@@ -328,7 +328,7 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 <div align="center">
 
-[Aarav Goel](https://github.com/coderaarav12) · CSE AIML · SRMIST KTR
+[Aarav Goel](https://github.com/coderaarav12) · [LinkedIn](https://linkedin.com/in/aaravgoel12) · CSE AIML · SRMIST KTR
 
 **[edutechsrm.in](https://edutechsrm.in)**
 
