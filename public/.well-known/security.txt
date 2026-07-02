@@ -1,0 +1,5 @@
+Contact: mailto:admin@edutechsrm.in
+Canonical: https://edutechsrm.in/.well-known/security.txt
+Preferred-Languages: en
+Expires: 2027-05-02T23:59:59.000Z
+Policy: https://edutechsrm.in/privacy

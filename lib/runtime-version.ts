@@ -1,0 +1,2 @@
+export const APP_RUNTIME_VERSION = "2026-07-02.11-15-33";
+export const LIVE_RUNTIME_POLL_MS = 5000;
