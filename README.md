@@ -23,8 +23,8 @@ Timetable, attendance, marks, CGPA, assignments, mess menu, AI — all live from
 
 edutechsrm is a student-built web app that connects to your SRM Academia account and presents all your academic data in one clean, fast interface. No more switching between tabs on the slow SRM portal — everything is here, with AI assistance, live profile photos, customizable views, and real-time alerts.
 
-> Built by **Aarav Goel**, CSE AIML · 1st Year · SRMIST KTR  
-> Solo designed, coded, and deployed. Powered by ☕ and late nights.
+> Created by **Aarav Goel** — CSE AIML · SRMIST KTR  
+> Independently designed, developed, and deployed.
 
 ---
 
@@ -328,7 +328,7 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 <div align="center">
 
-Made by [Aarav Goel](https://github.com/coderaarav12) · CSE AIML · SRMIST KTR
+[Aarav Goel](https://github.com/coderaarav12) · CSE AIML · SRMIST KTR
 
 **[edutechsrm.in](https://edutechsrm.in)**
 
