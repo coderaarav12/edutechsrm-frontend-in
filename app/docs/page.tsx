@@ -1,38 +1,28 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import { BookOpen, ExternalLink, FileText, Github, Globe, Shield } from "lucide-react"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
+import rehypeRaw from "rehype-raw"
 import { Header } from "@/components/Header"
 import { PublicFooter } from "@/components/public-footer"
-
-const sections = [
-  {
-    icon: BookOpen,
-    title: "Overview",
-    text: "edutechsrm is a student-built academic dashboard for SRMIST KTR students. It connects to SRM Academia and presents timetable, attendance, marks, CGPA, assignments, mess menu, and more in a clean, fast interface.",
-    color: "#22d3ee",
-  },
-  {
-    icon: FileText,
-    title: "Architecture",
-    text: "The frontend is built with Next.js 15 and deployed on Cloudflare Workers via @cloudflare/next-on-pages. The backend runs as a separate Cloudflare Worker with Durable Objects for state management and rate limiting.",
-    color: "#34d399",
-  },
-  {
-    icon: Shield,
-    title: "Security",
-    text: "Your password is never stored — credentials go directly to SRM Academia's servers. Only a session token is kept temporarily. The payment endpoint is rate-limited, and Turnstile bot protection activates after repeated failed logins.",
-    color: "#a78bfa",
-  },
-  {
-    icon: Github,
-    title: "Source Code",
-    text: "The frontend repository is publicly available on GitHub. It includes the full source code, deployment configuration, and CI/CD workflows.",
-    color: "#f87171",
-  },
-]
+import { BookOpen, Loader2 } from "lucide-react"
 
 export default function DocsPage() {
+  const [content, setContent] = useState<string | null>(null)
+  const [error, setError] = useState(false)
+
+  useEffect(() => {
+    fetch("https://raw.githubusercontent.com/coderaarav12/edutechsrm-frontend-in/main/README.md")
+      .then((r) => {
+        if (!r.ok) throw new Error("Failed to fetch")
+        return r.text()
+      })
+      .then(setContent)
+      .catch(() => setError(true))
+  }, [])
+
   return (
     <>
       <Header />
@@ -42,77 +32,70 @@ export default function DocsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-center mb-12"
+            className="text-center mb-10"
           >
             <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: "rgba(34,211,238,0.1)", border: "1px solid rgba(34,211,238,0.2)" }}>
               <BookOpen className="w-6 h-6" style={{ color: "#22d3ee" }} />
             </div>
             <h1 className="text-3xl font-black text-zinc-100 tracking-tight font-display">Documentation</h1>
-            <p className="text-sm mt-2 text-zinc-500 max-w-lg mx-auto">
-              Everything you need to know about edutechsrm — how it works, how it's built, and how to get involved.
-            </p>
+            <p className="text-sm mt-2 text-zinc-500">Loaded from the GitHub README</p>
           </motion.div>
 
-          <div className="flex flex-col gap-4">
-            {sections.map((section, i) => {
-              const Icon = section.icon
-              return (
-                <motion.div
-                  key={section.title}
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 + i * 0.08, duration: 0.4 }}
-                >
-                  <div
-                    className="rounded-2xl p-5"
-                    style={{
-                      background: "rgba(24,24,27,0.6)",
-                      border: "1px solid rgba(255,255,255,0.06)",
-                    }}
-                  >
-                    <div className="flex items-start gap-4">
-                      <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                        style={{
-                          background: `${section.color}15`,
-                          border: `1px solid ${section.color}30`,
-                        }}
-                      >
-                        <Icon className="w-5 h-5" style={{ color: section.color }} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h2 className="text-sm font-bold text-zinc-200">{section.title}</h2>
-                        <p className="text-xs mt-1.5 text-zinc-400 leading-relaxed">{section.text}</p>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              )
-            })}
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.4 }}
-            className="mt-8 text-center"
-          >
-            <a
-              href="https://github.com/coderaarav12/edutechsrm-frontend-in"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm font-bold px-5 py-3 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+          {error ? (
+            <div className="text-center py-20">
+              <p className="text-sm text-zinc-500">Could not load documentation. Try again later.</p>
+              <a
+                href="https://github.com/coderaarav12/edutechsrm-frontend-in"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block mt-4 text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors"
+              >
+                View on GitHub →
+              </a>
+            </div>
+          ) : content ? (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              className="prose prose-invert prose-sm max-w-none"
               style={{
-                background: "linear-gradient(135deg, rgba(52,211,153,0.15), rgba(34,211,238,0.1))",
-                color: "#34d399",
-                border: "1px solid rgba(52,211,153,0.2)",
+                color: "#a1a1aa",
+                fontSize: "0.875rem",
+                lineHeight: "1.75",
               }}
             >
-              <Github className="w-4 h-4" />
-              View on GitHub
-              <ExternalLink className="w-3.5 h-3.5" style={{ opacity: 0.6 }} />
-            </a>
-          </motion.div>
+              <style>{`
+                .prose h1 { color: #f4f4f5; font-size: 1.5rem; font-weight: 900; margin-top: 2rem; margin-bottom: 0.75rem; letter-spacing: -0.02em; }
+                .prose h2 { color: #e4e4e7; font-size: 1.15rem; font-weight: 800; margin-top: 2rem; margin-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.5rem; }
+                .prose h3 { color: #d4d4d8; font-size: 1rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+                .prose p { margin-bottom: 0.75rem; }
+                .prose a { color: #34d399; text-decoration: underline; text-underline-offset: 2px; }
+                .prose a:hover { color: #6ee7b7; }
+                .prose strong { color: #e4e4e7; font-weight: 700; }
+                .prose code { background: rgba(255,255,255,0.06); padding: 0.15rem 0.4rem; border-radius: 6px; font-size: 0.8em; color: #f472b6; }
+                .prose pre { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 1rem; overflow-x: auto; margin: 1rem 0; }
+                .prose pre code { background: none; color: #e4e4e7; padding: 0; font-size: 0.8rem; }
+                .prose ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+                .prose ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+                .prose li { margin-bottom: 0.25rem; }
+                .prose hr { border-color: rgba(255,255,255,0.06); margin: 2rem 0; }
+                .prose blockquote { border-left: 3px solid rgba(52,211,153,0.3); padding-left: 1rem; color: #71717a; margin: 1rem 0; }
+                .prose table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.8rem; }
+                .prose th { background: rgba(255,255,255,0.04); color: #d4d4d8; font-weight: 700; text-align: left; padding: 0.5rem 0.75rem; border: 1px solid rgba(255,255,255,0.06); }
+                .prose td { padding: 0.5rem 0.75rem; border: 1px solid rgba(255,255,255,0.06); }
+                .prose img { border-radius: 12px; margin: 1rem 0; max-width: 100%; }
+                .prose .prose-no-style { all: unset; }
+              `}</style>
+              <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                {content}
+              </ReactMarkdown>
+            </motion.div>
+          ) : (
+            <div className="flex justify-center py-20">
+              <Loader2 className="w-6 h-6 text-zinc-500 animate-spin" />
+            </div>
+          )}
         </div>
       </main>
       <PublicFooter />
