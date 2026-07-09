@@ -631,7 +631,7 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
             transition={{ duration: 0.25, ease: "easeOut" }}
             className="fixed left-0 right-0 z-[60] flex justify-center lg:hidden"
             style={{
-              bottom: "calc(88px + env(safe-area-inset-bottom, 0px))",
+              bottom: "calc(82px + env(safe-area-inset-bottom, 0px))",
               pointerEvents: "auto",
             }}
             onClick={() => setOpenCategory(null)}
@@ -778,14 +778,14 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
               background: "color-mix(in srgb, var(--elevated-bg, rgba(24,24,27,0.98)) 55%, transparent)",
               backdropFilter: "blur(36px) saturate(200%)",
               WebkitBackdropFilter: "blur(36px) saturate(200%)",
-              padding: 6,
-              borderRadius: 30,
+              padding: 5,
+              borderRadius: 28,
               boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
               border: "1px solid var(--border-color, rgba(255,255,255,0.06))",
               width: "100%",
-              maxWidth: 380,
-              minWidth: 300,
-              height: 60,
+              maxWidth: 370,
+              minWidth: 290,
+              height: 54,
               overflow: "hidden",
             }}
           >
@@ -805,9 +805,9 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
             <div
               style={{
                 position: "absolute",
-                top: 6,
-                bottom: 6,
-                left: sliderPos.left || 6,
+                top: 5,
+                bottom: 5,
+                left: sliderPos.left || 5,
                 width: sliderPos.width || `calc(25% - 4px)`,
                 background: "var(--card-solid, #18181b)",
                 borderRadius: 24,
@@ -835,8 +835,8 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
                   style={{
                     position: "relative",
                     zIndex: 1,
-                    width: 44,
-                    height: 44,
+                    width: 40,
+                    height: 40,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -851,7 +851,7 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
                     margin: "0 4px",
                   }}
                 >
-                  <Home style={{ width: 20, height: 20, color: activeTab === "dashboard" ? "#f472b6" : (openCategory ? "#f472b688" : "var(--text-muted, #a1a1aa)") }} />
+                  <Home style={{ width: 18, height: 18, color: activeTab === "dashboard" ? "#f472b6" : (openCategory ? "#f472b688" : "var(--text-muted, #a1a1aa)") }} />
                 </button>
               ) : tab.key === "ai" ? (
                 <button
