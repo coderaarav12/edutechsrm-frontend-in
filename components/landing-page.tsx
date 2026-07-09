@@ -81,7 +81,6 @@ const features = [
     description:
       "Access subject-wise notes, study materials, and previous year question papers organized by course code.",
     color: "#60a5fa",
-    span: "lg:col-span-2",
   },
   {
     icon: IdCard,
@@ -89,7 +88,6 @@ const features = [
     description:
       "Search 400+ faculty members by name, department, or faculty ID and find their designation and staff room location instantly.",
     color: "#34d399",
-    span: "lg:col-span-2",
   },
   {
     icon: Shield,
@@ -97,7 +95,6 @@ const features = [
     description:
       "Your SRM credentials are used only for authentication with SRM Academia. edutechsrm never stores your password.",
     color: "#34d399",
-    span: "lg:col-span-2",
   },
 ]
 
