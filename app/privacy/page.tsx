@@ -9,17 +9,18 @@ const updatedAt = "July 2, 2026"
 
 const commitments = [
   "Your SRM password is never stored by edutechsrm.",
-  "Credentials are used only to authenticate with SRM Academia.",
+  "Credentials are used only to authenticate with SRM Academia and are forwarded to SRM's servers in real time.",
+  "Your password passes through our server briefly for authentication and is not retained in logs, databases, or caches.",
   "Academic data is used to show your dashboard and power app features.",
-  "edutechsrm AI receives academic context only when you use AI features.",
-  "We do not sell your personal information.",
+  "edutechsrm AI receives academic context only when you use AI features, never your password.",
+  "All communication is encrypted over HTTPS. We do not sell your personal information.",
 ]
 
 const sections = [
   {
     title: "1. Information We Collect",
     body: [
-      "SRM login details you enter for authentication. Your password is not stored.",
+      "SRM login details (email and password) you enter for authentication. Your credentials are forwarded to SRM Academia's official servers and are not stored, logged, or retained by edutechsrm.",
       "Session token and auth state required to keep you signed in.",
       "Academic data fetched from SRM Academia, including timetable, attendance, courses, marks, calendar, circulars, assignments, and profile information.",
       "Support or feedback details if you contact us.",
@@ -41,9 +42,11 @@ const sections = [
     title: "3. Storage and Security",
     body: [
       "Passwords are not stored in local storage, databases, logs, or persistent server storage.",
+      "When you log in, your credentials are forwarded to SRM Academia's official servers for authentication. They pass through our server in memory only and are discarded immediately after the authentication response.",
+      "We do not log, cache, or retain passwords at any point in the authentication flow.",
       "Session tokens may be stored temporarily so you can stay signed in.",
       "Some academic data may be cached in your browser for offline display and faster reloads.",
-      "Data in transit uses HTTPS and reasonable security controls.",
+      "Data in transit uses HTTPS and industry-standard encryption. All API communication is over TLS.",
       "No system is perfectly secure, but we design edutechsrm to minimize sensitive storage.",
     ],
   },
@@ -113,7 +116,7 @@ export default function PrivacyPage() {
             </span>
             <h1 className="font-display mt-6 text-4xl font-black tracking-tight sm:text-6xl">Privacy, written clearly.</h1>
             <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-zinc-400">
-              Last updated: {updatedAt}. This policy explains what edutechsrm processes, why it is needed, and how your SRM credentials are handled.
+              Last updated: {updatedAt}. This policy explains what edutechsrm processes, why it is needed, and how your SRM credentials are handled — including the fact that credentials pass through our server briefly during login to reach SRM Academia's official servers.
             </p>
           </motion.div>
 
@@ -139,7 +142,7 @@ export default function PrivacyPage() {
 
           <div className="legal-summary-grid mt-8 grid gap-4 md:grid-cols-3">
             {[
-              [Lock, "Password", "Never stored by edutechsrm."],
+              [Lock, "Password", "Forwarded to SRM in real time, never stored or logged."],
               [Database, "Session", "Stored temporarily for login persistence."],
               [Bot, "AI", "Uses academic context, never credentials."],
             ].map(([Icon, title, text]) => (
