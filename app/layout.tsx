@@ -108,7 +108,6 @@ export const metadata: Metadata = {
   category: "education",
   manifest: "/manifest.json",
   referrer: "origin-when-cross-origin",
-  other: { "google-adsense-account": "ca-pub-3435389706341604" },
 }
 
 export const viewport: Viewport = {
