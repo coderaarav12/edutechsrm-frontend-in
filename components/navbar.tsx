@@ -631,7 +631,7 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
             transition={{ duration: 0.25, ease: "easeOut" }}
             className="fixed left-0 right-0 z-[60] flex justify-center lg:hidden"
             style={{
-              bottom: "calc(68px + env(safe-area-inset-bottom, 0px))",
+              bottom: "calc(88px + env(safe-area-inset-bottom, 0px))",
               pointerEvents: "auto",
             }}
             onClick={() => setOpenCategory(null)}
@@ -767,7 +767,7 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
         }`}
         style={{ bottom: 0 }}
       >
-        <div className="flex justify-center px-4" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)" }}>
+        <div className="flex justify-center px-4" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 14px)" }}>
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -778,14 +778,14 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
               background: "color-mix(in srgb, var(--elevated-bg, rgba(24,24,27,0.98)) 55%, transparent)",
               backdropFilter: "blur(36px) saturate(200%)",
               WebkitBackdropFilter: "blur(36px) saturate(200%)",
-              padding: 4,
-              borderRadius: 25,
+              padding: 6,
+              borderRadius: 30,
               boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
               border: "1px solid var(--border-color, rgba(255,255,255,0.06))",
               width: "100%",
-              maxWidth: 340,
-              minWidth: 260,
-              height: 44,
+              maxWidth: 380,
+              minWidth: 300,
+              height: 60,
               overflow: "hidden",
             }}
           >
@@ -805,12 +805,12 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
             <div
               style={{
                 position: "absolute",
-                top: 4,
-                bottom: 4,
-                left: sliderPos.left || 4,
-                width: sliderPos.width || `calc(25% - 3px)`,
+                top: 6,
+                bottom: 6,
+                left: sliderPos.left || 6,
+                width: sliderPos.width || `calc(25% - 4px)`,
                 background: "var(--card-solid, #18181b)",
-                borderRadius: 22,
+                borderRadius: 24,
                 transition: "all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
                 boxShadow: "0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
                 zIndex: 0,
@@ -835,8 +835,8 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
                   style={{
                     position: "relative",
                     zIndex: 1,
-                    width: 36,
-                    height: 36,
+                    width: 44,
+                    height: 44,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -851,7 +851,7 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
                     margin: "0 4px",
                   }}
                 >
-                  <Home style={{ width: 16, height: 16, color: activeTab === "dashboard" ? "#f472b6" : (openCategory ? "#f472b688" : "var(--text-muted, #a1a1aa)") }} />
+                  <Home style={{ width: 20, height: 20, color: activeTab === "dashboard" ? "#f472b6" : (openCategory ? "#f472b688" : "var(--text-muted, #a1a1aa)") }} />
                 </button>
               ) : tab.key === "ai" ? (
                 <button
@@ -884,7 +884,7 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
                       height: "100%",
                       width: "100%",
                       color: tabColor,
-                      fontSize: 13,
+                      fontSize: 14,
                       fontWeight: isActive ? 700 : 600,
                       cursor: "pointer",
                       userSelect: "none",
@@ -928,7 +928,7 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
                       height: "100%",
                       width: "100%",
                       color: tabColor,
-                      fontSize: 13,
+                      fontSize: 14,
                       fontWeight: isActive ? 700 : 600,
                       cursor: "pointer",
                       userSelect: "none",
