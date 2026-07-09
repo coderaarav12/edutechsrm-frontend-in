@@ -95,6 +95,7 @@ const features = [
     description:
       "Your SRM credentials are used only for authentication with SRM Academia. edutechsrm never stores your password.",
     color: "#34d399",
+    span: "lg:col-span-2",
   },
 ]
 
