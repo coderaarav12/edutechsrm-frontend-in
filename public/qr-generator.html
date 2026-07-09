@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>edutechsrm QR Code Generator</title>
+  <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: Inter, sans-serif;
+      background: #09090b;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      background: #18181b;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      padding: 40px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+    }
+    h1 {
+      font-size: 18px;
+      font-weight: 800;
+      color: #f4f4f5;
+      margin-bottom: 4px;
+    }
+    p {
+      font-size: 12px;
+      color: #71717a;
+      margin-bottom: 28px;
+    }
+    #qr { display: flex; justify-content: center; margin-bottom: 28px; }
+    button {
+      width: 100%;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 12px;
+      font-family: Inter, sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    button:hover { opacity: 0.85; }
+    .download-btn {
+      background: linear-gradient(135deg, #34d399, #10b981);
+      color: #09090b;
+      margin-bottom: 8px;
+    }
+    .svg-btn {
+      background: rgba(255,255,255,0.06);
+      color: #d4d4d8;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>edutechsrm QR Code</h1>
+    <p>Download as transparent PNG</p>
+    <div id="qr"></div>
+    <button class="download-btn" onclick="downloadPNG()">Download Transparent PNG</button>
+    <button class="svg-btn" onclick="downloadSVG()">Download SVG</button>
+  </div>
+
+  <script>
+    const qrCode = new QRCodeStyling({
+      width: 300,
+      height: 300,
+      data: "https://edutechsrm.in",
+      image: "/icon-192-v2.png",
+      qrOptions: { errorCorrectionLevel: "H" },
+      dotsOptions: { color: "#10b981", type: "dots" },
+      cornersSquareOptions: { color: "#059669", type: "extra-rounded" },
+      cornersDotOptions: { color: "#047857", type: "dot" },
+      backgroundOptions: { color: "transparent" },
+      imageOptions: { crossOrigin: "anonymous", margin: 14, imageSize: 0.55 },
+    })
+
+    qrCode.append(document.getElementById("qr"))
+
+    function downloadPNG() {
+      qrCode.download({ name: "edutechsrm-qr", extension: "png" })
+    }
+
+    function downloadSVG() {
+      qrCode.download({ name: "edutechsrm-qr", extension: "svg" })
+    }
+  </script>
+</body>
+</html>
