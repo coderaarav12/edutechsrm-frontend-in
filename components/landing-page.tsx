@@ -15,6 +15,7 @@ import {
   ExternalLink,
   FileText,
   GraduationCap,
+  IdCard,
   Lock,
   MessageSquareText,
   Shield,
@@ -83,6 +84,14 @@ const features = [
     span: "lg:col-span-2",
   },
   {
+    icon: IdCard,
+    title: "Faculty Finder",
+    description:
+      "Search 400+ faculty members by name, department, or faculty ID and find their designation and staff room location instantly.",
+    color: "#34d399",
+    span: "lg:col-span-2",
+  },
+  {
     icon: Shield,
     title: "Secure, No Password Stored",
     description:
@@ -133,6 +142,10 @@ const faqs = [
     q: "Does edutechsrm have an AI chatbot?",
     a: "Yes. edutechsrm AI can answer questions about your timetable, attendance, marks, and study planning inside the app after login.",
   },
+  {
+    q: "How do I find a professor's staff room at SRM KTR?",
+    a: "Use the Faculty Finder in the Tools section. Search by name, department, or faculty ID to find designations and staff room locations for 400+ faculty members across all SRM KTR departments.",
+  },
 ]
 
 const seoTags = [
@@ -146,6 +159,7 @@ const seoTags = [
   "SRM Day Order Today",
   "SRM PYQ Previous Year Questions",
   "edutechsrm AI Chatbot",
+  "SRM Faculty Finder Staff Room Locator",
 ]
 
 const dashboardRows = [

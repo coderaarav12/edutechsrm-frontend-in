@@ -20,7 +20,7 @@ export function SEOStructuredData() {
           audience: { "@type": "EducationalAudience", educationalRole: "student" },
           featureList: [
             "SRM timetable viewer", "Attendance tracker", "Internal marks tracker",
-            "GradeX CGPA calculator", "Academic calendar", "Assignments tracker", "Custom classes planner",
+            "GradeX CGPA calculator", "Academic calendar", "Assignments tracker", "Custom classes planner", "Faculty Finder staff room locator",
           ],
         },
         {
@@ -49,6 +49,14 @@ export function SEOStructuredData() {
               acceptedAnswer: {
                 "@type": "Answer",
                 text: "Yes. edutechsrm shows attendance percentages, internal marks, CGPA tools, class schedule, day order and academic calendar for SRMIST KTR students.",
+              },
+            },
+            {
+              "@type": "Question",
+              name: "How do I find a faculty member's staff room at SRM KTR?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "Use the Faculty Finder tool in edutechsrm to search 400+ faculty members by name, department, or faculty ID and find their designation and staff room location instantly.",
               },
             },
           ],
