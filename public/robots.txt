@@ -1,0 +1,12 @@
+# edutechsrm robots.txt
+
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /_next/
+
+Sitemap: https://edutechsrm.in/sitemap.xml
+Host: https://edutechsrm.in
+
+# IndexNow
+IndexNow: https://edutechsrm.in/896dcf7e-d51d-41df-8627-76c6331dead1.txt

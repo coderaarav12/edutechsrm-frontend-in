@@ -1,0 +1,26 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
+  "name": "edutechsrm-frontend-in",
+  "compatibility_date": "2026-04-17",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "edutechsrm-frontend-in"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    // All vars (TURNSTILE_SITE_KEY, AI_BACKEND_URL, BACKEND_URL, etc.) set via CI secrets
+  },
+  "workers_dev": true,
+  "routes": [],
+  "env": {}
+}
