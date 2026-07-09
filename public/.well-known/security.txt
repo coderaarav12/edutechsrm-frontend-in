@@ -1,5 +1,5 @@
-Contact: https://github.com/coderaarav12/edutechsrm-frontend-in/security/advisories/new
+Contact: mailto:admin@edutechsrm.in
 Encryption: https://keybase.io/coderaarav12/pgp_keys.asc
 Preferred-Languages: en
 Canonical: https://edutechsrm.in/.well-known/security.txt
-Policy: https://edutechsrm.in/security
+Policy: https://edutechsrm.in/privacy
