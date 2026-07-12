@@ -1,4 +1,4 @@
-export type TabType = "dashboard" | "timetable" | "attendance" | "courses" | "marks" | "calendar" | "gradex" | "about" | "planner" | "notes" | "updates" | "feedback" | "settings" | "ai" | "mess" | "finder"
+export type TabType = "dashboard" | "timetable" | "attendance" | "courses" | "marks" | "calendar" | "gradex" | "about" | "planner" | "notes" | "updates" | "feedback" | "settings" | "ai" | "mess" | "finder" | "calculator"
 
 export const VALID_TABS: TabType[] = [
   "dashboard",
@@ -17,6 +17,7 @@ export const VALID_TABS: TabType[] = [
   "about",
   "settings",
   "finder",
+  "calculator",
 ]
 
 export const TAB_FROM_PATH: Record<string, TabType> = {
@@ -36,4 +37,5 @@ export const TAB_FROM_PATH: Record<string, TabType> = {
   settings: "settings",
   ai: "ai",
   finder: "finder",
+  calculator: "calculator",
 }

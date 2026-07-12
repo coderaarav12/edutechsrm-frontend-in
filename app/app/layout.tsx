@@ -29,6 +29,7 @@ import { CoursesSection } from "@/components/courses-section"
 import { MarksSection } from "@/components/marks-section"
 import { CalendarSection } from "@/components/calendar-section"
 import { GradeXSection } from "@/components/gradex-section"
+import { CalculatorSection } from "@/components/calculator-section"
 import { AboutSection } from "@/components/profile"
 import { PlannerSection } from "@/components/planner-section"
 import { MessSection } from "@/components/mess-section"
@@ -61,6 +62,7 @@ const SECTION_MAP: Record<TabType, (props: { onNavigate: (tab: TabType) => void;
   marks:      ()      => <MarksSection />,
   calendar:   (props) => <CalendarSection {...props} />,
   gradex:     ()      => <GradeXSection />,
+  calculator: ()      => <CalculatorSection />,
   about:      ()      => <AboutSection />,
   planner:    ()      => <PlannerSection />,
   notes:      ()      => <NotesSection />,

@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { FileText, BookOpen, ExternalLink, ChevronLeft, GraduationCap, BookMarked, Sparkles, ArrowRight, Library, Lightbulb } from "lucide-react"
+import { FileText, BookOpen, ExternalLink, ChevronLeft, GraduationCap, BookMarked, Sparkles, ArrowRight, Library, Lightbulb, Layers } from "lucide-react"
+import { BranchSyllabus } from "@/components/branch-syllabus"
 import { NOTES_DATA, type SemesterResources, type SubjectResources } from "@/lib/notes-data"
 import { useAuth } from "@/lib/auth-context"
 import { DriveViewer } from "@/components/drive-viewer"
@@ -38,6 +39,7 @@ export function NotesSection() {
   const [selectedSem, setSelectedSem] = useState<number | null>(null)
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null)
   const [driveViewer, setDriveViewer] = useState<{ url: string; title: string } | null>(null)
+  const [showBranchwise, setShowBranchwise] = useState(false)
 
   const semData = NOTES_DATA.find(s => s.semester === selectedSem) || null
   const subjectData = semData?.subjects.find(s => s.name === selectedSubject) || null
@@ -93,8 +95,31 @@ export function NotesSection() {
         )}
       </AnimatePresence>
 
+      {/* View Toggle */}
+      {!selectedSem && !selectedSubject && (
+        <div className="flex items-center gap-2 mb-4">
+          <button
+            onClick={() => setShowBranchwise(false)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${!showBranchwise ? "bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/20" : "bg-zinc-900/40 text-zinc-500 ring-1 ring-white/5 hover:text-zinc-300"}`}
+          >
+            <GraduationCap size={12} /> By Semester
+          </button>
+          <button
+            onClick={() => setShowBranchwise(true)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${showBranchwise ? "bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/20" : "bg-zinc-900/40 text-zinc-500 ring-1 ring-white/5 hover:text-zinc-300"}`}
+          >
+            <Layers size={12} /> Branch-wise Syllabus
+          </button>
+        </div>
+      )}
+
+      {/* Branch Syllabus View */}
+      {!selectedSem && !selectedSubject && showBranchwise && (
+        <BranchSyllabus />
+      )}
+
       {/* Semester Grid */}
-      {!selectedSem && (
+      {!selectedSem && !showBranchwise && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {NOTES_DATA.map((sem, i) => {
