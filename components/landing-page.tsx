@@ -9,6 +9,7 @@ import {
   BookOpen,
   Bot,
   CalendarDays,
+  Calculator,
   CheckCircle2,
   ChevronDown,
   Clock,
@@ -90,12 +91,18 @@ const features = [
     color: "#34d399",
   },
   {
+    icon: Calculator,
+    title: "Calculator Plus",
+    description:
+      "Scientific calculator, unit converter, percentage calculator, number converter, logic gate simulator, and binary operations — all in one tool.",
+    color: "#f59e0b",
+  },
+  {
     icon: Shield,
     title: "Secure, No Password Stored",
     description:
       "Your SRM credentials are used only for authentication with SRM Academia. edutechsrm never stores your password.",
     color: "#34d399",
-    span: "lg:col-span-2",
   },
 ]
 

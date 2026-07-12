@@ -9,6 +9,7 @@ import {
   BookMarked,
   BookOpen,
   Bot,
+  Calculator,
   Calendar,
   CalendarDays,
   Coffee, ExternalLink, Heart,
@@ -55,6 +56,7 @@ type TabType =
   | "settings"
   | "mess"
   | "finder"
+  | "calculator"
 
 interface NavbarProps {
   activeTab: string
@@ -74,6 +76,7 @@ const NAV = [
   { id: "planner" as const, label: "Planner", short: "Plan", icon: BookMarked, color: "#34d399" },
   { id: "notes" as const, label: "Notes & PYQs", short: "Notes", icon: FileText, color: "#60a5fa" },
   { id: "mess" as const, label: "Mess Menu", short: "Mess", icon: Coffee, color: "#34d399" },
+  { id: "calculator" as const, label: "Calculator Plus", short: "Calc+", icon: Calculator, color: "#34d399" },
   { id: "updates" as const, label: "Updates", short: "News", icon: Megaphone, color: "#fbbf24" },
   { id: "feedback" as const, label: "Feedback", short: "Feedback", icon: MessageSquareText, color: "#fb923c" },
   { id: "about" as const, label: "Profile", short: "Me", icon: User, color: "#f472b6" },
@@ -83,7 +86,7 @@ const NAV = [
 
 function getCategoryItems(cat: string): readonly (typeof NAV)[number][] {
   if (cat === "academics") return NAV.filter((n) => n.id === "timetable" || n.id === "attendance" || n.id === "marks" || n.id === "courses" || n.id === "calendar")
-  if (cat === "tools") return NAV.filter((n) => n.id === "planner" || n.id === "gradex" || n.id === "notes" || n.id === "finder")
+  if (cat === "tools") return NAV.filter((n) => n.id === "planner" || n.id === "gradex" || n.id === "notes" || n.id === "finder" || n.id === "calculator")
   return NAV.filter((n) => n.id === "about" || n.id === "settings" || n.id === "updates" || n.id === "feedback")
 }
 
@@ -97,7 +100,7 @@ const MOBILE_TABS = [
 
 function tabCategory(tab: string): string | null {
   if (["timetable", "attendance", "marks", "courses", "calendar"].includes(tab)) return "academics"
-  if (["planner", "gradex", "notes", "finder"].includes(tab)) return "tools"
+  if (["planner", "gradex", "notes", "finder", "calculator"].includes(tab)) return "tools"
   if (["about", "settings", "updates", "feedback"].includes(tab)) return "account"
   if (tab === "ai") return "ai"
   return null
