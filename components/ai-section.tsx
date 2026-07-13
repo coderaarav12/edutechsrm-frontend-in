@@ -714,9 +714,13 @@ For bunking: show ONLY subjects at risk (below 75% or would drop below). Format:
     try {
       abortRef.current = new AbortController()
       // Use server-side proxy so this works reliably in production (no client env/CORS issues)
+      const authToken = localStorage.getItem("srm_token") || ""
       const res = await fetch(`/api/ai/chat`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": authToken,
+        },
         body: JSON.stringify({
           messages: trimMessages(updatedMessages),
           system_prompt: systemPrompt,
@@ -730,7 +734,14 @@ For bunking: show ONLY subjects at risk (below 75% or would drop below). Format:
       if (!res.ok) {
         const errData: any = await res.json().catch(() => null)
         const errMsg = errData?.error || `Error ${res.status}`
-        updateAssistant(`Sorry, I couldn't process that. ${errMsg}`)
+        if (res.status === 401) {
+          updateAssistant("Please log in to use the AI assistant.")
+        } else if (res.status === 429) {
+          updateAssistant("You've reached the daily AI limit. Try again tomorrow.")
+          setDailyCount(DAILY_LIMIT)
+        } else {
+          updateAssistant(`Sorry, I couldn't process that. ${errMsg}`)
+        }
         setIsStreaming(false)
         return
       }
