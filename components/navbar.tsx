@@ -642,8 +642,8 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
             <div
               style={{
                 width: "calc(100% - 32px)",
-                maxWidth: 400,
-                borderRadius: 24,
+                maxWidth: 340,
+                borderRadius: 20,
                 overflow: "hidden",
                 background: `color-mix(in srgb, ${catColor}08, var(--elevated-bg, rgba(24,24,27,0.98)) 85%)`,
                 backdropFilter: "blur(28px) saturate(180%)",
@@ -655,7 +655,7 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
             >
               {/* Top color bar */}
               <div style={{ height: 3, background: `linear-gradient(90deg, ${catColor}00, ${catColor}, ${catColor}00)`, opacity: 0.6 }} />
-              <div style={{ padding: "12px 12px 14px" }}>
+              <div style={{ padding: "10px 10px 12px" }}>
                 {/* Category row with icon + name */}
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14, padding: "0 4px" }}>
                   <div
