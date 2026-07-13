@@ -45,7 +45,10 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  return NextResponse.next()
+  // Strip Server-Timing header (leaks cfWorker duration)
+  const response = NextResponse.next()
+  response.headers.delete("Server-Timing")
+  return response
 }
 
 export const config = {
