@@ -19,6 +19,20 @@ export interface Announcement {
 
 export const DEFAULT_ANNOUNCEMENTS: Announcement[] = [
   {
+    id: 19,
+    type: "update",
+    title: "Calculator Plus — 6 tools in one",
+    body: "A full-featured Calculator Plus is now available under Tools in the navbar. It includes a scientific calculator with history and degrees/radians toggle, a unit converter covering 8 categories (length, weight, temperature, speed, data, time, area, volume), a percentage calculator with 3 modes, a number converter (decimal, binary, octal, hex, ASCII), a logic gate simulator, and binary operations. Calculator Plus is also shown on the landing page and available in the dashboard dock.",
+    date: "2026-07-13",
+  },
+  {
+    id: 18,
+    type: "update",
+    title: "Branch-wise Syllabus in Notes & PYQs",
+    body: "Notes & PYQs now has a Branch-wise Syllabus view alongside the existing semester-wise layout. Toggle between 'By Semester' and 'Branch-wise Syllabus' to browse 25 engineering branches. Each branch opens the full syllabus as a Google Drive PDF — sourced from thehelpers.tech.",
+    date: "2026-07-13",
+  },
+  {
     id: 17,
     type: "update",
     title: "Redesigned mobile navigation bar",

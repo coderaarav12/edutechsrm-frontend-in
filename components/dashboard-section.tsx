@@ -8,6 +8,7 @@ import {
   BarChart3,
   BookOpen,
   Bot,
+  Calculator,
   CalendarDays,
   CheckCircle2,
   ClipboardCheck,
@@ -15,6 +16,7 @@ import {
   Clock3,
   FileText,
   Heart,
+  IdCard,
   Megaphone,
   Palette,
   Pencil,
@@ -32,14 +34,14 @@ import { SupportModal } from "./support-modal"
 import { useSupport } from "@/lib/use-support"
 import { DEFAULT_ANNOUNCEMENTS } from "@/components/announcements"
 
-type TabType = "dashboard" | "timetable" | "attendance" | "courses" | "marks" | "calendar" | "gradex" | "about" | "notes" | "feedback" | "updates" | "settings" | "ai"
+type TabType = "dashboard" | "timetable" | "attendance" | "courses" | "marks" | "calendar" | "gradex" | "about" | "notes" | "feedback" | "updates" | "settings" | "ai" | "finder" | "calculator"
 
 interface DashboardSectionProps {
   onNavigate: (tab: TabType) => void
 }
 
 const DOCK_APPS_KEY = "edutechsrm_dock_apps"
-const ALL_DOCK_APP_IDS = ["timetable", "attendance", "courses", "marks", "calendar", "mess", "gradex", "notes", "ai", "about"]
+const ALL_DOCK_APP_IDS = ["timetable", "attendance", "courses", "marks", "calendar", "mess", "gradex", "notes", "finder", "calculator", "ai", "about"]
 
 const NAV_ITEMS = [
   { id: "timetable" as const, icon: Clock3, color: "#22d3ee", label: "Timetable" },
@@ -50,6 +52,8 @@ const NAV_ITEMS = [
   { id: "mess" as const, icon: Coffee, color: "#e11d48", label: "Mess Menu" },
   { id: "gradex" as const, icon: TrendingUp, color: "#fb923c", label: "GradeX" },
   { id: "notes" as const, icon: FileText, color: "#10b981", label: "Notes" },
+  { id: "finder" as const, icon: IdCard, color: "#34d399", label: "Faculty Finder" },
+  { id: "calculator" as const, icon: Calculator, color: "#f59e0b", label: "Calculator" },
   { id: "ai" as const, icon: Bot, color: "#a78bfa", label: "AI" },
   { id: "about" as const, icon: ClipboardCheck, color: "#f97316", label: "Assignments" },
 ]
@@ -147,8 +151,8 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
   const [dockApps, setDockApps] = useState<string[]>(() => {
     try {
       const stored = localStorage.getItem(DOCK_APPS_KEY)
-      return stored ? JSON.parse(stored) : ["timetable", "attendance", "courses", "marks"]
-    } catch { return ["timetable", "attendance", "courses", "marks"] }
+      return stored ? JSON.parse(stored) : ["timetable", "attendance", "courses", "marks", "finder", "calculator"]
+    } catch { return ["timetable", "attendance", "courses", "marks", "finder", "calculator"] }
   })
   const [showDockCustomize, setShowDockCustomize] = useState(false)
   const [isDesktop, setIsDesktop] = useState(false)
