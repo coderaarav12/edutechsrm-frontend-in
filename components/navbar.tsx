@@ -770,7 +770,7 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
         }`}
         style={{ bottom: 0 }}
       >
-        <div className="flex justify-center px-4" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 14px)" }}>
+        <div className="px-4" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 14px)" }}>
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -790,6 +790,7 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
               minWidth: 290,
               height: 54,
               overflow: "hidden",
+              margin: "0 auto",
             }}
           >
             {/* Glass shine overlay */}
