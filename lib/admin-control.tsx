@@ -196,7 +196,13 @@ export function AdminControlProvider({ children }: { children: ReactNode }) {
       const data = await response.json() as LooseJson
       if (response.ok && Array.isArray(data?.announcements)) {
         const filtered = sanitizeAnnouncements(data.announcements)
-        setAnnouncements(filtered.length > 0 ? filtered : DEFAULT_ANNOUNCEMENTS)
+        if (filtered.length > 0) {
+          const backendIds = new Set(filtered.map((a: Announcement) => a.id))
+          const extraDefaults = DEFAULT_ANNOUNCEMENTS.filter(a => !backendIds.has(a.id))
+          setAnnouncements([...filtered, ...extraDefaults])
+        } else {
+          setAnnouncements(DEFAULT_ANNOUNCEMENTS)
+        }
       }
     } catch {
       setAnnouncements((prev) => (prev.length > 0 ? prev : DEFAULT_ANNOUNCEMENTS))
