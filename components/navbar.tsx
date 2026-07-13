@@ -821,8 +821,8 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
                 opacity: activeCategory ? 1 : 0,
               }}
             />
-            {MOBILE_TABS.map((tab) => {
-              const isActive = (tab.key === "home" ? activeTab === "dashboard" : activeCategory === tab.key || openCategory === tab.key)
+            {/* Left group | Home (center) | Right group — guarantees home is always centered */}
+            {(() => {
               const catColors: Record<string, string> = {
                 academics: "#34d399",
                 tools: "#60a5fa",
@@ -830,9 +830,110 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
                 ai: "#a78bfa",
                 home: "#f472b6",
               }
-              const accent = catColors[tab.key] || "#34d399"
-              const tabColor = openCategory ? (isActive ? accent : `${accent}88`) : (isActive ? accent : "var(--text-muted, #a1a1aa)")
-              return tab.key === "home" ? (
+
+              const renderCategoryTab = (tab: { key: string; label: string }, idx: number) => {
+                const isActive = activeCategory === tab.key || openCategory === tab.key
+                const accent = catColors[tab.key] || "#34d399"
+                const tabColor = openCategory ? (isActive ? accent : `${accent}88`) : (isActive ? accent : "var(--text-muted, #a1a1aa)")
+                return (
+                  <button
+                    key={tab.key}
+                    ref={(el) => { tabRefs.current[tab.key] = el }}
+                    onClick={() => setOpenCategory(openCategory === tab.key ? null : tab.key)}
+                    style={{
+                      position: "relative",
+                      zIndex: 1,
+                      flex: 1,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      height: "100%",
+                      padding: "0 8px",
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      touchAction: "manipulation",
+                      WebkitTapHighlightColor: "transparent",
+                      animation: `nav-tab-in 0.4s ease-out backwards`,
+                      animationDelay: `${0.08 + idx * 0.06}s`,
+                    }}
+                  >
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        height: "100%",
+                        width: "100%",
+                        color: tabColor,
+                        fontSize: 14,
+                        fontWeight: isActive ? 700 : 600,
+                        cursor: "pointer",
+                        userSelect: "none",
+                        borderRadius: 20,
+                        whiteSpace: "nowrap",
+                        fontFamily: "'Space Grotesk', sans-serif",
+                        transition: "color 0.3s ease, font-weight 0.3s ease",
+                      }}
+                    >
+                      {tab.label}
+                    </span>
+                  </button>
+                )
+              }
+
+              const renderAiTab = (idx: number) => {
+                const isActive = activeCategory === "ai" || openCategory === "ai"
+                const accent = "#a78bfa"
+                const tabColor = openCategory ? (isActive ? accent : `${accent}88`) : (isActive ? accent : "var(--text-muted, #a1a1aa)")
+                return (
+                  <button
+                    key="ai"
+                    ref={(el) => { tabRefs.current["ai"] = el }}
+                    onClick={() => { sessionStorage.setItem("ai_context", "navbar"); handleTab("ai"); setOpenCategory(null) }}
+                    style={{
+                      position: "relative",
+                      zIndex: 1,
+                      flex: 1,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      height: "100%",
+                      padding: "0 8px",
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      touchAction: "manipulation",
+                      WebkitTapHighlightColor: "transparent",
+                      animation: `nav-tab-in 0.4s ease-out backwards`,
+                      animationDelay: `${0.08 + idx * 0.06}s`,
+                    }}
+                  >
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        height: "100%",
+                        width: "100%",
+                        color: tabColor,
+                        fontSize: 14,
+                        fontWeight: isActive ? 700 : 600,
+                        cursor: "pointer",
+                        userSelect: "none",
+                        borderRadius: 20,
+                        whiteSpace: "nowrap",
+                        fontFamily: "'Space Grotesk', sans-serif",
+                        transition: "color 0.3s ease, font-weight 0.3s ease",
+                      }}
+                    >
+                      AI
+                    </span>
+                  </button>
+                )
+              }
+
+              const renderHomeButton = () => (
                 <button
                   key="home"
                   onClick={() => handleTab("dashboard")}
@@ -852,101 +953,29 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
                     WebkitTapHighlightColor: "transparent",
                     transition: "all 0.2s",
                     flexShrink: 0,
-                    margin: "0 4px",
                   }}
                 >
                   <Home style={{ width: 18, height: 18, color: activeTab === "dashboard" ? "#f472b6" : (openCategory ? "#f472b688" : "var(--text-muted, #a1a1aa)") }} />
                 </button>
-              ) : tab.key === "ai" ? (
-                <button
-                  key="ai"
-                  ref={(el) => { tabRefs.current["ai"] = el }}
-                  onClick={() => { sessionStorage.setItem("ai_context", "navbar"); handleTab("ai"); setOpenCategory(null) }}
-                  style={{
-                    position: "relative",
-                    zIndex: 1,
-                    flex: 1,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    height: "100%",
-                    padding: "0 8px",
-                    background: "transparent",
-                    border: "none",
-                    cursor: "pointer",
-                    touchAction: "manipulation",
-                    WebkitTapHighlightColor: "transparent",
-                    animation: `nav-tab-in 0.4s ease-out backwards`,
-                    animationDelay: `${0.08 + MOBILE_TABS.indexOf(tab) * 0.06}s`,
-                  }}
-                >
-                  <span
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      height: "100%",
-                      width: "100%",
-                      color: tabColor,
-                      fontSize: 14,
-                      fontWeight: isActive ? 700 : 600,
-                      cursor: "pointer",
-                      userSelect: "none",
-                      borderRadius: 20,
-                      whiteSpace: "nowrap",
-                      fontFamily: "'Space Grotesk', sans-serif",
-                      transition: "color 0.3s ease, font-weight 0.3s ease",
-                    }}
-                  >
-                    {tab.label}
-                  </span>
-                </button>
-              ) : (
-                <button
-                  key={tab.key}
-                  ref={(el) => { tabRefs.current[tab.key] = el }}
-                  onClick={() => setOpenCategory(openCategory === tab.key ? null : tab.key)}
-                  style={{
-                    position: "relative",
-                    zIndex: 1,
-                    flex: 1,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    height: "100%",
-                    padding: "0 8px",
-                    background: "transparent",
-                    border: "none",
-                    cursor: "pointer",
-                    touchAction: "manipulation",
-                    WebkitTapHighlightColor: "transparent",
-                    animation: `nav-tab-in 0.4s ease-out backwards`,
-                    animationDelay: `${0.08 + MOBILE_TABS.indexOf(tab) * 0.06}s`,
-                  }}
-                >
-                  <span
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      height: "100%",
-                      width: "100%",
-                      color: tabColor,
-                      fontSize: 14,
-                      fontWeight: isActive ? 700 : 600,
-                      cursor: "pointer",
-                      userSelect: "none",
-                      borderRadius: 20,
-                      whiteSpace: "nowrap",
-                      fontFamily: "'Space Grotesk', sans-serif",
-                      transition: "color 0.3s ease, font-weight 0.3s ease",
-                    }}
-                  >
-                    {tab.label}
-                  </span>
-                </button>
               )
-            })}
+
+              return (
+                <>
+                  {/* Left group: Academics + Tools */}
+                  <div style={{ flex: 1, display: "flex", minWidth: 0 }}>
+                    {renderCategoryTab({ key: "academics", label: "Academics" }, 0)}
+                    {renderCategoryTab({ key: "tools", label: "Tools" }, 1)}
+                  </div>
+                  {/* Center: Home button */}
+                  {renderHomeButton()}
+                  {/* Right group: Account + AI */}
+                  <div style={{ flex: 1, display: "flex", minWidth: 0 }}>
+                    {renderCategoryTab({ key: "account", label: "Account" }, 3)}
+                    {renderAiTab(4)}
+                  </div>
+                </>
+              )
+            })()}
           </motion.div>
         </div>
       </div>
