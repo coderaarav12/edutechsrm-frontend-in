@@ -85,8 +85,8 @@ const NAV = [
 ] as const
 
 function getCategoryItems(cat: string): readonly (typeof NAV)[number][] {
-  if (cat === "academics") return NAV.filter((n) => n.id === "timetable" || n.id === "attendance" || n.id === "marks" || n.id === "courses" || n.id === "calendar")
-  if (cat === "tools") return NAV.filter((n) => n.id === "planner" || n.id === "gradex" || n.id === "notes" || n.id === "finder" || n.id === "calculator")
+  if (cat === "academics") return NAV.filter((n) => n.id === "timetable" || n.id === "attendance" || n.id === "marks" || n.id === "courses" || n.id === "calendar" || n.id === "planner" || n.id === "gradex" || n.id === "notes")
+  if (cat === "tools") return NAV.filter((n) => n.id === "finder" || n.id === "calculator" || n.id === "mess")
   return NAV.filter((n) => n.id === "about" || n.id === "settings" || n.id === "updates" || n.id === "feedback")
 }
 
@@ -99,8 +99,8 @@ const MOBILE_TABS = [
 ] as const
 
 function tabCategory(tab: string): string | null {
-  if (["timetable", "attendance", "marks", "courses", "calendar"].includes(tab)) return "academics"
-  if (["planner", "gradex", "notes", "finder", "calculator"].includes(tab)) return "tools"
+  if (["timetable", "attendance", "marks", "courses", "calendar", "planner", "gradex", "notes"].includes(tab)) return "academics"
+  if (["finder", "calculator", "mess"].includes(tab)) return "tools"
   if (["about", "settings", "updates", "feedback"].includes(tab)) return "account"
   if (tab === "ai") return "ai"
   return null
@@ -692,13 +692,19 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
 
                 {/* Animated grid */}
                 <AnimatePresence mode="wait">
-                  <motion.div
+                    <motion.div
                     key={openCategory}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.15 }}
-                    style={{ display: "flex", flexDirection: "row", justifyContent: "center", gap: 6 }}
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: `repeat(${openCategory === "academics" ? 4 : openCategory === "tools" ? 3 : 4}, 1fr)`,
+                      gap: 6,
+                      justifyItems: "center",
+                      paddingBottom: 4,
+                    }}
                   >
                     {(openCategory === "ai"
                       ? [{ id: "ai", label: "AI Chat", icon: Bot, color: "#a78bfa" }]
@@ -718,11 +724,11 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
                             display: "flex",
                             flexDirection: "column",
                             alignItems: "center",
-                            gap: 4,
-                            padding: "10px 6px 8px",
+                            gap: 3,
+                            padding: "8px 4px 6px",
                             minWidth: 0,
                             flex: 1,
-                            borderRadius: 14,
+                            borderRadius: 12,
                             background: active ? `${item.color}0a` : "transparent",
                             border: `1px solid ${active ? `${item.color}18` : "transparent"}`,
                             cursor: "pointer",
@@ -734,22 +740,22 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
                         >
                           <div
                             style={{
-                              width: 34,
-                              height: 34,
-                              borderRadius: 10,
+                              width: 30,
+                              height: 30,
+                              borderRadius: 9,
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
                               background: active ? `${item.color}18` : `${catColor}0a`,
                             }}
                           >
-                            <Icon style={{ width: 16, height: 16, color: active ? item.color : catColor }} />
+                            <Icon style={{ width: 14, height: 14, color: active ? item.color : catColor }} />
                           </div>
-                          <span style={{ fontSize: 10, fontWeight: active ? 700 : 500, color: active ? item.color : catColor, textAlign: "center", lineHeight: 1.2 }}>
+                          <span style={{ fontSize: 9, fontWeight: active ? 700 : 500, color: active ? item.color : catColor, textAlign: "center", lineHeight: 1.15 }}>
                             {item.label}
                           </span>
                           {active && (
-                            <div style={{ position: "absolute", top: 4, right: 4, width: 5, height: 5, borderRadius: "50%", background: item.color }} />
+                            <div style={{ position: "absolute", top: 3, right: 3, width: 4, height: 4, borderRadius: "50%", background: item.color }} />
                           )}
                         </button>
                       )
