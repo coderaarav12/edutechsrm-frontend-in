@@ -29,6 +29,5 @@ export function getDriveEmbedUrl(url: string): string | null {
   if (isGoogleDriveFolder(url)) return null
   const fileId = getGoogleDriveFileId(url)
   if (!fileId) return null
-  const directUrl = `https://drive.google.com/uc?id=${fileId}&export=view`
-  return `https://docs.google.com/gview?url=${encodeURIComponent(directUrl)}&embedded=true`
+  return `https://drive.google.com/file/d/${fileId}/preview`
 }
