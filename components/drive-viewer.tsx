@@ -105,7 +105,7 @@ export function DriveViewer({ url, title, onClose }: DriveViewerProps) {
                 src={embedUrl}
                 className={`w-full h-full border-0 ${loaded ? "opacity-100" : "opacity-0"}`}
                 style={{ transition: "opacity 0.2s" }}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allow="autoplay"
                 allowFullScreen
                 title={title}
                 onLoad={() => setLoaded(true)}

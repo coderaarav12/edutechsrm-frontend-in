@@ -59,14 +59,14 @@ const DESKTOP_SECTIONS = [
       { id: "courses" as const, label: "Courses", subtitle: "Subjects and faculty", icon: "BookOpen", color: "#60a5fa" },
       { id: "marks" as const, label: "Marks", subtitle: "Scores and trends", icon: "Award", color: "#f59e0b" },
       { id: "calendar" as const, label: "Calendar", subtitle: "Day order and holidays", icon: "CalendarDays", color: "#a78bfa" },
+      { id: "planner" as const, label: "Planner", subtitle: "All day orders", icon: "BookMarked", color: "#34d399" },
+      { id: "gradex" as const, label: "GradeX", subtitle: "Projection tools", icon: "TrendingUp", color: "#fb923c" },
+      { id: "notes" as const, label: "Notes & PYQs", subtitle: "Study material", icon: "FileText", color: "#60a5fa" },
     ],
   },
   {
     label: "Tools",
     items: [
-      { id: "gradex" as const, label: "GradeX", subtitle: "Projection tools", icon: "TrendingUp", color: "#fb923c" },
-      { id: "planner" as const, label: "Planner", subtitle: "All day orders", icon: "BookMarked", color: "#34d399" },
-      { id: "notes" as const, label: "Notes & PYQs", subtitle: "Study material", icon: "FileText", color: "#60a5fa" },
       { id: "mess" as const, label: "Mess Menu", subtitle: "Hostel mess menus", icon: "Coffee", color: "#34d399" },
       { id: "calculator" as const, label: "Calculator Plus", subtitle: "Study utilities", icon: "Calculator", color: "#34d399" },
       { id: "finder" as const, label: "Faculty Finder", subtitle: "Staff room locator", icon: "IdCard", color: "#34d399" },
