@@ -372,11 +372,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const hydrated = await fetchHydratedDashboard(token)
+      // After fetchHydratedDashboard, a silent refresh may have updated localStorage.
+      // Read the latest token to keep state.token in sync.
+      const latestToken = localStorage.getItem("srm_token") || token
+
       if (!hydrated) {
         const cachedSnapshot = readPersistedSnapshot()
         if (cachedSnapshot) {
           setState((prev) => ({
-            ...buildAuthenticatedStateFromSnapshot(token, cachedSnapshot, {
+            ...buildAuthenticatedStateFromSnapshot(latestToken, cachedSnapshot, {
               isOffline: getInitialOfflineState(),
               isLoading: false,
               isLoginSyncing: false,
@@ -395,7 +399,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           isLoginSyncing: false,
           isBackgroundSyncing: false,
           isOffline: getInitialOfflineState(),
-          token,
+          token: latestToken,
           user: null,
           attendance: [],
           timetable: [],
@@ -419,7 +423,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoginSyncing: false,
         isOffline: false,
         isBackgroundSyncing: false,
-        token,
+        token: latestToken,
         user: hydrated.user,
         attendance: hydrated.attendance,
         timetable: hydrated.timetable.timetable || [],
@@ -496,7 +500,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const runRefreshData = useCallback(async (options?: { silent?: boolean; tokenOverride?: string | null }) => {
-    const activeToken = options?.tokenOverride ?? state.token
+    // Prefer the caller-provided token, then localStorage (which may have been
+    // updated by a silent refresh), then the in-memory state.
+    const activeToken = options?.tokenOverride ?? (typeof localStorage !== "undefined" ? localStorage.getItem("srm_token") : null) ?? state.token
     if (!activeToken) { notifyAndroidRefreshComplete(); return }
     const silent = options?.silent ?? Boolean(state.isAuthenticated && state.user)
 
@@ -542,11 +548,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const hydrated = await fetchHydratedDashboard(activeToken)
+      // Silent refresh may have rotated the token — read the latest from localStorage
+      const latestToken = typeof localStorage !== "undefined" ? localStorage.getItem("srm_token") : null
+
       if (!hydrated) {
         const cachedSnapshot = readPersistedSnapshot()
         if (cachedSnapshot) {
           setState((prev) => ({
-            ...buildAuthenticatedStateFromSnapshot(activeToken, cachedSnapshot, {
+            ...buildAuthenticatedStateFromSnapshot(latestToken || activeToken, cachedSnapshot, {
               isOffline: getInitialOfflineState(),
               isLoading: false,
               isLoginSyncing: false,
@@ -583,6 +592,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isOffline: false,
         isBackgroundSyncing: false,
         isManualRefresh: false,
+        token: latestToken || activeToken,
         user: hydrated.user,
         attendance: hydrated.attendance,
         timetable: hydrated.timetable.timetable || [],
@@ -686,7 +696,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [runRefreshData])
 
   const updateTimetableSettings = async (section: string, batch: string) => {
-    if (!state.token) return
+    // Use the freshest token available — a silent refresh may have updated localStorage
+    const activeToken = typeof localStorage !== "undefined" ? localStorage.getItem("srm_token") : null
+    if (!activeToken) return
 
     setState((prev) => ({ ...prev, isLoading: true, isLoginSyncing: false }))
 
@@ -694,7 +706,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("srm_batch", batch)
 
     try {
-      const timetableData = await fetchTimetable(state.token, section, batch)
+      const timetableData = await fetchTimetable(activeToken, section, batch)
 
       setState((prev) => ({
         ...prev,

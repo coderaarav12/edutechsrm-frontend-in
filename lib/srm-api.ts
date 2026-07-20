@@ -272,10 +272,16 @@ async function throwIfSessionExpired(response: Response, fallback: string) {
 let _refreshPromise: Promise<string | null> | null = null
 
 async function attemptSilentRefresh(): Promise<string | null> {
-  // Deduplicate: if a refresh is already in flight, wait for it
-  if (_refreshPromise) return _refreshPromise
+  // Deduplicate: if a refresh is already in flight, wait for it.
+  // The promise is set synchronously so concurrent callers always see it.
+  if (!_refreshPromise) {
+    _refreshPromise = doRefresh()
+  }
+  return _refreshPromise
+}
 
-  _refreshPromise = (async () => {
+async function doRefresh(): Promise<string | null> {
+  try {
     const expiredToken = localStorage.getItem("srm_token")
     if (!expiredToken) return null
 
@@ -300,10 +306,6 @@ async function attemptSilentRefresh(): Promise<string | null> {
       console.warn("[edutechsrm] Silent refresh failed:", e)
     }
     return null
-  })()
-
-  try {
-    return await _refreshPromise
   } finally {
     _refreshPromise = null
   }
