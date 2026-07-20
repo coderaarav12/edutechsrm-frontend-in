@@ -31,15 +31,15 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // Protect AI chat endpoint — require auth token
-  if (pathname === "/api/ai/chat") {
+  // Protect /api/notes and /api/ai/chat — require auth token
+  if (pathname === "/api/notes" || pathname === "/api/ai/chat") {
     const token = request.headers.get("x-access-token")
     if (!token || token.trim().length === 0) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 })
     }
 
     const ip = getClientIP(request)
-    const { allowed } = rateLimit(`middleware:ai:${ip}`, 30, 60 * 1000)
+    const { allowed } = rateLimit(`middleware:${pathname}:${ip}`, 30, 60 * 1000)
     if (!allowed) {
       return NextResponse.json({ error: "Too many requests" }, { status: 429 })
     }
@@ -52,5 +52,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin{/:path}?", "/portal-g7k2", "/api/ai/chat"],
+  matcher: ["/admin{/:path}?", "/portal-g7k2", "/api/notes", "/api/ai/chat"],
 }
