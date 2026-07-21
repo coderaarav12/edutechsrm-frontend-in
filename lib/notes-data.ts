@@ -19,6 +19,7 @@ export const NOTES_DATA: SemesterResources[] = [
     semester: 1,
     subjects: [
       { name: "Calculus And Linear Algebra", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Chapter 1: Matrices", url: "https://drive.google.com/drive/folders/1PDTEDD7r7QqW0xWoN_pAATkhr8LAXbmN?usp=drive_link" },
       { title: "Chapter 1 & 2 Class Notes 2025", url: "https://drive.google.com/file/d/1wS0KDQJbpxKUV8GTSfUbmuIPrqlA1rjT/view?usp=sharing" },
       { title: "Chapter 2: Functions Of Several Variables", url: "https://drive.google.com/drive/folders/1SpNIkGywR7ZKowUDPxhZZl-yTpHua0M2?usp=drive_link" },
@@ -41,6 +42,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "Calculator List Updated For 2024", url: "https://drive.google.com/file/d/1IR6Jk4-t-eYSJB-EX2uvBbyFTxc1oK0F/view?usp=drive_link" }
       ] },
       { name: "Chemistry", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Chapter 1: Periodic Properties", url: "https://drive.google.com/file/d/1PDJOwDIHMecthOEI2dgRgR0oULwHZYSV/view?usp=drive_link" },
       { title: "Chapter 2: Use Of Free Energy In Chemical Equilibria", url: "https://drive.google.com/file/d/1gV9B9r6yZo_t2oNlUPeVqrBiPgMzzjnE/view?usp=drive_link" },
       { title: "Chapter 3: Stereo Chemistry And Organic Reactions", url: "https://drive.google.com/file/d/110w12g6laqPUTXf9Jurb8MkJ6emkiYB7/view?usp=drive_link" },
@@ -66,6 +68,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "Important Questions: CTs and SEM", url: "https://drive.google.com/drive/folders/1yOXcvkndGCCtVDk6dlo1b0p-cGw5-2GD?usp=drive_link" }
       ] },
       { name: "Philosophy Of Engineering", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Chapter 1: Introduction To Philosophy Of Engineering", url: "https://drive.google.com/drive/folders/1A0pGPpjlHkZGICKYAHNt6GmB7CXAlF_0?usp=sharing" },
       { title: "Chapter 2: Ontology Of Engineering", url: "https://drive.google.com/drive/folders/1sZ5yEypoHbDo_55Xdsvp1VT3EV5dB__l?usp=sharing" },
       { title: "Chapter 3: Epistemology Of Engineering", url: "https://drive.google.com/drive/folders/10HqLNoF_ZHRv4nHdBM0fqSOz2WY0ooFA?usp=sharing" },
@@ -85,6 +88,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "Important Topics & Exam Pattern", url: "https://docs.google.com/document/d/1WGW5jJVAoTk7598I9wLGGUVpJNds1__W7QIiqOlPEl8/edit?usp=sharing" }
       ] },
       { name: "Introduction To Computational Biology", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Chapter 1: Cell And Evolution", url: "https://drive.google.com/drive/folders/1kQIQUQwf0J5CB_nLoJuwNd_z9wR-Ols6?usp=sharing" },
       { title: "Chapter 2: Basics In Biochemistry", url: "https://drive.google.com/drive/folders/1PAL9aXCH9dQnRigncQ-SRzmkR78L6r1l?usp=sharing" },
       { title: "Chapter 3: Structure Biology", url: "https://docs.google.com/presentation/d/1NvNby20sQwxWxyZZf_aorONjbBL6O-wZ/edit?usp=drive_link&ouid=104856686103320873965&rtpof=true&sd=true" },
@@ -105,6 +109,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "HOTs Questions Unit 1 to 5, Question Banks, MCQs & More", url: "https://drive.google.com/drive/folders/1wN2x025nxZYsCoUhyNoHJUM8WT1i-sWT?usp=drive_link" }
       ] },
       { name: "Programming For Problem Solving", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Chapter 1", url: "https://drive.google.com/drive/folders/115dAsr68aT8VLi_7Bmv2XAuu7ekdlNzQ?usp=drive_link" },
       { title: "Chapter 2", url: "https://drive.google.com/drive/folders/15qqWbCXr5Rd0UL1opZB5vpPQDn3AsZMG?usp=drive_link" },
       { title: "Chapter 3", url: "https://drive.google.com/drive/folders/1d3mCBRey2ZjNgkiWW-zxSBqUx61d2m7l?usp=drive_link" },
@@ -132,6 +137,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "Important Questions", url: "https://drive.google.com/file/d/1REJu8O7Zd--eBgJVLAQ6mlV7vO5XMLcU/view?usp=drive_link" }
       ] },
       { name: "Fundamental Of Economics (FOE)", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Study Material Drive Link", url: "https://drive.google.com/drive/folders/1D0GFFKWgIjw5tGWK-NLgscvaOULlJHeY?usp=drive_link" }
       ], pyqs: [
       { title: "PYQ Jan 2024", url: "https://drive.google.com/file/d/1LY9QRZLJCCdcvAi0Z_g-fASLnJA8GddP/view?usp=drive_link" },
@@ -141,11 +147,13 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "Questions Bank", url: "https://docs.google.com/document/d/1HW-C1-X8DRIdmMUOB2APuuq8YCKV1RtH/edit?usp=drive_link&ouid=104856686103320873965&rtpof=true&sd=true" }
       ] },
       { name: "Biomedical Sensors", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
 
       ], pyqs: [
       { title: "PYQ May 2023", url: "https://drive.google.com/file/d/1q4mE8pPVbznCaoaKbhfGt7EazS2vmQyn/view?usp=drive_link" }
       ] },
       { name: "Foreign Languages", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "French Book", url: "https://drive.google.com/file/d/1u_v_MLCXnprT6Ua9FyCxbXJocjaup4RF/view?usp=drive_link" },
       { title: "French Book Translation", url: "https://drive.google.com/file/d/1BB3d1Nd8IYgMY9KzoethflzkjUIRYRqk/view?usp=drive_link" },
       { title: "French Notes CT1", url: "https://drive.google.com/file/d/1tgWbDPfvFB-G5SGaIalS1ROsd9ikIqvD/view?usp=sharing" },
@@ -162,6 +170,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "German CT1 2025", url: "https://drive.google.com/file/d/1mJmOWOC5wGTlkkpQCfiLKw0WijLmAk6Q/view?usp=sharing" }
       ] },
       { name: "Cell Biology", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Chapter 1", url: "https://drive.google.com/file/d/17QwIVxEPWAWVfVb8TIG3BWAerk2p2eHr/view?usp=drive_link" },
       { title: "Chapter 2", url: "https://drive.google.com/file/d/1fXqhZm_wb10iajTytYJX6jQeQEEfGRr0/view?usp=drive_link" },
       { title: "Chapter 3", url: "https://drive.google.com/file/d/1u-nTTGlL8UV9N9eSUQu5QSiRcr8ONdaF/view?usp=drive_link" },
@@ -174,6 +183,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "Study Material Drive Link", url: "https://drive.google.com/drive/folders/1Mgt2VtpzOxARAGFm6D2_cNl-s0PBHbAp?usp=drive_link" }
       ] },
       { name: "Microbiology", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Chapter 1: Cell Basic Unit Of Life", url: "https://drive.google.com/file/d/1NRFIYVvPyYih-WuhBQnQGVWPhv7ASqYD/view?usp=drive_link" },
       { title: "Chapter 2: Macromolecules And Metabolism", url: "https://drive.google.com/file/d/1RCrH9GGmoI50OIbebr-HTq_xTPQo3T2r/view?usp=drive_link" },
       { title: "Chapter 3: Microbiology In Human Life", url: "https://drive.google.com/file/d/1UazVTgPXBXMdNn2_AUWpZSLvojCxmIaW/view?usp=drive_link" },
@@ -184,12 +194,14 @@ export const NOTES_DATA: SemesterResources[] = [
 
       ] },
       { name: "Physical And Analytical Chemistry", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
 
       ], pyqs: [
       { title: "PYQ Jul 2025", url: "https://drive.google.com/file/d/1RePx5oxIso0RnLdB7zNsVDJbSYkdjtK2/view?usp=sharing" },
       { title: "PYQ May 2023", url: "https://drive.google.com/file/d/1F10dw18lGsWIt57qHf75vqD9oMMJiXPf/view?usp=drive_link" }
       ] },
       { name: "Biochemistry", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Chapter 1: Introduction To Biochemistry", url: "https://drive.google.com/drive/folders/1AdyBBezaEKi2Z6jIgf_T-S9I3qJxDOrt?usp=sharing" },
       { title: "Chapter 2: Introduction To Metabolism, Bioenergetics And Photosynthesis", url: "https://drive.google.com/drive/folders/1pF6WWT1TUqmP3U15ywNNUzqaL406bSS1?usp=sharing" },
       { title: "Chapter 3: Carbohydrate Metabolism", url: "https://drive.google.com/file/d/1QvAQc6JWvl-mQpgIAbWQj5FsVWCJ6EOo/view?usp=drive_link" },
@@ -206,11 +218,13 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "PYQ May 2023", url: "https://drive.google.com/file/d/1B_xfp2LaPZHD1Wau8IsB8MOHDhtlTY-_/view?usp=drive_link" }
       ] },
       { name: "Basic Civil & Mechanical Workshop", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Labwork Solutions", url: "https://drive.google.com/file/d/16Glt-21RKG1sVn7tLec_SuLUSpXVWqz_/view?usp=sharing" }
       ], pyqs: [
 
       ] },
       { name: "Biology", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
 
       ], pyqs: [
       { title: "PYQ Nov 2025", url: "https://drive.google.com/file/d/1n0fwz2Tbjcu4aThlu87PuNzzFZDWeq2Z/view?usp=sharing" },
@@ -229,6 +243,7 @@ export const NOTES_DATA: SemesterResources[] = [
     semester: 2,
     subjects: [
       { name: "Advanced Calculus And Complex Analysis", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Chapter 1: Integral Calculus", url: "https://drive.google.com/drive/folders/10MhT0VpHIX1z5exdROiCNJ-hEgc_L0HB?usp=drive_link" },
       { title: "Chapter 2: Vector Calculus", url: "https://drive.google.com/drive/folders/1D8DbGyhmCxRjsH6HueTk5od-ir-AQF4-?usp=drive_link" },
       { title: "Chapter 3: Laplace Transform", url: "https://drive.google.com/drive/folders/1eVvnfACc_on7WVw_aJ1svJwH1lxsAdEU?usp=drive_link" },
@@ -252,6 +267,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "Calculator List Updated For 2024", url: "https://drive.google.com/file/d/1IR6Jk4-t-eYSJB-EX2uvBbyFTxc1oK0F/view?usp=drive_link" }
       ] },
       { name: "Electrical And Electronics Engineering", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Electric Circuits", url: "https://docs.google.com/presentation/d/1bPBwdQyolajpl_Yvnf9FN6PH9PLfFvHU/edit?usp=drive_link&ouid=104856686103320873965&rtpof=true&sd=true" },
       { title: "Electronics", url: "https://docs.google.com/presentation/d/1Fl_HnPxNwC-p8cwsiBbbXKU_JQ4pPiRQ/edit?usp=drive_link&ouid=104856686103320873965&rtpof=true&sd=true" },
       { title: "Machines And Drives", url: "https://docs.google.com/presentation/d/1ZiRH5sw__xM09kSlR4YVeLrHznPrNQx6/edit?usp=drive_link&ouid=104856686103320873965&rtpof=true&sd=true" },
@@ -284,6 +300,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "Calculator List Updated For 2024", url: "https://drive.google.com/file/d/1IR6Jk4-t-eYSJB-EX2uvBbyFTxc1oK0F/view?usp=drive_link" }
       ] },
       { name: "Semiconductor Physics And Computational Methods", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Chapter 1: Energy Bands In Solids", url: "https://drive.google.com/file/d/1EACIBHKWj8FMHb3veDMsKp-D-xofm6xB/view?usp=drive_link" },
       { title: "Chapter 2: Carrier Transport Mechanism In Semiconductors", url: "https://drive.google.com/file/d/1UHbGMqvhM6kc8R-ThV5KCKu7x5Km4Im1/view?usp=drive_link" },
       { title: "Chapter 3: Optoelectronic Properties Of Semiconductors", url: "https://drive.google.com/file/d/1Nly-gEdmq8x1InLEgVPC9Axx6JYAS00u/view?usp=drive_link" },
@@ -314,6 +331,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "Important Topics", url: "https://docs.google.com/document/d/1d93T2rn1CXakIU8B9zFSdNvLcIIEFEmA5-XYnyEn6qo/edit?usp=drive_link" }
       ] },
       { name: "Physics-Mechanics", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Complete Study Materials", url: "https://drive.google.com/drive/folders/1-XQVidvAI_7gQrmO35x4tZ09GO-N_Ax1?usp=drive_link" }
       ], pyqs: [
       { title: "PYQ Jul 2023", url: "https://drive.google.com/file/d/1hLqpPQnVxOitjPBRfZOZcXoE_RQooaSg/view?usp=drive_link" },
@@ -322,6 +340,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "PYQ Jul 2024", url: "https://drive.google.com/file/d/1kqEx0EQRoEWqfPbVivydRSBtUnt-z2_b/view?usp=drive_link" }
       ] },
       { name: "Object Oriented Design And Programming", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Chapter 1: Introduction To OOPS", url: "https://drive.google.com/file/d/19FDqGruYLCRlY5X5QMs9Yv9T8ud0_vjH/view?usp=drive_link" },
       { title: "Chapter 2: Methods And Polymorphism", url: "https://drive.google.com/file/d/1oZGWe7fU9IUy9UXifmRzii91BCuA3OEJ/view?usp=drive_link" },
       { title: "Chapter 3: Inheritence", url: "https://drive.google.com/file/d/1aqEFFQ3xJutAmWnRt5UW9xRNxlhhPyHH/view?usp=drive_link" },
@@ -345,6 +364,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "More Questions", url: "https://drive.google.com/file/d/1gUeqNXL3SeVyhahUh6x-KsCG3ldF1eys/view?usp=sharing" }
       ] },
       { name: "Communicative English", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Study Materials", url: "https://drive.google.com/drive/folders/1EZN7OFedecezHibAfhjruQu1SWXd5107?usp=drive_link" },
       { title: "Notes Complete", url: "https://drive.google.com/file/d/1kB9WiCVhxsmuOuoIXnqMLFpPlSZtzjT_/view?usp=drive_link" }
       ], pyqs: [
@@ -365,6 +385,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "More PYQs", url: "https://drive.google.com/drive/folders/1XRWZb4k2c0WhYPZTs1t3Jaflydg5Rxxv?usp=drive_link" }
       ] },
       { name: "Electromagnetic Physics", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Chapter 1: Electromagnetism And Dielectrics", url: "https://drive.google.com/drive/folders/11w4JqcjvAVvfV39JWGRFLtt5v7I-TPNx?usp=drive_link" },
       { title: "Chapter 2: Magnetic Materials", url: "https://drive.google.com/drive/folders/1QsUAiw6wOPVM4R_4ZdS5fx0QnpQ3qFWs?usp=drive_link" },
       { title: "Chapter 3: Quantum Mechanics", url: "https://drive.google.com/drive/folders/1J7ev17xSqpzu-GRjGGy0x0zoExHeFTQx?usp=drive_link" },
@@ -382,6 +403,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "Question Bank", url: "https://drive.google.com/file/d/18ubPMug4jRVTf36oTVcFbG7BJMwYOSPs/view?usp=drive_link" }
       ] },
       { name: "Engineering Mechanics", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Chapter 1: Statics Of Particles And Rigid Bodies", url: "https://drive.google.com/file/d/1ehp9LpWVmZK6iolUU3ZIitTyBdHxlyjQ/view?usp=drive_link" },
       { title: "Chapter 2: Analysis Of Friction And Trusses", url: "https://drive.google.com/file/d/1gJihOk16LcxHv8ksQZyuQCpZXQ3xaf2y/view?usp=drive_link" },
       { title: "Chapter 3: Centroid And Moment Of Inertia", url: "https://drive.google.com/file/d/1D7P7kteOwQ9mR3Spn9hDeOuqOipyMhbw/view?usp=drive_link" },
@@ -394,6 +416,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "PYQ May 2023", url: "https://drive.google.com/file/d/1wEqW5D0mbxHCamg_GsAbV6ejvPgqHbtN/view?usp=drive_link" }
       ] },
       { name: "Electronic System And PCB Design", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Chapter 1", url: "https://drive.google.com/file/d/1xLz8rvWEIGNx5G_xp7pbj16PXc1RePzD/view?usp=drive_link" },
       { title: "Chapter 2", url: "https://drive.google.com/file/d/1vLoBG06uZynECvwDH4HB7K1VUAGP-s5u/view?usp=drive_link" },
       { title: "Chapter 3", url: "https://drive.google.com/file/d/1mSBNgA_GDDc78NI2EuYnOhYwcuLhBrfc/view?usp=drive_link" },
@@ -416,6 +439,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "Important Questions / Topics", url: "https://drive.google.com/file/d/1ak5u4QogCLXeRP2lL2sFuqGtwqAgI2ne/view?usp=sharing" }
       ] },
       { name: "Building Materials In The Built Environment", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
 
       ], pyqs: [
       { title: "PYQ Nov 2025", url: "https://drive.google.com/file/d/1DXCnbRg-RagDJ6GgOcbReAs-TiN8ysV9/view?usp=sharing" },
@@ -428,6 +452,7 @@ export const NOTES_DATA: SemesterResources[] = [
     semester: 3,
     subjects: [
       { name: "Data Structures And Algorithm", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Unit 1", url: "https://drive.google.com/drive/folders/1lIdRl7YsgQ2RkQhK5vSiSRsAR1gGlPw0?usp=drive_link" },
       { title: "Unit 2", url: "https://drive.google.com/drive/folders/1groFGtdFkSdtEgthRuHpSB_cK55XS7s-?usp=drive_link" },
       { title: "Unit 3", url: "https://drive.google.com/drive/folders/1kPrci5eE-_hKj2UHI1yT26rJbq2wkm0B?usp=drive_link" },
@@ -445,6 +470,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "Important Topics", url: "https://drive.google.com/file/d/1PhM2PG3U9-z5SmQtcR_FsSQIUHiRxa6B/view?usp=sharing" }
       ] },
       { name: "Computer Organization And Architecture", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Unit 1", url: "https://drive.google.com/drive/folders/1Oo_LMKe1yEnkDvdHkV8tPD7i-QWKfqLs?usp=drive_link" },
       { title: "Unit 2", url: "https://drive.google.com/drive/folders/1BgyufGkVIKcoWtFjvSYqxJw8P8Z60xmU?usp=drive_link" },
       { title: "Unit 3", url: "https://drive.google.com/drive/folders/1Ofrtaw2CBusjNLjw_FgW0faEy904G8TM?usp=drive_link" },
@@ -464,6 +490,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "Important Topics", url: "https://drive.google.com/drive/folders/1AFdtzESwBIWPFUYeAEvOXrn_ntSqykZp?usp=sharing" }
       ] },
       { name: "Operating Systems", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Unit 1", url: "https://drive.google.com/file/d/1m3HahaUEUwqWUjJlfIoc5rxeELcOsoDw/view?usp=drive_link" },
       { title: "Unit 2", url: "https://drive.google.com/file/d/1o0MvhOteH2FcJgM4NjNv-ELFnYk3Xo9I/view?usp=drive_link" },
       { title: "Unit 3", url: "https://docs.google.com/presentation/d/1yhwbr_TyOnhN0_a7DVM66HkyokiGKSMq/edit?usp=drive_link&ouid=104856686103320873965&rtpof=true&sd=true" },
@@ -483,6 +510,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "Important Topics", url: "https://docs.google.com/document/d/1RXAHwTC7dWe5apNJAJEVPNY_y35UhhR0NWBlaL5_e_A/edit?usp=sharing" }
       ] },
       { name: "Transforms And Boundary Value Problems", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Unit 1 (Best Handwritten Notes + PPTs", url: "https://drive.google.com/drive/folders/1E6YAjd1lIhLWNkApnl0tJk02AhL2EDfl?usp=drive_link" },
       { title: "Unit 2 (Best Handwritten Notes + PPTs", url: "https://drive.google.com/drive/folders/1pQZBKHul5peCHSUJiBSuxjztMnKr7Nqm?usp=drive_link" },
       { title: "Unit 3 (Best Handwritten Notes + PPTs", url: "https://drive.google.com/drive/folders/115nd_bx3wHrmr8xkfYPCrRdwcZA3mBCf?usp=drive_link" },
@@ -503,6 +531,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "CT Papers", url: "https://drive.google.com/drive/folders/1PzGdoiUpM8V8DKCwroYG9fWCg3ZYmYv7?usp=drive_link" }
       ] },
       { name: "Advanced Programming Practice", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Unit 3", url: "https://docs.google.com/presentation/d/1ZIypQgRLg8JmBc-RSisOabjXBhTFxsdz/edit?usp=drive_link&ouid=104856686103320873965&rtpof=true&sd=true" },
       { title: "Unit 4", url: "https://docs.google.com/presentation/d/1MUKOxP5YPVYl1AnlX16snckb2f0bsClr/edit?usp=drive_link&ouid=104856686103320873965&rtpof=true&sd=true" },
       { title: "Unit 5", url: "https://docs.google.com/presentation/d/1aRIsf3PCsd-Fe7M91_h88uPECMWiPhk3/edit?usp=drive_link&ouid=104856686103320873965&rtpof=true&sd=true" },
@@ -511,12 +540,14 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "CT Papers", url: "https://drive.google.com/drive/folders/1usLNaymcsmP-3msDKyT5tC-M0A78f2hM?usp=drive_link" }
       ] },
       { name: "Design Thinking And Methodology", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Resources", url: "https://drive.google.com/drive/folders/1vmkBdyFo_hXLKW6xj9VwuMKhC5k_X_5E?usp=drive_link" },
       { title: "Resources From NCR Campus By BTECH CRUX", url: "https://drive.google.com/drive/folders/1V4PNoRvTRjm1aQJHL3uD5LbnrdCvHTYJ?usp=drive_link" }
       ], pyqs: [
 
       ] },
       { name: "Digital Logic Design", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Unit - 1", url: "https://drive.google.com/drive/folders/1xQqYOtjZoKvAws6txapTEMtHa0d2LPZp?usp=drive_link" },
       { title: "Unit - 2", url: "https://drive.google.com/drive/folders/1ByL8KGNqCqgihIPwtH8Y5JjPaJ0qZedw?usp=drive_link" },
       { title: "Unit - 3", url: "https://drive.google.com/drive/folders/1VwSBY8CyS3OjoGhbcDhWhEoAceByexp1?usp=drive_link" },
@@ -527,6 +558,7 @@ export const NOTES_DATA: SemesterResources[] = [
 
       ] },
       { name: "Solid State Devices", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Unit - 1", url: "https://drive.google.com/drive/folders/1NceSQDrGjzfmcdewiDRf3nzSBhxnWXNb?usp=drive_link" },
       { title: "Unit - 2", url: "https://drive.google.com/drive/folders/1MCoTgJN7wiUEdjFooqV82peKjquOg8Wo?usp=drive_link" },
       { title: "Unit - 3", url: "https://drive.google.com/drive/folders/1uJkWbvrMgR4AIMkTCCTau-8aLI9hHJez?usp=drive_link" },
@@ -537,6 +569,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "Important Topics", url: "https://drive.google.com/drive/folders/1sREDu5FC3d1DLqf6PWADtlmP3VS9WBBu?usp=drive_link" }
       ] },
       { name: "Biochemistry", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Chapter 1: Introduction To Biochemistry", url: "https://drive.google.com/drive/folders/1AdyBBezaEKi2Z6jIgf_T-S9I3qJxDOrt?usp=sharing" },
       { title: "Chapter 2: Introduction To Metabolism, Bioenergetics And Photosynthesis", url: "https://drive.google.com/drive/folders/1pF6WWT1TUqmP3U15ywNNUzqaL406bSS1?usp=sharing" },
       { title: "Chapter 3: Carbohydrate Metabolism", url: "https://drive.google.com/file/d/1QvAQc6JWvl-mQpgIAbWQj5FsVWCJ6EOo/view?usp=drive_link" },
@@ -553,6 +586,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "PYQ May 2023", url: "https://drive.google.com/file/d/1B_xfp2LaPZHD1Wau8IsB8MOHDhtlTY-_/view?usp=drive_link" }
       ] },
       { name: "Electromagnetic Thoery And Interference", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Unit - 1", url: "https://drive.google.com/drive/folders/1mZVdTKuVKQOrykbLFezy38bUgwyDIfcN?usp=drive_link" },
       { title: "Unit - 2", url: "https://drive.google.com/drive/folders/1CTlGQCzhezIz_Y94oYK2ixlwDlOnJYpV?usp=drive_link" },
       { title: "Unit - 3", url: "https://drive.google.com/drive/folders/1L3IrAluTTFhMbjRRuq-z72-LxuH9aXGf?usp=drive_link" },
@@ -565,6 +599,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "PYQs Coming Soon", url: "https://drive.google.com/file/d/15SkqtwNJnj3O79lqhAFl7iynkKDf3NZo/view?usp=drive_link" }
       ] },
       { name: "Basic Chemical Engineering", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Unit 1", url: "https://drive.google.com/drive/folders/1Sccvtsv9JQ3KBmvZsNjF6K_SnyvtqJQM?usp=drive_link" },
       { title: "Unit 2", url: "https://drive.google.com/drive/folders/1e-b8MM2sxue4GRPdJoRFIAOKYrsmN9Gg?usp=drive_link" },
       { title: "Unit 3", url: "https://drive.google.com/drive/folders/1E3Dj0GIUhAge4BjKT6WUhpmcIyNDbsNv?usp=drive_link" },
@@ -575,11 +610,13 @@ export const NOTES_DATA: SemesterResources[] = [
 
       ] },
       { name: "Bioprocess Principles", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
 
       ], pyqs: [
 
       ] },
       { name: "Genetics And Cytogenetics", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Unit - 1", url: "https://docs.google.com/presentation/d/1XgrULEDpBqQ8aIois6GvgfC6YdjXxvB1/edit?usp=drive_link&ouid=104856686103320873965&rtpof=true&sd=true" },
       { title: "Unit - 2", url: "https://docs.google.com/presentation/d/1pQHuogvkf9EKgNBnUwVC_1jF44IhH51Z/edit?usp=drive_link&ouid=104856686103320873965&rtpof=true&sd=true" },
       { title: "Unit - 3", url: "https://docs.google.com/presentation/d/1yQQ6M5bkt32MNT3cUdiWXCb2Vz3-VqCI/edit?usp=drive_link&ouid=104856686103320873965&rtpof=true&sd=true" },
@@ -590,6 +627,7 @@ export const NOTES_DATA: SemesterResources[] = [
 
       ] },
       { name: "Microbiology", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Chapter 1: Cell Basic Unit Of Life", url: "https://drive.google.com/file/d/1NRFIYVvPyYih-WuhBQnQGVWPhv7ASqYD/view?usp=drive_link" },
       { title: "Chapter 2: Macromolecules And Metabolism", url: "https://drive.google.com/file/d/1RCrH9GGmoI50OIbebr-HTq_xTPQo3T2r/view?usp=drive_link" },
       { title: "Chapter 3: Microbiology In Human Life", url: "https://drive.google.com/file/d/1UazVTgPXBXMdNn2_AUWpZSLvojCxmIaW/view?usp=drive_link" },
@@ -600,12 +638,14 @@ export const NOTES_DATA: SemesterResources[] = [
 
       ] },
       { name: "Social Engineering", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Study Materials", url: "https://drive.google.com/drive/folders/16XDz1RuY1zKHIqvso0-CB3G8iV0QAE5c?usp=drive_link" }
       ], pyqs: [
       { title: "PYQ CT Papers", url: "https://drive.google.com/file/d/1WwlOwVuqvm8pIV9PFEo1fvnkBjc3WF5-/view?usp=sharing" },
       { title: "Imp Questions & MCQs", url: "https://drive.google.com/drive/folders/1o91F0pHEIFDO95eVn_ad6UPyv8Qq7HCS?usp=drive_link" }
       ] },
       { name: "Numerical Methods & Analysis", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Handwritten Notes (Unit 1 to 5)", url: "https://drive.google.com/drive/folders/1_yx9gHE9wCSuhHQLxgGLvvEiCK4sk_Jk?usp=sharing" },
       { title: "Video Lectures (Unit 1 to 5)", url: "https://drive.google.com/drive/folders/1XgsDgK0hwzftw-3weSmd5JXx2wgED5kD?usp=sharing" },
       { title: "Book", url: "https://drive.google.com/drive/folders/1MT0fH_qm9iThwhqaCzXm7QA7qq3iaLlB?usp=sharing" },
@@ -621,6 +661,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "Formulas (Unit 1 to 5)", url: "https://drive.google.com/file/d/1vkNTXxuhWslRvsxhnpFKkdP6tYYBZWWM/view?usp=sharing" }
       ] },
       { name: "Foundation of Data Science (FDS)", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Unit - 1", url: "https://docs.google.com/presentation/d/1eRjk9eZNr0sOG-ncszUUWPfbb1dKI4zF/edit?usp=sharing&ouid=104856686103320873965&rtpof=true&sd=true" },
       { title: "Unit - 2", url: "https://docs.google.com/presentation/d/1c6Zbk5MyXCwDvTuE_iSiXpIeO76MsEVt/edit?usp=sharing&ouid=104856686103320873965&rtpof=true&sd=true" },
       { title: "Unit - 3", url: "https://docs.google.com/presentation/d/18ejquzHtyxYaIT0WbxRsu2oSv3oxCnOk/edit?usp=sharing&ouid=104856686103320873965&rtpof=true&sd=true" },
@@ -640,6 +681,7 @@ export const NOTES_DATA: SemesterResources[] = [
     semester: 4,
     subjects: [
       { name: "Design And Analysis Of Algorithms", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Unit 1", url: "https://drive.google.com/drive/folders/1yIK7ebssi3KRjUnlS9MAFV0K21T2NSBY?usp=drive_link" },
       { title: "Unit 2", url: "https://drive.google.com/drive/folders/1r3tWP772ZvAThmnwlnoFd1GV525he4i6?usp=drive_link" },
       { title: "Unit 3", url: "https://drive.google.com/drive/folders/1uTp_NyR75-VZhGRGPPIk--WsmKzu1Z2R?usp=drive_link" },
@@ -656,6 +698,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "PYQ Nov 2024", url: "https://drive.google.com/file/d/1mjVZyRHONl_euTtWON7P699J5acM5mLi/view?usp=sharing" }
       ] },
       { name: "Database Management Systems", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Unit 1", url: "https://drive.google.com/file/d/1Zms_a-iDpB5IvaDh-3xa0fKfdpjj4sjg/view?usp=sharing" },
       { title: "Unit 3", url: "https://docs.google.com/presentation/d/1t6wFh5KHGIhBjR3RrLyxouYg7aoYhhOg/edit?usp=drive_link&ouid=104856686103320873965&rtpof=true&sd=true" },
       { title: "Unit 5", url: "https://drive.google.com/file/d/1UY8C997l3CSttVgd2nUdzgm8dXs2yhlU/view?usp=drive_link" }
@@ -664,6 +707,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "SEM Papers", url: "https://drive.google.com/drive/folders/1uQLtuQyuoBwXBur2ZQPUp2Q16MjaXtxK?usp=sharing" }
       ] },
       { name: "Artificial Intelligence", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Unit 1", url: "https://docs.google.com/presentation/d/1ZCRSq-FFGaMC10X3vyhu7SvVjFA9KB22/edit?usp=drive_link&ouid=104856686103320873965&rtpof=true&sd=true" },
       { title: "Unit 2", url: "https://drive.google.com/file/d/1P96TlpUT79A8ASB9hGmShyWzi-nFCXX1/view?usp=drive_link" },
       { title: "Unit 3", url: "https://drive.google.com/file/d/1LIH8WDTktg4puEc2iCHSAfbnbLYWy1R2/view?usp=drive_link" },
@@ -680,6 +724,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "PYQ July 2023", url: "https://drive.google.com/file/d/13xutSJ7U3JzIaPM5Yg5PCsC2nvPl0CLi/view?usp=drive_link" }
       ] },
       { name: "Probability And Queueing Theory", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Unit 1", url: "https://drive.google.com/drive/folders/1hQn53A49uYx3KlGZDRc7L6AQZFwc75py?usp=drive_link" },
       { title: "Unit 2", url: "https://drive.google.com/drive/folders/1sw02282tT2-XlIg2Qh9Z45fJxKP2GscM?usp=drive_link" },
       { title: "Unit 4", url: "https://drive.google.com/drive/folders/1czNeYg50hxuE46PdZVjeiDV9xOhnxmXl?usp=drive_link" },
@@ -696,12 +741,14 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "PYQ Jul 2025 (Paper - 2)", url: "https://drive.google.com/file/d/1nshVsE_WAKOSb_emqF-PIq6Adwwo8wkC/view?usp=sharing" }
       ] },
       { name: "Social Engineering", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Study Materials", url: "https://drive.google.com/drive/folders/16XDz1RuY1zKHIqvso0-CB3G8iV0QAE5c?usp=drive_link" }
       ], pyqs: [
       { title: "PYQ CT Papers", url: "https://drive.google.com/file/d/1WwlOwVuqvm8pIV9PFEo1fvnkBjc3WF5-/view?usp=sharing" },
       { title: "Imp Questions & MCQs", url: "https://drive.google.com/drive/folders/1o91F0pHEIFDO95eVn_ad6UPyv8Qq7HCS?usp=drive_link" }
       ] },
       { name: "Bioprocess Engineering", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Unit 1", url: "https://drive.google.com/drive/folders/1f3HpC92GBKGwWujw2mYluG01bnMO_Tx0?usp=drive_link" },
       { title: "Unit 3", url: "https://drive.google.com/file/d/18PXoeiVcCik3qx-6kv2F70vDWifeL7Pz/view?usp=drive_link" },
       { title: "Unit 4", url: "https://drive.google.com/file/d/1kPMJGcBcw5iD7vYxvW-hU_r7vO5EGuhg/view?usp=drive_link" },
@@ -713,6 +760,7 @@ export const NOTES_DATA: SemesterResources[] = [
 
       ] },
       { name: "Cell Communication And Signaling", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Unit 1", url: "https://drive.google.com/file/d/1j2EUJRPoww4wPiaDc1GBLswTJhVdmKQY/view?usp=drive_link" },
       { title: "Unit 2", url: "https://drive.google.com/file/d/1sf-d1XeqwT4BTbzitIaH07bC58-sxFUs/view?usp=drive_link" },
       { title: "Unit 3", url: "https://drive.google.com/file/d/1Ql3STcuvu0aM1QyPCu1jsj3CUxdkCqPY/view?usp=drive_link" },
@@ -723,6 +771,7 @@ export const NOTES_DATA: SemesterResources[] = [
 
       ] },
       { name: "Software Process", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Unit 1", url: "https://drive.google.com/file/d/1918nLjWj9e8y7CuaKnCo6puSoj8xWIji/view?usp=drive_link" },
       { title: "Unit 2", url: "https://drive.google.com/file/d/1fgIOGqljq6_qt374aI5BCOTITrx50B39/view?usp=drive_link" },
       { title: "Unit 3", url: "https://drive.google.com/file/d/1RqKQACYst5hzCEtkurKt6ncd1Qa8XQ0n/view?usp=drive_link" },
@@ -731,6 +780,7 @@ export const NOTES_DATA: SemesterResources[] = [
 
       ] },
       { name: "Chemical Engineering Principles", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Unit 2", url: "https://drive.google.com/drive/folders/1fTI7gFaYPWKltLbvPf9YBadp3JgdT8HS?usp=drive_link" },
       { title: "Unit 3", url: "https://drive.google.com/drive/folders/1T-zvh8mXrl6-p0sYGdkL7pBnqc80KuqB?usp=drive_link" },
       { title: "Unit 4", url: "https://drive.google.com/drive/folders/1Joh_j3I65xvf7MHv2bZsDUjwM97pQYfN?usp=drive_link" },
@@ -739,6 +789,7 @@ export const NOTES_DATA: SemesterResources[] = [
 
       ] },
       { name: "Molecular Biology", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Unit 1", url: "https://docs.google.com/presentation/d/135DRxnugjY40CSOvqh85W6UvoNk7KV0F/edit?usp=drive_link&ouid=104856686103320873965&rtpof=true&sd=true" },
       { title: "Unit 2", url: "https://docs.google.com/presentation/d/14TvvxShtBiTvAhxScllvvvWI5AIN0uNd/edit?usp=drive_link&ouid=104856686103320873965&rtpof=true&sd=true" },
       { title: "Unit 3", url: "https://docs.google.com/presentation/d/1bmeva06jb9wkEGvWxgCCOqGN6FdYloee/edit?usp=drive_link&ouid=104856686103320873965&rtpof=true&sd=true" },
@@ -749,6 +800,7 @@ export const NOTES_DATA: SemesterResources[] = [
 
       ] },
       { name: "Internet Of Things (IOT)", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Unit 1", url: "https://docs.google.com/presentation/d/18S2osQF1TUo4p2ZEdRbBimJMoD9YD0Uj/edit?usp=drive_link&ouid=104856686103320873965&rtpof=true&sd=true" },
       { title: "Unit 2", url: "https://drive.google.com/file/d/1FqkiokSjvNtuza_W88Wvio2Q2MwIthTP/view?usp=drive_link" }
       ], pyqs: [
@@ -759,6 +811,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "May 2025", url: "https://drive.google.com/file/d/13xutSJ7U3JzIaPM5Yg5PCsC2nvPl0CLi/view?usp=sharing" }
       ] },
       { name: "Probability & Applied Statistics", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Unit - 1", url: "https://drive.google.com/file/d/1nvlT-wMapLiIWRc9E8_AuvXay3Xe54_B/view?usp=sharing" },
       { title: "Unit - 2", url: "https://drive.google.com/file/d/1-KjYgLV7OrZ5qFeeC_TnUDuM3ouZjNqF/view?usp=sharing" },
       { title: "Unit - 3", url: "https://drive.google.com/file/d/1vScX9_Rhg-IHQU7rU2wbTKF-vhM1xJNV/view?usp=sharing" },
@@ -774,12 +827,14 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "PYQ Nov 2024", url: "https://drive.google.com/file/d/1Dj52RWgYoa8tsAf3hxl301NITKArVZSM/view?usp=sharing" }
       ] },
       { name: "Digital Image Processing", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
 
       ], pyqs: [
       { title: "Nov 2025", url: "https://drive.google.com/file/d/1o6Cvdknb26JI7A7Aw3vd8yZMGctMCa4V/view?usp=sharing" },
       { title: "Jul 2025", url: "https://drive.google.com/file/d/1Zx4njutLzIbZldfMBEBvZyATgdmVUzYp/view?usp=sharing" }
       ] },
       { name: "CGA", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "NOTES 1", url: "https://drive.google.com/file/d/1_XJI6Pe9QfiRUmdvpCOg_jqMq2vHcTRL/view?usp=drive_link" },
       { title: "NOTES 2", url: "https://drive.google.com/file/d/1o8EH4oiYb9O5DBW76GiTZJb-jCjgLchL/view?usp=drive_link" }
       ], pyqs: [
@@ -795,6 +850,7 @@ export const NOTES_DATA: SemesterResources[] = [
     semester: 5,
     subjects: [
       { name: "Discrete Mathematics", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Unit 1", url: "https://drive.google.com/file/d/1vA1eKJGbQ7VgqtHjFztKG3RiXynpV2xO/view?usp=sharing" },
       { title: "Unit 2", url: "https://drive.google.com/file/d/1tM_7A0Wbig-Dc3XhSFYFtg59fYCvqpCB/view?usp=sharing" },
       { title: "Unit 3", url: "https://drive.google.com/file/d/1AQbOOY2sKbW_HeB2bUr-z1Q-JDk4wqAQ/view?usp=sharing" },
@@ -815,11 +871,13 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "PYQ Jul 2025 (Paper - 2)", url: "https://drive.google.com/file/d/13ks6-UEZxcJOaD-n2ZCXNyQCHLreiEA4/view?usp=sharing" }
       ] },
       { name: "Full Stack Web Development", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
 
       ], pyqs: [
       { title: "PYQ May 2024", url: "https://drive.google.com/file/d/10pgJCboWiG_LVqzBvgoC6jh6pKwLU26G/view?usp=sharing" }
       ] },
       { name: "Formal Language And Automata", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Unit 1 (Part-1)", url: "https://drive.google.com/file/d/1I3mNoLKaulHa4r7i5OQpSwHL_m754iIT/view?usp=sharing" },
       { title: "Unit 1 (Part-2)", url: "https://drive.google.com/file/d/1fcLHQGxLhYTGMv3XhC5zbqjhd3Te99GC/view?usp=sharing" },
       { title: "Unit 2", url: "https://drive.google.com/file/d/1rLLS5sb9ZKEgSSpipHT7PWt1y3v5shxa/view?usp=sharing" },
@@ -838,6 +896,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "PYQ Jul 2025 (Paper - 2)", url: "https://drive.google.com/file/d/1fHJiWrbhaimiALXIpsJfI-3iA8QWGNx0/view?usp=sharing" }
       ] },
       { name: "Computer Networks", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "Chapter - 1", url: "https://drive.google.com/file/d/1kYsviYEYs8kBziEb9Om881kYfbAs1ua2/view?usp=sharing" },
       { title: "Chapter - 2", url: "https://drive.google.com/file/d/1WHr02Jk5FVtfTkNCZvUAvJvZNqx_TemL/view?usp=sharing" },
       { title: "Chapter - 3", url: "https://drive.google.com/file/d/19JKZyA1iwqsV2hTOABHTgXkqqK19shCW/view?usp=sharing" },
@@ -856,21 +915,25 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "PYQ Jul 2025 (Paper - 2)", url: "https://drive.google.com/file/d/15D0h3SZbitJ616i6AIr8YCC6Wt51ckhQ/view?usp=sharing" }
       ] },
       { name: "Machine Learning", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
 
       ], pyqs: [
 
       ] },
       { name: "Professional Elective 2", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
 
       ], pyqs: [
 
       ] },
       { name: "Open Elective 1", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
 
       ], pyqs: [
 
       ] },
       { name: "Community Connect", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
 
       ], pyqs: [
 
@@ -881,6 +944,7 @@ export const NOTES_DATA: SemesterResources[] = [
     semester: 6,
     subjects: [
       { name: "Data Science", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
 
       ], pyqs: [
       { title: "May 2024   ", url: "https://drive.google.com/file/d/13b3eanNK8yIzTBVACH_e9RifZyPr6tkZ/view?usp=sharing" },
@@ -890,6 +954,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "Dec 2025  ", url: "https://drive.google.com/file/d/1YnNpVP7eOUDX0ft-HooKyvvEksYazQtE/view?usp=sharing" }
       ] },
       { name: "Software Engineering & Project Management (SEPM)", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
 
       ], pyqs: [
       { title: "May 2024   ", url: "https://drive.google.com/file/d/10sTGEwRDUZFGzMDvXddM9eon-MYAE-8Q/view?usp=sharing" },
@@ -898,6 +963,7 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "Nov  2025  ", url: "https://drive.google.com/file/d/1YF6E93f2eQOH9JFIP5GdLHCjdOoeiWZt/view?usp=sharing" }
       ] },
       { name: "Compiler Design", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
       { title: "NOTES 1", url: "https://drive.google.com/file/d/1se8RxJx3g5VNiT9jZpparRJ4n0Zvjw05/view?usp=drive_link" },
       { title: "NOTES 2", url: "https://drive.google.com/file/d/12LFxOLSVaUp0twsxJZzmwB8sJU0V4YBe/view?usp=drive_link" }
       ], pyqs: [
@@ -919,21 +985,25 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "IMPORTANT QUESTIONS", url: "https://drive.google.com/file/d/1XPsCvtVbJ65ExXeqTUrPhTNEsLBiPkHR/view?usp=drive_link" }
       ] },
       { name: "Professional Elective 3", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
 
       ], pyqs: [
 
       ] },
       { name: "Professional Elective 4", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
 
       ], pyqs: [
 
       ] },
       { name: "Open Elective 2", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
 
       ], pyqs: [
 
       ] },
       { name: "Project & MOOC", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
 
       ], pyqs: [
 
@@ -944,31 +1014,37 @@ export const NOTES_DATA: SemesterResources[] = [
     semester: 7,
     subjects: [
       { name: "Behavioral Psychology", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
 
       ], pyqs: [
 
       ] },
       { name: "Professional Elective 5", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
 
       ], pyqs: [
 
       ] },
       { name: "Professional Elective 6", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
 
       ], pyqs: [
 
       ] },
       { name: "Professional Elective 7", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
 
       ], pyqs: [
 
       ] },
       { name: "Professional Elective 8", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
 
       ], pyqs: [
 
       ] },
       { name: "Open Elective 3", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
 
       ], pyqs: [
 
@@ -979,11 +1055,13 @@ export const NOTES_DATA: SemesterResources[] = [
     semester: 8,
     subjects: [
       { name: "Major Project", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
 
       ], pyqs: [
 
       ] },
       { name: "Internship", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
 
       ], pyqs: [
 

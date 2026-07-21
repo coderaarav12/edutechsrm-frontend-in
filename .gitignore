@@ -49,6 +49,7 @@ scripts/list-*.js
 scripts/check-*.js
 scripts/test-*.js
 scripts/fast-*.js
+scripts/add-*.js
 
 # capacitor / Android app (moved to separate android-app folder)
 /android/
