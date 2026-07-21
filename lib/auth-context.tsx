@@ -529,7 +529,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }))
 
     try {
-      const syncResult = await syncData(activeToken)
+      // Read the freshest token from localStorage BEFORE making any API call,
+      // since a previous refresh cycle (e.g. during syncData) may have rotated it.
+      const tokenAfterSync = typeof localStorage !== "undefined" ? localStorage.getItem("srm_token") : null
+      const freshToken = tokenAfterSync || activeToken
+
+      const syncResult = await syncData(freshToken)
       if (!syncResult.success && syncResult.reason === "session_expired") {
         forceSessionExpiry(syncResult.error || "Your SRM session was replaced elsewhere. Please sign in again.")
         return
@@ -547,8 +552,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return
       }
 
-      const hydrated = await fetchHydratedDashboard(activeToken)
-      // Silent refresh may have rotated the token — read the latest from localStorage
+      // Re-read token after syncData in case it triggered a silent refresh
+      const tokenAfterHydrate = typeof localStorage !== "undefined" ? localStorage.getItem("srm_token") : null
+      const freshToken2 = tokenAfterHydrate || freshToken
+      const hydrated = await fetchHydratedDashboard(freshToken2)
+      // Silent refresh may have rotated the token again — read the latest from localStorage
       const latestToken = typeof localStorage !== "undefined" ? localStorage.getItem("srm_token") : null
 
       if (!hydrated) {
@@ -669,6 +677,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
 
+    // Periodic heartbeat: refresh every 90 minutes to keep the session alive
+    // and prevent silent expiry when the user leaves the tab open for hours.
+    const HEARTBEAT_MS = 90 * 60 * 1000
+    const heartbeatId = setInterval(() => {
+      const storedToken = localStorage.getItem("srm_token")
+      if (storedToken && state.isAuthenticated && navigator.onLine) {
+        console.log("[AuthContext] Heartbeat — refreshing data to keep session alive")
+        void runRefreshData({ silent: true, tokenOverride: storedToken })
+      }
+    }, HEARTBEAT_MS)
+
     const handlePullToRefresh = () => {
       console.log("[AuthContext] Pull-to-refresh triggered from native app")
       const storedToken = localStorage.getItem("srm_token")
@@ -683,6 +702,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.addEventListener("app:pulltorefresh", handlePullToRefresh)
     
     return () => {
+      clearInterval(heartbeatId)
       window.removeEventListener("offline", handleOffline)
       window.removeEventListener("online", handleOnline)
       document.removeEventListener("visibilitychange", handleVisibilityChange)
