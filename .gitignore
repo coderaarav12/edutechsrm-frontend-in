@@ -37,6 +37,18 @@ scripts/generate-finder-data.mjs
 scripts/generate-qr.mjs
 scripts/step1-studyplus.png
 scripts/step2-branches.png
+scripts/scrape-*.js
+scripts/debug-*.js
+scripts/explore-*.js
+scripts/analyze-*.js
+scripts/capture-*.js
+scripts/intercept-*.js
+scripts/extract-*.js
+scripts/find-*.js
+scripts/list-*.js
+scripts/check-*.js
+scripts/test-*.js
+scripts/fast-*.js
 
 # capacitor / Android app (moved to separate android-app folder)
 /android/

@@ -779,6 +779,16 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "Nov 2025", url: "https://drive.google.com/file/d/1o6Cvdknb26JI7A7Aw3vd8yZMGctMCa4V/view?usp=sharing" },
       { title: "Jul 2025", url: "https://drive.google.com/file/d/1Zx4njutLzIbZldfMBEBvZyATgdmVUzYp/view?usp=sharing" }
       ] },
+      { name: "CGA", notes: [
+      { title: "NOTES 1", url: "https://drive.google.com/file/d/1_XJI6Pe9QfiRUmdvpCOg_jqMq2vHcTRL/view?usp=drive_link" },
+      { title: "NOTES 2", url: "https://drive.google.com/file/d/1o8EH4oiYb9O5DBW76GiTZJb-jCjgLchL/view?usp=drive_link" }
+      ], pyqs: [
+      { title: "PYQs May 2025", url: "https://drive.google.com/file/d/1mjyNNwsWF6M_9yApjRbEoVvSJFiGi3Ho/view?usp=drive_link" },
+      { title: "PYQs May 2024", url: "https://drive.google.com/file/d/1Xyy43-Ju_ROkvfa_KMxaT13nN7YV_45n/view?usp=drive_link" },
+      { title: "PYQs Dec 2025", url: "https://drive.google.com/file/d/1SCyksPnbAkjigUUIbecu6ntlWZJfVqDE/view?usp=drive_link" },
+      { title: "All units MCQs", url: "https://drive.google.com/file/d/1VKJk0jdkNBrDFzZcSp870OrOxwiO8zw-/view?usp=drive_link" },
+      { title: "Question_Analysis", url: "https://drive.google.com/file/d/1FWTSiMe8TcNkMjRFm09_64wrPJbQm39I/view?usp=drive_link" }
+      ] },
     ],
   },
   {
@@ -888,12 +898,25 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "Nov  2025  ", url: "https://drive.google.com/file/d/1YF6E93f2eQOH9JFIP5GdLHCjdOoeiWZt/view?usp=sharing" }
       ] },
       { name: "Compiler Design", notes: [
-
+      { title: "NOTES 1", url: "https://drive.google.com/file/d/1se8RxJx3g5VNiT9jZpparRJ4n0Zvjw05/view?usp=drive_link" },
+      { title: "NOTES 2", url: "https://drive.google.com/file/d/12LFxOLSVaUp0twsxJZzmwB8sJU0V4YBe/view?usp=drive_link" }
       ], pyqs: [
       { title: "PYQ May 2024  ", url: "https://drive.google.com/file/d/1Fp-MZfpNFrqDL4qfUVNpvwsGEfMFV5ba/view?usp=sharing" },
       { title: "PYQ May 2025", url: "https://drive.google.com/file/d/1fy5vgpoGpMEaDHj2fCb2mqIrMOZwfhtg/view?usp=sharing" },
       { title: "PYQ Nov 2025", url: "https://drive.google.com/file/d/1W6R90T94fR95iB0mI9zB0R5M9R3X9R3X/view?usp=sharing" },
-      { title: "PYQ Jul 2025", url: "https://drive.google.com/file/d/1s3TNgr-HpK0u__iEYX04Ju6MOz2J5xJc/view?usp=sharing" }
+      { title: "PYQ Jul 2025", url: "https://drive.google.com/file/d/1s3TNgr-HpK0u__iEYX04Ju6MOz2J5xJc/view?usp=sharing" },
+      { title: "18CSC362J NOV 2023", url: "https://drive.google.com/file/d/13g7g8QxNgUvtzAOjE_03wuiLlpWZyvFh/view?usp=drive_link" },
+      { title: "18CSC304J JAN 2024", url: "https://drive.google.com/file/d/1-adP4IHF3eCV1scdkhsr5Jcz0fvXn6cw/view?usp=drive_link" },
+      { title: "18CSC304J MAY 2023", url: "https://drive.google.com/file/d/19ZsRmxY-t9Ukkn0G5kVrNt65uy3cSj3J/view?usp=drive_link" },
+      { title: "18CSC304J NOV 2024", url: "https://drive.google.com/file/d/13rNSrrhObJBpJENnZHpdnqppH33fwJ3W/view?usp=drive_link" },
+      { title: "18CSC304J NOV 2022", url: "https://drive.google.com/file/d/1dg7wpuYg4B6AbpFrjiv92NjJebscgM7d/view?usp=drive_link" },
+      { title: "18CSC304J MAY 2025", url: "https://drive.google.com/file/d/1SEPFVi3uGjOOHgICiva3bsuWvX70jtGb/view?usp=drive_link" },
+      { title: "18CSC304J MAY 2024", url: "https://drive.google.com/file/d/1cJu2FS1t3rof0p1M4UhM0IuWfThKOrYh/view?usp=drive_link" },
+      { title: "18CSC304J MAY 2022", url: "https://drive.google.com/file/d/1BLv39JI_D7-q_Gc_xXS6W9wwRAgCkp-G/view?usp=drive_link" },
+      { title: "18CSC304J JULY 2025", url: "https://drive.google.com/file/d/1wdLoZayEd_oGYfvawsbvlLbcA4TMX5RF/view?usp=drive_link" },
+      { title: "18CSC304J DEC 2023", url: "https://drive.google.com/file/d/1unEiv3281ZBiIT7mSo3Kecesvsz9uzLN/view?usp=drive_link" },
+      { title: "QUESTION BANK", url: "https://drive.google.com/file/d/1AneYgWczqDwJWZHN2bWZzX4D_x1s2tS-/view?usp=drive_link" },
+      { title: "IMPORTANT QUESTIONS", url: "https://drive.google.com/file/d/1XPsCvtVbJ65ExXeqTUrPhTNEsLBiPkHR/view?usp=drive_link" }
       ] },
       { name: "Professional Elective 3", notes: [
 
