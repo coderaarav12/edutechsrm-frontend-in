@@ -34,6 +34,12 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
   const goalPercentage = 75
 
   const toDate = (value: string) => new Date(`${value}T00:00:00`)
+  const normalizeCat = (v: string) => {
+    const t = String(v || "").toLowerCase().trim()
+    if (t.includes("lab")) return "Practical"
+    if (t === "practical" || t === "theory") return t[0].toUpperCase() + t.slice(1)
+    return v
+  }
   const isNormalPractical = (typeValue: string) => {
     const t = String(typeValue || "").toLowerCase().trim()
     if (!t) return false
@@ -127,13 +133,13 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
       const courseEntries = courseByCode.get(code) || []
       const names = [...new Set(courseEntries.map((c: any) => c.name?.trim()).filter(Boolean))]
       const name = names[0] || code
-      const courseTypes = [...new Set(courseEntries.map((c: any) => c.type).filter(Boolean))]
+      const courseTypes = [...new Set(courseEntries.map((c: any) => normalizeCat(c.type)).filter(Boolean))]
       const attEntries = attGrouped.get(code) || []
-      const attCategories = [...new Set(attEntries.map((r: any) => r.category).filter(Boolean))]
+      const attCategories = [...new Set(attEntries.map((r: any) => normalizeCat(r.category)).filter(Boolean))]
       const allCategories = [...new Set([...courseTypes, ...attCategories])]
       const allRecords = allCategories.map((t: string) => {
-        const match = attEntries.find((r: any) => r.category === t)
-        return match || { code, name, attended: 0, total: 0, percentage: 0, category: t, slot: courseEntries.find((c: any) => c.type === t)?.slot || "" }
+        const match = attEntries.find((r: any) => normalizeCat(r.category) === t)
+        return match || { code, name, attended: 0, total: 0, percentage: 0, category: t, slot: courseEntries.find((c: any) => normalizeCat(c.type) === t)?.slot || "" }
       })
       const hasData = attEntries.some((r: any) => r.total > 0)
       if (hasData) {
@@ -501,7 +507,7 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
                         return (
                           <div key={ri} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-zinc-900/50 ring-1 ring-white/[0.04]">
                             <div className="w-0.5 h-4 rounded-full shrink-0" style={{ background: rc }} />
-                            <span className="text-[11px] font-semibold text-zinc-300 flex-1 min-w-0 truncate">{rr.category || "?"}</span>
+                            <span className="text-[11px] font-semibold text-zinc-300 flex-1 min-w-0 truncate">{normalizeCat(rr.category) || "?"}</span>
                             <span className="text-[11px] font-bold tabular-nums" style={{ color: rc }}>{rp}%</span>
                             <span className="text-[10px] text-zinc-500 font-mono tabular-nums">{rr.attended}/{rr.total}</span>
                           </div>
