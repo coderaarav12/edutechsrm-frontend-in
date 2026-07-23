@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>edutechsrm — share</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0a0a0f;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 16px;
+  }
+  .card {
+    max-width: 480px; width: 100%;
+    background: linear-gradient(145deg, #111118, #181822);
+    border-radius: 28px; padding: 32px 28px;
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+    position: relative; overflow: hidden;
+  }
+  .card::before {
+    content: ''; position: absolute; top: -50%; right: -50%;
+    width: 100%; height: 100%;
+    background: radial-gradient(circle, rgba(52,211,153,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.2);
+    border-radius: 100px; padding: 6px 14px 6px 10px;
+    font-size: 11px; font-weight: 700; color: #34d399;
+    letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 18px;
+  }
+  .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #34d399; }
+  h1 {
+    font-size: 28px; font-weight: 800; color: #f4f4f5;
+    letter-spacing: -0.03em; line-height: 1.2; margin-bottom: 10px;
+  }
+  h1 span { background: linear-gradient(135deg, #34d399, #22d3ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .sub {
+    font-size: 14px; color: #a1a1aa; line-height: 1.5; margin-bottom: 24px;
+  }
+  .features { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+  .feature {
+    display: flex; align-items: center; gap: 12px;
+    background: rgba(255,255,255,0.03); border-radius: 14px;
+    padding: 12px 14px; border: 1px solid rgba(255,255,255,0.04);
+  }
+  .feature-icon {
+    width: 36px; height: 36px; border-radius: 10px; display: flex;
+    align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;
+  }
+  .feature-text { flex: 1; }
+  .feature-text strong { display: block; font-size: 13px; color: #e4e4e7; font-weight: 700; }
+  .feature-text span { font-size: 11.5px; color: #71717a; }
+  .divider { height: 1px; background: rgba(255,255,255,0.05); margin: 18px 0; }
+  .stats {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px;
+  }
+  .stat {
+    background: rgba(255,255,255,0.03); border-radius: 12px;
+    padding: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.04);
+  }
+  .stat-num { font-size: 20px; font-weight: 800; color: #34d399; }
+  .stat-label { font-size: 10px; color: #71717a; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+  .cta {
+    display: block; text-align: center; text-decoration: none;
+    background: linear-gradient(135deg, #34d399, #22d3ee);
+    color: #09090b; font-weight: 800; font-size: 15px;
+    padding: 16px; border-radius: 14px; margin-top: 4px;
+    transition: transform 0.15s;
+  }
+  .cta:hover { transform: scale(1.02); }
+  .footer { text-align: center; margin-top: 14px; font-size: 10px; color: #52525b; letter-spacing: 0.04em; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge">Now with Courses Mapping</div>
+    <h1>Your SRM <span>Academic Dashboard</span> — Reinvented</h1>
+    <p class="sub">Every subject visible. Every stat accurate. Even when SRM hasn't updated marks or attendance yet.</p>
+
+    <div class="divider"></div>
+
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon" style="background:rgba(52,211,153,0.12);">📘</div>
+        <div class="feature-text">
+          <strong>Courses → Marks Mapping</strong>
+          <span>Subjects without test data show "No data yet" instead of disappearing</span>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon" style="background:rgba(251,191,36,0.12);">📊</div>
+        <div class="feature-text">
+          <strong>Smart Attendance</strong>
+          <span>Risk analysis, skip counters, and OD/ML adjustments</span>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon" style="background:rgba(129,140,248,0.12);">🎯</div>
+        <div class="feature-text">
+          <strong>GradeX Predictor</strong>
+          <span>Estimate your CGPA from internal marks before results drop</span>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon" style="background:rgba(244,63,94,0.12);">⚡</div>
+        <div class="feature-text">
+          <strong>No CAPTCHA Headache</strong>
+          <span>Login once — stays connected. Automatic silent refresh.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-num">9+</div>
+        <div class="stat-label">Academic Tools</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">100%</div>
+        <div class="stat-label">Free</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">AI</div>
+        <div class="stat-label">Chat Assistant</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">Live</div>
+        <div class="stat-label">Timetable</div>
+      </div>
+    </div>
+
+    <a class="cta" href="https://edutechsrm.vercel.app" target="_blank">Open edutechsrm →</a>
+    <p class="footer">edutechsrm · built for SRM students</p>
+  </div>
+</body>
+</html>

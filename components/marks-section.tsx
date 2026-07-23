@@ -20,10 +20,16 @@ export function MarksSection() {
       list.push(m)
       marksByCode.set(m.code, list)
     })
+    const normalizeCat = (v: string) => {
+      const t = String(v || "").toLowerCase().trim()
+      if (t.includes("lab")) return "Practical"
+      if (t === "practical" || t === "theory") return t[0].toUpperCase() + t.slice(1)
+      return v
+    }
     const typesByCode = new Map<string, Set<string>>()
     ;(courses as any[]).forEach((c: any) => {
       if (!typesByCode.has(c.code)) typesByCode.set(c.code, new Set())
-      typesByCode.get(c.code)!.add(c.type)
+      typesByCode.get(c.code)!.add(normalizeCat(c.type))
     })
     const codes = [...new Set((courses as any[]).map((c: any) => c.code))]
     return codes.map(code => {

@@ -1,0 +1,10 @@
+﻿
+node.exe : (node:10832) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead 
+to security vulnerabilities, as the arguments are not escaped, only concatenated.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:10832) [D...y concatenated.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `electron --trace-deprecation ...` to show where the warning was created)
