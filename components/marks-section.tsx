@@ -14,42 +14,39 @@ export function MarksSection() {
   const [expandedCard, setExpandedCard] = useState<string | null>(null)
 
   const mergedMarks = useMemo(() => {
-    const byCode = new Map<string, any[]>()
+    const marksByCode = new Map<string, any[]>()
+    ;(marks as any[]).forEach((m: any) => {
+      const list = marksByCode.get(m.code) || []
+      list.push(m)
+      marksByCode.set(m.code, list)
+    })
+    const courseByCode = new Map<string, any[]>()
     ;(courses as any[]).forEach((c: any) => {
-      const list = byCode.get(c.code) || []
+      const list = courseByCode.get(c.code) || []
       list.push(c)
-      byCode.set(c.code, list)
+      courseByCode.set(c.code, list)
     })
-    const unique: any[] = []
-    byCode.forEach((entries) => {
-      if (entries.length === 1) { unique.push(entries[0]); return }
-      const names = entries.map(e => e.name?.trim().toLowerCase() || "")
-      const firstName = names[0]
-      const allRelated = names.every(n => n.includes(firstName) || firstName.includes(n))
-      if (allRelated) {
-        const best = entries.reduce((a, b) => (b.credits || 0) > (a.credits || 0) ? b : a)
-        unique.push(best)
-      } else {
-        unique.push(...entries)
+    const codes = [...new Set((courses as any[]).map((c: any) => c.code))]
+    return codes.map(code => {
+      const courseEntries = courseByCode.get(code) || []
+      const names = [...new Set(courseEntries.map((c: any) => c.name?.trim()).filter(Boolean))]
+      const name = names[0] || code
+      const marksEntries = marksByCode.get(code)
+      if (marksEntries && marksEntries.length > 0) {
+        const total = marksEntries.reduce((s: number, m: any) => s + (m.total || 0), 0)
+        const maxTotal = marksEntries.reduce((s: number, m: any) => s + (m.maxTotal || 0), 0)
+        const tests = marksEntries.flatMap((m: any) => m.tests || [])
+        const test1 = marksEntries.reduce((s: number, m: any) => s + (m.test1 || 0), 0) || null
+        const test1_max = marksEntries.reduce((s: number, m: any) => s + (m.test1_max || 0), 0)
+        const test2 = marksEntries.reduce((s: number, m: any) => s + (m.test2 || 0), 0) || null
+        const test2_max = marksEntries.reduce((s: number, m: any) => s + (m.test2_max || 0), 0)
+        const test3 = marksEntries.reduce((s: number, m: any) => s + (m.test3 || 0), 0) || null
+        const test3_max = marksEntries.reduce((s: number, m: any) => s + (m.test3_max || 0), 0)
+        const pct = maxTotal > 0 ? Math.round((total / maxTotal) * 100) : 0
+        const grade = pct >= 90 ? "O" : pct >= 80 ? "A+" : pct >= 70 ? "A" : pct >= 60 ? "B+" : pct >= 50 ? "B" : pct >= 40 ? "C" : pct > 0 ? "F" : undefined
+        return { code, name, tests, test1, test1_max, test2, test2_max, test3, test3_max, total, maxTotal, grade }
       }
-    })
-    const marksByCode = new Map(marks.map(m => [m.code, m]))
-    return unique.map(course => {
-      const existing = marksByCode.get(course.code)
-      return existing || {
-        code: course.code,
-        name: course.name,
-        tests: [],
-        test1: null,
-        test1_max: 0,
-        test2: null,
-        test2_max: 0,
-        test3: null,
-        test3_max: 0,
-        total: 0,
-        maxTotal: 0,
-        grade: undefined,
-      }
+      return { code, name, tests: [], test1: null, test1_max: 0, test2: null, test2_max: 0, test3: null, test3_max: 0, total: 0, maxTotal: 0, grade: undefined }
     })
   }, [courses, marks])
 

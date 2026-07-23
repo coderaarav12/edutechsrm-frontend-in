@@ -211,29 +211,64 @@ export function AboutSection() {
   const theoryCount    = uniqueCourses.filter(c => c.type === "Theory").length
   const labCount       = uniqueCourses.filter(c => c.type === "Lab" || c.type === "Practical").length
 
+  const codes = useMemo(() => [...new Set((courses as any[]).map((c: any) => c.code))], [courses])
+
   const mergedAttendance = useMemo(() => {
-    const attByCode = new Map((attendance || []).map((r: any) => [r.code, r]))
-    return uniqueCourses.map((course: any) => {
-      const code = String(course.code || "")
-      const existing = attByCode.get(code)
-      return existing || { code, name: course.name || code, attended: 0, total: 0, percentage: 0 }
+    const attGrouped = new Map<string, any[]>()
+    ;(attendance || []).forEach((r: any) => {
+      const list = attGrouped.get(r.code) || []
+      list.push(r)
+      attGrouped.set(r.code, list)
     })
-  }, [uniqueCourses, attendance])
-  const attendanceWithData = mergedAttendance.filter((r: any) => r.percentage > 0)
-  const avgAttendance = attendanceWithData.length > 0
-    ? Math.round(attendanceWithData.reduce((s, a) => s + (a.percentage || 0), 0) / attendanceWithData.length) : 0
-  const atRiskSubjects = mergedAttendance.filter((a: any) => a.percentage > 0 && a.percentage < 75)
-  const safeSubjects   = mergedAttendance.filter((a: any) => a.percentage > 0 && a.percentage >= 75)
-  const attendancePendingCount = mergedAttendance.length - attendanceWithData.length
+    return codes.map(code => {
+      const courseEntries = (courses as any[]).filter((c: any) => c.code === code)
+      const names = [...new Set(courseEntries.map((c: any) => c.name?.trim()).filter(Boolean))]
+      const name = names[0] || code
+      const attEntries = attGrouped.get(code)
+      if (attEntries && attEntries.length > 0 && attEntries.some((r: any) => r.total > 0)) {
+        const attended = attEntries.reduce((s: number, r: any) => s + (r.attended || 0), 0)
+        const total = attEntries.reduce((s: number, r: any) => s + (r.total || 0), 0)
+        const percentage = total > 0 ? Math.round((attended / total) * 100) : 0
+        return { code, name, attended, total, percentage }
+      }
+      return { code, name, attended: 0, total: 0, percentage: 0 }
+    })
+  }, [codes, attendance])
+  const attendanceWithData = mergedAttendance.filter((r: any) => r.total > 0)
+  const overallAttended = attendanceWithData.reduce((s: number, r: any) => s + r.attended, 0)
+  const overallTotal = attendanceWithData.reduce((s: number, r: any) => s + r.total, 0)
+  const avgAttendance = overallTotal > 0 ? Math.round((overallAttended / overallTotal) * 100) : 0
+  const atRiskSubjects = attendanceWithData.filter((a: any) => a.percentage < 75)
+  const safeSubjects   = attendanceWithData.filter((a: any) => a.percentage >= 75)
+  const attendancePendingCount = codes.length - attendanceWithData.length
 
   const mergedMarks = useMemo(() => {
-    const marksByCode = new Map(marks.map(m => [m.code, m]))
-    return uniqueCourses.map(course => {
-      const existing = marksByCode.get(course.code)
-      return existing || { code: course.code, name: course.name, total: 0, maxTotal: 0, tests: [],
-        test1: null, test1_max: 0, test2: null, test2_max: 0, test3: null, test3_max: 0, grade: undefined }
+    const marksGrouped = new Map<string, any[]>()
+    ;(marks as any[]).forEach((m: any) => {
+      const list = marksGrouped.get(m.code) || []
+      list.push(m)
+      marksGrouped.set(m.code, list)
     })
-  }, [uniqueCourses, marks])
+    return codes.map(code => {
+      const courseEntries = (courses as any[]).filter((c: any) => c.code === code)
+      const names = [...new Set(courseEntries.map((c: any) => c.name?.trim()).filter(Boolean))]
+      const name = names[0] || code
+      const mEntries = marksGrouped.get(code)
+      if (mEntries && mEntries.length > 0) {
+        const total = mEntries.reduce((s: number, m: any) => s + (m.total || 0), 0)
+        const maxTotal = mEntries.reduce((s: number, m: any) => s + (m.maxTotal || 0), 0)
+        return { code, name, total, maxTotal, tests: mEntries.flatMap((m: any) => m.tests || []),
+          test1: mEntries.reduce((s: number, m: any) => s + (m.test1 || 0), 0) || null,
+          test1_max: mEntries.reduce((s: number, m: any) => s + (m.test1_max || 0), 0),
+          test2: mEntries.reduce((s: number, m: any) => s + (m.test2 || 0), 0) || null,
+          test2_max: mEntries.reduce((s: number, m: any) => s + (m.test2_max || 0), 0),
+          test3: mEntries.reduce((s: number, m: any) => s + (m.test3 || 0), 0) || null,
+          test3_max: mEntries.reduce((s: number, m: any) => s + (m.test3_max || 0), 0),
+          grade: undefined }
+      }
+      return { code, name, total: 0, maxTotal: 0, tests: [], test1: null, test1_max: 0, test2: null, test2_max: 0, test3: null, test3_max: 0, grade: undefined }
+    })
+  }, [codes, marks])
   const totalScored = mergedMarks.reduce((s, m) => s + (m.total || 0), 0)
   const totalMax    = mergedMarks.reduce((s, m) => s + (m.maxTotal || 0), 0)
   const marksPercent = totalMax > 0 ? Math.round((totalScored / totalMax) * 100) : 0
