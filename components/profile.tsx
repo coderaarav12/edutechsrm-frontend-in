@@ -184,23 +184,59 @@ export function AboutSection() {
   const todayStr = formatLocalDateKey(new Date())
   const todayDO  = dateToDoMap[todayStr] ?? null
 
-  const uniqueCourses = Array.from(
-    courses.reduce((map: Map<string, any>, c: any) => {
-      if (!map.has(c.code)) map.set(c.code, c)
-      return map
-    }, new Map()).values()
-  ) as any[]
+  const uniqueCourses: any[] = useMemo(() => {
+    const byCode = new Map<string, any[]>()
+    ;(courses as any[]).forEach((c: any) => {
+      const list = byCode.get(c.code) || []
+      list.push(c)
+      byCode.set(c.code, list)
+    })
+    const result: any[] = []
+    byCode.forEach((entries) => {
+      if (entries.length === 1) { result.push(entries[0]); return }
+      const names = entries.map(e => e.name?.trim().toLowerCase() || "")
+      const firstName = names[0]
+      const allRelated = names.every(n => n.includes(firstName) || firstName.includes(n))
+      if (allRelated) {
+        const best = entries.reduce((a, b) => (b.credits || 0) > (a.credits || 0) ? b : a)
+        result.push(best)
+      } else {
+        result.push(...entries)
+      }
+    })
+    return result
+  }, [courses])
 
   const totalCredits   = uniqueCourses.reduce((s, c) => s + (c.credits || 0), 0)
   const theoryCount    = uniqueCourses.filter(c => c.type === "Theory").length
   const labCount       = uniqueCourses.filter(c => c.type === "Lab" || c.type === "Practical").length
-  const avgAttendance  = attendance.length > 0
-    ? Math.round(attendance.reduce((s, a) => s + (a.percentage || 0), 0) / attendance.length) : 0
-  const atRiskSubjects = attendance.filter(a => a.percentage < 75)
-  const safeSubjects   = attendance.filter(a => a.percentage >= 75)
-  const totalScored    = marks.reduce((s, m) => s + (m.total || 0), 0)
-  const totalMax       = marks.reduce((s, m) => s + (m.maxTotal || 0), 0)
-  const marksPercent   = totalMax > 0 ? Math.round((totalScored / totalMax) * 100) : 0
+
+  const mergedAttendance = useMemo(() => {
+    const attByCode = new Map((attendance || []).map((r: any) => [r.code, r]))
+    return uniqueCourses.map((course: any) => {
+      const code = String(course.code || "")
+      const existing = attByCode.get(code)
+      return existing || { code, name: course.name || code, attended: 0, total: 0, percentage: 0 }
+    })
+  }, [uniqueCourses, attendance])
+  const attendanceWithData = mergedAttendance.filter((r: any) => r.percentage > 0)
+  const avgAttendance = attendanceWithData.length > 0
+    ? Math.round(attendanceWithData.reduce((s, a) => s + (a.percentage || 0), 0) / attendanceWithData.length) : 0
+  const atRiskSubjects = mergedAttendance.filter((a: any) => a.percentage > 0 && a.percentage < 75)
+  const safeSubjects   = mergedAttendance.filter((a: any) => a.percentage > 0 && a.percentage >= 75)
+  const attendancePendingCount = mergedAttendance.length - attendanceWithData.length
+
+  const mergedMarks = useMemo(() => {
+    const marksByCode = new Map(marks.map(m => [m.code, m]))
+    return uniqueCourses.map(course => {
+      const existing = marksByCode.get(course.code)
+      return existing || { code: course.code, name: course.name, total: 0, maxTotal: 0, tests: [],
+        test1: null, test1_max: 0, test2: null, test2_max: 0, test3: null, test3_max: 0, grade: undefined }
+    })
+  }, [uniqueCourses, marks])
+  const totalScored = mergedMarks.reduce((s, m) => s + (m.total || 0), 0)
+  const totalMax    = mergedMarks.reduce((s, m) => s + (m.maxTotal || 0), 0)
+  const marksPercent = totalMax > 0 ? Math.round((totalScored / totalMax) * 100) : 0
   const upcomingCustomClasses = useMemo(
     () => customClasses.filter((item) => item.repeatMode === "day_order" || item.date >= todayIso).slice(0, 5),
     [customClasses, todayIso]
