@@ -224,7 +224,8 @@ export function MarksSection() {
           {mergedMarks.map((mark, index) => {
             const cardKey   = `${mark.code}-${index}`
             const isOpen    = expandedCard === cardKey
-            const pct       = getPercentage(mark.total, mark.maxTotal)
+            const hasMarks  = mark.maxTotal > 0
+            const pct       = hasMarks ? getPercentage(mark.total, mark.maxTotal) : 0
             const color     = getProgressColor(pct)
             const chartData = mark.tests.map((t) => ({
               name:   t.test,
@@ -232,6 +233,7 @@ export function MarksSection() {
               max:    t.max,
               pct:    t.max > 0 ? Math.round(((t.scored ?? 0) / t.max) * 100) : 0,
             }))
+            const gradeColor = mark.grade ? (mark.grade === "O" ? "#34d399" : mark.grade === "A+" ? "#22d3ee" : mark.grade === "A" ? "#3b82f6" : mark.grade === "B+" ? "#fbbf24" : mark.grade === "B" ? "#f97316" : mark.grade === "C" ? "#a78bfa" : "#f87171") : ""
             return (
               <motion.div
                 key={cardKey}
@@ -252,42 +254,42 @@ export function MarksSection() {
                       <div className="flex-1 min-w-0 pr-2">
                         <span className="text-zinc-500 text-[10px] uppercase font-bold tracking-[0.1em] mb-1 block">
                           {mark.code}
-                          {mark.type && <span className={`ml-2 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider ${
+                          {mark.type && <span className={`ml-1.5 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider ${
                             mark.type === "Theory + Practical" ? "text-purple-400 bg-purple-500/10" :
                             mark.type === "Theory" ? "text-blue-400 bg-blue-500/10" : "text-emerald-400 bg-emerald-500/10"
                           }`}>{mark.type}</span>}
+                          {mark.grade && <span className="ml-1.5 px-1.5 py-0.5 rounded text-[8px] font-bold" style={{ color: gradeColor, background: `${gradeColor}18`, border: `1px solid ${gradeColor}30` }}>{mark.grade}</span>}
                         </span>
                         <h4 className={`font-semibold text-zinc-200 text-lg tracking-tight ${!isOpen ? "truncate" : ""}`}>{mark.name}</h4>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <svg width="40" height="40" viewBox="0 0 36 36" className="shrink-0">
-                          <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2.5" />
-                          <motion.circle
-                            cx="18" cy="18" r="15.5" fill="none"
-                            stroke={color.bar} strokeWidth="2.5" strokeLinecap="round"
-                            strokeDasharray="97.389"
-                            transform="rotate(-90 18 18)"
-                            initial={{ strokeDashoffset: 97.389 }}
-                            animate={{ strokeDashoffset: 97.389 - (97.389 * pct) / 100 }}
-                            transition={{ duration: 1, ease: "easeOut" }}
-                          />
-                          <text x="18" y="19" textAnchor="middle" fontSize="7" fontWeight="800" fill={color.bar}>{pct}%</text>
-                        </svg>
+                        {hasMarks ? (
+                          <svg width="40" height="40" viewBox="0 0 36 36" className="shrink-0">
+                            <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2.5" />
+                            <motion.circle cx="18" cy="18" r="15.5" fill="none" stroke={color.bar} strokeWidth="2.5" strokeLinecap="round"
+                              strokeDasharray="97.389" transform="rotate(-90 18 18)"
+                              initial={{ strokeDashoffset: 97.389 }}
+                              animate={{ strokeDashoffset: 97.389 - (97.389 * pct) / 100 }}
+                              transition={{ duration: 1, ease: "easeOut" }} />
+                            <text x="18" y="19" textAnchor="middle" fontSize="7" fontWeight="800" fill={color.bar}>{pct}%</text>
+                          </svg>
+                        ) : (
+                          <span className="px-2 py-1 rounded text-[9px] font-bold text-zinc-500 bg-zinc-800/50 ring-1 ring-white/10">NO DATA</span>
+                        )}
                         <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
                           <ChevronDown className="w-4 h-4 text-zinc-500" />
                         </motion.div>
                       </div>
                     </div>
-                    <div className="w-full h-1.5 bg-zinc-950 rounded-full overflow-hidden shadow-inner ring-1 ring-white/5">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${pct}%` }}
-                        transition={{ duration: 0.8 }}
-                        className="h-full rounded-full"
-                        style={{ background: `linear-gradient(90deg,${color.bar},#22d3ee)` }}
-                      />
-                    </div>
-                    <p className="text-[10px] text-zinc-600 mt-1.5">{mark.total ?? "—"} / {mark.maxTotal || "—"} total</p>
+                    {hasMarks && (
+                      <div className="w-full h-1.5 bg-zinc-950 rounded-full overflow-hidden shadow-inner ring-1 ring-white/5">
+                        <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.8 }}
+                          className="h-full rounded-full" style={{ background: `linear-gradient(90deg,${color.bar},#22d3ee)` }} />
+                      </div>
+                    )}
+                    <p className={`text-[10px] mt-1.5 ${hasMarks ? "text-zinc-600" : "text-zinc-500 italic"}`}>
+                      {hasMarks ? `${mark.total ?? "—"} / ${mark.maxTotal || "—"} total` : "No marks uploaded yet"}
+                    </p>
                   </button>
 
                   <AnimatePresence>
@@ -304,7 +306,8 @@ export function MarksSection() {
                             <p className="text-xs text-center py-2 text-zinc-500">No test data yet</p>
                           ) : (
                             <>
-                              <div className="h-36">
+                              {chartData.length >= 2 && (
+                                <div className="h-36">
 <ResponsiveContainer width="100%" height={144}>
                   <AreaChart data={chartData} margin={{ top: 8, right: 8, left: -24, bottom: 0 }}>
                                     <defs>
@@ -337,17 +340,22 @@ export function MarksSection() {
                                   </AreaChart>
                                 </ResponsiveContainer>
                               </div>
-                              <div className="grid grid-cols-2 gap-2">
-                                {mark.tests.map((test) => (
-                                  <div key={test.test} className="rounded-xl px-3 py-2.5 text-center bg-white/5 ring-1 ring-white/10">
-                                    <p className="text-zinc-500 text-[10px] mb-1">{test.test}</p>
-                                    <p className="text-sm font-bold text-zinc-100">
-                                      {test.scored !== null && test.scored !== undefined ? test.scored : "—"}
-                                      <span className="text-xs font-normal text-zinc-500">/{test.max}</span>
-                                    </p>
+                              )}
+                              {mark.tests.map((test) => {
+                                const tp = test.max > 0 ? Math.round(((test.scored ?? 0) / test.max) * 100) : 0
+                                const tc = tp >= 80 ? "#34d399" : tp >= 60 ? "#22d3ee" : tp >= 40 ? "#fbbf24" : "#f87171"
+                                return (
+                                  <div key={test.test} className="flex items-center gap-2">
+                                    <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: tc }} />
+                                    <span className="text-[10px] text-zinc-400 min-w-[28px]">{test.test}</span>
+                                    <div className="flex-1 h-1 rounded-full overflow-hidden bg-zinc-950 ring-1 ring-white/5">
+                                      <div className="h-full rounded-full" style={{ width: `${tp}%`, background: tc }} />
+                                    </div>
+                                    <span className="text-[10px] font-semibold text-right w-8 tabular-nums" style={{ color: tc }}>{tp}%</span>
+                                    <span className="text-[10px] text-zinc-500 font-mono text-right w-12 tabular-nums">{test.scored ?? "—"}/{test.max}</span>
                                   </div>
-                                ))}
-                              </div>
+                                )
+                              })}
                             </>
                           )}
                           {pct < 60 && pct > 0 && (
@@ -364,36 +372,40 @@ export function MarksSection() {
 
                 {/* === DESKTOP (always-expanded dashboard card) === */}
                 <div className="hidden md:block p-6 relative z-10">
-                  {/* Top row: code + donut */}
+                  {/* Top row: code + type + grade badges */}
                   <div className="flex items-start justify-between mb-5">
                     <div className="min-w-0 flex-1">
                       <span className="text-zinc-500 text-[10px] uppercase font-bold tracking-[0.1em] mb-1 block">
                         {mark.code}
-                        {mark.type && <span className={`ml-2 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider ${
+                        {mark.type && <span className={`ml-1.5 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider ${
                           mark.type === "Theory + Practical" ? "text-purple-400 bg-purple-500/10" :
                           mark.type === "Theory" ? "text-blue-400 bg-blue-500/10" : "text-emerald-400 bg-emerald-500/10"
                         }`}>{mark.type}</span>}
+                        {mark.grade && <span className="ml-1.5 px-1.5 py-0.5 rounded text-[8px] font-bold" style={{ color: gradeColor, background: `${gradeColor}18`, border: `1px solid ${gradeColor}30` }}>{mark.grade}</span>}
                       </span>
                       <h4 className="font-semibold text-zinc-200 text-lg tracking-tight leading-tight">{mark.name}</h4>
                     </div>
                     <div className="shrink-0 ml-4 flex items-center gap-3">
-                      <svg width="52" height="52" viewBox="0 0 36 36" className="shrink-0">
-                        <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2.5" />
-                        <motion.circle
-                          cx="18" cy="18" r="15.5" fill="none"
-                          stroke={color.bar} strokeWidth="2.5" strokeLinecap="round"
-                          strokeDasharray="97.389"
-                          transform="rotate(-90 18 18)"
-                          initial={{ strokeDashoffset: 97.389 }}
-                          animate={{ strokeDashoffset: 97.389 - (97.389 * pct) / 100 }}
-                          transition={{ duration: 1, ease: "easeOut" }}
-                        />
-                        <text x="18" y="19" textAnchor="middle" fontSize="7" fontWeight="800" fill={color.bar}>{pct}%</text>
-                      </svg>
+                      {hasMarks ? (
+                        <svg width="52" height="52" viewBox="0 0 36 36" className="shrink-0">
+                          <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2.5" />
+                          <motion.circle cx="18" cy="18" r="15.5" fill="none" stroke={color.bar} strokeWidth="2.5" strokeLinecap="round"
+                            strokeDasharray="97.389" transform="rotate(-90 18 18)"
+                            initial={{ strokeDashoffset: 97.389 }}
+                            animate={{ strokeDashoffset: 97.389 - (97.389 * pct) / 100 }}
+                            transition={{ duration: 1, ease: "easeOut" }} />
+                          <text x="18" y="19" textAnchor="middle" fontSize="7" fontWeight="800" fill={color.bar}>{pct}%</text>
+                        </svg>
+                      ) : (
+                        <span className="px-2 py-1 rounded text-[9px] font-bold text-zinc-500 bg-zinc-800/50 ring-1 ring-white/10">NO DATA</span>
+                      )}
                       <div className="text-right">
-                        <p className="text-[10px] text-zinc-500">
-                          <span className="font-mono text-zinc-400">{mark.total ?? "—"}</span>
-                          <span className="text-zinc-600"> / {mark.maxTotal || "—"}</span>
+                        <p className={`text-[10px] ${hasMarks ? "text-zinc-500" : "text-zinc-500 italic"}`}>
+                          {hasMarks ? (
+                            <><span className="font-mono text-zinc-400">{mark.total ?? "—"}</span><span className="text-zinc-600"> / {mark.maxTotal || "—"}</span></>
+                          ) : (
+                            "No marks uploaded yet"
+                          )}
                         </p>
                       </div>
                     </div>
@@ -448,24 +460,25 @@ export function MarksSection() {
                     </div>
                   </div>
 
-                  {/* Bottom: progress bar + need to improve */}
-                  <div className="mt-4 flex items-center gap-3">
-                    <div className="flex-1 h-1 bg-zinc-950 rounded-full overflow-hidden shadow-inner ring-1 ring-white/5">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${pct}%` }}
-                        transition={{ duration: 0.8 }}
-                        className="h-full rounded-full"
-                        style={{ background: `linear-gradient(90deg,${color.bar},#22d3ee)` }}
-                      />
+                  {hasMarks && (
+                    <div className="mt-4 flex items-center gap-3">
+                      <div className="flex-1 h-1 bg-zinc-950 rounded-full overflow-hidden shadow-inner ring-1 ring-white/5">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${pct}%` }}
+                          transition={{ duration: 0.8 }}
+                          className="h-full rounded-full"
+                          style={{ background: `linear-gradient(90deg,${color.bar},#22d3ee)` }}
+                        />
+                      </div>
+                      {pct < 60 && (
+                        <span className="text-[9px] font-bold uppercase tracking-widest text-amber-400 shrink-0">Needs work</span>
+                      )}
+                      {pct >= 80 && (
+                        <span className="text-[9px] font-bold uppercase tracking-widest text-emerald-400 shrink-0">Excellent</span>
+                      )}
                     </div>
-                    {pct < 60 && pct > 0 && (
-                      <span className="text-[9px] font-bold uppercase tracking-widest text-amber-400 shrink-0">Needs work</span>
-                    )}
-                    {pct >= 80 && (
-                      <span className="text-[9px] font-bold uppercase tracking-widest text-emerald-400 shrink-0">Excellent</span>
-                    )}
-                  </div>
+                  )}
                 </div>
 
               </motion.div>

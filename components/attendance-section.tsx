@@ -127,14 +127,20 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
       const courseEntries = courseByCode.get(code) || []
       const names = [...new Set(courseEntries.map((c: any) => c.name?.trim()).filter(Boolean))]
       const name = names[0] || code
-      const attEntries = attGrouped.get(code)
-      if (attEntries && attEntries.length > 0 && attEntries.some((r: any) => r.total > 0)) {
+      const courseTypes = [...new Set(courseEntries.map((c: any) => c.type).filter(Boolean))]
+      const attEntries = attGrouped.get(code) || []
+      const allRecords = courseTypes.map((t: string) => {
+        const match = attEntries.find((r: any) => r.category === t)
+        return match || { code, name, attended: 0, total: 0, percentage: 0, category: t, slot: courseEntries.find((c: any) => c.type === t)?.slot || "" }
+      })
+      const hasData = attEntries.some((r: any) => r.total > 0)
+      if (hasData) {
         const attended = attEntries.reduce((s: number, r: any) => s + (r.attended || 0), 0)
         const total = attEntries.reduce((s: number, r: any) => s + (r.total || 0), 0)
         const percentage = total > 0 ? Math.round((attended / total) * 100) : 0
-        result.push({ code, name, attended, total, percentage, category: attEntries[0].category || "", slot: attEntries[0].slot || "", hasData: true })
+        result.push({ code, name, attended, total, percentage, category: courseTypes.join(" + ") || "", slot: courseEntries[0]?.slot || "", hasData: true, records: allRecords })
       } else {
-        result.push({ code, name, attended: 0, total: 0, percentage: 0, category: courseEntries[0]?.type || "", slot: courseEntries[0]?.slot || "", hasData: false })
+        result.push({ code, name, attended: 0, total: 0, percentage: 0, category: courseTypes.join(" + ") || "", slot: courseEntries[0]?.slot || "", hasData: false, records: allRecords })
       }
     })
     attGrouped.forEach((entries, code) => {
@@ -142,7 +148,7 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
         const attended = entries.reduce((s: number, r: any) => s + (r.attended || 0), 0)
         const total = entries.reduce((s: number, r: any) => s + (r.total || 0), 0)
         const percentage = total > 0 ? Math.round((attended / total) * 100) : 0
-        result.push({ code, name: entries[0].name || code, attended, total, percentage, category: entries[0].category || "", slot: entries[0].slot || "", hasData: true })
+        result.push({ code, name: entries[0].name || code, attended, total, percentage, category: entries[0].category || "", slot: entries[0].slot || "", hasData: true, records: entries })
       }
     })
     return result
@@ -483,6 +489,24 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
                       </div>
                     ))}
                   </div>
+
+                  {record.records && record.records.length > 1 && (
+                    <div className="space-y-1.5">
+                      <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-[0.1em]">Breakdown</p>
+                      {record.records.map((rr: any, ri: number) => {
+                        const rp = rr.total > 0 ? Math.round((rr.attended / rr.total) * 100) : 0
+                        const rc = rp >= 75 ? "#34d399" : rp >= 65 ? "#fbbf24" : "#f87171"
+                        return (
+                          <div key={ri} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-zinc-900/50 ring-1 ring-white/[0.04]">
+                            <div className="w-0.5 h-4 rounded-full shrink-0" style={{ background: rc }} />
+                            <span className="text-[11px] font-semibold text-zinc-300 flex-1 min-w-0 truncate">{rr.category || "?"}</span>
+                            <span className="text-[11px] font-bold tabular-nums" style={{ color: rc }}>{rp}%</span>
+                            <span className="text-[10px] text-zinc-500 font-mono tabular-nums">{rr.attended}/{rr.total}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
 
                   {status === "safe" && skippable > 0 && (
                     <div className="flex items-center gap-2 rounded-lg px-3 py-2 text-[10px] bg-emerald-500/5 ring-1 ring-emerald-500/20 text-emerald-400">
