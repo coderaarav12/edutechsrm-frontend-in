@@ -159,8 +159,8 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
     return result
   }, [activeAttendance, courses])
 
-  const attendanceWithData = mergedAttendance.filter((r: any) => r.hasData)
-  const attendancePending = mergedAttendance.filter((r: any) => !r.hasData)
+  const attendanceWithData = mergedAttendance.filter((r: any) => r.hasData && r.total > 0)
+  const attendancePending = mergedAttendance.filter((r: any) => !r.hasData || r.total === 0)
 
   const getStatus = (pct: number) => {
     if (pct >= goalPercentage) return "safe"
@@ -196,7 +196,7 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
   const atRiskSubjects = attendanceWithData.filter((r: any) => getStatus(r.percentage) !== "safe")
 
   const filteredAttendance = mergedAttendance.filter((r: any) => {
-    if (!r.hasData) return filter === "all"
+    if (!r.hasData || r.total === 0) return filter === "all"
     if (filter === "all") return true
     if (filter === "safe") return getStatus(r.percentage) === "safe"
     return getStatus(r.percentage) !== "safe"
