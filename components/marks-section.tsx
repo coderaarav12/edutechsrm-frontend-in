@@ -20,17 +20,18 @@ export function MarksSection() {
       list.push(m)
       marksByCode.set(m.code, list)
     })
-    const courseByCode = new Map<string, any[]>()
+    const typesByCode = new Map<string, Set<string>>()
     ;(courses as any[]).forEach((c: any) => {
-      const list = courseByCode.get(c.code) || []
-      list.push(c)
-      courseByCode.set(c.code, list)
+      if (!typesByCode.has(c.code)) typesByCode.set(c.code, new Set())
+      typesByCode.get(c.code)!.add(c.type)
     })
     const codes = [...new Set((courses as any[]).map((c: any) => c.code))]
     return codes.map(code => {
-      const courseEntries = courseByCode.get(code) || []
+      const courseEntries = (courses as any[]).filter((c: any) => c.code === code)
       const names = [...new Set(courseEntries.map((c: any) => c.name?.trim()).filter(Boolean))]
       const name = names[0] || code
+      const types = [...(typesByCode.get(code) || [])]
+      const type = types.length > 1 ? "Theory + Practical" : types[0] || ""
       const marksEntries = marksByCode.get(code)
       if (marksEntries && marksEntries.length > 0) {
         const total = marksEntries.reduce((s: number, m: any) => s + (m.total || 0), 0)
@@ -44,9 +45,9 @@ export function MarksSection() {
         const test3_max = marksEntries.reduce((s: number, m: any) => s + (m.test3_max || 0), 0)
         const pct = maxTotal > 0 ? Math.round((total / maxTotal) * 100) : 0
         const grade = pct >= 90 ? "O" : pct >= 80 ? "A+" : pct >= 70 ? "A" : pct >= 60 ? "B+" : pct >= 50 ? "B" : pct >= 40 ? "C" : pct > 0 ? "F" : undefined
-        return { code, name, tests, test1, test1_max, test2, test2_max, test3, test3_max, total, maxTotal, grade }
+        return { code, name, type, tests, test1, test1_max, test2, test2_max, test3, test3_max, total, maxTotal, grade }
       }
-      return { code, name, tests: [], test1: null, test1_max: 0, test2: null, test2_max: 0, test3: null, test3_max: 0, total: 0, maxTotal: 0, grade: undefined }
+      return { code, name, type, tests: [], test1: null, test1_max: 0, test2: null, test2_max: 0, test3: null, test3_max: 0, total: 0, maxTotal: 0, grade: undefined }
     })
   }, [courses, marks])
 
@@ -249,7 +250,13 @@ export function MarksSection() {
                   >
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1 min-w-0 pr-2">
-                        <span className="text-zinc-500 text-[10px] uppercase font-bold tracking-[0.1em] mb-1 block">{mark.code}</span>
+                        <span className="text-zinc-500 text-[10px] uppercase font-bold tracking-[0.1em] mb-1 block">
+                          {mark.code}
+                          {mark.type && <span className={`ml-2 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider ${
+                            mark.type === "Theory + Practical" ? "text-purple-400 bg-purple-500/10" :
+                            mark.type === "Theory" ? "text-blue-400 bg-blue-500/10" : "text-emerald-400 bg-emerald-500/10"
+                          }`}>{mark.type}</span>}
+                        </span>
                         <h4 className={`font-semibold text-zinc-200 text-lg tracking-tight ${!isOpen ? "truncate" : ""}`}>{mark.name}</h4>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
@@ -360,7 +367,13 @@ export function MarksSection() {
                   {/* Top row: code + donut */}
                   <div className="flex items-start justify-between mb-5">
                     <div className="min-w-0 flex-1">
-                      <span className="text-zinc-500 text-[10px] uppercase font-bold tracking-[0.1em] mb-1 block">{mark.code}</span>
+                      <span className="text-zinc-500 text-[10px] uppercase font-bold tracking-[0.1em] mb-1 block">
+                        {mark.code}
+                        {mark.type && <span className={`ml-2 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider ${
+                          mark.type === "Theory + Practical" ? "text-purple-400 bg-purple-500/10" :
+                          mark.type === "Theory" ? "text-blue-400 bg-blue-500/10" : "text-emerald-400 bg-emerald-500/10"
+                        }`}>{mark.type}</span>}
+                      </span>
                       <h4 className="font-semibold text-zinc-200 text-lg tracking-tight leading-tight">{mark.name}</h4>
                     </div>
                     <div className="shrink-0 ml-4 flex items-center gap-3">
