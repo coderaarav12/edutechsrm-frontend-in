@@ -129,7 +129,9 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
       const name = names[0] || code
       const courseTypes = [...new Set(courseEntries.map((c: any) => c.type).filter(Boolean))]
       const attEntries = attGrouped.get(code) || []
-      const allRecords = courseTypes.map((t: string) => {
+      const attCategories = [...new Set(attEntries.map((r: any) => r.category).filter(Boolean))]
+      const allCategories = [...new Set([...courseTypes, ...attCategories])]
+      const allRecords = allCategories.map((t: string) => {
         const match = attEntries.find((r: any) => r.category === t)
         return match || { code, name, attended: 0, total: 0, percentage: 0, category: t, slot: courseEntries.find((c: any) => c.type === t)?.slot || "" }
       })
@@ -138,9 +140,9 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
         const attended = attEntries.reduce((s: number, r: any) => s + (r.attended || 0), 0)
         const total = attEntries.reduce((s: number, r: any) => s + (r.total || 0), 0)
         const percentage = total > 0 ? Math.round((attended / total) * 100) : 0
-        result.push({ code, name, attended, total, percentage, category: courseTypes.join(" + ") || "", slot: courseEntries[0]?.slot || "", hasData: true, records: allRecords })
+        result.push({ code, name, attended, total, percentage, category: allCategories.join(" + ") || "", slot: courseEntries[0]?.slot || attEntries[0]?.slot || "", hasData: true, records: allRecords })
       } else {
-        result.push({ code, name, attended: 0, total: 0, percentage: 0, category: courseTypes.join(" + ") || "", slot: courseEntries[0]?.slot || "", hasData: false, records: allRecords })
+        result.push({ code, name, attended: 0, total: 0, percentage: 0, category: allCategories.join(" + ") || "", slot: courseEntries[0]?.slot || "", hasData: false, records: allRecords })
       }
     })
     attGrouped.forEach((entries, code) => {
