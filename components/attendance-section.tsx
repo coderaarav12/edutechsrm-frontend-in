@@ -133,22 +133,15 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
       const courseEntries = courseByCode.get(code) || []
       const names = [...new Set(courseEntries.map((c: any) => c.name?.trim()).filter(Boolean))]
       const name = names[0] || code
-      const courseTypes = [...new Set(courseEntries.map((c: any) => normalizeCat(c.type)).filter(Boolean))]
       const attEntries = attGrouped.get(code) || []
-      const attCategories = [...new Set(attEntries.map((r: any) => normalizeCat(r.category)).filter(Boolean))]
-      const allCategories = [...new Set([...courseTypes, ...attCategories])]
-      const allRecords = allCategories.map((t: string) => {
-        const match = attEntries.find((r: any) => normalizeCat(r.category) === t)
-        return match || { code, name, attended: 0, total: 0, percentage: 0, category: t, slot: courseEntries.find((c: any) => normalizeCat(c.type) === t)?.slot || "" }
-      })
       const hasData = attEntries.some((r: any) => r.total > 0)
       if (hasData) {
         const attended = attEntries.reduce((s: number, r: any) => s + (r.attended || 0), 0)
         const total = attEntries.reduce((s: number, r: any) => s + (r.total || 0), 0)
         const percentage = total > 0 ? Math.round((attended / total) * 100) : 0
-        result.push({ code, name, attended, total, percentage, category: allCategories.join(" + ") || "", slot: courseEntries[0]?.slot || attEntries[0]?.slot || "", hasData: true, records: allRecords })
+        result.push({ code, name, attended, total, percentage, category: [...new Set(attEntries.map((r: any) => normalizeCat(r.category)).filter(Boolean))].join(" + ") || "", slot: courseEntries[0]?.slot || attEntries[0]?.slot || "", hasData: true, records: attEntries })
       } else {
-        result.push({ code, name, attended: 0, total: 0, percentage: 0, category: allCategories.join(" + ") || "", slot: courseEntries[0]?.slot || "", hasData: false, records: allRecords })
+        result.push({ code, name, attended: 0, total: 0, percentage: 0, category: "", slot: courseEntries[0]?.slot || "", hasData: false, records: [] })
       }
     })
     attGrouped.forEach((entries, code) => {
