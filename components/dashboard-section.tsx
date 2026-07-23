@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import gsap from "gsap"
 import {
   AlertTriangle,
@@ -238,14 +238,58 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
   const todayStr = fmtLocalDateKey(now)
   const nowMinutes = now.getHours() * 60 + now.getMinutes()
   const customClassesByDate = expandCustomClassesByDate(customClasses, dateToDoMap)
-  const riskyAttendance = attendance.filter((item) => item.percentage < 75).sort((a, b) => a.percentage - b.percentage)
-  const lowMarks = marks
-    .map((item) => ({
+
+  const uniqueCourses: any[] = useMemo(() => {
+    const byCode = new Map<string, any[]>()
+    ;(courses as any[]).forEach((c: any) => {
+      const list = byCode.get(c.code) || []
+      list.push(c)
+      byCode.set(c.code, list)
+    })
+    const result: any[] = []
+    byCode.forEach((entries) => {
+      if (entries.length === 1) { result.push(entries[0]); return }
+      const names = entries.map(e => e.name?.trim().toLowerCase() || "")
+      const firstName = names[0]
+      const allRelated = names.every(n => n.includes(firstName) || firstName.includes(n))
+      if (allRelated) {
+        const best = entries.reduce((a, b) => (b.credits || 0) > (a.credits || 0) ? b : a)
+        result.push(best)
+      } else {
+        result.push(...entries)
+      }
+    })
+    return result
+  }, [courses])
+  const mergedAttendance = useMemo(() => {
+    const attByCode = new Map((attendance || []).map((r: any) => [r.code, r]))
+    return uniqueCourses.map((course: any) => {
+      const code = String(course.code || "")
+      const existing = attByCode.get(code)
+      return existing || { code, name: course.name || code, attended: 0, total: 0, percentage: 0 }
+    })
+  }, [uniqueCourses, attendance])
+  const riskyAttendance = mergedAttendance.filter((item: any) => item.percentage > 0 && item.percentage < 75).sort((a: any, b: any) => a.percentage - b.percentage)
+  const averageAttendance = mergedAttendance.length
+    ? Math.round(mergedAttendance.reduce((sum: number, item: any) => sum + (item.percentage || 0), 0) / mergedAttendance.length)
+    : 0
+  const mergedMarks = useMemo(() => {
+    const marksByCode = new Map((marks || []).map((m: any) => [m.code, m]))
+    return uniqueCourses.map(course => {
+      const existing = marksByCode.get(course.code)
+      return existing || { code: course.code, name: course.name, total: 0, maxTotal: 0 }
+    })
+  }, [uniqueCourses, marks])
+  const lowMarks = mergedMarks
+    .map((item: any) => ({
       ...item,
       percentage: item.maxTotal > 0 ? Math.round(((item.total ?? 0) / item.maxTotal) * 100) : 0,
     }))
-    .filter((item) => item.maxTotal > 0 && item.percentage < 60)
-    .sort((a, b) => a.percentage - b.percentage)
+    .filter((item: any) => item.maxTotal > 0 && item.percentage < 60)
+    .sort((a: any, b: any) => a.percentage - b.percentage)
+  const totalMarks = mergedMarks.reduce((sum: number, item: any) => sum + (item.total ?? 0), 0)
+  const maxMarks = mergedMarks.reduce((sum: number, item: any) => sum + (item.maxTotal ?? 0), 0)
+  const marksPercent = maxMarks > 0 ? Math.round((totalMarks / maxMarks) * 100) : 0
 
   const mergedClasses = [
     ...timetable,
@@ -288,12 +332,6 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
 
   const pendingAssignmentCount = (assignments || []).filter((a: any) => a.status !== "done").length
 
-  const totalMarks = marks.reduce((sum, item) => sum + (item.total ?? 0), 0)
-  const maxMarks = marks.reduce((sum, item) => sum + (item.maxTotal ?? 0), 0)
-  const marksPercent = maxMarks > 0 ? Math.round((totalMarks / maxMarks) * 100) : 0
-  const averageAttendance = attendance.length
-    ? Math.round(attendance.reduce((sum, item) => sum + item.percentage, 0) / attendance.length)
-    : 0
   const todayDayOrder = dateToDoMap[todayStr]
   const nextCalendarEvent = calendar
     .filter((event) => event.date >= todayStr)
