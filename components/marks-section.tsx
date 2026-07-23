@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { RefreshCw, LogIn, Award, BookOpen, Trophy, Target, ChevronDown } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
@@ -9,9 +9,49 @@ import { AIPromoBadge } from "@/components/ai-promo-badge"
 import { XAxis, YAxis, Tooltip, ResponsiveContainer, Area, AreaChart, CartesianGrid } from "recharts"
 
 export function MarksSection() {
-  const { isAuthenticated, marks, isLoading, refreshData, user } = useAuth()
+  const { isAuthenticated, marks, courses, isLoading, refreshData, user } = useAuth()
   const [isLoginOpen,   setIsLoginOpen]   = useState(false)
   const [expandedCard, setExpandedCard] = useState<string | null>(null)
+
+  const mergedMarks = useMemo(() => {
+    const byCode = new Map<string, any[]>()
+    ;(courses as any[]).forEach((c: any) => {
+      const list = byCode.get(c.code) || []
+      list.push(c)
+      byCode.set(c.code, list)
+    })
+    const unique: any[] = []
+    byCode.forEach((entries) => {
+      if (entries.length === 1) { unique.push(entries[0]); return }
+      const names = entries.map(e => e.name?.trim().toLowerCase() || "")
+      const firstName = names[0]
+      const allRelated = names.every(n => n.includes(firstName) || firstName.includes(n))
+      if (allRelated) {
+        const best = entries.reduce((a, b) => (b.credits || 0) > (a.credits || 0) ? b : a)
+        unique.push(best)
+      } else {
+        unique.push(...entries)
+      }
+    })
+    const marksByCode = new Map(marks.map(m => [m.code, m]))
+    return unique.map(course => {
+      const existing = marksByCode.get(course.code)
+      return existing || {
+        code: course.code,
+        name: course.name,
+        tests: [],
+        test1: null,
+        test1_max: 0,
+        test2: null,
+        test2_max: 0,
+        test3: null,
+        test3_max: 0,
+        total: 0,
+        maxTotal: 0,
+        grade: undefined,
+      }
+    })
+  }, [courses, marks])
 
   const getPercentage = (total: number | null, max: number) => {
     if (total === null || max === 0) return 0
@@ -25,14 +65,13 @@ export function MarksSection() {
     return { bar: "#f87171", bg: "rgba(248,113,113,0.12)", border: "rgba(248,113,113,0.25)" }
   }
 
-  const totalMarks = marks.reduce((sum, m) => sum + (m.total || 0), 0)
-  const maxMarks = marks.reduce((sum, m) => sum + (m.maxTotal || 0), 0)
+  const totalMarks = mergedMarks.reduce((sum, m) => sum + (m.total || 0), 0)
+  const maxMarks = mergedMarks.reduce((sum, m) => sum + (m.maxTotal || 0), 0)
   const overallPercentage = maxMarks > 0 ? Math.round((totalMarks / maxMarks) * 100) : 0
 
-  const excellentCount = marks.filter((m) => m.grade === "O" || m.grade === "A+" || m.grade === "A").length
+  const excellentCount = mergedMarks.filter((m) => m.grade === "O" || m.grade === "A+" || m.grade === "A").length
 
-  // Calculate avg score only from subjects that have marks
-  const marksWithData = marks.filter((m) => m.total !== null && m.maxTotal > 0)
+  const marksWithData = mergedMarks.filter((m) => m.total !== null && m.maxTotal > 0)
   const averageScore =
     marksWithData.length > 0
       ? Math.round(
@@ -40,7 +79,7 @@ export function MarksSection() {
         )
       : 0
 
-  const improvementSubjects = marks
+  const improvementSubjects = mergedMarks
     .map((mark) => ({
       ...mark,
       percentage: getPercentage(mark.total, mark.maxTotal),
@@ -80,7 +119,7 @@ export function MarksSection() {
           <h2 className="text-zinc-500 font-bold text-[10px] uppercase tracking-widest mb-1">Performance Studio</h2>
           <h1 className="text-3xl font-bold text-zinc-100 tracking-tight font-display">Marks & Grades</h1>
           <p className="text-xs mt-1 text-zinc-600">
-            {user?.specialization || user?.program} · Sem {user?.semester} · {marks.length} subjects
+            {user?.specialization || user?.program} · Sem {user?.semester} · {mergedMarks.length} subjects
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -184,7 +223,7 @@ export function MarksSection() {
       {/* Subject Cards */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {marks.map((mark, index) => {
+          {mergedMarks.map((mark, index) => {
             const cardKey   = `${mark.code}-${index}`
             const isOpen    = expandedCard === cardKey
             const pct       = getPercentage(mark.total, mark.maxTotal)

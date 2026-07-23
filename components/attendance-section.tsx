@@ -108,6 +108,60 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
 
   const activeAttendance = attendanceMode === "with_od_ml" ? attendanceWithAdjustments : attendance
 
+  const mergedAttendance = useMemo(() => {
+    const attByCode = new Map((activeAttendance || []).map((r: any) => [r.code, r]))
+    const seen = new Set<string>()
+    const result: any[] = []
+    const byCode = new Map<string, any[]>()
+    ;(courses as any[]).forEach((c: any) => {
+      const list = byCode.get(c.code) || []
+      list.push(c)
+      byCode.set(c.code, list)
+    })
+    const unique: any[] = []
+    byCode.forEach((entries) => {
+      if (entries.length === 1) { unique.push(entries[0]); return }
+      const names = entries.map(e => e.name?.trim().toLowerCase() || "")
+      const firstName = names[0]
+      const allRelated = names.every(n => n.includes(firstName) || firstName.includes(n))
+      if (allRelated) {
+        const best = entries.reduce((a, b) => (b.credits || 0) > (a.credits || 0) ? b : a)
+        unique.push(best)
+      } else {
+        unique.push(...entries)
+      }
+    })
+    unique.forEach((course: any) => {
+      const code = String(course.code || "")
+      if (!code) return
+      seen.add(code)
+      const existing = attByCode.get(code)
+      if (existing) {
+        result.push({ ...existing, hasData: true })
+      } else {
+        result.push({
+          code,
+          name: course.name || code,
+          attended: 0,
+          total: 0,
+          percentage: 0,
+          category: course.type || "",
+          slot: course.slot || "",
+          hasData: false,
+        })
+      }
+    })
+    activeAttendance?.forEach((r: any) => {
+      if (!seen.has(r.code)) {
+        result.push({ ...r, hasData: true })
+      }
+    })
+    return result
+  }, [activeAttendance, courses])
+
+  const attendanceWithData = mergedAttendance.filter((r: any) => r.hasData)
+  const attendancePending = mergedAttendance.filter((r: any) => !r.hasData)
+
   const getStatus = (pct: number) => {
     if (pct >= goalPercentage) return "safe"
     if (pct >= goalPercentage - 10) return "warning"
@@ -135,13 +189,14 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
     return skippable
   }
 
-  const overallAttended = activeAttendance.reduce((s: number, r: any) => s + r.attended, 0)
-  const overallTotal = activeAttendance.reduce((s: number, r: any) => s + r.total, 0)
+  const overallAttended = attendanceWithData.reduce((s: number, r: any) => s + r.attended, 0)
+  const overallTotal = attendanceWithData.reduce((s: number, r: any) => s + r.total, 0)
   const overallPercentage = overallTotal > 0 ? Math.round((overallAttended / overallTotal) * 100) : 0
-  const safeCount = activeAttendance.filter((r: any) => getStatus(r.percentage) === "safe").length
-  const atRiskSubjects = activeAttendance.filter((r: any) => getStatus(r.percentage) !== "safe")
+  const safeCount = attendanceWithData.filter((r: any) => getStatus(r.percentage) === "safe").length
+  const atRiskSubjects = attendanceWithData.filter((r: any) => getStatus(r.percentage) !== "safe")
 
-  const filteredAttendance = activeAttendance.filter((r: any) => {
+  const filteredAttendance = mergedAttendance.filter((r: any) => {
+    if (!r.hasData) return filter === "all"
     if (filter === "all") return true
     if (filter === "safe") return getStatus(r.percentage) === "safe"
     return getStatus(r.percentage) !== "safe"
@@ -179,7 +234,7 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
           <p className="text-zinc-500 font-bold text-[10px] uppercase tracking-widest mb-1">Attendance Radar</p>
           <h1 className="text-3xl font-bold text-zinc-100 tracking-tight font-display">Attendance</h1>
           <p className="text-[11px] text-zinc-500 mt-0.5">
-            {user?.specialization || user?.program} · Sem {user?.semester} · {attendance.length} subjects
+            {user?.specialization || user?.program} · Sem {user?.semester} · {attendanceWithData.length} tracked{attendancePending.length > 0 ? ` · ${attendancePending.length} pending` : ""}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -309,7 +364,7 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
                 ? "bg-zinc-800 text-zinc-100 shadow-md border border-white/5"
                 : "font-medium text-zinc-500 hover:text-zinc-300"
             }`}>
-            {f === "all" ? `All ${attendance.length}` : f === "safe" ? `Safe ${safeCount}` : `Risk ${atRiskSubjects.length}`}
+              {f === "all" ? `All ${mergedAttendance.length}` : f === "safe" ? `Safe ${safeCount}` : `Risk ${atRiskSubjects.length}`}
           </motion.button>
         ))}
       </motion.div>
@@ -465,9 +520,44 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
         })}
       </div>
 
+      {/* Pending attendance cards */}
+      {attendancePending.length > 0 && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-8">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-2 h-2 rounded-full bg-zinc-600" />
+            <h3 className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Attendance data pending</h3>
+            <span className="text-zinc-600 text-[10px]">({attendancePending.length})</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {attendancePending.map((record, idx) => (
+              <motion.div key={`pending-${record.code}`}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.04 }}
+                className="bg-zinc-900/20 ring-1 ring-white/[0.04] rounded-xl p-4 opacity-60"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-1 h-9 rounded-full shrink-0 bg-zinc-700" />
+                  <div className="flex-1 min-w-0">
+                    <span className="text-zinc-600 text-[10px] uppercase font-bold tracking-[0.1em] block">{record.code}</span>
+                    <h4 className="font-semibold text-zinc-500 text-sm tracking-tight truncate">{record.name}</h4>
+                  </div>
+                </div>
+                <p className="text-zinc-600 text-[10px] mt-3">Awaiting attendance data from SRM</p>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
       {/* Empty state */}
-      {filteredAttendance.length === 0 && (
+      {filteredAttendance.length === 0 && attendancePending.length === 0 && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
+          <p className="text-zinc-500 text-sm">No subjects matching filter</p>
+        </motion.div>
+      )}
+      {filteredAttendance.length === 0 && attendancePending.length > 0 && filter !== "all" && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-8">
           <p className="text-zinc-500 text-sm">No subjects matching filter</p>
         </motion.div>
       )}
