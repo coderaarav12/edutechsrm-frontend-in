@@ -1,5 +1,6 @@
 // Auto-generated from finder.csv - do not edit directly
-export const FINDER_CSV = `Sl. No.,Faculty Id.,Faculty Name,Designation,Staff Room,Department,
+export const FINDER_CSV = `
+Sl. No.,Faculty Id.,Faculty Name,Designation,Staff Room,Department,
 1,102688,Dr Lakshmi M,HOD,TP411,NWC,
 2,100160,Dr Annapurani K,Professor,TP2 - FR310,NWC, 
 3,100158,Dr MALATHY C,Professor,TP1310,NWC,
@@ -427,4 +428,5 @@ export const FINDER_CSV = `Sl. No.,Faculty Id.,Faculty Name,Designation,Staff Ro
 425,103813,Mrs. R. Saranya,Assistant Professor(Jr.G),TP2-CLS823,CTech,
 426,103824,Mrs. B. Ramya,Assistant Professor(Jr.G),TP2-CLS823,CTech,
 427,103835,Mrs. B. Sharmila,Assistant Professor(Jr.G),TP2-CLS823,CTech,
+
 `
