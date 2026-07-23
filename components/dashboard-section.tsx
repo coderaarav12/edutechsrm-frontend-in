@@ -269,10 +269,11 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
       return existing || { code, name: course.name || code, attended: 0, total: 0, percentage: 0 }
     })
   }, [uniqueCourses, attendance])
-  const riskyAttendance = mergedAttendance.filter((item: any) => item.percentage > 0 && item.percentage < 75).sort((a: any, b: any) => a.percentage - b.percentage)
-  const averageAttendance = mergedAttendance.length
-    ? Math.round(mergedAttendance.reduce((sum: number, item: any) => sum + (item.percentage || 0), 0) / mergedAttendance.length)
-    : 0
+  const attendanceWithData = mergedAttendance.filter((item: any) => item.total > 0)
+  const riskyAttendance = attendanceWithData.filter((item: any) => item.percentage > 0 && item.percentage < 75).sort((a: any, b: any) => a.percentage - b.percentage)
+  const overallAttended = attendanceWithData.reduce((sum: number, item: any) => sum + (item.attended || 0), 0)
+  const overallTotal = attendanceWithData.reduce((sum: number, item: any) => sum + (item.total || 0), 0)
+  const averageAttendance = overallTotal > 0 ? Math.round((overallAttended / overallTotal) * 100) : 0
   const mergedMarks = useMemo(() => {
     const marksByCode = new Map((marks || []).map((m: any) => [m.code, m]))
     return uniqueCourses.map(course => {
