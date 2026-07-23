@@ -196,7 +196,7 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
   const atRiskSubjects = attendanceWithData.filter((r: any) => getStatus(r.percentage) !== "safe")
 
   const filteredAttendance = mergedAttendance.filter((r: any) => {
-    if (!r.hasData || r.total === 0) return filter === "all"
+    if (!r.hasData || r.total === 0) return false
     if (filter === "all") return true
     if (filter === "safe") return getStatus(r.percentage) === "safe"
     return getStatus(r.percentage) !== "safe"
