@@ -70,8 +70,8 @@ function NotificationsProviderInner({ children }: { children: React.ReactNode })
     const now = Date.now()
     const todayStr = fmtDate(new Date())
 
-    // ── Low attendance warnings ──
-    ;(attendance as any[]).filter(a => a.percentage < 75).forEach(a => {
+    // ── Low attendance warnings (skip subjects with no classes conducted) ──
+    ;(attendance as any[]).filter(a => (a.total || 0) > 0 && a.percentage < 75).forEach(a => {
       upsert({
         id:        `att-${a.code}-${todayStr}`,
         type:      "attendance",
