@@ -109,51 +109,40 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
   const activeAttendance = attendanceMode === "with_od_ml" ? attendanceWithAdjustments : attendance
 
   const mergedAttendance = useMemo(() => {
-    const attByCode = new Map((activeAttendance || []).map((r: any) => [r.code, r]))
-    const seen = new Set<string>()
-    const result: any[] = []
-    const byCode = new Map<string, any[]>()
+    const attGrouped = new Map<string, any[]>()
+    ;(activeAttendance || []).forEach((r: any) => {
+      const list = attGrouped.get(r.code) || []
+      list.push(r)
+      attGrouped.set(r.code, list)
+    })
+    const courseByCode = new Map<string, any[]>()
     ;(courses as any[]).forEach((c: any) => {
-      const list = byCode.get(c.code) || []
+      const list = courseByCode.get(c.code) || []
       list.push(c)
-      byCode.set(c.code, list)
+      courseByCode.set(c.code, list)
     })
-    const unique: any[] = []
-    byCode.forEach((entries) => {
-      if (entries.length === 1) { unique.push(entries[0]); return }
-      const names = entries.map(e => e.name?.trim().toLowerCase() || "")
-      const firstName = names[0]
-      const allRelated = names.every(n => n.includes(firstName) || firstName.includes(n))
-      if (allRelated) {
-        const best = entries.reduce((a, b) => (b.credits || 0) > (a.credits || 0) ? b : a)
-        unique.push(best)
+    const codes = [...new Set((courses as any[]).map((c: any) => c.code))]
+    const result: any[] = []
+    codes.forEach(code => {
+      const courseEntries = courseByCode.get(code) || []
+      const names = [...new Set(courseEntries.map((c: any) => c.name?.trim()).filter(Boolean))]
+      const name = names[0] || code
+      const attEntries = attGrouped.get(code)
+      if (attEntries && attEntries.length > 0 && attEntries.some((r: any) => r.total > 0)) {
+        const attended = attEntries.reduce((s: number, r: any) => s + (r.attended || 0), 0)
+        const total = attEntries.reduce((s: number, r: any) => s + (r.total || 0), 0)
+        const percentage = total > 0 ? Math.round((attended / total) * 100) : 0
+        result.push({ code, name, attended, total, percentage, category: attEntries[0].category || "", slot: attEntries[0].slot || "", hasData: true })
       } else {
-        unique.push(...entries)
+        result.push({ code, name, attended: 0, total: 0, percentage: 0, category: courseEntries[0]?.type || "", slot: courseEntries[0]?.slot || "", hasData: false })
       }
     })
-    unique.forEach((course: any) => {
-      const code = String(course.code || "")
-      if (!code) return
-      seen.add(code)
-      const existing = attByCode.get(code)
-      if (existing) {
-        result.push({ ...existing, hasData: true })
-      } else {
-        result.push({
-          code,
-          name: course.name || code,
-          attended: 0,
-          total: 0,
-          percentage: 0,
-          category: course.type || "",
-          slot: course.slot || "",
-          hasData: false,
-        })
-      }
-    })
-    activeAttendance?.forEach((r: any) => {
-      if (!seen.has(r.code)) {
-        result.push({ ...r, hasData: true })
+    attGrouped.forEach((entries, code) => {
+      if (!codes.includes(code) && entries.some((r: any) => r.total > 0)) {
+        const attended = entries.reduce((s: number, r: any) => s + (r.attended || 0), 0)
+        const total = entries.reduce((s: number, r: any) => s + (r.total || 0), 0)
+        const percentage = total > 0 ? Math.round((attended / total) * 100) : 0
+        result.push({ code, name: entries[0].name || code, attended, total, percentage, category: entries[0].category || "", slot: entries[0].slot || "", hasData: true })
       }
     })
     return result

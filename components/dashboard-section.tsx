@@ -239,48 +239,52 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
   const nowMinutes = now.getHours() * 60 + now.getMinutes()
   const customClassesByDate = expandCustomClassesByDate(customClasses, dateToDoMap)
 
-  const uniqueCourses: any[] = useMemo(() => {
-    const byCode = new Map<string, any[]>()
-    ;(courses as any[]).forEach((c: any) => {
-      const list = byCode.get(c.code) || []
-      list.push(c)
-      byCode.set(c.code, list)
-    })
-    const result: any[] = []
-    byCode.forEach((entries) => {
-      if (entries.length === 1) { result.push(entries[0]); return }
-      const names = entries.map(e => e.name?.trim().toLowerCase() || "")
-      const firstName = names[0]
-      const allRelated = names.every(n => n.includes(firstName) || firstName.includes(n))
-      if (allRelated) {
-        const best = entries.reduce((a, b) => (b.credits || 0) > (a.credits || 0) ? b : a)
-        result.push(best)
-      } else {
-        result.push(...entries)
-      }
-    })
-    return result
-  }, [courses])
+  const codes = useMemo(() => [...new Set((courses as any[]).map((c: any) => c.code))], [courses])
   const mergedAttendance = useMemo(() => {
-    const attByCode = new Map((attendance || []).map((r: any) => [r.code, r]))
-    return uniqueCourses.map((course: any) => {
-      const code = String(course.code || "")
-      const existing = attByCode.get(code)
-      return existing || { code, name: course.name || code, attended: 0, total: 0, percentage: 0 }
+    const attGrouped = new Map<string, any[]>()
+    ;(attendance || []).forEach((r: any) => {
+      const list = attGrouped.get(r.code) || []
+      list.push(r)
+      attGrouped.set(r.code, list)
     })
-  }, [uniqueCourses, attendance])
+    return codes.map(code => {
+      const courseEntries = (courses as any[]).filter((c: any) => c.code === code)
+      const names = [...new Set(courseEntries.map((c: any) => c.name?.trim()).filter(Boolean))]
+      const name = names[0] || code
+      const attEntries = attGrouped.get(code)
+      if (attEntries && attEntries.length > 0 && attEntries.some((r: any) => r.total > 0)) {
+        const attended = attEntries.reduce((s: number, r: any) => s + (r.attended || 0), 0)
+        const total = attEntries.reduce((s: number, r: any) => s + (r.total || 0), 0)
+        return { code, name, attended, total, percentage: total > 0 ? Math.round((attended / total) * 100) : 0 }
+      }
+      return { code, name, attended: 0, total: 0, percentage: 0 }
+    })
+  }, [codes, attendance])
   const attendanceWithData = mergedAttendance.filter((item: any) => item.total > 0)
   const riskyAttendance = attendanceWithData.filter((item: any) => item.percentage > 0 && item.percentage < 75).sort((a: any, b: any) => a.percentage - b.percentage)
   const overallAttended = attendanceWithData.reduce((sum: number, item: any) => sum + (item.attended || 0), 0)
   const overallTotal = attendanceWithData.reduce((sum: number, item: any) => sum + (item.total || 0), 0)
   const averageAttendance = overallTotal > 0 ? Math.round((overallAttended / overallTotal) * 100) : 0
   const mergedMarks = useMemo(() => {
-    const marksByCode = new Map((marks || []).map((m: any) => [m.code, m]))
-    return uniqueCourses.map(course => {
-      const existing = marksByCode.get(course.code)
-      return existing || { code: course.code, name: course.name, total: 0, maxTotal: 0 }
+    const marksGrouped = new Map<string, any[]>()
+    ;(marks || []).forEach((m: any) => {
+      const list = marksGrouped.get(m.code) || []
+      list.push(m)
+      marksGrouped.set(m.code, list)
     })
-  }, [uniqueCourses, marks])
+    return codes.map(code => {
+      const courseEntries = (courses as any[]).filter((c: any) => c.code === code)
+      const names = [...new Set(courseEntries.map((c: any) => c.name?.trim()).filter(Boolean))]
+      const name = names[0] || code
+      const mEntries = marksGrouped.get(code)
+      if (mEntries && mEntries.length > 0) {
+        const total = mEntries.reduce((s: number, m: any) => s + (m.total ?? 0), 0)
+        const maxTotal = mEntries.reduce((s: number, m: any) => s + (m.maxTotal ?? 0), 0)
+        return { code, name, total, maxTotal }
+      }
+      return { code, name, total: 0, maxTotal: 0 }
+    })
+  }, [codes, marks])
   const lowMarks = mergedMarks
     .map((item: any) => ({
       ...item,
