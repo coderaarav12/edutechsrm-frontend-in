@@ -34,11 +34,13 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
   const goalPercentage = 75
 
   const toDate = (value: string) => new Date(`${value}T00:00:00`)
-  const normalizeCat = (v: string) => {
-    const t = String(v || "").toLowerCase().trim()
-    if (t.includes("lab")) return "Practical"
-    if (t === "practical" || t === "theory") return t[0].toUpperCase() + t.slice(1)
-    return v
+  const catFromSlot = (slot: string | undefined) => {
+    if (!slot) return "Extra"
+    const c = slot.trim().charAt(0).toUpperCase()
+    if (c >= "A" && c <= "G") return "Theory"
+    if (c === "P") return "Practical"
+    if (slot.toLowerCase() === "online") return "Online"
+    return "Extra"
   }
   const isNormalPractical = (typeValue: string) => {
     const t = String(typeValue || "").toLowerCase().trim()
@@ -139,7 +141,7 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
         const attended = attEntries.reduce((s: number, r: any) => s + (r.attended || 0), 0)
         const total = attEntries.reduce((s: number, r: any) => s + (r.total || 0), 0)
         const percentage = total > 0 ? Math.round((attended / total) * 100) : 0
-        result.push({ code, name, attended, total, percentage, category: [...new Set(attEntries.map((r: any) => normalizeCat(r.category)).filter(Boolean))].join(" + ") || "", slot: courseEntries[0]?.slot || attEntries[0]?.slot || "", hasData: true, records: attEntries })
+        result.push({ code, name, attended, total, percentage, category: [...new Set(attEntries.map((r: any) => catFromSlot(r.slot)).filter(Boolean))].join(" + ") || "", slot: courseEntries[0]?.slot || attEntries[0]?.slot || "", hasData: true, records: attEntries })
       } else {
         result.push({ code, name, attended: 0, total: 0, percentage: 0, category: "", slot: courseEntries[0]?.slot || "", hasData: false, records: [] })
       }
@@ -149,7 +151,7 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
         const attended = entries.reduce((s: number, r: any) => s + (r.attended || 0), 0)
         const total = entries.reduce((s: number, r: any) => s + (r.total || 0), 0)
         const percentage = total > 0 ? Math.round((attended / total) * 100) : 0
-        result.push({ code, name: entries[0].name || code, attended, total, percentage, category: entries[0].category || "", slot: entries[0].slot || "", hasData: true, records: entries })
+        result.push({ code, name: entries[0].name || code, attended, total, percentage, category: catFromSlot(entries[0].slot) || "", slot: entries[0].slot || "", hasData: true, records: entries })
       }
     })
     return result
@@ -500,7 +502,7 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
                         return (
                           <div key={ri} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-zinc-900/50 ring-1 ring-white/[0.04]">
                             <div className="w-0.5 h-4 rounded-full shrink-0" style={{ background: rc }} />
-                            <span className="text-[11px] font-semibold text-zinc-300 flex-1 min-w-0 truncate">{normalizeCat(rr.category) || "?"}</span>
+                            <span className="text-[11px] font-semibold text-zinc-300 flex-1 min-w-0 truncate">{catFromSlot(rr.slot) || "?"}</span>
                             <span className="text-[11px] font-bold tabular-nums" style={{ color: rc }}>{rp}%</span>
                             <span className="text-[10px] text-zinc-500 font-mono tabular-nums">{rr.attended}/{rr.total}</span>
                           </div>
