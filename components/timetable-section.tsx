@@ -150,6 +150,14 @@ function getTypeStyle(type: string): { color: string; border: string; bg: string
   return { color: "#f59e0b", border: "rgba(245,158,11,0.25)", bg: "rgba(245,158,11,0.08)", label: type }
 }
 
+function getCategoryFromSlot(slot: string | undefined): "Theory" | "Practical" | "Extra" {
+  if (!slot) return "Extra"
+  const c = slot.trim().charAt(0).toUpperCase()
+  if (c >= "A" && c <= "G") return "Theory"
+  if (c === "P") return "Practical"
+  return "Extra"
+}
+
 // ─── Break card (extracted component — no IIFE needed) ──────────────────────
 
 function TimelineDot({ isCurrent, isPast, isBreak }: { isCurrent?: boolean; isPast?: boolean; isBreak?: boolean }) {
@@ -233,14 +241,14 @@ function HolidayIcon({ size = "w-5 h-5" }: { size?: string }) {
 // ─── Day classes list (extracted to avoid IIFE in JSX) ──────────────────────
 
 function DayClassesList({
-  selectedDayClasses, selectedDay, currentHour, getCourseDetails, getAttendanceData,
+  selectedDayClasses, selectedDay, currentHour, getCourseDetails, getAttendanceByCategory,
   dateToHoliday, assignments, updateAssignment, removeAssignment,
 }: {
   selectedDayClasses: any[]
   selectedDay: ReturnType<typeof getWeekDaysFrom>[0] | undefined
   currentHour: number | null
   getCourseDetails: (code: string) => any
-  getAttendanceData: (code: string) => any
+  getAttendanceByCategory: (code: string, category: string) => any
   dateToHoliday: Record<string, string>
   assignments?: any[]
   updateAssignment?: (id: string, updates: any) => void
@@ -321,7 +329,8 @@ function DayClassesList({
     const courseDetails  = getCourseDetails(classData.code)
     const isCurrentClass = isToday && nowMins >= getClassStartMins(classData) && nowMins < getClassEndMins(classData)
     const timeSlot       = TIME_SLOTS.find((s) => s.hour === classData.hour)
-    const att            = getAttendanceData(classData.code)
+    const slotCategory   = getCategoryFromSlot(classData.slot)
+    const att            = slotCategory !== "Extra" ? getAttendanceByCategory(classData.code, slotCategory) : null
     const skip           = att ? canSkip(att.attended, att.total) : 0
     const needed         = att ? classesNeeded(att.attended, att.total) : 0
     const attPct         = att ? att.percentage : null
@@ -401,6 +410,11 @@ function DayClassesList({
                   }`}>
                     {ts.label}
                   </span>
+                  {classData.slot?.toLowerCase() === "online" && (
+                    <span className="text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ring-1 text-sky-400 bg-sky-500/10 ring-sky-500/20">
+                      Online
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -791,6 +805,20 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
     ) ?? null
   }
 
+  const getAttendanceByCategory = (code: string, category: string) => {
+    if (!attendance || !Array.isArray(attendance)) return null
+    const records = attendance.filter((a: any) => {
+      const codeMatch = a.code === code || a.course_code === code ||
+        code?.startsWith(a.code) || a.code?.startsWith(code)
+      return codeMatch && a.category === category
+    })
+    if (records.length === 0) return null
+    const attended = records.reduce((s: number, r: any) => s + (r.attended || 0), 0)
+    const total = records.reduce((s: number, r: any) => s + (r.total || 0), 0)
+    const percentage = total > 0 ? Math.round((attended / total) * 100) : 0
+    return { attended, total, percentage }
+  }
+
   const uniqueCourses = new Set(timetable.map((t: any) => t.code)).size
   const totalCredits  = Array.isArray(courses)
     ? Array.from(
@@ -1158,7 +1186,7 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
                 selectedDay={selectedDay}
                 currentHour={currentHour}
                 getCourseDetails={getCourseDetails}
-                getAttendanceData={getAttendanceData}
+                getAttendanceByCategory={getAttendanceByCategory}
                 dateToHoliday={dateToHoliday}
                 assignments={assignments}
                 updateAssignment={updateAssignment}
@@ -1447,7 +1475,8 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
                           Theory: "#60a5fa", Lab: "#34d399", Practical: "#34d399", "Lab Based Theory": "#a78bfa",
                         }
                         const col = typeColors[c.type] || "#2dd4bf"
-                        const att = getAttendanceData(c.code)
+                        const slotCategory = getCategoryFromSlot(c.slot)
+                        const att = slotCategory !== "Extra" ? getAttendanceByCategory(c.code, slotCategory) : null
                         const attPct = att ? att.percentage : null
                         const courseDetails = getCourseDetails(c.code)
 
@@ -1486,6 +1515,11 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
                               }`}>
                                 {c.type}
                               </span>
+                              {c.slot?.toLowerCase() === "online" && (
+                                <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg ring-1 text-sky-400 bg-sky-500/10 ring-sky-500/20">
+                                  Online
+                                </span>
+                              )}
                               <span className="text-[10px] font-semibold px-3 py-1.5 rounded-lg bg-white/[0.03] text-zinc-400 ring-1 ring-white/5">
                                 {ts.time} · Hr {ts.hour}
                               </span>
