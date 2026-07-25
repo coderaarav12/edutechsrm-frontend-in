@@ -394,11 +394,13 @@ function DayClassesList({
                     {(classData.custom ? classData.time?.split(" - ")[1] : timeSlot?.time?.split(" - ")[1]) || classData.time?.split(" - ")[1]}
                   </span>
                   {(() => {
-                    if (classData.slot?.toLowerCase() === "online") return <span className="text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ring-1 text-sky-400 bg-sky-500/10 ring-sky-500/20">Online</span>
                     const c = getCategoryFromSlot(classData.slot)
                     const s = c === "Theory" ? "text-purple-400 bg-purple-500/10 ring-purple-500/20" : c === "Practical" ? "text-blue-400 bg-blue-500/10 ring-blue-500/20" : "text-emerald-400 bg-emerald-500/10 ring-emerald-500/20"
                     return <span className={`text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ring-1 ${s}`}>{c}</span>
                   })()}
+                  {classData.room?.toLowerCase().includes("online") && (
+                    <span className="text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ring-1 text-sky-400 bg-sky-500/10 ring-sky-500/20">Online</span>
+                  )}
                 </div>
               </div>
 
@@ -1492,11 +1494,13 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
                             {/* Type badge + time */}
                             <div className="flex items-center gap-2 mb-4">
                               {(() => {
-                                if (c.slot?.toLowerCase() === "online") return <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg ring-1 text-sky-400 bg-sky-500/10 ring-sky-500/20">Online</span>
                                 const cat = getCategoryFromSlot(c.slot)
                                 const st = cat === "Theory" ? "text-purple-400 bg-purple-500/10 ring-purple-500/20" : cat === "Practical" ? "text-blue-400 bg-blue-500/10 ring-blue-500/20" : "text-emerald-400 bg-emerald-500/10 ring-emerald-500/20"
                                 return <span className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg ring-1 ${st}`}>{cat}</span>
                               })()}
+                              {c.room?.toLowerCase().includes("online") && (
+                                <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg ring-1 text-sky-400 bg-sky-500/10 ring-sky-500/20">Online</span>
+                              )}
                               <span className="text-[10px] font-semibold px-3 py-1.5 rounded-lg bg-white/[0.03] text-zinc-400 ring-1 ring-white/5">
                                 {ts.time} · Hr {ts.hour}
                               </span>
