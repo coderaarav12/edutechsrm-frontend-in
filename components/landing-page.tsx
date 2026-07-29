@@ -151,6 +151,10 @@ const faqs = [
     q: "How do I find a professor's staff room at SRM KTR?",
     a: "Use the Faculty Finder in the Tools section. Search by name, department, or faculty ID to find designations and staff room locations for 400+ faculty members across all SRM KTR departments.",
   },
+  {
+    q: "Who built edutechsrm?",
+    a: 'edutechsrm was built and is maintained solely by Aarav Goel (CSE AIML, SRM IST). Connect with him on LinkedIn: <a href="https://www.linkedin.com/in/aaravgoel12/" target="_blank" rel="noopener noreferrer" class="text-emerald-300 underline hover:text-emerald-200">linkedin.com/in/aaravgoel12</a>.',
+  },
 ]
 
 const seoTags = [

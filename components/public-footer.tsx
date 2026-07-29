@@ -25,6 +25,8 @@ export function PublicFooter() {
         <span>Not affiliated with SRM Institute</span>
         <span className="hidden h-1 w-1 rounded-full bg-zinc-700 sm:inline-block" />
         <span className="font-bold text-emerald-300">edutechsrm v2.1</span>
+        <span className="hidden h-1 w-1 rounded-full bg-zinc-700 sm:inline-block" />
+        <a href="https://www.linkedin.com/in/aaravgoel12/" target="_blank" rel="noopener noreferrer" className="font-semibold transition hover:text-zinc-300">Built by Aarav Goel</a>
       </div>
       <p className="mt-2">Your credentials are never stored. All data is fetched live from SRM Academia.</p>
     </footer>
