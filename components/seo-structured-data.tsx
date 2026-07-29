@@ -59,6 +59,14 @@ export function SEOStructuredData() {
                 text: "Use the Faculty Finder tool in edutechsrm to search 400+ faculty members by name, department, or faculty ID and find their designation and staff room location instantly.",
               },
             },
+            {
+              "@type": "Question",
+              name: "Who built edutechsrm?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "edutechsrm was built and is maintained solely by Aarav Goel (CSE AIML, SRM IST). Connect with him on LinkedIn at linkedin.com/in/aaravgoel12.",
+              },
+            },
           ],
         },
       ],
