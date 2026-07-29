@@ -337,7 +337,7 @@ function FAQItem({ item, index }: { item: (typeof faqs)[number]; index: number }
       <AnimatePresence initial={false}>
         {open && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
-            <p className="border-t border-white/5 px-5 pb-5 pt-4 text-sm leading-7 text-zinc-400">{item.a}</p>
+            <p className="border-t border-white/5 px-5 pb-5 pt-4 text-sm leading-7 text-zinc-400" dangerouslySetInnerHTML={{ __html: item.a }} />
           </motion.div>
         )}
       </AnimatePresence>
