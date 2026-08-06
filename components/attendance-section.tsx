@@ -197,6 +197,11 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
   const overallTotal = attendanceWithData.reduce((s: number, r: any) => s + r.total, 0)
   const overallPercentage = overallTotal > 0 ? Math.round((overallAttended / overallTotal) * 100) : 0
   const safeCount = attendanceWithData.filter((r: any) => getStatus(r.percentage) === "safe").length
+  const borderlineCount = attendanceWithData.filter((r: any) => getStatus(r.percentage) === "warning").length
+  const dangerCount = attendanceWithData.filter((r: any) => getStatus(r.percentage) === "danger").length
+  const below75Count = attendanceWithData.filter((r: any) => r.percentage < goalPercentage).length
+  const overallSkip = attendanceWithData.reduce((s: number, r: any) => s + canSkip(r.attended, r.total), 0)
+  const overallNeeded = attendanceWithData.reduce((s: number, r: any) => s + classesNeeded(r.attended, r.total), 0)
   const atRiskSubjects = attendanceWithData.filter((r: any) => getStatus(r.percentage) !== "safe")
 
   const filteredAttendance = mergedAttendance.filter((r: any) => {
@@ -344,15 +349,37 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
                 }`}
               />
             </div>
-            <div className="flex gap-4 mt-3">
+            <div className="flex flex-wrap gap-x-4 gap-y-2 mt-3">
               <div className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-emerald-400" />
                 <span className="text-[10px] text-zinc-500">{safeCount} safe</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-red-400" />
-                <span className="text-[10px] text-zinc-500">{atRiskSubjects.length} at risk</span>
+                <div className="w-2 h-2 rounded-full bg-amber-400" />
+                <span className="text-[10px] text-zinc-500">{borderlineCount} borderline</span>
               </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-red-400" />
+                <span className="text-[10px] text-zinc-500">{dangerCount} at risk</span>
+              </div>
+              {below75Count > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-red-500" />
+                  <span className="text-[10px] font-semibold text-rose-400">{below75Count} below 75%</span>
+                </div>
+              )}
+              {overallSkip > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <TrendingUp className="w-2.5 h-2.5 text-emerald-400" />
+                  <span className="text-[10px] text-zinc-500">Skip {overallSkip}</span>
+                </div>
+              )}
+              {overallNeeded > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <TrendingDown className="w-2.5 h-2.5 text-red-400" />
+                  <span className="text-[10px] text-zinc-500">Need {overallNeeded}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
