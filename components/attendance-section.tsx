@@ -522,7 +522,7 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
                     ].map((s, i) => (
                       <div key={i} className="rounded-lg px-3 py-2 bg-zinc-900/50 ring-1 ring-white/5">
                         <p className="text-zinc-500 text-[9px] uppercase font-bold tracking-[0.1em]">{s.label}</p>
-                        <p className="text-xs font-bold text-zinc-200 mt-0.5 truncate">{s.value}</p>
+                        <p className="text-xs font-bold text-zinc-200 mt-0.5 break-words leading-snug">{s.value}</p>
                       </div>
                     ))}
                   </div>
