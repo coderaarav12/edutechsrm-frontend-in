@@ -197,11 +197,6 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
   const overallTotal = attendanceWithData.reduce((s: number, r: any) => s + r.total, 0)
   const overallPercentage = overallTotal > 0 ? Math.round((overallAttended / overallTotal) * 100) : 0
   const safeCount = attendanceWithData.filter((r: any) => getStatus(r.percentage) === "safe").length
-  const borderlineCount = attendanceWithData.filter((r: any) => getStatus(r.percentage) === "warning").length
-  const dangerCount = attendanceWithData.filter((r: any) => getStatus(r.percentage) === "danger").length
-  const below75Count = attendanceWithData.filter((r: any) => r.percentage < goalPercentage).length
-  const overallSkip = attendanceWithData.reduce((s: number, r: any) => s + canSkip(r.attended, r.total), 0)
-  const overallNeeded = attendanceWithData.reduce((s: number, r: any) => s + classesNeeded(r.attended, r.total), 0)
   const atRiskSubjects = attendanceWithData.filter((r: any) => getStatus(r.percentage) !== "safe")
 
   const filteredAttendance = mergedAttendance.filter((r: any) => {
@@ -349,37 +344,15 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
                 }`}
               />
             </div>
-            <div className="flex flex-wrap gap-x-4 gap-y-2 mt-3">
+            <div className="flex gap-4 mt-3">
               <div className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-emerald-400" />
                 <span className="text-[10px] text-zinc-500">{safeCount} safe</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-amber-400" />
-                <span className="text-[10px] text-zinc-500">{borderlineCount} borderline</span>
-              </div>
-              <div className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-red-400" />
-                <span className="text-[10px] text-zinc-500">{dangerCount} at risk</span>
+                <span className="text-[10px] text-zinc-500">{atRiskSubjects.length} at risk</span>
               </div>
-              {below75Count > 0 && (
-                <div className="flex items-center gap-1.5">
-                  <div className="w-2 h-2 rounded-full bg-red-500" />
-                  <span className="text-[10px] font-semibold text-rose-400">{below75Count} below 75%</span>
-                </div>
-              )}
-              {overallSkip > 0 && (
-                <div className="flex items-center gap-1.5">
-                  <TrendingUp className="w-2.5 h-2.5 text-emerald-400" />
-                  <span className="text-[10px] text-zinc-500">Skip {overallSkip}</span>
-                </div>
-              )}
-              {overallNeeded > 0 && (
-                <div className="flex items-center gap-1.5">
-                  <TrendingDown className="w-2.5 h-2.5 text-red-400" />
-                  <span className="text-[10px] text-zinc-500">Need {overallNeeded}</span>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -408,6 +381,22 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
           const needed = classesNeeded(record.attended, record.total)
           const skippable = canSkip(record.attended, record.total)
           const isExpanded = expandedCode === record.code
+
+          const recChips = (record.records || [])
+            .filter((rr: any) => rr.total > 0)
+            .map((rr: any, ri: number) => {
+              const rpct = rr.total > 0 ? Math.round((rr.attended / rr.total) * 100) : 0
+              const rStatus = getStatus(rpct)
+              const rNeeded = classesNeeded(rr.attended, rr.total)
+              const rSkippable = canSkip(rr.attended, rr.total)
+              const rColor = rpct >= 75 ? "#34d399" : rpct >= 65 ? "#fbbf24" : "#f87171"
+              const rLabel = rr.category || catFromSlot(rr.slot) || "?"
+              let rText = `Need ${rNeeded}`
+              if (rStatus === "safe" && rSkippable > 0) rText = `Skip ${rSkippable}`
+              else if (rStatus === "safe") rText = "On track"
+              else if (rStatus === "warning") rText = rNeeded > 0 ? `Borderline · Need ${rNeeded}` : "Borderline"
+              return { ri, rLabel, rText, rColor }
+            })
 
           return (
             <motion.div key={`${record.code}___${record.slot || record.category || idx}`}
@@ -463,6 +452,12 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
                         <TrendingDown className="w-2.5 h-2.5" />Need {needed}
                       </span>
                     )}
+                    {recChips.length > 1 && recChips.map((c: any) => (
+                      <span key={`rec-${c.ri}`} className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ring-1 ring-white/10"
+                        style={{ background: `${c.rColor}12`, color: c.rColor }}>
+                        {c.rLabel}: {c.rText}
+                      </span>
+                    ))}
                   </div>
                 </button>
               )}
@@ -505,6 +500,12 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
                         <TrendingDown className="w-2.5 h-2.5" />Need {needed}
                       </span>
                     )}
+                    {recChips.length > 1 && recChips.map((c: any) => (
+                      <span key={`rec-${c.ri}`} className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ring-1 ring-white/10"
+                        style={{ background: `${c.rColor}12`, color: c.rColor }}>
+                        {c.rLabel}: {c.rText}
+                      </span>
+                    ))}
                   </div>
                 </div>
               )}
