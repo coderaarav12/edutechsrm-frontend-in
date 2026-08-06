@@ -18,7 +18,7 @@ interface AttendanceSectionProps {
 }
 
 export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
-  const { isAuthenticated, attendance, isLoading, refreshData, user, timetable = [], dateToDoMap = {}, courses = [], calendar = [] } = useAuth() as any
+  const { isAuthenticated, attendance, isLoading, refreshData, user, timetable = [], dateToDoMap = {}, courses = [] } = useAuth() as any
   const { odMlEntries } = useCustomPlanner()
   const [isLoginOpen, setIsLoginOpen] = useState(false)
   const [filter, setFilter] = useState<"all" | "safe" | "risk">("all")
@@ -42,36 +42,29 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
     if (slot.toLowerCase() === "online") return "Online"
     return "Extra"
   }
-  const isNormalPractical = (typeValue: string) => {
-    const t = String(typeValue || "").toLowerCase().trim()
-    if (!t) return false
-    if (t.includes("lab based")) return false
-    return t === "practical" || t === "lab"
-  }
-
   const attendanceWithAdjustments = useMemo(() => {
     if (!attendance?.length) return attendance
     if (!odMlEntries?.length) return attendance
-
-    const courseTypeByCode = new Map<string, string>()
-    ;(courses as any[]).forEach((course) => {
-      if (course?.code) courseTypeByCode.set(String(course.code), String(course.type || ""))
-    })
 
     const dayOrderSlots = new Map<number, any[]>()
     ;(timetable as any[]).forEach((slot) => {
       const dayOrder = Number(slot?.day_order)
       if (!dayOrder) return
       if (!dayOrderSlots.has(dayOrder)) dayOrderSlots.set(dayOrder, [])
-      dayOrderSlots.get(dayOrder)!.push(slot)
+      const list = dayOrderSlots.get(dayOrder)!
+      if (!list.find((s: any) => s.hour === slot.hour && s.code === slot.code)) list.push(slot)
     })
 
-    const holidayByDate = new Set<string>()
-    ;(calendar as any[]).forEach((item) => {
-      if (item?.type === "holiday" && item?.date) holidayByDate.add(String(item.date))
+    const slotCat = new Map<string, string>()
+    const codeCats = new Map<string, Set<string>>()
+    ;(attendance as any[]).forEach((a: any) => {
+      if (!a?.category || !a?.code) return
+      if (a.slot) slotCat.set(`${a.code}|||${String(a.slot).toLowerCase()}`, a.category)
+      if (!codeCats.has(a.code)) codeCats.set(a.code, new Set<string>())
+      codeCats.get(a.code)!.add(a.category)
     })
 
-    const bonusByCode = new Map<string, number>()
+    const missedByKey = new Map<string, number>()
     const seenSessionKeys = new Set<string>()
 
     ;(odMlEntries as any[]).forEach((entry) => {
@@ -80,39 +73,52 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
       const end = toDate(entry.endDate)
       if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end < start) return
 
+      const type = entry.type === "od" ? "od" : "ml"
+
       Object.entries(dateToDoMap as Record<string, number>).forEach(([date, dayOrder]) => {
         if (!dayOrder) return
         const d = toDate(date)
         if (d < start || d > end) return
-        if (holidayByDate.has(date) && !(dateToDoMap as Record<string, number>)[date]) return
 
         const slots = dayOrderSlots.get(Number(dayOrder)) || []
         slots.forEach((slot) => {
           const code = String(slot?.code || "")
           if (!code) return
 
-          const courseType = courseTypeByCode.get(code) || String(slot?.type || "")
-          if (entry.type === "od" && isNormalPractical(courseType)) return
+          const slotLower = String(slot?.slot || "").toLowerCase()
+          const exact = slotCat.get(`${code}|||${slotLower}`)
+          const cats = codeCats.get(code)
+          const only = cats && cats.size === 1 ? [...cats][0] : null
+          const typeLower = String(slot?.type || "").toLowerCase()
+          const cat =
+            exact ||
+            (only === "Practical" ? "Practical" : null) ||
+            (typeLower.includes("practical") || typeLower.includes("lab") ? "Practical" : null) ||
+            (slotLower.startsWith("p") || slotLower.startsWith("l") ? "Practical" : "Theory")
+
+          if (type === "od" && cat !== "Theory") return
+          if (type === "ml" && cat !== "Practical" && cat !== "Theory") return
 
           const hour = String(slot?.hour || "0")
-          const key = `${entry.type}:${date}:${code}:${hour}`
+          const key = `${type}:${date}:${code}:${hour}`
           if (seenSessionKeys.has(key)) return
           seenSessionKeys.add(key)
 
-          bonusByCode.set(code, (bonusByCode.get(code) || 0) + 1)
+          const catKey = `${code}|||${cat}`
+          missedByKey.set(catKey, (missedByKey.get(catKey) || 0) + 1)
         })
       })
     })
 
     return attendance.map((record: any) => {
-      const bonus = bonusByCode.get(String(record.code)) || 0
-      if (!bonus) return record
-      const attended = Number(record.attended || 0) + bonus
-      const total = Number(record.total || 0) + bonus
+      const missed = missedByKey.get(`${String(record.code)}|||${record.category || ""}`) || 0
+      if (!missed) return record
+      const total = Number(record.total || 0)
+      const attended = Math.min(total, Number(record.attended || 0) + missed)
       const percentage = total > 0 ? Math.round((attended / total) * 100) : 0
       return { ...record, attended, total, percentage }
     })
-  }, [attendance, odMlEntries, courses, timetable, dateToDoMap, calendar])
+  }, [attendance, odMlEntries, timetable, dateToDoMap])
 
   const activeAttendance = attendanceMode === "with_od_ml" ? attendanceWithAdjustments : attendance
 

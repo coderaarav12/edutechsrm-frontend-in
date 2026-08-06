@@ -350,12 +350,11 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
       : { title: upcomingAssignment.title, date: upcomingAssignment.dueDate, type: "assignment", id: upcomingAssignment.id }
   })()
   const nextEventDate = nextEvent ? new Date(nextEvent.date + "T00:00:00").toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" }) : ""
-  const stripLabel = todayDayOrder
-    ? nextEvent
-      ? `Next event: ${nextEvent.title} - ${nextEventDate} - DO ${todayDayOrder}`
-      : `Day Order: ${todayDayOrder}`
-    : nextEvent
-      ? `Next event: ${nextEvent.title} - ${nextEventDate}`
+  const nextEventDayOrder = nextEvent ? dateToDoMap[nextEvent.date] : null
+  const stripLabel = nextEvent
+    ? `Next event: ${nextEvent.title} - ${nextEventDate}${nextEventDayOrder ? ` - DO ${nextEventDayOrder}` : ""}`
+    : todayDayOrder
+      ? `Day Order: ${todayDayOrder}`
       : null
 
   const greeting = (() => {
@@ -519,33 +518,51 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
             </div>
 
             <div ref={statsRef} className="flex gap-4 self-center md:self-auto md:justify-end">
-            <div className="bg-zinc-900/60 ring-1 ring-white/5 rounded-2xl px-5 py-3.5 min-w-[170px] relative overflow-hidden group text-center">
+            <button
+              onClick={() => onNavigate("attendance")}
+              className="bg-zinc-900/60 ring-1 ring-white/5 rounded-2xl px-5 py-3.5 min-w-[170px] relative overflow-hidden group text-center transition-all active:scale-[0.97] hover:bg-zinc-900/80 cursor-pointer"
+            >
               <div className="text-zinc-500 text-[10px] font-bold mb-1.5 uppercase tracking-[0.15em] flex items-center justify-center gap-2">
                 <span className={averageAttendance >= 75 ? "text-emerald-500/50" : "text-rose-500/50"}>✦</span>
                 Attendance
               </div>
               <div className="text-3xl font-display font-bold tracking-tighter text-zinc-100 flex items-baseline justify-center gap-1">
-                <StatNumber value={averageAttendance} color={averageAttendance >= 75 ? "#34d399" : "#f43f5e"} />
-                <span className="text-lg text-emerald-500">%</span>
+                {overallTotal > 0 ? (
+                  <>
+                    <StatNumber value={averageAttendance} color={averageAttendance >= 75 ? "#34d399" : "#f43f5e"} />
+                    <span className="text-lg text-emerald-500">%</span>
+                  </>
+                ) : (
+                  <span className="text-2xl text-zinc-500">-</span>
+                )}
               </div>
               {riskyAttendance.length > 0 && (
                 <p className="text-[10px] mt-1.5 font-semibold text-rose-400">{riskyAttendance.length} at risk</p>
               )}
-            </div>
+            </button>
 
-            <div className="bg-zinc-900/60 ring-1 ring-white/5 rounded-2xl px-5 py-3.5 min-w-[170px] relative overflow-hidden group text-center">
+            <button
+              onClick={() => onNavigate("marks")}
+              className="bg-zinc-900/60 ring-1 ring-white/5 rounded-2xl px-5 py-3.5 min-w-[170px] relative overflow-hidden group text-center transition-all active:scale-[0.97] hover:bg-zinc-900/80 cursor-pointer"
+            >
               <div className="text-zinc-500 text-[10px] font-bold mb-1.5 uppercase tracking-[0.15em] flex items-center justify-center gap-2">
                 <span className={marksPercent >= 60 ? "text-emerald-500/50" : marksPercent >= 40 ? "text-amber-500/50" : "text-rose-500/50"}>✦</span>
                 Marks
               </div>
               <div className="text-3xl font-display font-bold tracking-tighter text-zinc-100 flex items-baseline justify-center gap-1">
-                <StatNumber value={marksPercent} color={marksPercent >= 60 ? "#34d399" : marksPercent >= 40 ? "#fbbf24" : "#f43f5e"} />
-                <span className="text-lg text-emerald-500">%</span>
+                {maxMarks > 0 ? (
+                  <>
+                    <StatNumber value={marksPercent} color={marksPercent >= 60 ? "#34d399" : marksPercent >= 40 ? "#fbbf24" : "#f43f5e"} />
+                    <span className="text-lg text-emerald-500">%</span>
+                  </>
+                ) : (
+                  <span className="text-2xl text-zinc-500">-</span>
+                )}
               </div>
               {lowMarks.length > 0 && (
                 <p className="text-[10px] mt-1.5 font-semibold text-rose-400">{lowMarks.length} below 60%</p>
               )}
-            </div>
+            </button>
             </div>
           </div>
 
