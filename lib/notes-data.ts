@@ -26,7 +26,8 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "Chapter 3: Ordinary Differential Equations", url: "https://drive.google.com/drive/folders/1zV4RBVdL7HQf99fFWXm-5SWtQWrHhen4?usp=drive_link" },
       { title: "Chapter 3 & 4 Class Notes 2025", url: "https://drive.google.com/file/d/17fVInuGPk7UZ4yJ5L5bTiH3Lo9LC-f3U/view?usp=sharing" },
       { title: "Chapter 4: Differential Calculus And Beta Gamma Functions", url: "https://drive.google.com/drive/folders/1umSBkXWiR4Gj2XGXLbdL4gWKxtLlo4ux?usp=drive_link" },
-      { title: "Chapter 5: Sequence And Series", url: "https://drive.google.com/drive/folders/1KxcIEJMDsIxIS6gqEwwi727vPBpEWDaN?usp=drive_link" }
+      { title: "Chapter 5: Sequence And Series", url: "https://drive.google.com/drive/folders/1KxcIEJMDsIxIS6gqEwwi727vPBpEWDaN?usp=drive_link" },
+      { title: "Maths Semester Exam Strategies", url: "https://docs.google.com/document/d/1vkS-3ilVcU4XJzeuDSaIw4DcH9-hSNI25zaf2Vuy-6o/preview?usp=sharing" }
       ], pyqs: [
       { title: "PYQ Dec 2023", url: "https://drive.google.com/file/d/1gjpajPAfUg84IUfeA9NjTluLobSwLUwB/view?usp=drive_link" },
       { title: "PYQ Jan 2023", url: "https://drive.google.com/file/d/1ge5x8_13MtSTnMzAS7swwtscwK7tU7cv/view?usp=drive_link" },
@@ -75,7 +76,8 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "Chapter 4: Methodology Of Engineering", url: "https://drive.google.com/drive/folders/1cByAbZmJIzEfQZrMatVwKMLDqDkk1rUX?usp=sharing" },
       { title: "Chapter 5: Axiology Of Engineering", url: "https://drive.google.com/drive/folders/1bz05Us_cVpRyvBOOGwP_QOFwsmnXQ60R?usp=sharing" },
       { title: "Best Books", url: "https://drive.google.com/drive/folders/1tSuXu0GNZTmLvGPOZpJAaMlhKNfMkRd8?usp=sharing" },
-      { title: "Study Material Drive Link", url: "https://drive.google.com/drive/folders/1gs-IjIYanHX0EWNXolPD22nrhR9pFP7h?usp=drive_link" }
+      { title: "Study Material Drive Link", url: "https://drive.google.com/drive/folders/1gs-IjIYanHX0EWNXolPD22nrhR9pFP7h?usp=drive_link" },
+      { title: "POE Semester Exam Strategies", url: "https://docs.google.com/document/d/1y4aSOEgYRtntJ-_BxtCGCfCdzYK6kiyDtxMOu2_rVP0/preview?usp=drive_link" }
       ], pyqs: [
       { title: "PYQ May 2023", url: "https://drive.google.com/file/d/1jY9prBMQWKPtEpCa1BJdrrDollc3Ut0j/view?usp=drive_link" },
       { title: "PYQ Jan 2023", url: "https://drive.google.com/file/d/1nd5fsd1RNSB8NApQT7qe8gywcny8LR5o/view?usp=drive_link" },
@@ -94,7 +96,8 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "Chapter 3: Structure Biology", url: "https://docs.google.com/presentation/d/1NvNby20sQwxWxyZZf_aorONjbBL6O-wZ/edit?usp=drive_link&ouid=104856686103320873965&rtpof=true&sd=true" },
       { title: "Chapter 4: Neurobiology", url: "https://docs.google.com/presentation/d/1tHBBklafppqklOs2x4h-1y6S3NzEyUc8/edit?usp=drive_link&ouid=104856686103320873965&rtpof=true&sd=true" },
       { title: "Chapter 5: Immunobiology", url: "https://docs.google.com/presentation/d/1DY-XBXY4tr-qfvZV1tZk4FIkQcoeuxA7/edit?usp=drive_link&ouid=104856686103320873965&rtpof=true&sd=true" },
-      { title: "Study Material Drive Link", url: "https://drive.google.com/drive/folders/12HmbHf838rHNBjAH1X8_MCtEtFbJEztH?usp=drive_link" }
+      { title: "Study Material Drive Link", url: "https://drive.google.com/drive/folders/12HmbHf838rHNBjAH1X8_MCtEtFbJEztH?usp=drive_link" },
+      { title: "Computational Bio Semester Exam Strategies", url: "https://docs.google.com/document/d/14PrBmh9DQsJlPj4LYjf6Y0RJMBSF44QK3cJlDoIs3Ws/preview?usp=drive_link" }
       ], pyqs: [
       { title: "PYQ Dec 2023", url: "https://drive.google.com/file/d/1gLlh0fB1rctmKZBSPPZC35ryZt_K4Phg/view?usp=drive_link" },
       { title: "PYQ Jan 2023", url: "https://drive.google.com/file/d/1pu7GK8lLq_KIBMdBOETeCVWMeJLHiUMb/view?usp=drive_link" },
@@ -117,7 +120,8 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "Chapter 5", url: "https://drive.google.com/drive/folders/1dF2v7hE1_0MmiByuiY1M4xPJ6DLPuyoY?usp=drive_link" },
       { title: "Best Books", url: "https://drive.google.com/drive/folders/1sWMOrOpnvCyuFD7cg_AYsTZtit2hvAy6?usp=sharing" },
       { title: "Study Material Drive Link", url: "https://drive.google.com/drive/folders/1eUUUl5O3Crs9reqX1RmQRkMqidK7VRV5?usp=drive_link" },
-      { title: "Study Material Drive Link From NCR Campus (By BTECH CRUX)", url: "https://drive.google.com/drive/folders/1bZ7YrbQPczxJgGrmHLjOpZUX3XhwWLog?usp=drive_link" }
+      { title: "Study Material Drive Link From NCR Campus (By BTECH CRUX)", url: "https://drive.google.com/drive/folders/1bZ7YrbQPczxJgGrmHLjOpZUX3XhwWLog?usp=drive_link" },
+      { title: "PPS Semester Exam Strategies", url: "https://docs.google.com/document/d/1hGtMfxy7Np1JHq5kztHJoq4R40_voVELrCs2fk-IowI/preview?usp=drive_link" }
       ], pyqs: [
       { title: "PYQ Jun 2023", url: "https://drive.google.com/file/d/1mrvBYe6mv42Tfein8AN2T8txeXHvk4Tw/view?usp=drive_link" },
       { title: "PYQ Jan 2023", url: "https://drive.google.com/file/d/1_O9YsNWs3Vw-au0oG95glj-Y8CHZCugH/view?usp=drive_link" },
@@ -276,7 +280,8 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "EEE Lab Manual", url: "https://drive.google.com/file/d/1rCMKo4AJaey13AEQ7vU3rWzw7WcxOm3f/view?usp=drive_link" },
       { title: "EEE Book", url: "https://drive.google.com/file/d/177_vU4n7lRah8dNuVtiiBp4t9MPEFZ0E/view?usp=drive_link" },
       { title: "Handwritten Notes by THE HELPER", url: "https://drive.google.com/drive/folders/1phV20ArTBNES6Dsp1nwYIb_BxYMBe4vt?usp=sharing" },
-      { title: "Study Material Drive Link", url: "https://drive.google.com/drive/folders/1X96eA7O-4-mozGf65mf8STMFKQa6MR2q?usp=drive_link" }
+      { title: "Study Material Drive Link", url: "https://drive.google.com/drive/folders/1X96eA7O-4-mozGf65mf8STMFKQa6MR2q?usp=drive_link" },
+      { title: "EEE Semester Exam Strategies", url: "https://docs.google.com/document/d/1z5mdvwaxZ2XcGrFQJVb5PHWjZEXyewPcv2hV1KIdvOA/preview?usp=sharing" }
       ], pyqs: [
       { title: "PYQ Jul 2022", url: "https://drive.google.com/file/d/1hn8RJ-Rfu_ypFUtx_8NFCWOuB1AWU98e/view?usp=drive_link" },
       { title: "PYQ Jan 2023", url: "https://drive.google.com/file/d/1hiPjHJ4qRxZvsUCOZBPl71TPnoRxLZTE/view?usp=drive_link" },
@@ -346,7 +351,8 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "Chapter 3: Inheritence", url: "https://drive.google.com/file/d/1aqEFFQ3xJutAmWnRt5UW9xRNxlhhPyHH/view?usp=drive_link" },
       { title: "Chapter 4: Generic Programming", url: "https://drive.google.com/file/d/1OlzxlgqgTa8epRI9VFKkKWyyz0AW8KiN/view?usp=drive_link" },
       { title: "Chapter 5: Standard Template Library", url: "https://drive.google.com/file/d/1vFqpdYIbEiQgR0PS8y4Ked8EdkAjKHu6/view?usp=drive_link" },
-      { title: "Study Material Drive Link", url: "https://drive.google.com/drive/folders/1S5aCLxCbvepfvEvfCwd9jMRjA8tHW9SW?usp=drive_link" }
+      { title: "Study Material Drive Link", url: "https://drive.google.com/drive/folders/1S5aCLxCbvepfvEvfCwd9jMRjA8tHW9SW?usp=drive_link" },
+      { title: "OODP Semester Exam Strategies", url: "https://docs.google.com/document/d/1GdVF_3NawkemzUDpI3K4styzeYKjc6MGMhDjaDEUE0c/preview?tab=t.0" }
       ], pyqs: [
       { title: "PYQ Jul 2025", url: "https://drive.google.com/file/d/1HTdSvdLsPsQjyCz8whZ8Sen1liMPXVHJ/view?usp=drive_link" },
       { title: "PYQ May 2025", url: "https://drive.google.com/file/d/1nVsPegA4gvXudVGyl-L74MjLcpilKnXL/view?usp=sharing" },
@@ -842,7 +848,15 @@ export const NOTES_DATA: SemesterResources[] = [
       { title: "PYQs May 2024", url: "https://drive.google.com/file/d/1Xyy43-Ju_ROkvfa_KMxaT13nN7YV_45n/view?usp=drive_link" },
       { title: "PYQs Dec 2025", url: "https://drive.google.com/file/d/1SCyksPnbAkjigUUIbecu6ntlWZJfVqDE/view?usp=drive_link" },
       { title: "All units MCQs", url: "https://drive.google.com/file/d/1VKJk0jdkNBrDFzZcSp870OrOxwiO8zw-/view?usp=drive_link" },
-      { title: "Question_Analysis", url: "https://drive.google.com/file/d/1FWTSiMe8TcNkMjRFm09_64wrPJbQm39I/view?usp=drive_link" }
+      { title: "Question_Analysis", url: "https://drive.google.com/file/d/1FWTSiMe8TcNkMjRFm09_64wrPJbQm39I/view?usp=drive_link" },
+      { title: "Question Bank", url: "https://drive.google.com/file/d/1kcWl8zglMNxB2HpX2ZHMd0-m44Hfdupz/preview?usp=drive_link" }
+      ] },
+      { name: "Signal Processing", notes: [
+      { title: "Sem Exams General Rules", url: "https://drive.google.com/file/d/1IhGYn-Hq50hu5Fcmwr23jgf5PL-T9tB8/view?usp=drive_link" },
+
+      ], pyqs: [
+      { title: "PYQ Nov 2025", url: "https://drive.google.com/file/d/1k5gcJ66AUNCbr1x8cynuVVf9ggAWA3Q8/preview?usp=drive_link" },
+      { title: "PYQ May 2025", url: "https://drive.google.com/file/d/1evUBdSsADOGA3ywpYtcbLqB_GSgafE-3/preview?usp=drive_link" }
       ] },
     ],
   },
