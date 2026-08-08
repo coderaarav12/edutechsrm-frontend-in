@@ -147,9 +147,14 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
         const attended = attEntries.reduce((s: number, r: any) => s + (r.attended || 0), 0)
         const total = attEntries.reduce((s: number, r: any) => s + (r.total || 0), 0)
         const percentage = total > 0 ? Math.round((attended / total) * 100) : 0
-        result.push({ code, name, attended, total, percentage, category: [...new Set(attEntries.map((r: any) => r.category || catFromSlot(r.slot)).filter(Boolean))].join(" + ") || "", slot: courseEntries[0]?.slot || attEntries[0]?.slot || "", hasData: true, records: attEntries })
+        const statusPct = (() => {
+          const valid = attEntries.filter((r: any) => r.total > 0)
+          if (valid.length === 0) return percentage
+          return Math.min(...valid.map((r: any) => Math.round((r.attended / r.total) * 100)))
+        })()
+        result.push({ code, name, attended, total, percentage, statusPct, category: [...new Set(attEntries.map((r: any) => r.category || catFromSlot(r.slot)).filter(Boolean))].join(" + ") || "", slot: courseEntries[0]?.slot || attEntries[0]?.slot || "", hasData: true, records: attEntries })
       } else {
-        result.push({ code, name, attended: 0, total: 0, percentage: 0, category: "", slot: courseEntries[0]?.slot || "", hasData: false, records: [] })
+        result.push({ code, name, attended: 0, total: 0, percentage: 0, statusPct: 0, category: "", slot: courseEntries[0]?.slot || "", hasData: false, records: [] })
       }
     })
     attGrouped.forEach((entries, code) => {
@@ -157,7 +162,12 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
         const attended = entries.reduce((s: number, r: any) => s + (r.attended || 0), 0)
         const total = entries.reduce((s: number, r: any) => s + (r.total || 0), 0)
         const percentage = total > 0 ? Math.round((attended / total) * 100) : 0
-        result.push({ code, name: entries[0].name || code, attended, total, percentage, category: entries[0].category || catFromSlot(entries[0].slot) || "", slot: entries[0].slot || "", hasData: true, records: entries })
+        const statusPct = (() => {
+          const valid = entries.filter((r: any) => r.total > 0)
+          if (valid.length === 0) return percentage
+          return Math.min(...valid.map((r: any) => Math.round((r.attended / r.total) * 100)))
+        })()
+        result.push({ code, name: entries[0].name || code, attended, total, percentage, statusPct, category: entries[0].category || catFromSlot(entries[0].slot) || "", slot: entries[0].slot || "", hasData: true, records: entries })
       }
     })
     return result
@@ -196,14 +206,14 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
   const overallAttended = attendanceWithData.reduce((s: number, r: any) => s + r.attended, 0)
   const overallTotal = attendanceWithData.reduce((s: number, r: any) => s + r.total, 0)
   const overallPercentage = overallTotal > 0 ? Math.round((overallAttended / overallTotal) * 100) : 0
-  const safeCount = attendanceWithData.filter((r: any) => getStatus(r.percentage) === "safe").length
-  const atRiskSubjects = attendanceWithData.filter((r: any) => getStatus(r.percentage) !== "safe")
+  const safeCount = attendanceWithData.filter((r: any) => getStatus(r.statusPct ?? r.percentage) === "safe").length
+  const atRiskSubjects = attendanceWithData.filter((r: any) => getStatus(r.statusPct ?? r.percentage) !== "safe")
 
   const filteredAttendance = mergedAttendance.filter((r: any) => {
     if (!r.hasData || r.total === 0) return false
     if (filter === "all") return true
-    if (filter === "safe") return getStatus(r.percentage) === "safe"
-    return getStatus(r.percentage) !== "safe"
+    if (filter === "safe") return getStatus(r.statusPct ?? r.percentage) === "safe"
+    return getStatus(r.statusPct ?? r.percentage) !== "safe"
   })
 
   const overallStatus = overallPercentage >= 75 ? "emerald" : overallPercentage >= 65 ? "amber" : "red"
@@ -376,7 +386,8 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
       {/* ── Subject cards ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {filteredAttendance.map((record, idx) => {
-          const status = getStatus(record.percentage)
+          const statusPct = record.statusPct ?? record.percentage
+          const status = getStatus(statusPct)
           const cfg = statusConfig[status]
           const needed = classesNeeded(record.attended, record.total)
           const skippable = canSkip(record.attended, record.total)
@@ -418,7 +429,7 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <span className={`font-display font-bold text-xl tracking-tighter ${cfg.text}`}>
-                        {record.percentage}%
+                        {statusPct}%
                       </span>
                       <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
                         <ChevronDown className="w-3.5 h-3.5 text-zinc-500" />
@@ -430,7 +441,7 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
                   <div className="w-full h-1 bg-zinc-950 rounded-full overflow-hidden ring-1 ring-white/5 mt-3">
                     <motion.div
                       initial={{ width: 0 }}
-                      animate={{ width: `${record.percentage}%` }}
+                      animate={{ width: `${statusPct}%` }}
                       transition={{ duration: 0.8, delay: idx * 0.05, ease: "easeOut" }}
                       className="h-full rounded-full"
                       style={{ background: cfg.color }}
@@ -473,14 +484,14 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <span className={`font-display font-bold text-xl tracking-tighter ${cfg.text}`}>
-                        {record.percentage}%
+                        {statusPct}%
                       </span>
                     </div>
                   </div>
                   <div className="w-full h-1 bg-zinc-950 rounded-full overflow-hidden ring-1 ring-white/5 mt-3">
                     <motion.div
                       initial={{ width: 0 }}
-                      animate={{ width: `${record.percentage}%` }}
+                      animate={{ width: `${statusPct}%` }}
                       transition={{ duration: 0.8, delay: idx * 0.05, ease: "easeOut" }}
                       className="h-full rounded-full"
                       style={{ background: cfg.color }}
