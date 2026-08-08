@@ -957,13 +957,48 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
       })
 
       const dataUrl = canvas.toDataURL("image/png")
+      const fileName = "edutechsrm-timetable.png"
+
       if ((window as any).Android?.saveFile) {
-        (window as any).Android.saveFile(dataUrl, "edutechsrm-timetable.png")
+        (window as any).Android.saveFile(dataUrl, fileName)
+        return
+      }
+
+      let blob: Blob | null = null
+      let file: File | null = null
+      try {
+        blob = await (await fetch(dataUrl)).blob()
+        file = new File([blob], fileName, { type: "image/png" })
+      } catch {}
+
+      if (
+        blob && file &&
+        typeof navigator.share === "function" &&
+        typeof navigator.canShare === "function" &&
+        navigator.canShare({ files: [file] })
+      ) {
+        try {
+          await navigator.share({ files: [file], title: "edutechsrm Timetable" })
+          return
+        } catch {}
+      }
+
+      if (blob) {
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement("a")
+        link.href = url
+        link.download = fileName
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        setTimeout(() => URL.revokeObjectURL(url), 1000)
       } else {
         const link = document.createElement("a")
         link.href = dataUrl
-        link.download = "edutechsrm-timetable.png"
+        link.download = fileName
+        document.body.appendChild(link)
         link.click()
+        link.remove()
       }
     } finally {
       setIsExporting(false)
