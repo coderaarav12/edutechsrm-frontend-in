@@ -17,8 +17,12 @@ import {
   FileText,
   GraduationCap,
   IdCard,
+  LocateFixed,
   Lock,
+  Map as MapIcon,
   MessageSquareText,
+  Navigation,
+  Search,
   Shield,
   Sparkles,
   Star,
@@ -26,6 +30,7 @@ import {
   Zap,
 } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
+import { BUILDINGS, CATEGORY_META } from "@/lib/campus-data"
 import { Header } from "@/components/Header"
 import { SEOStructuredData } from "@/components/seo-structured-data"
 import { AiPrankPopup } from "@/components/ai-prank-popup"
@@ -246,6 +251,136 @@ function AiShowcaseCard({ style }: { style?: CSSProperties }) {
             </div>
           ))}
         </div>
+      </div>
+    </motion.div>
+  )
+}
+
+function MapShowcaseCard({ style }: { style?: CSSProperties }) {
+  const [query, setQuery] = useState("")
+  const [focused, setFocused] = useState(false)
+
+  const results = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return []
+    return BUILDINGS.filter(
+      (b) =>
+        b.name.toLowerCase().includes(q) ||
+        b.shortDesc.toLowerCase().includes(q) ||
+        CATEGORY_META[b.category].label.toLowerCase().includes(q),
+    ).slice(0, 5)
+  }, [query])
+
+  const go = (url: string) => {
+    window.location.href = url
+  }
+
+  const categoryChips: { label: string; cat: string; color: string }[] = [
+    { label: "Blocks", cat: "academic", color: "#34d399" },
+    { label: "Hostels", cat: "accommodation", color: "#a78bfa" },
+    { label: "Food & Cafes", cat: "food", color: "#f472b6" },
+  ]
+
+  return (
+    <motion.div
+      style={style}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 0.2, duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+      className="relative w-full max-w-[390px] rounded-[34px] border border-white/10 bg-white/[0.035] p-5 shadow-[0_34px_90px_rgba(0,0,0,0.45)] backdrop-blur-3xl"
+    >
+      <div className="absolute inset-0 rounded-[34px] bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.16),transparent_44%),radial-gradient(circle_at_50%_100%,rgba(52,211,153,0.14),transparent_42%)]" />
+      <div className="relative">
+        <div className="mb-5 flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-sky-300/25 bg-sky-300/12">
+            <MapIcon className="h-5 w-5 text-sky-300" />
+          </div>
+          <div>
+            <p className="font-display text-sm font-bold text-zinc-50">SRM Campus Map</p>
+            <p className="text-[11px] uppercase tracking-[0.14em] text-zinc-500">Explore KTR</p>
+          </div>
+        </div>
+
+        {/* Live search */}
+        <div className="relative mb-4">
+          <div className="flex items-center gap-2.5 rounded-2xl border border-white/10 bg-white/[0.055] px-3.5 py-2.5">
+            <Search className="h-4 w-4 text-zinc-500" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setTimeout(() => setFocused(false), 150)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && results.length > 0) go(`/explore?b=${results[0].id}`)
+              }}
+              placeholder="Search blocks, hostels, labs…"
+              className="w-full bg-transparent text-sm text-zinc-100 placeholder-zinc-500 outline-none"
+            />
+          </div>
+          {focused && results.length > 0 && (
+            <div className="absolute top-full left-0 right-0 z-30 mt-1.5 overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/95 backdrop-blur-xl shadow-[0_18px_50px_rgba(0,0,0,0.5)]">
+              {results.map((b) => (
+                <button
+                  key={b.id}
+                  onMouseDown={() => go(`/explore?b=${b.id}`)}
+                  className="flex w-full items-center gap-3 px-3.5 py-2.5 text-left transition hover:bg-white/[0.06]"
+                >
+                  <span className="text-base shrink-0">{b.icon}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-xs font-semibold text-zinc-100">{b.name}</span>
+                    <span className="block truncate text-[10px] text-zinc-500">{b.shortDesc}</span>
+                  </span>
+                  <span className="shrink-0 text-[9px] font-black uppercase tracking-wide" style={{ color: CATEGORY_META[b.category].color }}>
+                    {CATEGORY_META[b.category].label.replace(" Blocks", "").replace("accommodation", "Hostel")}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Live map embed — click to open */}
+        <button
+          onClick={() => go("/explore")}
+          className="relative block h-[168px] w-full overflow-hidden rounded-[20px] border border-white/10 bg-[#0d1b2a] text-left transition hover:border-sky-300/40"
+          aria-label="Open SRM campus map"
+        >
+          <iframe
+            title="Google Maps — SRM Kattankulathur Campus"
+            src="https://www.google.com/maps?q=12.8236,80.0442&z=15&output=embed"
+            className="pointer-events-none h-full w-full border-0"
+            loading="lazy"
+            allowFullScreen
+            referrerPolicy="no-referrer-when-downgrade"
+            style={{ display: "block", filter: "saturate(0.9)" }}
+          />
+          <div className="absolute bottom-2 left-2 rounded-lg bg-zinc-950/80 px-2 py-1 text-[10px] font-bold text-zinc-300 backdrop-blur-sm pointer-events-none">
+            SRM Kattankulathur
+          </div>
+          <div className="absolute right-2 top-2 rounded-lg bg-zinc-950/80 px-2 py-1 text-[10px] font-bold text-sky-300 backdrop-blur-sm pointer-events-none">
+            Open map ↗
+          </div>
+        </button>
+
+        <div className="mt-4 grid grid-cols-3 gap-2">
+          {categoryChips.map((chip) => (
+            <button
+              key={chip.cat}
+              onClick={() => go(`/explore?cat=${chip.cat}`)}
+              className="rounded-2xl border px-3 py-2.5 text-center text-[10px] font-bold text-zinc-200 transition hover:bg-white/[0.06] active:scale-[0.97]"
+              style={{ borderColor: `${chip.color}33`, background: `${chip.color}0d` }}
+            >
+              {chip.label}
+            </button>
+          ))}
+        </div>
+
+        <a
+          href="/explore"
+          className="mt-4 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-400 to-emerald-300 py-3 text-sm font-black text-zinc-950 transition hover:opacity-90"
+        >
+          <Navigation className="h-4 w-4" /> Explore the campus map
+        </a>
       </div>
     </motion.div>
   )
@@ -525,7 +660,7 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
               </motion.div>
 
               <div className="hidden md:block">
-                <AiShowcaseCard />
+                <MapShowcaseCard />
               </div>
               </div>
 
