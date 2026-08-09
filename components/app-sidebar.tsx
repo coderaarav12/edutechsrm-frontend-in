@@ -22,6 +22,9 @@ function CoffeeIcon({ className, style }: { className?: string; style?: React.CS
 function HeartIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return <svg className={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
 }
+function MapIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return <svg className={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/></svg>
+}
 
 const iconComponents: Record<string, React.FC<{ active: boolean; color: string }>> = {
   Calculator: ({ active, color }) => <CalculatorIcon className="w-[15px] h-[15px]" style={{ color: active ? color : "#52525b" }} />,
@@ -42,6 +45,7 @@ const iconComponents: Record<string, React.FC<{ active: boolean; color: string }
   Bot: ({ active, color }) => <svg className="w-[15px] h-[15px]" style={{ color: active ? color : "#52525b" }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="18" height="12" x="3" y="8" rx="2"/><path d="M10 11h4"/><path d="M12 2v6"/><circle cx="9" cy="14" r="1" fill="currentColor"/><circle cx="15" cy="14" r="1" fill="currentColor"/></svg>,
   Coffee: ({ active, color }) => <CoffeeIcon className="w-[15px] h-[15px]" style={{ color: active ? color : "#52525b" }} />,
   IdCard: ({ active, color }) => <svg className="w-[15px] h-[15px]" style={{ color: active ? color : "#52525b" }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 3h5v18H3V3h5"/><rect width="6" height="10" x="9" y="7" rx="1"/><path d="M9 7v10"/></svg>,
+  Map: ({ active, color }) => <MapIcon className="w-[15px] h-[15px]" style={{ color: active ? color : "#52525b" }} />,
 }
 
 const DESKTOP_SECTIONS = [
@@ -70,6 +74,7 @@ const DESKTOP_SECTIONS = [
       { id: "mess" as const, label: "Mess Menu", subtitle: "Hostel mess menus", icon: "Coffee", color: "#34d399" },
       { id: "calculator" as const, label: "Calculator Plus", subtitle: "Study utilities", icon: "Calculator", color: "#34d399" },
       { id: "finder" as const, label: "Faculty Finder", subtitle: "Staff room locator", icon: "IdCard", color: "#34d399" },
+      { id: "map" as const, label: "Campus Map", subtitle: "Blocks, hostels & more", icon: "Map", color: "#38bdf8" },
     ],
   },
   {

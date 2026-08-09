@@ -40,6 +40,7 @@ export const PAGE_OPTIONS = [
   { id: "notes", label: "Notes & PYQs" },
   { id: "gradex", label: "GradeX / GPA" },
   { id: "finder", label: "Faculty Finder" },
+  { id: "map", label: "Campus Map" },
   { id: "settings", label: "Settings" },
   { id: "ai", label: "AI Chat" },
 ]

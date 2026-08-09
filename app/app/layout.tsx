@@ -39,6 +39,7 @@ import { FeedbackSection } from "@/components/feedback-section"
 import { SettingsSection } from "@/components/settings-section"
 import { AiSection } from "@/components/ai-section"
 import { FinderSection } from "@/components/finder-section"
+import { CampusMapSection } from "@/components/campus-map-section"
 
 const TAB_PAGE_MAP: Record<string, string> = {
   attendance: "My_Attendance",
@@ -52,6 +53,7 @@ const TAB_PAGE_MAP: Record<string, string> = {
   gradex: "gradex",
   updates: "updates",
   finder: "finder",
+  map: "map",
 }
 
 const SECTION_MAP: Record<TabType, (props: { onNavigate: (tab: TabType) => void; minimised: boolean; isActive: boolean }) => React.ReactNode> = {
@@ -72,6 +74,7 @@ const SECTION_MAP: Record<TabType, (props: { onNavigate: (tab: TabType) => void;
   settings:   (props) => <SettingsSection {...props} />,
   ai:         (props) => <AiSection {...props} />,
   finder:     ()      => <FinderSection />,
+  map:        ()      => <CampusMapSection />,
 }
 
 function DisabledPageOverlay({ reason }: { reason: string }) {

@@ -20,7 +20,9 @@
   "build": {
     "appId": "in.edutechsrm.desktop",
     "productName": "EduTechSRM",
-    "directories": { "output": "dist-electron" },
+    "directories": {
+      "output": "dist-electron"
+    },
     "files": [
       "electron/**/*",
       ".next/**/*",
@@ -30,9 +32,16 @@
       "node_modules/next/**/*",
       "!node_modules/**/*"
     ],
-    "extraResources": [ { "from": ".next", "to": ".next" } ],
+    "extraResources": [
+      {
+        "from": ".next",
+        "to": ".next"
+      }
+    ],
     "win": {
-      "target": ["nsis"],
+      "target": [
+        "nsis"
+      ],
       "icon": "public/icon-512-v2.png"
     },
     "nsis": {

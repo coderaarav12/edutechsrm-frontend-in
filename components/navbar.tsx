@@ -22,6 +22,7 @@ import {
   Megaphone,
   MessageSquareText,
   Moon,
+  Map as MapIcon,
   WifiOff,
   Settings,
   Sun,
@@ -57,6 +58,7 @@ type TabType =
   | "mess"
   | "finder"
   | "calculator"
+  | "map"
 
 interface NavbarProps {
   activeTab: string
@@ -81,12 +83,13 @@ const NAV = [
   { id: "feedback" as const, label: "Feedback", short: "Feedback", icon: MessageSquareText, color: "#fb923c" },
   { id: "about" as const, label: "Profile", short: "Me", icon: User, color: "#f472b6" },
   { id: "finder" as const, label: "Faculty Finder", short: "Finder", icon: IdCard, color: "#34d399" },
+  { id: "map" as const, label: "Campus Map", short: "Map", icon: MapIcon, color: "#38bdf8" },
   { id: "settings" as const, label: "App Setting", short: "Gear", icon: Settings, color: "#a78bfa" },
 ] as const
 
 function getCategoryItems(cat: string): readonly (typeof NAV)[number][] {
   if (cat === "academics") return NAV.filter((n) => n.id === "timetable" || n.id === "attendance" || n.id === "marks" || n.id === "courses" || n.id === "calendar" || n.id === "planner" || n.id === "gradex" || n.id === "notes")
-  if (cat === "tools") return NAV.filter((n) => n.id === "finder" || n.id === "calculator" || n.id === "mess")
+  if (cat === "tools") return NAV.filter((n) => n.id === "finder" || n.id === "calculator" || n.id === "mess" || n.id === "map")
   return NAV.filter((n) => n.id === "about" || n.id === "settings" || n.id === "updates" || n.id === "feedback")
 }
 
@@ -100,7 +103,7 @@ const MOBILE_TABS = [
 
 function tabCategory(tab: string): string | null {
   if (["timetable", "attendance", "marks", "courses", "calendar", "planner", "gradex", "notes"].includes(tab)) return "academics"
-  if (["finder", "calculator", "mess"].includes(tab)) return "tools"
+  if (["finder", "calculator", "mess", "map"].includes(tab)) return "tools"
   if (["about", "settings", "updates", "feedback"].includes(tab)) return "account"
   if (tab === "ai") return "ai"
   return null
@@ -123,6 +126,7 @@ const SUBTITLES: Record<TabType, string> = {
   feedback: "Send feedback",
   ai: "AI assistant & chat",
   finder: "Faculty staff room locator",
+  map: "Campus map & navigation",
 }
 
 function fmtDate(date: Date) {
@@ -700,7 +704,7 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
                     transition={{ duration: 0.15 }}
                     style={{
                       display: "grid",
-                      gridTemplateColumns: `repeat(${openCategory === "academics" ? 4 : openCategory === "tools" ? 3 : 4}, 1fr)`,
+                      gridTemplateColumns: `repeat(4, 1fr)`,
                       gap: 6,
                       justifyItems: "center",
                       paddingBottom: 4,

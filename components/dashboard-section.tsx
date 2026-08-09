@@ -17,6 +17,7 @@ import {
   FileText,
   Heart,
   IdCard,
+  Map as MapIcon,
   Megaphone,
   Palette,
   Pencil,
@@ -34,14 +35,14 @@ import { SupportModal } from "./support-modal"
 import { useSupport } from "@/lib/use-support"
 import { DEFAULT_ANNOUNCEMENTS } from "@/components/announcements"
 
-type TabType = "dashboard" | "timetable" | "attendance" | "courses" | "marks" | "calendar" | "gradex" | "about" | "notes" | "feedback" | "updates" | "settings" | "ai" | "finder" | "calculator"
+type TabType = "dashboard" | "timetable" | "attendance" | "courses" | "marks" | "calendar" | "gradex" | "about" | "notes" | "feedback" | "updates" | "settings" | "ai" | "finder" | "calculator" | "map"
 
 interface DashboardSectionProps {
   onNavigate: (tab: TabType) => void
 }
 
 const DOCK_APPS_KEY = "edutechsrm_dock_apps"
-const ALL_DOCK_APP_IDS = ["timetable", "attendance", "courses", "marks", "calendar", "mess", "gradex", "notes", "finder", "calculator", "ai", "about"]
+const ALL_DOCK_APP_IDS = ["timetable", "attendance", "courses", "marks", "calendar", "mess", "gradex", "notes", "finder", "calculator", "ai", "about", "map"]
 
 const NAV_ITEMS = [
   { id: "timetable" as const, icon: Clock3, color: "#22d3ee", label: "Timetable" },
@@ -54,6 +55,7 @@ const NAV_ITEMS = [
   { id: "notes" as const, icon: FileText, color: "#10b981", label: "Notes" },
   { id: "finder" as const, icon: IdCard, color: "#34d399", label: "Faculty Finder" },
   { id: "calculator" as const, icon: Calculator, color: "#f59e0b", label: "Calculator" },
+  { id: "map" as const, icon: MapIcon, color: "#38bdf8", label: "Campus Map" },
   { id: "ai" as const, icon: Bot, color: "#a78bfa", label: "AI" },
   { id: "about" as const, icon: ClipboardCheck, color: "#f97316", label: "Assignments" },
 ]
@@ -578,7 +580,27 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
           )}
         </div>
 
-        <div className="-mt-6">
+        <div className="-mt-6 space-y-3">
+          <button
+            onClick={() => onNavigate("map")}
+            className="w-full group rounded-2xl border overflow-hidden transition-all duration-200 active:scale-[0.98]"
+            style={{
+              background: "var(--card-bg, rgba(24,24,27,0.7))",
+              borderColor: "rgba(56,189,248,0.18)",
+              WebkitTapHighlightColor: "transparent",
+            }}
+          >
+            <div className="flex items-center gap-2.5 px-4 py-3">
+              <div className="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(56,189,248,0.12)" }}>
+                <MapIcon className="w-3.5 h-3.5" style={{ color: "#38bdf8" }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold leading-snug" style={{ color: "var(--text-primary, #f4f4f5)" }}>Explore Campus</p>
+                <p className="text-[11px] truncate" style={{ color: "var(--text-faint, #52525b)" }}>Blocks, hostels, food & more around SRM</p>
+              </div>
+              <ChevronRight className="w-3.5 h-3.5 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" style={{ color: "var(--text-faint, #52525b)" }} />
+            </div>
+          </button>
           <AiQuickInput onNavigate={onNavigate} />
         </div>
 

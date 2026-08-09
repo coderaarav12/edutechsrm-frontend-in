@@ -28,6 +28,7 @@ const REDIRECT_TABS: { keywords: string[]; tab: TabType; label: string }[] = [
   { keywords: ["mark", "score", "grade", "internal", "assessment"], tab: "marks", label: "Marks" },
   { keywords: ["calendar", "event", "holiday", "exam", "sessional", "endsem"], tab: "calendar", label: "Calendar" },
   { keywords: ["notes", "pyq", "study", "previous year", "exam prep", "revision", "practice", "question", "material", "subject", "tutorial", "reference"], tab: "notes", label: "Notes & PYQs" },
+  { keywords: ["campus map", "map", "building", "block", "hostel", "location", "navigate", "directions", "where is", "auditorium", "library", "sports complex"], tab: "map", label: "Campus Map" },
 ]
 
 function getRedirects(text: string): { tab: TabType; label: string }[] {
@@ -342,7 +343,7 @@ function MarkdownContent({ content }: { content: string }) {
   )
 }
 
-type TabType = "dashboard" | "timetable" | "attendance" | "courses" | "marks" | "calendar" | "gradex" | "about" | "planner" | "notes" | "updates" | "feedback" | "settings" | "ai"
+type TabType = "dashboard" | "timetable" | "attendance" | "courses" | "marks" | "calendar" | "gradex" | "about" | "planner" | "notes" | "updates" | "feedback" | "settings" | "ai" | "map"
 
 export function AiSection({ onNavigate, minimised, isActive }: { onNavigate?: (tab: TabType) => void; minimised?: boolean; isActive?: boolean }) {
   const { user, timetable, attendance, marks, calendar, timetableMetadata, isBackgroundSyncing, refreshData, courses, dateToDoMap } = useAuth() as any
