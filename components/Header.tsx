@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { useAuth } from "@/lib/auth-context"
-import { ArrowRight, Book, Home, Info, LayoutDashboard, Mail, Scale, Shield, Smartphone, X } from "lucide-react"
+import { ArrowRight, Book, Home, Info, LayoutDashboard, Mail, MapPin, Scale, Shield, Smartphone, X } from "lucide-react"
 import { QrCode } from "./qr-code"
 
 interface HeaderProps {
@@ -35,6 +35,7 @@ export function Header({ onLoginClick }: HeaderProps = {}) {
 
   const navLinks = [
     { href: "/home", label: "Home", icon: Home },
+    { href: "/explore", label: "Explore Map", icon: MapPin },
     { href: "/about", label: "About", icon: Info },
     { href: "/docs", label: "Docs", icon: Book },
     { href: "/download", label: "Download", icon: Smartphone },

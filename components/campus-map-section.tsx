@@ -170,15 +170,27 @@ function GroupHeader({ kind, count, open, onToggle }: { kind: GroupKey; count: n
   )
 }
 
-export function CampusMapSection() {
-  const [selectedId, setSelectedId] = useState<number | null>(null)
+export function CampusMapSection({
+  standalone = false,
+  initialQuery = "",
+  initialCategory = "all",
+  initialBuildingId = null,
+}: {
+  standalone?: boolean
+  initialQuery?: string
+  initialCategory?: CategoryFilter
+  initialBuildingId?: number | null
+}) {
+  const [selectedId, setSelectedId] = useState<number | null>(initialBuildingId)
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null)
   const [posStatus, setPosStatus] = useState<"idle" | "loading" | "denied" | "unsupported">("idle")
-  const [searchQuery, setSearchQuery] = useState("")
+  const [searchQuery, setSearchQuery] = useState(initialQuery)
   const [searchFocused, setSearchFocused] = useState(false)
-  const [category, setCategory] = useState<CategoryFilter>("all")
+  const [category, setCategory] = useState<CategoryFilter>(initialCategory)
   const [sortNearest, setSortNearest] = useState(false)
-  const [groupOverrides, setGroupOverrides] = useState<Record<string, boolean>>({})
+  const [groupOverrides, setGroupOverrides] = useState<Record<string, boolean>>(() =>
+    initialBuildingId ? { [BUILDINGS.find((b) => b.id === initialBuildingId)?.category ?? "academic"]: true } : {},
+  )
   const selectedRef = useRef<HTMLDivElement | null>(null)
   const mapWrapRef = useRef<HTMLDivElement | null>(null)
   const [mapBoxHeight, setMapBoxHeight] = useState(0)
@@ -344,7 +356,7 @@ export function CampusMapSection() {
   const showNoResults = filteredBuildings.length === 0 && (searchQuery.trim() || category !== "all")
 
   return (
-    <div className="min-h-full pt-[3.75rem] pb-[calc(5rem+env(safe-area-inset-bottom))] px-3 sm:px-4 lg:px-8 lg:pb-8 w-full">
+    <div className="min-h-full pt-[3.75rem] pb-[calc(5rem+env(safe-area-inset-bottom))] px-3 sm:px-4 lg:px-8 lg:pb-8 w-full" style={standalone ? { paddingTop: "5.5rem", paddingBottom: "3rem" } : undefined}>
       <div className="flex justify-between items-start mb-4">
         <div>
           <p className="text-zinc-500 font-bold text-[10px] uppercase tracking-widest mb-1">Campus</p>
@@ -356,7 +368,7 @@ export function CampusMapSection() {
       {/* Sticky search + filters */}
       <div
         className="sticky top-[52px] z-30 -mx-3 px-3 sm:-mx-4 sm:px-4 lg:mx-0 lg:px-0 pt-1.5 pb-2.5"
-        style={{ background: "var(--page-bg, #09090b)", backdropFilter: "blur(12px)" }}
+        style={{ background: "var(--page-bg, #09090b)", backdropFilter: "blur(12px)", top: standalone ? 68 : 52 }}
       >
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
@@ -459,9 +471,9 @@ export function CampusMapSection() {
       {/* Map + list */}
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-6 lg:items-start">
         {/* Map */}
-        <div ref={mapWrapRef} className="lg:sticky lg:top-[140px]">
+        <div ref={mapWrapRef} className="lg:sticky" style={{ top: standalone ? 156 : 140 }}>
           <div
-            className="campus-map-wrap relative rounded-2xl overflow-hidden h-[38vh] min-h-[300px] max-h-[460px] lg:h-[calc(100vh-170px)] lg:max-h-none isolate z-0"
+            className="campus-map-wrap relative rounded-2xl overflow-hidden h-[38vh] min-h-[300px] max-h-[460px] lg:h-[52vh] lg:min-h-[400px] lg:max-h-[540px] isolate z-0"
             style={{ background: "#0f172a", border: "1px solid rgba(255,255,255,0.06)" }}
           >
             <MapView buildings={BUILDINGS} selectedId={selectedId} userPos={userPos} onSelect={handleMapSelect} />
