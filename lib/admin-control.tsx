@@ -29,6 +29,53 @@ interface AdminAnalytics {
   logs: AdminLogItem[]
 }
 
+interface MobileAppChangelogEntry {
+  version: string
+  code: number
+  date: string
+  changes: string[]
+}
+
+interface MobileAppSettings {
+  announcement: {
+    enabled: boolean
+    title: string
+    body: string
+    imageUrl: string
+    createdAt: string
+  }
+  update: {
+    enabled: boolean
+    latestVersion: string
+    latestVersionCode: number
+    minVersionCode: number
+    forceUpdate: boolean
+    updateUrl: string
+    changelog: MobileAppChangelogEntry[]
+  }
+  updatedAt: string
+}
+
+const DEFAULT_MOBILE_APP_SETTINGS: MobileAppSettings = {
+  announcement: {
+    enabled: false,
+    title: "",
+    body: "",
+    imageUrl: "",
+    createdAt: "",
+  },
+  update: {
+    enabled: true,
+    latestVersion: "1.1.0",
+    latestVersionCode: 14,
+    minVersionCode: 14,
+    forceUpdate: false,
+    updateUrl: "https://play.google.com/store/apps/details?id=in.edutechsrm.app",
+    changelog: [],
+  },
+  updatedAt: "",
+}
+
 interface AdminControlContextValue {
   isManagerOpen: boolean
   isAdminAuthenticated: boolean
@@ -38,6 +85,7 @@ interface AdminControlContextValue {
   analytics: AdminAnalytics
   announcements: Announcement[]
   disabledPages: { page: string; reason: string }[]
+  mobileAppSettings: MobileAppSettings
   feedback: any[]
   payments: any[]
   fetchPayments: () => Promise<void>
@@ -48,6 +96,8 @@ interface AdminControlContextValue {
   refreshAdminStatus: () => Promise<void>
   refreshAnnouncements: () => Promise<void>
   fetchDisabledPages: () => Promise<void>
+  fetchMobileAppSettings: () => Promise<void>
+  updateMobileAppSettings: (settings: Partial<MobileAppSettings>) => Promise<{ success: boolean; error?: string }>
   fetchFeedback: () => Promise<void>
   logoutAllUsers: () => Promise<{ success: boolean; error?: string; deletedCount?: number }>
   logoutUser: (username: string) => Promise<{ success: boolean; error?: string; deletedCount?: number; matchedUsers?: string[] }>
@@ -90,6 +140,7 @@ export function AdminControlProvider({ children }: { children: ReactNode }) {
   })
   const [announcements, setAnnouncements] = useState<Announcement[]>(DEFAULT_ANNOUNCEMENTS)
   const [disabledPages, setDisabledPages] = useState<{ page: string; reason: string }[]>([])
+  const [mobileAppSettings, setMobileAppSettings] = useState<MobileAppSettings>(DEFAULT_MOBILE_APP_SETTINGS)
   const [feedback, setFeedback] = useState<any[]>([])
   const [payments, setPayments] = useState<any[]>([])
   const updateReloadStartedRef = useRef(false)
@@ -232,6 +283,57 @@ export function AdminControlProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  const fetchMobileAppSettings = useCallback(async () => {
+    const token = localStorage.getItem(STORAGE_KEY)
+    try {
+      const response = await fetch("/api/admin/mobile-app-settings", {
+        cache: "no-store",
+        headers: token ? { "x-admin-token": token } : undefined,
+      })
+      const data = await response.json() as LooseJson
+      if (response.ok && data?.settings) {
+        setMobileAppSettings((prev) => ({
+          announcement: { ...prev.announcement, ...(data.settings.announcement ?? {}) },
+          update: { ...prev.update, ...(data.settings.update ?? {}) },
+          updatedAt: typeof data.settings.updatedAt === "string" ? data.settings.updatedAt : prev.updatedAt,
+        }))
+      }
+    } catch {
+      // best effort
+    }
+  }, [])
+
+  const updateMobileAppSettings = useCallback(async (settings: Partial<MobileAppSettings>) => {
+    const token = localStorage.getItem(STORAGE_KEY)
+    if (!token) return { success: false, error: "Admin session missing" }
+
+    setAdminLoading(true)
+    try {
+      const response = await fetch("/api/admin/mobile-app-settings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-token": token,
+        },
+        body: JSON.stringify({ settings }),
+      })
+      const data = await response.json() as LooseJson
+      if (!response.ok) return { success: false, error: data?.error || "Failed to save mobile app settings" }
+      if (data?.settings) {
+        setMobileAppSettings((prev) => ({
+          announcement: { ...prev.announcement, ...(data.settings.announcement ?? {}) },
+          update: { ...prev.update, ...(data.settings.update ?? {}) },
+          updatedAt: typeof data.settings.updatedAt === "string" ? data.settings.updatedAt : prev.updatedAt,
+        }))
+      }
+      return { success: true }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : "Failed to save mobile app settings" }
+    } finally {
+      setAdminLoading(false)
+    }
+  }, [])
+
   const fetchFeedback = useCallback(async () => {
     if (!adminToken) return
     try {
@@ -266,9 +368,10 @@ export function AdminControlProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     void fetchDisabledPages()
+    void fetchMobileAppSettings()
     void fetchFeedback()
     void fetchPayments()
-  }, [fetchDisabledPages, fetchFeedback, fetchPayments])
+  }, [fetchDisabledPages, fetchMobileAppSettings, fetchFeedback, fetchPayments])
 
   useEffect(() => {
     const poll = () => {
@@ -561,6 +664,7 @@ export function AdminControlProvider({ children }: { children: ReactNode }) {
     analytics,
     announcements,
     disabledPages,
+    mobileAppSettings,
     openManager: () => setIsManagerOpen(true),
     closeManager: () => setIsManagerOpen(false),
     adminLogin,
@@ -568,6 +672,8 @@ export function AdminControlProvider({ children }: { children: ReactNode }) {
     refreshAdminStatus,
     refreshAnnouncements,
     fetchDisabledPages,
+    fetchMobileAppSettings,
+    updateMobileAppSettings,
     logoutAllUsers,
     logoutUser,
     setMaintenanceMode,
@@ -588,6 +694,7 @@ export function AdminControlProvider({ children }: { children: ReactNode }) {
     analytics,
     announcements,
     disabledPages,
+    mobileAppSettings,
     feedback,
     payments,
     adminLogin,
@@ -595,6 +702,8 @@ export function AdminControlProvider({ children }: { children: ReactNode }) {
     refreshAdminStatus,
     refreshAnnouncements,
     fetchDisabledPages,
+    fetchMobileAppSettings,
+    updateMobileAppSettings,
     fetchFeedback,
     fetchPayments,
     logoutAllUsers,

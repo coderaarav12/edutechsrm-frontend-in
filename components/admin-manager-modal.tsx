@@ -1,15 +1,16 @@
 "use client"
 
-import { useEffect, useState, useMemo, useCallback } from "react"
+import { useEffect, useState, useMemo, useCallback, useRef } from "react"
 import {
   AlertCircle, Loader2, Shield, Trash2, X,
   BarChart3, MessageSquareText, Megaphone, Ban, Users, Wrench,
-  EyeOff, LogOut, UserX2, Check, Key,
+  EyeOff, LogOut, UserX2, Check, Key, Smartphone, Megaphone as AnnounceIcon,
+  UploadCloud, ImageOff, Plus, Save,
 } from "lucide-react"
 import { useAdminControl } from "@/lib/admin-control"
 import type { AnnouncementType } from "./announcements"
 
-export type AdminTabType = "analytics" | "announcements" | "pages" | "sessions" | "feedback" | "api-keys" | "payments"
+export type AdminTabType = "analytics" | "announcements" | "pages" | "sessions" | "feedback" | "api-keys" | "payments" | "mobile-app"
 type TabType = AdminTabType
 
 export const ADMIN_TABS: Array<{ id: AdminTabType; label: string; icon: any; color: string }> = [
@@ -19,6 +20,7 @@ export const ADMIN_TABS: Array<{ id: AdminTabType; label: string; icon: any; col
   { id: "feedback", label: "Feedback", icon: MessageSquareText, color: "#fbbf24" },
   { id: "payments", label: "Payments", icon: Wrench, color: "#34d399" },
   { id: "pages", label: "Pages", icon: Ban, color: "#f87171" },
+  { id: "mobile-app", label: "Mobile App", icon: Smartphone, color: "#22d3ee" },
   { id: "api-keys", label: "API Keys", icon: Key, color: "#f472b6" },
 ]
 
@@ -28,6 +30,7 @@ const TABS: Array<{ id: TabType; label: string; icon: any; color: string }> = [
   { id: "pages", label: "Pages", icon: Ban, color: "#f87171" },
   { id: "sessions", label: "Sessions", icon: Users, color: "#a78bfa" },
   { id: "feedback", label: "Feedback", icon: MessageSquareText, color: "#fbbf24" },
+  { id: "mobile-app", label: "Mobile App", icon: Smartphone, color: "#22d3ee" },
   { id: "api-keys", label: "API Keys", icon: Key, color: "#f472b6" },
   { id: "payments", label: "Payments", icon: Wrench, color: "#34d399" },
 ]
@@ -318,6 +321,274 @@ export function PagesTab({
   )
 }
 
+export function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <button onClick={() => onChange(!checked)}
+      className="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-0 transition-colors duration-200"
+      style={{ background: checked ? "#22d3ee" : "rgba(255,255,255,0.08)" }}>
+      <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200" style={{ margin: "2px", transform: checked ? "translateX(14px)" : "translateX(0)" }} />
+    </button>
+  )
+}
+
+export function MobileAppSettingsTab({
+  mobileAppSettings, updateMobileAppSettings, adminLoading,
+}: any) {
+  const [annEnabled, setAnnEnabled] = useState(Boolean(mobileAppSettings?.announcement?.enabled))
+  const [annTitle, setAnnTitle] = useState(mobileAppSettings?.announcement?.title || "")
+  const [annBody, setAnnBody] = useState(mobileAppSettings?.announcement?.body || "")
+  const [annImage, setAnnImage] = useState(mobileAppSettings?.announcement?.imageUrl || "")
+  const [annSaving, setAnnSaving] = useState(false)
+  const [annStatus, setAnnStatus] = useState<{ text: string; error: boolean } | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  const [updEnabled, setUpdEnabled] = useState(Boolean(mobileAppSettings?.update?.enabled))
+  const [latestVersion, setLatestVersion] = useState(mobileAppSettings?.update?.latestVersion || "1.1.0")
+  const [latestVersionCode, setLatestVersionCode] = useState(String(mobileAppSettings?.update?.latestVersionCode ?? 14))
+  const [minVersionCode, setMinVersionCode] = useState(String(mobileAppSettings?.update?.minVersionCode ?? 14))
+  const [forceUpdate, setForceUpdate] = useState(Boolean(mobileAppSettings?.update?.forceUpdate))
+  const [updateUrl, setUpdateUrl] = useState(mobileAppSettings?.update?.updateUrl || "https://play.google.com/store/apps/details?id=in.edutechsrm.app")
+  const [changelog, setChangelog] = useState<Array<{ version: string; code: number; date: string; changes: string[] }>>(
+    Array.isArray(mobileAppSettings?.update?.changelog) ? mobileAppSettings.update.changelog : []
+  )
+  const [updSaving, setUpdSaving] = useState(false)
+  const [updStatus, setUpdStatus] = useState<{ text: string; error: boolean } | null>(null)
+
+  useEffect(() => {
+    if (!mobileAppSettings) return
+    setAnnEnabled(Boolean(mobileAppSettings.announcement?.enabled))
+    setAnnTitle(mobileAppSettings.announcement?.title || "")
+    setAnnBody(mobileAppSettings.announcement?.body || "")
+    setAnnImage(mobileAppSettings.announcement?.imageUrl || "")
+    setUpdEnabled(Boolean(mobileAppSettings.update?.enabled))
+    setLatestVersion(mobileAppSettings.update?.latestVersion || "1.1.0")
+    setLatestVersionCode(String(mobileAppSettings.update?.latestVersionCode ?? 14))
+    setMinVersionCode(String(mobileAppSettings.update?.minVersionCode ?? 14))
+    setForceUpdate(Boolean(mobileAppSettings.update?.forceUpdate))
+    setUpdateUrl(mobileAppSettings.update?.updateUrl || "")
+    setChangelog(Array.isArray(mobileAppSettings.update?.changelog) ? mobileAppSettings.update.changelog : [])
+  }, [mobileAppSettings])
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith("image/")) { setAnnStatus({ text: "Please select an image file", error: true }); return }
+    if (file.size > 3 * 1024 * 1024) { setAnnStatus({ text: "Image must be under 3MB", error: true }); return }
+    const reader = new FileReader()
+    reader.onload = () => { if (typeof reader.result === "string") setAnnImage(reader.result) }
+    reader.readAsDataURL(file)
+  }
+
+  const saveAnnouncement = async () => {
+    setAnnSaving(true)
+    setAnnStatus(null)
+    const r = await updateMobileAppSettings({
+      announcement: { enabled: annEnabled, title: annTitle.trim(), body: annBody.trim(), imageUrl: annImage.trim() },
+    })
+    if (!r.success) { setAnnStatus({ text: r.error || "Failed to save", error: true }) }
+    else { setAnnStatus({ text: "Announcement saved — it will appear on the next app launch", error: false }) }
+    setAnnSaving(false)
+  }
+
+  const saveUpdate = async () => {
+    setUpdSaving(true)
+    setUpdStatus(null)
+    const code = parseInt(latestVersionCode, 10)
+    const minCode = parseInt(minVersionCode, 10)
+    const r = await updateMobileAppSettings({
+      update: {
+        enabled: updEnabled,
+        latestVersion: latestVersion.trim() || "1.0.0",
+        latestVersionCode: Number.isFinite(code) ? code : 1,
+        minVersionCode: Number.isFinite(minCode) ? minCode : code,
+        forceUpdate,
+        updateUrl: updateUrl.trim(),
+        changelog,
+      },
+    })
+    if (!r.success) { setUpdStatus({ text: r.error || "Failed to save", error: true }) }
+    else { setUpdStatus({ text: "Update settings saved — the update popup will reflect these values", error: false }) }
+    setUpdSaving(false)
+  }
+
+  const addChangelog = () => {
+    const version = latestVersion.trim() || `1.0.${changelog.length + 1}`
+    setChangelog((prev) => [{ version, code: parseInt(latestVersionCode, 10) || 1, date: new Date().toISOString().slice(0, 10), changes: [] }, ...prev])
+  }
+
+  const updateChangelog = (index: number, patch: Partial<{ version: string; code: number; date: string; changes: string[] }>) => {
+    setChangelog((prev) => prev.map((item, i) => (i === index ? { ...item, ...patch } : item)))
+  }
+
+  const removeChangelog = (index: number) => {
+    setChangelog((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  const flash = (s: { text: string; error: boolean } | null) => {
+    if (!s) return null
+    return (
+      <div className="px-4 py-3 rounded-xl text-sm flex items-center gap-2" style={{ background: s.error ? "rgba(248,113,113,0.1)" : "rgba(52,211,153,0.1)", color: s.error ? "#fda4af" : "#34d399" }}>
+        {s.error ? <AlertCircle className="w-4 h-4 shrink-0" /> : <Check className="w-4 h-4 shrink-0" />}
+        {s.text}
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* ── App announcement ── */}
+      <Card>
+        <div className="flex items-start justify-between mb-5">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(34,211,238,0.12)", color: "#22d3ee" }}>
+              <AnnounceIcon className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-zinc-100 tracking-tight font-display">App Announcement</h3>
+              <p className="text-[10px] text-zinc-500 mt-0.5">Shown as a banner on the Android app's home screen at launch</p>
+            </div>
+          </div>
+          <Toggle checked={annEnabled} onChange={setAnnEnabled} />
+        </div>
+
+        <div className="space-y-3">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Title</p>
+            <Input value={annTitle} onChange={(e: any) => setAnnTitle(e.target.value)} placeholder="e.g. Mid-term exam schedule is live" />
+          </div>
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Message</p>
+            <Textarea value={annBody} onChange={(e: any) => setAnnBody(e.target.value)} rows={3} placeholder="Write the announcement message students should see..." />
+          </div>
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Image (optional)</p>
+            <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
+            {annImage ? (
+              <div className="relative overflow-hidden rounded-xl ring-1 ring-white/10">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={annImage} alt="Announcement preview" className="w-full h-40 object-cover" />
+                <button onClick={() => { setAnnImage(""); setAnnStatus(null) }}
+                  className="absolute top-2 right-2 w-7 h-7 rounded-lg flex items-center justify-center text-zinc-300 bg-black/60 hover:bg-red-500/70 transition-all">
+                  <ImageOff className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <button onClick={() => fileRef.current?.click()}
+                className="w-full flex flex-col items-center justify-center gap-2 py-6 rounded-xl border border-dashed border-white/10 hover:border-cyan-400/40 hover:bg-cyan-400/5 transition-all text-zinc-500">
+                <UploadCloud className="w-5 h-5" />
+                <span className="text-xs font-semibold">Click to attach an announcement image (max 3MB)</span>
+              </button>
+            )}
+          </div>
+          <button onClick={saveAnnouncement} disabled={adminLoading || annSaving || (!annTitle.trim() && !annBody.trim())}
+            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-xs uppercase tracking-wider transition-all"
+            style={{ background: "rgba(34,211,238,0.15)", color: "#67e8f9", opacity: adminLoading || annSaving ? 0.4 : 1 }}>
+            {annSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+            {annSaving ? "Saving..." : "Save Announcement"}
+          </button>
+          {flash(annStatus)}
+        </div>
+      </Card>
+
+      {/* ── Update / version popup ── */}
+      <Card>
+        <div className="flex items-start justify-between mb-5">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(52,211,153,0.12)", color: "#34d399" }}>
+              <Smartphone className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-zinc-100 tracking-tight font-display">Update Notification</h3>
+              <p className="text-[10px] text-zinc-500 mt-0.5">Controls the "Update Available" popup and what users see in it</p>
+            </div>
+          </div>
+          <Toggle checked={updEnabled} onChange={setUpdEnabled} />
+        </div>
+
+        <div className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Latest Version</p>
+              <Input value={latestVersion} onChange={(e: any) => setLatestVersion(e.target.value)} placeholder="1.1.0" />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Version Code</p>
+              <Input value={latestVersionCode} onChange={(e: any) => setLatestVersionCode(e.target.value.replace(/\D/g, ""))} placeholder="14" inputMode="numeric" />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Min Version Code</p>
+              <Input value={minVersionCode} onChange={(e: any) => setMinVersionCode(e.target.value.replace(/\D/g, ""))} placeholder="14" inputMode="numeric" />
+            </div>
+          </div>
+          <p className="text-[10px] text-zinc-600 -mt-1">The popup appears when a user's app version is below <span className="text-zinc-400 font-mono">Latest Version Code</span>. If their version is below <span className="text-zinc-400 font-mono">Min Version Code</span>, the update is forced.</p>
+
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Update Link</p>
+            <Input value={updateUrl} onChange={(e: any) => setUpdateUrl(e.target.value)} placeholder="https://play.google.com/store/apps/details?id=in.edutechsrm.app" />
+          </div>
+
+          <div className="flex items-center justify-between px-4 py-3 rounded-xl" style={{ background: "rgba(251,191,36,0.07)", border: "1px solid rgba(251,191,36,0.15)" }}>
+            <div>
+              <p className="text-xs font-semibold text-zinc-200">Force update</p>
+              <p className="text-[10px] text-zinc-500 mt-0.5">Block usage until the user updates the app</p>
+            </div>
+            <Toggle checked={forceUpdate} onChange={setForceUpdate} />
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">What's new (changelog)</p>
+              <button onClick={addChangelog}
+                className="flex items-center gap-1.5 py-1.5 px-3 rounded-lg text-[10px] font-bold uppercase tracking-wider text-cyan-400 hover:bg-cyan-400/10 transition-all">
+                <Plus className="w-3 h-3" /> Add version
+              </button>
+            </div>
+            {changelog.length === 0 ? (
+              <p className="text-xs text-zinc-600 text-center py-4 rounded-xl bg-zinc-900/40 ring-1 ring-white/5">No changelog entries yet</p>
+            ) : (
+              <div className="space-y-2">
+                {changelog.map((entry, index) => (
+                  <div key={`${entry.version}-${index}`} className="px-4 py-3 rounded-xl bg-zinc-900/60 ring-1 ring-white/5">
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold px-2 py-0.5 rounded-md font-mono" style={{ background: "rgba(52,211,153,0.12)", color: "#34d399" }}>v{entry.version || "—"}</span>
+                        <span className="text-[10px] text-zinc-500 font-mono">code {entry.code}</span>
+                        <span className="text-[10px] text-zinc-600">{entry.date || "—"}</span>
+                      </div>
+                      <button onClick={() => removeChangelog(index)} className="w-6 h-6 rounded-md flex items-center justify-center text-zinc-600 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 mb-2">
+                      <Input value={entry.version} onChange={(e: any) => updateChangelog(index, { version: e.target.value })} placeholder="1.2.0" className="!py-2 !text-xs" />
+                      <Input value={String(entry.code)} onChange={(e: any) => updateChangelog(index, { code: parseInt(e.target.value.replace(/\D/g, ""), 10) || 0 })} placeholder="15" inputMode="numeric" className="!py-2 !text-xs" />
+                    </div>
+                    <Textarea
+                      value={entry.changes.join("\n")}
+                      onChange={(e: any) => updateChangelog(index, { changes: e.target.value.split("\n").map((l: string) => l.trim()).filter(Boolean) })}
+                      rows={2}
+                      placeholder={"One feature per line:\nNew dashboard customization\nFaster login"}
+                      className="!py-2 !text-xs"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <button onClick={saveUpdate} disabled={adminLoading || updSaving}
+            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-xs uppercase tracking-wider transition-all"
+            style={{ background: "rgba(52,211,153,0.15)", color: "#6ee7b7", opacity: adminLoading || updSaving ? 0.4 : 1 }}>
+            {updSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+            {updSaving ? "Saving..." : "Save Update Settings"}
+          </button>
+          {flash(updStatus)}
+        </div>
+      </Card>
+    </div>
+  )
+}
+
 export function SessionsTab({ handleLogoutAll, handleLogoutUser, targetUsername, setTargetUsername, adminLoading }: any) {
   return (
     <div className="space-y-6 lg:space-y-8">
@@ -511,9 +782,10 @@ export function AdminManagerModal() {
   const {
     isManagerOpen, closeManager, isAdminAuthenticated, adminLoading,
     adminLogout, maintenance, analytics, announcements,
-    disabledPages, feedback, setMaintenanceMode,
+    disabledPages, mobileAppSettings, feedback, setMaintenanceMode,
     addAnnouncement, deleteAnnouncement,
     addDisabledPage, removeDisabledPage,
+    updateMobileAppSettings,
     logoutAllUsers, logoutUser,
   } = useAdminControl()
 
@@ -691,6 +963,13 @@ export function AdminManagerModal() {
                 )}
                 {activeTab === "feedback" && <FeedbackTab feedback={feedback} />}
                 {activeTab === "api-keys" && <ApiKeysTab />}
+                {activeTab === "mobile-app" && (
+                  <MobileAppSettingsTab
+                    mobileAppSettings={mobileAppSettings}
+                    updateMobileAppSettings={updateMobileAppSettings}
+                    adminLoading={adminLoading}
+                  />
+                )}
               </div>
 
               {/* ── Footer ── */}

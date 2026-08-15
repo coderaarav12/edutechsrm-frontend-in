@@ -12,7 +12,7 @@ import { AdminNavbar } from "@/components/admin-navbar"
 import type { AdminTabType } from "@/components/admin-manager-modal"
 import {
   AnalyticsTab, AnnouncementsTab, PagesTab, SessionsTab,
-  FeedbackTab, PaymentsTab, ApiKeysTab, ADMIN_TABS,
+  FeedbackTab, PaymentsTab, ApiKeysTab, MobileAppSettingsTab, ADMIN_TABS,
 } from "@/components/admin-manager-modal"
 import type { AnnouncementType } from "@/components/announcements"
 
@@ -33,9 +33,10 @@ export default function AdminPortalPage() {
   const {
     isAdminAuthenticated, adminLoading, adminLogin, adminLogout,
     refreshAdminStatus, analytics, maintenance, announcements,
-    disabledPages, feedback, setMaintenanceMode,
+    disabledPages, mobileAppSettings, feedback, setMaintenanceMode,
     addAnnouncement, deleteAnnouncement,
     addDisabledPage, removeDisabledPage,
+    updateMobileAppSettings,
     logoutAllUsers, logoutUser,
     payments, fetchPayments,
   } = useAdminControl()
@@ -206,6 +207,14 @@ export default function AdminPortalPage() {
         return <FeedbackTab feedback={feedback} />
       case "payments":
         return <PaymentsTab payments={payments} />
+      case "mobile-app":
+        return (
+          <MobileAppSettingsTab
+            mobileAppSettings={mobileAppSettings}
+            updateMobileAppSettings={updateMobileAppSettings}
+            adminLoading={adminLoading}
+          />
+        )
       case "api-keys":
         return <ApiKeysTab />
     }
