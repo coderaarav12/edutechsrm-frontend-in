@@ -1,11 +1,11 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Bot, CheckCircle2, Database, Eye, Lock, Mail, Shield, Sparkles } from "lucide-react"
+import { Bot, CheckCircle2, Database, Eye, Lock, Mail, MapPin, Shield, Sparkles } from "lucide-react"
 import { Header } from "@/components/Header"
 import { PublicFooter } from "@/components/public-footer"
 
-const updatedAt = "July 2, 2026"
+const updatedAt = "August 16, 2026"
 
 const commitments = [
   "Your SRM password is never stored by edutechsrm.",
@@ -29,6 +29,7 @@ const sections = [
       "Payment information if you choose to support the project. Razorpay processes all payments securely in a WebView; edutechsrm does not store your card or UPI details but retains a record of the transaction for support purposes.",
       "Support or feedback details if you contact us.",
       "Basic technical metadata such as browser, device, IP address, and usage events for reliability, security, and abuse prevention.",
+      "Your device location (approximate or precise) when you use the interactive campus map feature to find nearby buildings, calculate distances, and get directions. Location access is entirely optional and is only used while the map feature is active.",
     ],
   },
   {
@@ -39,6 +40,7 @@ const sections = [
       "To keep your session active until logout or expiry.",
       "To power AI features — academic context (timetable, attendance, marks, courses, profile) is sent to the AI backend only when you use the AI chatbot.",
       "To send push notifications for low attendance warnings or class reminders (if enabled).",
+      "To calculate your distance from campus buildings and provide directions when you use the campus map explorer.",
       "To improve performance, debug issues, prevent abuse, and maintain platform security.",
       "To answer support messages and publish important updates.",
     ],
@@ -88,28 +90,41 @@ const sections = [
     ],
   },
   {
-    title: "7. Third-Party Services",
+    title: "7. Location Data (Campus Map)",
+    body: [
+      "The interactive campus map feature on both the website (edutechsrm.in/explore) and the Android app may request access to your device's location to show nearby buildings and calculate distances.",
+      "Location access is entirely optional — you can use the campus map without granting location permission, but distance and 'nearest' sorting will be unavailable.",
+      "When granted, your location is processed locally on your device using the browser or Android geolocation API. Your coordinates are not sent to or stored on edutechsrm servers.",
+      "Location data is used only to compute the distance between your position and campus building coordinates (haversine formula) and to generate navigation URLs when you tap 'Get Directions'.",
+      "No location history is tracked, stored, or transmitted. Location is read only while the map feature is actively in use and is discarded immediately when you navigate away.",
+      "The campus map uses publicly available coordinates from OpenStreetMap for 171 building and landmark entries across the SRM Kattankulathur campus.",
+    ],
+  },
+  {
+    title: "8. Third-Party Services",
     body: [
       "SRM Academia is used to verify credentials and fetch official academic data.",
       "Cloudflare is used for hosting, security, routing, DNS, and serverless workers (backend API).",
       "AI infrastructure (Cloudflare Workers AI / external LLM providers) is used for chatbot responses when you choose to use AI features.",
       "Razorpay is used for processing support/donation payments. No sensitive payment details are stored by edutechsrm.",
+      "Google Maps is used to embed interactive campus maps and provide navigation directions. Google's privacy policy applies when you open directions in Google Maps.",
       "Vercel is used for frontend hosting and deployment.",
     ],
   },
   {
-    title: "8. Your Choices and Rights",
+    title: "9. Your Choices and Rights",
     body: [
       "You can log out at any time to clear the active session and all locally stored data.",
       "You can clear browser storage or app data to remove locally cached dashboard data, notes, tasks, and planner entries.",
       "You can contact admin@edutechsrm.in to request deletion of server-stored data, access your data, or ask privacy questions.",
       "You can choose not to use the AI chatbot — your academic data will not be sent to any AI provider.",
       "You can enable or disable push notifications at any time via the app settings.",
+      "You can grant or deny location access at any time — the campus map works without it, just without distance and nearest-building features.",
       "You should never share your SRM password over email, chat, or support messages.",
     ],
   },
   {
-    title: "9. Retention",
+    title: "10. Retention",
     body: [
       "Session tokens remain until logout, expiry, or replacement.",
       "Locally cached academic data remains in your browser until cleared or replaced by fresh sync data.",
@@ -120,14 +135,14 @@ const sections = [
     ],
   },
   {
-    title: "10. Children's Privacy",
+    title: "11. Children's Privacy",
     body: [
       "edutechsrm is intended for use by students of SRM Institute of Science and Technology who are typically 18 years or older. The app accesses official SRM Academia data and does not knowingly collect personal information from children under 13.",
       "If you believe a child under 13 has provided personal information, contact admin@edutechsrm.in for removal.",
     ],
   },
   {
-    title: "11. Changes",
+    title: "12. Changes",
     body: [
       "We may update this Privacy Policy as the product changes.",
       `When we make meaningful changes, we update this page and revise the Last updated date. This version was last updated on ${updatedAt}.`,
@@ -187,6 +202,7 @@ export default function PrivacyPage() {
               [Lock, "Password", "Forwarded to SRM in real time, never stored or logged."],
               [Database, "Session", "Stored temporarily for login persistence."],
               [Bot, "AI", "Uses academic context, never credentials."],
+              [MapPin, "Location", "Optional, processed locally for campus map only."],
             ].map(([Icon, title, text]) => (
               <div key={String(title)} className="legal-summary-card rounded-[26px] border border-white/10 bg-white/[0.035] p-6 backdrop-blur-2xl transition md:hover:-translate-y-1 active:scale-[0.97]">
                 <Icon className="mb-5 h-6 w-6 text-cyan-300" />
