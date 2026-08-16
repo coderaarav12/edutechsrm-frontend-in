@@ -11,6 +11,7 @@ import { ThemePanel } from "@/components/theme-panel"
 import { MaintenanceOverlay } from "@/components/maintenance-overlay"
 import { AppSidebar } from "@/components/app-sidebar"
 import { LoginSyncScreen, UpdateOverlay, DataUnavailableScreen } from "@/components/app-shell-ui"
+import { AndroidAnnouncementModal, useAndroidAnnouncement } from "@/components/android-announcement"
 import type { TabType } from "@/lib/app-types"
 import { VALID_TABS } from "@/lib/app-types"
 import { writeCachedPhoto } from "@/lib/photo-cache"
@@ -231,6 +232,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [showThemePanel, setShowThemePanel] = useState(false)
   const [showV2Changelog, setShowV2Changelog] = useState(false)
   const { show: showMidnightBanner, dismiss: dismissMidnightBanner } = useMidnightRefreshWindow()
+  const { show: showAndroidAnnouncement, dismiss: dismissAndroidAnnouncement } = useAndroidAnnouncement()
   const wasLoginSyncing = useRef(false)
   const hasShownDashboard = useRef(false)
   const [photoReady, setPhotoReady] = useState(false)
@@ -392,6 +394,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <UpdateOverlay />
       <ChangelogModalV2 isOpen={showV2Changelog} onClose={closeV2Changelog}
         onViewUpdates={() => { closeV2Changelog(); navigate("updates") }} />
+      <AndroidAnnouncementModal isOpen={showAndroidAnnouncement} onClose={dismissAndroidAnnouncement} />
       <ThemePanel open={showThemePanel} onClose={() => setShowThemePanel(false)} />
       <div className="min-h-screen relative overflow-hidden flex flex-col selection:bg-emerald-500/30">
         <Navbar activeTab={activeTab} setActiveTab={(tab) => navigate(tab as TabType)} minimised={minimised} setMinimised={setMinimised} />
