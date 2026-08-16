@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { ArrowDown, Globe, Shield, Smartphone, Sparkles, Loader2 } from "lucide-react"
+import { ArrowDown, Globe, Shield, Smartphone, Sparkles, Download } from "lucide-react"
 import { Header } from "@/components/Header"
 import { PublicFooter } from "@/components/public-footer"
 
@@ -30,7 +30,7 @@ export default function DownloadPage() {
             </div>
 
             <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/25 bg-emerald-300/10 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.16em] text-emerald-300">
-              <Sparkles className="h-3 w-3" /> Coming Soon to Play Store
+              <Sparkles className="h-3 w-3" /> Available on Play Store
             </span>
 
             <h1 className="font-display mt-5 text-3xl font-black tracking-tight sm:text-5xl">
@@ -43,16 +43,21 @@ export default function DownloadPage() {
             </p>
 
             <div className="mt-8 flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row">
-              <button className="group inline-flex w-full items-center justify-center gap-3 rounded-2xl bg-zinc-950/60 px-5 py-3.5 ring-1 ring-white/10 backdrop-blur-2xl transition hover:ring-emerald-300/30 hover:bg-zinc-950/80 active:scale-[0.98] cursor-not-allowed sm:w-auto">
+              <a
+                href="https://play.google.com/store/apps/details?id=in.edutechsrm.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex w-full items-center justify-center gap-3 rounded-2xl bg-zinc-950/60 px-5 py-3.5 ring-1 ring-emerald-300/30 backdrop-blur-2xl transition hover:ring-emerald-300/50 hover:bg-zinc-950/80 active:scale-[0.98] sm:w-auto"
+              >
                 <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 text-emerald-300">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                  <path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 01-.61-.92V2.734a1 1 0 01.609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.199l2.302 2.302a1 1 0 010 1.38l-2.302 2.302L15.394 12l2.304-2.492zM5.864 2.658L16.8 8.99l-2.302 2.302L5.864 2.658z"/>
                 </svg>
                 <div className="text-left">
-                  <span className="block text-[10px] font-medium uppercase tracking-wide text-zinc-500">Coming Soon</span>
+                  <span className="block text-[10px] font-medium uppercase tracking-wide text-emerald-300/70">Get it on</span>
                   <span className="block font-black text-base text-zinc-50">Google Play Store</span>
                 </div>
-                <Loader2 className="ml-1 h-4 w-4 text-emerald-300 animate-spin" />
-              </button>
+                <Download className="ml-1 h-4 w-4 text-emerald-300" />
+              </a>
 
               <a
                 href="/home"
