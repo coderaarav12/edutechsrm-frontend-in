@@ -5,11 +5,16 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { Eye, EyeOff, Loader2, Lock, Mail, AlertCircle, ArrowLeft, Rocket } from "lucide-react"
+import { Eye, EyeOff, Loader2, Lock, Mail, AlertCircle, ArrowLeft, Rocket, Smartphone } from "lucide-react"
 import { loginToSRM } from "@/lib/srm-api"
 import { useAuth } from "@/lib/auth-context"
 import { InstallPrompt } from "@/components/install-prompt"
 import { TurnstileWidget } from "@/components/turnstile-widget"
+
+function isAndroid() {
+  if (typeof navigator === "undefined") return false
+  return /android/i.test(navigator.userAgent)
+}
 
 export default function LoginPage() {
   const router = useRouter()
@@ -118,7 +123,25 @@ export default function LoginPage() {
       `}</style>
       <div className="relative flex min-h-dvh items-center justify-center px-4 sm:px-6">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
-          <InstallPrompt />
+          {isAndroid() ? (
+            <a href="https://play.google.com/store/apps/details?id=in.edutechsrm.app" target="_blank" rel="noopener noreferrer" className="block mb-3.5">
+              <div className="relative rounded-xl border border-emerald-500/20 px-3 py-2.5 overflow-hidden flex items-center gap-2.5 bg-emerald-500/[0.06]">
+                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-400/30 to-transparent" />
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-emerald-500/10 ring-1 ring-emerald-500/20">
+                  <Smartphone size={13} className="text-emerald-400" />
+                </div>
+                <p className="text-xs text-zinc-400 flex-1 min-w-0 leading-tight">
+                  <span className="text-zinc-200 font-semibold">Get the Android app</span>
+                  <span> — on Play Store</span>
+                </p>
+                <span className="px-3 py-1.5 rounded-lg text-[11px] font-bold whitespace-nowrap shrink-0 bg-emerald-500 text-zinc-950">
+                  Open
+                </span>
+              </div>
+            </a>
+          ) : (
+            <InstallPrompt />
+          )}
           <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-white/[0.035] p-6 backdrop-blur-2xl sm:p-8" style={{ boxShadow: "0 24px 64px rgba(0,0,0,0.50)" }}>
 
             <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-zinc-400 mb-5 transition-colors hover:text-zinc-300">
