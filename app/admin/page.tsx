@@ -5,7 +5,7 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import {
   ArrowLeft, Eye, EyeOff, Loader2, Lock, Shield, AlertCircle,
-  LogOut, Check, Users, BarChart3, Wrench, Megaphone,
+  LogOut, Check, Users, BarChart3, Wrench, Megaphone, Smartphone,
 } from "lucide-react"
 import { useAdminControl } from "@/lib/admin-control"
 import { AdminNavbar } from "@/components/admin-navbar"
@@ -149,8 +149,9 @@ export default function AdminPortalPage() {
   const metrics = useMemo(() => ([
     { icon: Users, label: "Active sessions", value: analytics.activeSessionCount || 0, color: "#34d399" },
     { icon: BarChart3, label: "Successful logins", value: analytics.loginSuccessCount || 0, color: "#60a5fa" },
+    { icon: Smartphone, label: "Mobile logins", value: analytics.mobileLoginSuccessCount || 0, color: "#a78bfa" },
     { icon: Wrench, label: "Failed logins", value: analytics.loginFailureCount || 0, color: "#f87171" },
-  ]), [analytics.activeSessionCount, analytics.loginFailureCount, analytics.loginSuccessCount])
+  ]), [analytics.activeSessionCount, analytics.loginFailureCount, analytics.loginSuccessCount, analytics.mobileLoginSuccessCount])
 
   const renderTabContent = () => {
     switch (activeTab) {
