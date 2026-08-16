@@ -411,7 +411,7 @@ export function AdminControlProvider({ children }: { children: ReactNode }) {
   }, [refreshAnnouncements])
 
   useEffect(() => {
-    if (!adminToken || !isManagerOpen) {
+    if (!adminToken) {
       return
     }
 
@@ -421,7 +421,7 @@ export function AdminControlProvider({ children }: { children: ReactNode }) {
       void refreshAdminStatus()
     }, 60000)
     return () => window.clearInterval(id)
-  }, [adminToken, isManagerOpen, refreshAdminStatus])
+  }, [adminToken, refreshAdminStatus])
 
   const adminLogin = useCallback(async (username: string, password: string) => {
     setAdminLoading(true)
