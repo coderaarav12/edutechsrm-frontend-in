@@ -332,16 +332,72 @@ export function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: 
   )
 }
 
+interface AnnouncementDraft {
+  id: string
+  enabled: boolean
+  title: string
+  body: string
+  imageUrl: string
+}
+
+function newAnnouncementId(): string {
+  return `ann-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`
+}
+
+function normalizeAnnouncements(s: any): AnnouncementDraft[] {
+  const list =
+    Array.isArray(s?.announcements) && s.announcements.length > 0
+      ? s.announcements
+      : s?.announcement && (s.announcement.title || s.announcement.body || s.announcement.imageUrl || s.announcement.enabled)
+        ? [s.announcement]
+        : []
+  return list.map((a: any) => ({
+    id: a?.id || newAnnouncementId(),
+    enabled: Boolean(a?.enabled),
+    title: a?.title || "",
+    body: a?.body || "",
+    imageUrl: a?.imageUrl || "",
+  }))
+}
+
+/** Downscale + re-encode an image to a small data URI so it loads reliably in the app. */
+function compressImage(dataUrl: string, maxDim = 1280, quality = 0.72): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => {
+      const scale = Math.min(1, maxDim / Math.max(img.width, img.height))
+      if (scale >= 1 && dataUrl.length < 400 * 1024) {
+        resolve(dataUrl)
+        return
+      }
+      const canvas = document.createElement("canvas")
+      canvas.width = Math.round(img.width * scale)
+      canvas.height = Math.round(img.height * scale)
+      const ctx = canvas.getContext("2d")
+      if (!ctx) {
+        resolve(dataUrl)
+        return
+      }
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+      try {
+        const out = canvas.toDataURL("image/jpeg", quality)
+        resolve(out.length < dataUrl.length ? out : dataUrl)
+      } catch {
+        resolve(dataUrl)
+      }
+    }
+    img.onerror = () => resolve(dataUrl)
+    img.src = dataUrl
+  })
+}
+
 export function MobileAppSettingsTab({
   mobileAppSettings, updateMobileAppSettings, adminLoading,
 }: any) {
-  const [annEnabled, setAnnEnabled] = useState(Boolean(mobileAppSettings?.announcement?.enabled))
-  const [annTitle, setAnnTitle] = useState(mobileAppSettings?.announcement?.title || "")
-  const [annBody, setAnnBody] = useState(mobileAppSettings?.announcement?.body || "")
-  const [annImage, setAnnImage] = useState(mobileAppSettings?.announcement?.imageUrl || "")
+  const [annList, setAnnList] = useState<AnnouncementDraft[]>(() => normalizeAnnouncements(mobileAppSettings))
   const [annSaving, setAnnSaving] = useState(false)
   const [annStatus, setAnnStatus] = useState<{ text: string; error: boolean } | null>(null)
-  const fileRef = useRef<HTMLInputElement>(null)
+  const fileRefs = useRef<Record<string, HTMLInputElement | null>>({})
 
   const [updEnabled, setUpdEnabled] = useState(Boolean(mobileAppSettings?.update?.enabled))
   const [latestVersion, setLatestVersion] = useState(mobileAppSettings?.update?.latestVersion || "1.1.0")
@@ -357,10 +413,7 @@ export function MobileAppSettingsTab({
 
   useEffect(() => {
     if (!mobileAppSettings) return
-    setAnnEnabled(Boolean(mobileAppSettings.announcement?.enabled))
-    setAnnTitle(mobileAppSettings.announcement?.title || "")
-    setAnnBody(mobileAppSettings.announcement?.body || "")
-    setAnnImage(mobileAppSettings.announcement?.imageUrl || "")
+    setAnnList(normalizeAnnouncements(mobileAppSettings))
     setUpdEnabled(Boolean(mobileAppSettings.update?.enabled))
     setLatestVersion(mobileAppSettings.update?.latestVersion || "1.1.0")
     setLatestVersionCode(String(mobileAppSettings.update?.latestVersionCode ?? 14))
@@ -370,28 +423,50 @@ export function MobileAppSettingsTab({
     setChangelog(Array.isArray(mobileAppSettings.update?.changelog) ? mobileAppSettings.update.changelog : [])
   }, [mobileAppSettings])
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+  const updateAnn = useCallback((id: string, patch: Partial<{ enabled: boolean; title: string; body: string; imageUrl: string }>) => {
+    setAnnList((prev) => prev.map((a) => (a.id === id ? { ...a, ...patch } : a)))
+  }, [])
+
+  const addAnnouncement = () => {
+    setAnnList((prev) => [...prev, { id: newAnnouncementId(), enabled: true, title: "", body: "", imageUrl: "" }])
+    setAnnStatus(null)
+  }
+
+  const removeAnnouncement = (id: string) => {
+    setAnnList((prev) => prev.filter((a) => a.id !== id))
+    setAnnStatus(null)
+  }
+
+  const handleAnnImage = async (id: string, file: File) => {
     if (!file) return
     if (!file.type.startsWith("image/")) { setAnnStatus({ text: "Please select an image file", error: true }); return }
-    if (file.size > 3 * 1024 * 1024) { setAnnStatus({ text: "Image must be under 3MB", error: true }); return }
+    if (file.size > 10 * 1024 * 1024) { setAnnStatus({ text: "Image must be under 10MB", error: true }); return }
     const reader = new FileReader()
-    reader.onload = () => { if (typeof reader.result === "string") setAnnImage(reader.result) }
+    reader.onload = async () => {
+      if (typeof reader.result !== "string") return
+      const compressed = await compressImage(reader.result)
+      updateAnn(id, { imageUrl: compressed })
+      setAnnStatus({ text: "Image attached — auto-compressed for fast loading in the app", error: false })
+    }
     reader.readAsDataURL(file)
   }
 
-  const saveAnnouncement = async () => {
+  const saveAnnouncements = async () => {
     setAnnSaving(true)
     setAnnStatus(null)
-    const hasContent = Boolean(annTitle.trim() || annBody.trim() || annImage.trim())
-    // If the admin typed content, treat saving as publishing — auto-enable so the
-    // banner actually shows up instead of silently saving a disabled announcement.
-    const willEnable = hasContent ? true : annEnabled
-    const r = await updateMobileAppSettings({
-      announcement: { enabled: willEnable, title: annTitle.trim(), body: annBody.trim(), imageUrl: annImage.trim() },
-    })
+    const list = annList
+      .filter((a) => a.title.trim() || a.body.trim() || a.imageUrl.trim())
+      .map((a) => ({
+        id: a.id,
+        enabled: a.enabled,
+        title: a.title.trim(),
+        body: a.body.trim(),
+        imageUrl: a.imageUrl.trim(),
+        createdAt: new Date().toISOString(),
+      }))
+    const r = await updateMobileAppSettings({ announcements: list })
     if (!r.success) { setAnnStatus({ text: r.error || "Failed to save", error: true }) }
-    else { setAnnStatus({ text: willEnable ? "Announcement saved and enabled — it will appear on the next app launch" : "Announcement disabled — nothing is shown to users", error: false }) }
+    else { setAnnStatus({ text: list.length === 0 ? "All announcements removed — nothing shows in the app" : `Saved ${list.length} announcement${list.length > 1 ? "s" : ""} — they appear as popups on launch`, error: false }) }
     setAnnSaving(false)
   }
 
@@ -441,7 +516,7 @@ export function MobileAppSettingsTab({
 
   return (
     <div className="space-y-6">
-      {/* ── App announcement ── */}
+      {/* ── App announcements ── */}
       <Card>
         <div className="flex items-start justify-between mb-5">
           <div className="flex items-center gap-2">
@@ -449,47 +524,79 @@ export function MobileAppSettingsTab({
               <AnnounceIcon className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-zinc-100 tracking-tight font-display">App Announcement</h3>
-              <p className="text-[10px] text-zinc-500 mt-0.5">Shown as a banner on the Android app's home screen at launch</p>
+              <h3 className="text-base font-bold text-zinc-100 tracking-tight font-display">App Announcements</h3>
+              <p className="text-[10px] text-zinc-500 mt-0.5">{annList.length} announcement{annList.length === 1 ? "" : "s"} — shown one-by-one as popups on the app at launch</p>
             </div>
           </div>
-          <Toggle checked={annEnabled} onChange={setAnnEnabled} />
         </div>
 
-        <div className="space-y-3">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Title</p>
-            <Input value={annTitle} onChange={(e: any) => setAnnTitle(e.target.value)} placeholder="e.g. Mid-term exam schedule is live" />
-          </div>
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Message</p>
-            <Textarea value={annBody} onChange={(e: any) => setAnnBody(e.target.value)} rows={3} placeholder="Write the announcement message students should see..." />
-          </div>
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Image (optional)</p>
-            <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
-            {annImage ? (
-              <div className="relative overflow-hidden rounded-xl ring-1 ring-white/10">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={annImage} alt="Announcement preview" className="w-full h-40 object-cover" />
-                <button onClick={() => { setAnnImage(""); setAnnStatus(null) }}
-                  className="absolute top-2 right-2 w-7 h-7 rounded-lg flex items-center justify-center text-zinc-300 bg-black/60 hover:bg-red-500/70 transition-all">
-                  <ImageOff className="w-3.5 h-3.5" />
-                </button>
+        <div className="space-y-4">
+          {annList.length === 0 && (
+            <div className="text-sm text-zinc-500 text-center py-4 border border-dashed border-white/10 rounded-xl">No announcements yet — add one below</div>
+          )}
+          {annList.map((a, idx) => (
+            <div key={a.id} className="rounded-xl border border-white/8 bg-white/[0.02] p-4 space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-cyan-400/80">Announcement {idx + 1}</p>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 font-semibold">
+                    <span>{a.enabled ? "Live" : "Draft"}</span>
+                    <Toggle checked={a.enabled} onChange={(v) => updateAnn(a.id, { enabled: v })} />
+                  </div>
+                  <button onClick={() => removeAnnouncement(a.id)}
+                    className="w-7 h-7 rounded-lg flex items-center justify-center text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
-            ) : (
-              <button onClick={() => fileRef.current?.click()}
-                className="w-full flex flex-col items-center justify-center gap-2 py-6 rounded-xl border border-dashed border-white/10 hover:border-cyan-400/40 hover:bg-cyan-400/5 transition-all text-zinc-500">
-                <UploadCloud className="w-5 h-5" />
-                <span className="text-xs font-semibold">Click to attach an announcement image (max 3MB)</span>
-              </button>
-            )}
-          </div>
-          <button onClick={saveAnnouncement} disabled={adminLoading || annSaving || (!annTitle.trim() && !annBody.trim())}
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Title</p>
+                <Input value={a.title} onChange={(e: any) => updateAnn(a.id, { title: e.target.value })} placeholder="e.g. Mid-term exam schedule is live" />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Message</p>
+                <Textarea value={a.body} onChange={(e: any) => updateAnn(a.id, { body: e.target.value })} rows={3} placeholder="Write the announcement message students should see..." />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Image (optional)</p>
+                <input
+                  ref={(el) => { fileRefs.current[a.id] = el }}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handleAnnImage(a.id, f); e.target.value = "" }}
+                />
+                {a.imageUrl ? (
+                  <div className="relative overflow-hidden rounded-xl ring-1 ring-white/10">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={a.imageUrl} alt="Announcement preview" className="w-full h-40 object-cover" />
+                    <button onClick={() => { updateAnn(a.id, { imageUrl: "" }); setAnnStatus(null) }}
+                      className="absolute top-2 right-2 w-7 h-7 rounded-lg flex items-center justify-center text-zinc-300 bg-black/60 hover:bg-red-500/70 transition-all">
+                      <ImageOff className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <button onClick={() => fileRefs.current[a.id]?.click()}
+                    className="w-full flex flex-col items-center justify-center gap-2 py-6 rounded-xl border border-dashed border-white/10 hover:border-cyan-400/40 hover:bg-cyan-400/5 transition-all text-zinc-500">
+                    <UploadCloud className="w-5 h-5" />
+                    <span className="text-xs font-semibold">Click to attach an image (auto-compressed)</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+
+          <button onClick={addAnnouncement}
+            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-xs uppercase tracking-wider transition-all border border-dashed border-white/10 hover:border-cyan-400/40 hover:text-cyan-300 text-zinc-400">
+            <Plus className="w-3.5 h-3.5" />
+            Add Announcement
+          </button>
+
+          <button onClick={saveAnnouncements} disabled={adminLoading || annSaving}
             className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-xs uppercase tracking-wider transition-all"
             style={{ background: "rgba(34,211,238,0.15)", color: "#67e8f9", opacity: adminLoading || annSaving ? 0.4 : 1 }}>
             {annSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-            {annSaving ? "Saving..." : "Save Announcement"}
+            {annSaving ? "Saving..." : "Save Announcements"}
           </button>
           {flash(annStatus)}
         </div>

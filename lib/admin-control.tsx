@@ -37,14 +37,18 @@ interface MobileAppChangelogEntry {
   changes: string[]
 }
 
+interface MobileAppAnnouncement {
+  id: string
+  enabled: boolean
+  title: string
+  body: string
+  imageUrl: string
+  createdAt: string
+}
+
 interface MobileAppSettings {
-  announcement: {
-    enabled: boolean
-    title: string
-    body: string
-    imageUrl: string
-    createdAt: string
-  }
+  announcement: MobileAppAnnouncement
+  announcements: MobileAppAnnouncement[]
   update: {
     enabled: boolean
     latestVersion: string
@@ -59,12 +63,14 @@ interface MobileAppSettings {
 
 const DEFAULT_MOBILE_APP_SETTINGS: MobileAppSettings = {
   announcement: {
+    id: "",
     enabled: false,
     title: "",
     body: "",
     imageUrl: "",
     createdAt: "",
   },
+  announcements: [],
   update: {
     enabled: true,
     latestVersion: "1.1.0",
@@ -297,6 +303,7 @@ export function AdminControlProvider({ children }: { children: ReactNode }) {
       if (response.ok && data?.settings) {
         setMobileAppSettings((prev) => ({
           announcement: { ...prev.announcement, ...(data.settings.announcement ?? {}) },
+          announcements: Array.isArray(data.settings.announcements) ? data.settings.announcements : prev.announcements,
           update: { ...prev.update, ...(data.settings.update ?? {}) },
           updatedAt: typeof data.settings.updatedAt === "string" ? data.settings.updatedAt : prev.updatedAt,
         }))
@@ -325,6 +332,7 @@ export function AdminControlProvider({ children }: { children: ReactNode }) {
       if (data?.settings) {
         setMobileAppSettings((prev) => ({
           announcement: { ...prev.announcement, ...(data.settings.announcement ?? {}) },
+          announcements: Array.isArray(data.settings.announcements) ? data.settings.announcements : prev.announcements,
           update: { ...prev.update, ...(data.settings.update ?? {}) },
           updatedAt: typeof data.settings.updatedAt === "string" ? data.settings.updatedAt : prev.updatedAt,
         }))
