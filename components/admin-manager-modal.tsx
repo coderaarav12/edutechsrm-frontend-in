@@ -382,11 +382,15 @@ export function MobileAppSettingsTab({
   const saveAnnouncement = async () => {
     setAnnSaving(true)
     setAnnStatus(null)
+    const hasContent = Boolean(annTitle.trim() || annBody.trim() || annImage.trim())
+    // If the admin typed content, treat saving as publishing — auto-enable so the
+    // banner actually shows up instead of silently saving a disabled announcement.
+    const willEnable = hasContent ? true : annEnabled
     const r = await updateMobileAppSettings({
-      announcement: { enabled: annEnabled, title: annTitle.trim(), body: annBody.trim(), imageUrl: annImage.trim() },
+      announcement: { enabled: willEnable, title: annTitle.trim(), body: annBody.trim(), imageUrl: annImage.trim() },
     })
     if (!r.success) { setAnnStatus({ text: r.error || "Failed to save", error: true }) }
-    else { setAnnStatus({ text: "Announcement saved — it will appear on the next app launch", error: false }) }
+    else { setAnnStatus({ text: willEnable ? "Announcement saved and enabled — it will appear on the next app launch" : "Announcement disabled — nothing is shown to users", error: false }) }
     setAnnSaving(false)
   }
 
