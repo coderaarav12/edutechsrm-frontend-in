@@ -24,6 +24,7 @@ interface AdminAnalytics {
   totalVisits: number
   loginSuccessCount: number
   loginFailureCount: number
+  mobileLoginSuccessCount: number
   activeSessionCount: number
   lastUpdated: string | null
   logs: AdminLogItem[]
@@ -134,6 +135,7 @@ export function AdminControlProvider({ children }: { children: ReactNode }) {
     totalVisits: 0,
     loginSuccessCount: 0,
     loginFailureCount: 0,
+    mobileLoginSuccessCount: 0,
     activeSessionCount: 0,
     lastUpdated: null,
     logs: [],
@@ -231,6 +233,7 @@ export function AdminControlProvider({ children }: { children: ReactNode }) {
           totalVisits: Number(data.analytics.totalVisits || 0),
           loginSuccessCount: Number(data.analytics.loginSuccessCount || 0),
           loginFailureCount: Number(data.analytics.loginFailureCount || 0),
+          mobileLoginSuccessCount: Number(data.analytics.mobileLoginSuccessCount || 0),
           activeSessionCount: Number(data.analytics.activeSessionCount || 0),
           lastUpdated: data.analytics.lastUpdated || null,
           logs: Array.isArray(data.analytics.logs) ? data.analytics.logs : [],

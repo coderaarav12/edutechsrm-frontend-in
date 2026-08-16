@@ -138,12 +138,13 @@ export function AnalyticsTab({ analytics, maintenance, setMaintenanceMode, maint
     { label: "Active Users", value: analytics.activeSessionCount, color: "#38bdf8", subtitle: "Currently logged in" },
     { label: "Total Visits", value: analytics.totalVisits, color: "#34d399", subtitle: "Backend hits tracked" },
     { label: "Success Logins", value: analytics.loginSuccessCount, color: "#60a5fa", subtitle: "Successful sign-ins" },
+    { label: "Mobile Logins", value: analytics.mobileLoginSuccessCount, color: "#a78bfa", subtitle: "Android app sign-ins" },
     { label: "Failed Logins", value: analytics.loginFailureCount, color: "#f87171", subtitle: "Failed attempts" },
   ], [analytics])
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
         {stats.map(s => <StatCard key={s.label} {...s} />)}
       </div>
       <Card>
