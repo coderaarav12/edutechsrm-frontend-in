@@ -253,6 +253,7 @@ export function StudentPortalProvider({ children }: { children: ReactNode }) {
           }
         }
 
+        const finalSessionId = data.sessionId || sessionId || ""
         const newPortalData: StudentPortalData = {
           attendance: data.attendance || [],
           attendanceOutput: data.attendanceOutput,
@@ -267,6 +268,11 @@ export function StudentPortalProvider({ children }: { children: ReactNode }) {
         setPortalData(newPortalData)
         setIsSessionExpired(false)
         writeCachedPortalData(newPortalData)
+        if (typeof window !== "undefined") {
+          if (finalSessionId) {
+            localStorage.setItem("edutechsrm_student_portal_session_id", finalSessionId)
+          }
+        }
         writeStoredCredentials({
           netId: netId.trim().toLowerCase(),
           password: pass,
@@ -291,23 +297,42 @@ export function StudentPortalProvider({ children }: { children: ReactNode }) {
         setPortalData(cached)
       }
 
+      const storedSessionId = typeof window !== "undefined"
+        ? localStorage.getItem("edutechsrm_student_portal_session_id") || ""
+        : ""
+
+      if (!storedSessionId) {
+        // No active session token found - session is stale/expired
+        if (cached) {
+          setIsSessionExpired(true)
+        }
+        return false
+      }
+
       setIsSyncing(true)
       try {
-        const attRes = await fetch("/api/student-portal/attendance", { cache: "no-store" }).catch(() => null)
-        const marksRes = await fetch("/api/student-portal/marks", { cache: "no-store" }).catch(() => null)
-        const intRes = await fetch("/api/student-portal/internal-marks", { cache: "no-store" }).catch(() => null)
+        const query = `?sessionId=${encodeURIComponent(storedSessionId)}`
+        const attRes = await fetch(`/api/student-portal/attendance${query}`, { cache: "no-store" }).catch(() => null)
+        const marksRes = await fetch(`/api/student-portal/marks${query}`, { cache: "no-store" }).catch(() => null)
+        const intRes = await fetch(`/api/student-portal/internal-marks${query}`, { cache: "no-store" }).catch(() => null)
 
-        if (attRes?.status === 401 || marksRes?.status === 401 || intRes?.status === 401) {
+        if (
+          attRes?.status === 401 ||
+          marksRes?.status === 401 ||
+          intRes?.status === 401 ||
+          attRes?.status === 404 ||
+          marksRes?.status === 404
+        ) {
           setIsSessionExpired(true)
           return false
         }
 
         if (attRes?.ok && marksRes?.ok) {
-          const attData = await attRes.json()
-          const marksData = await marksRes.json()
-          const intData = intRes?.ok ? await intRes.json() : { internalMarks: [] }
+          const attData = await attRes.json().catch(() => ({}))
+          const marksData = await marksRes.json().catch(() => ({}))
+          const intData = intRes?.ok ? await intRes.json().catch(() => ({})) : { internalMarks: [] }
 
-          if (attData?.sessionExpired || marksData?.sessionExpired) {
+          if (attData?.sessionExpired || marksData?.sessionExpired || !attData?.success) {
             setIsSessionExpired(true)
             return false
           }
