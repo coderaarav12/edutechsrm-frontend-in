@@ -25,8 +25,10 @@ import {
   TrendingUp,
   ChevronRight,
   User,
+  GraduationCap,
 } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
+import { useStudentPortal } from "@/lib/student-portal-context"
 import { expandCustomClassesByDate, useCustomPlanner } from "@/lib/custom-planner"
 import { InstallPrompt } from "@/components/install-prompt"
 import { AiQuickInput } from "@/components/ai-quick-input"
@@ -143,6 +145,7 @@ let _splashShown = false
 export function DashboardSection({ onNavigate }: DashboardSectionProps) {
   const auth = useAuth() as any
   const { user, attendance, marks, timetable, calendar, dateToDoMap, isLoading, refreshData, lastSyncTime, courses, token } = auth
+  const { portalData, isPortalConnected, isSessionExpired, openGradesModal, openPortalLogin } = useStudentPortal()
   const { customClasses, assignments, updateAssignment } = useCustomPlanner()
   const [now, setNow] = useState(() => new Date())
   const [showSplash, setShowSplash] = useState(() => {
@@ -241,10 +244,31 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
   const nowMinutes = now.getHours() * 60 + now.getMinutes()
   const customClassesByDate = expandCustomClassesByDate(customClasses, dateToDoMap)
 
-  const codes = useMemo(() => [...new Set((courses as any[]).map((c: any) => c.code))], [courses])
+  const effectiveAtt = useMemo(() => {
+    if (attendance && attendance.length > 0) return attendance
+    if (portalData?.attendance && portalData.attendance.length > 0) return portalData.attendance
+    return []
+  }, [attendance, portalData?.attendance])
+
+  const effectiveMarks = useMemo(() => {
+    if (marks && marks.length > 0) return marks
+    if (portalData?.internalMarks && portalData.internalMarks.length > 0) return portalData.internalMarks
+    return []
+  }, [marks, portalData?.internalMarks])
+
+  const codes = useMemo(() => {
+    return [
+      ...new Set([
+        ...(courses as any[]).map((c: any) => c.code),
+        ...effectiveAtt.map((r: any) => r.code),
+        ...effectiveMarks.map((m: any) => m.code),
+      ]),
+    ].filter(Boolean)
+  }, [courses, effectiveAtt, effectiveMarks])
+
   const mergedAttendance = useMemo(() => {
     const attGrouped = new Map<string, any[]>()
-    ;(attendance || []).forEach((r: any) => {
+    effectiveAtt.forEach((r: any) => {
       const list = attGrouped.get(r.code) || []
       list.push(r)
       attGrouped.set(r.code, list)
@@ -252,8 +276,8 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
     return codes.map(code => {
       const courseEntries = (courses as any[]).filter((c: any) => c.code === code)
       const names = [...new Set(courseEntries.map((c: any) => c.name?.trim()).filter(Boolean))]
-      const name = names[0] || code
-      const attEntries = attGrouped.get(code)
+      const attEntries = attGrouped.get(code) || []
+      const name = names[0] || attEntries[0]?.name || code
       if (attEntries && attEntries.length > 0 && attEntries.some((r: any) => r.total > 0)) {
         const attended = attEntries.reduce((s: number, r: any) => s + (r.attended || 0), 0)
         const total = attEntries.reduce((s: number, r: any) => s + (r.total || 0), 0)
@@ -261,7 +285,7 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
       }
       return { code, name, attended: 0, total: 0, percentage: 0 }
     })
-  }, [codes, attendance])
+  }, [codes, courses, effectiveAtt])
   const attendanceWithData = mergedAttendance.filter((item: any) => item.total > 0)
   const riskyAttendance = attendanceWithData.filter((item: any) => item.percentage > 0 && item.percentage < 75).sort((a: any, b: any) => a.percentage - b.percentage)
   const overallAttended = attendanceWithData.reduce((sum: number, item: any) => sum + (item.attended || 0), 0)
@@ -269,7 +293,7 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
   const averageAttendance = overallTotal > 0 ? Math.round((overallAttended / overallTotal) * 100) : 0
   const mergedMarks = useMemo(() => {
     const marksGrouped = new Map<string, any[]>()
-    ;(marks || []).forEach((m: any) => {
+    effectiveMarks.forEach((m: any) => {
       const list = marksGrouped.get(m.code) || []
       list.push(m)
       marksGrouped.set(m.code, list)
@@ -277,8 +301,8 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
     return codes.map(code => {
       const courseEntries = (courses as any[]).filter((c: any) => c.code === code)
       const names = [...new Set(courseEntries.map((c: any) => c.name?.trim()).filter(Boolean))]
-      const name = names[0] || code
-      const mEntries = marksGrouped.get(code)
+      const mEntries = marksGrouped.get(code) || []
+      const name = names[0] || mEntries[0]?.name || code
       if (mEntries && mEntries.length > 0) {
         const total = mEntries.reduce((s: number, m: any) => s + (m.total ?? 0), 0)
         const maxTotal = mEntries.reduce((s: number, m: any) => s + (m.maxTotal ?? 0), 0)
@@ -286,7 +310,7 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
       }
       return { code, name, total: 0, maxTotal: 0 }
     })
-  }, [codes, marks])
+  }, [codes, courses, effectiveMarks])
   const lowMarks = mergedMarks
     .map((item: any) => ({
       ...item,
@@ -581,6 +605,85 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
         </div>
 
         <div className="-mt-6 space-y-3">
+          {/* Student Portal Card */}
+          {isSessionExpired ? (
+            <button
+              onClick={openPortalLogin}
+              className="w-full group rounded-2xl border overflow-hidden transition-all duration-200 active:scale-[0.98] text-left"
+              style={{
+                background: "var(--card-bg, rgba(24,24,27,0.7))",
+                borderColor: "rgba(251,191,36,0.25)",
+                WebkitTapHighlightColor: "transparent",
+              }}
+            >
+              <div className="flex items-center gap-2.5 px-4 py-3">
+                <div className="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center bg-amber-500/15 text-amber-400">
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold leading-snug text-zinc-100">Portal Session Expired</p>
+                  <p className="text-[11px] truncate text-amber-400/80">
+                    Tap to relogin and refresh attendance & marks
+                  </p>
+                </div>
+                <ChevronRight className="w-3.5 h-3.5 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5 text-amber-400" />
+              </div>
+            </button>
+          ) : isPortalConnected ? (
+            <button
+              onClick={openGradesModal}
+              className="w-full group rounded-2xl border overflow-hidden transition-all duration-200 active:scale-[0.98] text-left"
+              style={{
+                background: "var(--card-bg, rgba(24,24,27,0.7))",
+                borderColor: "rgba(56,189,248,0.18)",
+                WebkitTapHighlightColor: "transparent",
+              }}
+            >
+              <div className="flex items-center gap-2.5 px-4 py-3">
+                <div className="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(56,189,248,0.12)" }}>
+                  <GraduationCap className="w-3.5 h-3.5" style={{ color: "#38bdf8" }} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold leading-snug" style={{ color: "var(--text-primary, #f4f4f5)" }}>Semester Grades & GPA</p>
+                    {portalData?.marks?.cgpa ? (
+                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20">
+                        CGPA {portalData.marks.cgpa.toFixed(2)}
+                      </span>
+                    ) : null}
+                  </div>
+                  <p className="text-[11px] truncate" style={{ color: "var(--text-faint, #52525b)" }}>
+                    {portalData?.marks?.semesters?.length || 0} Semesters Synced · Tap to view breakdown
+                  </p>
+                </div>
+                <ChevronRight className="w-3.5 h-3.5 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" style={{ color: "var(--text-faint, #52525b)" }} />
+              </div>
+            </button>
+          ) : (
+            <button
+              onClick={openPortalLogin}
+              className="w-full group rounded-2xl border overflow-hidden transition-all duration-200 active:scale-[0.98] text-left"
+              style={{
+                background: "var(--card-bg, rgba(24,24,27,0.7))",
+                borderColor: "rgba(52,211,153,0.2)",
+                WebkitTapHighlightColor: "transparent",
+              }}
+            >
+              <div className="flex items-center gap-2.5 px-4 py-3">
+                <div className="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center bg-emerald-500/10 text-emerald-400">
+                  <GraduationCap className="w-3.5 h-3.5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold leading-snug text-zinc-100">Login to Student Portal</p>
+                  <p className="text-[11px] truncate text-zinc-500">
+                    Access multi-semester grades, CGPA, and portal attendance
+                  </p>
+                </div>
+                <ChevronRight className="w-3.5 h-3.5 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5 text-emerald-400" />
+              </div>
+            </button>
+          )}
+
           <button
             onClick={() => onNavigate("map")}
             className="w-full group rounded-2xl border overflow-hidden transition-all duration-200 active:scale-[0.98]"

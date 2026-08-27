@@ -59,6 +59,11 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
         return
       }
       if (result.success && result.token) {
+        try {
+          const netId = normalizedEmail.split("@")[0].trim().toLowerCase()
+          window.localStorage.setItem("edutechsrm_srm_email", normalizedEmail)
+          window.localStorage.setItem("edutechsrm_netid", netId)
+        } catch {}
         login(result.token)
         onClose()
       } else if ("requiresTurnstile" in result && (result as any).requiresTurnstile) {
@@ -90,6 +95,11 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
       const result = await loginToSRM(normalizedEmail, password, captchaAnswer, cdigest || "")
       if (result.success && result.token) {
+        try {
+          const netId = normalizedEmail.split("@")[0].trim().toLowerCase()
+          window.localStorage.setItem("edutechsrm_srm_email", normalizedEmail)
+          window.localStorage.setItem("edutechsrm_netid", netId)
+        } catch {}
         login(result.token)
         onClose()
       } else {

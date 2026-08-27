@@ -57,6 +57,7 @@ interface MobileAppSettings {
     forceUpdate: boolean
     updateUrl: string
     changelog: MobileAppChangelogEntry[]
+attendanceSource?: "backend" | "portal"
   }
   updatedAt: string
 }
@@ -78,7 +79,8 @@ const DEFAULT_MOBILE_APP_SETTINGS: MobileAppSettings = {
     minVersionCode: 14,
     forceUpdate: false,
     updateUrl: "https://play.google.com/store/apps/details?id=in.edutechsrm.app",
-    changelog: [],
+changelog: [],
+    attendanceSource: "backend",
   },
   updatedAt: "",
 }

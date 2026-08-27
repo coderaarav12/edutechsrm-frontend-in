@@ -9,6 +9,7 @@ import {
   ClipboardCheck, ClipboardList, CheckCircle2, Heart,
 } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
+import { useStudentPortal } from "@/lib/student-portal-context"
 import { readCachedPhoto, writeCachedPhoto } from "@/lib/photo-cache"
 import { LoginModal } from "./login-modal"
 import { SignOutModal } from "./signout-modal"
@@ -170,6 +171,7 @@ export function AboutSection() {
     note: "",
   }))
 
+  const { portalData } = useStudentPortal()
   const isAuthenticated = auth.isAuthenticated
   const user            = auth.user
   const attendance      = (auth.attendance  || []) as any[]
@@ -180,6 +182,18 @@ export function AboutSection() {
   const refreshData     = auth.refreshData
   const logout          = auth.logout
   const dateToDoMap     = auth.dateToDoMap  || {}
+
+  const effectiveAtt = useMemo(() => {
+    if (attendance && attendance.length > 0) return attendance
+    if (portalData?.attendance && portalData.attendance.length > 0) return portalData.attendance
+    return []
+  }, [attendance, portalData?.attendance])
+
+  const effectiveMarks = useMemo(() => {
+    if (marks && marks.length > 0) return marks
+    if (portalData?.internalMarks && portalData.internalMarks.length > 0) return portalData.internalMarks
+    return []
+  }, [marks, portalData?.internalMarks])
 
   const todayStr = formatLocalDateKey(new Date())
   const todayDO  = dateToDoMap[todayStr] ?? null
@@ -207,15 +221,29 @@ export function AboutSection() {
     return result
   }, [courses])
 
-  const totalCredits   = uniqueCourses.reduce((s, c) => s + (c.credits || 0), 0)
+  const totalCredits = useMemo(() => {
+    const fromCourses = uniqueCourses.reduce((s, c) => s + (c.credits || 0), 0)
+    if (fromCourses > 0) return fromCourses
+    if (portalData?.marks?.creditsEarned) return portalData.marks.creditsEarned
+    return 0
+  }, [uniqueCourses, portalData?.marks?.creditsEarned])
+
   const theoryCount    = uniqueCourses.filter(c => c.type === "Theory").length
   const labCount       = uniqueCourses.filter(c => c.type === "Lab" || c.type === "Practical").length
 
-  const codes = useMemo(() => [...new Set((courses as any[]).map((c: any) => c.code))], [courses])
+  const codes = useMemo(() => {
+    return [
+      ...new Set([
+        ...(courses as any[]).map((c: any) => c.code),
+        ...effectiveAtt.map((r: any) => r.code),
+        ...effectiveMarks.map((m: any) => m.code),
+      ]),
+    ].filter(Boolean)
+  }, [courses, effectiveAtt, effectiveMarks])
 
   const mergedAttendance = useMemo(() => {
     const attGrouped = new Map<string, any[]>()
-    ;(attendance || []).forEach((r: any) => {
+    effectiveAtt.forEach((r: any) => {
       const list = attGrouped.get(r.code) || []
       list.push(r)
       attGrouped.set(r.code, list)
@@ -223,9 +251,9 @@ export function AboutSection() {
     return codes.map(code => {
       const courseEntries = (courses as any[]).filter((c: any) => c.code === code)
       const names = [...new Set(courseEntries.map((c: any) => c.name?.trim()).filter(Boolean))]
-      const name = names[0] || code
-      const attEntries = attGrouped.get(code)
-      if (attEntries && attEntries.length > 0 && attEntries.some((r: any) => r.total > 0)) {
+      const attEntries = attGrouped.get(code) || []
+      const name = names[0] || attEntries[0]?.name || code
+      if (attEntries.length > 0 && attEntries.some((r: any) => r.total > 0)) {
         const attended = attEntries.reduce((s: number, r: any) => s + (r.attended || 0), 0)
         const total = attEntries.reduce((s: number, r: any) => s + (r.total || 0), 0)
         const percentage = total > 0 ? Math.round((attended / total) * 100) : 0
@@ -233,7 +261,7 @@ export function AboutSection() {
       }
       return { code, name, attended: 0, total: 0, percentage: 0 }
     })
-  }, [codes, attendance])
+  }, [codes, courses, effectiveAtt])
   const attendanceWithData = mergedAttendance.filter((r: any) => r.total > 0)
   const overallAttended = attendanceWithData.reduce((s: number, r: any) => s + r.attended, 0)
   const overallTotal = attendanceWithData.reduce((s: number, r: any) => s + r.total, 0)
@@ -244,7 +272,7 @@ export function AboutSection() {
 
   const mergedMarks = useMemo(() => {
     const marksGrouped = new Map<string, any[]>()
-    ;(marks as any[]).forEach((m: any) => {
+    effectiveMarks.forEach((m: any) => {
       const list = marksGrouped.get(m.code) || []
       list.push(m)
       marksGrouped.set(m.code, list)
@@ -252,11 +280,22 @@ export function AboutSection() {
     return codes.map(code => {
       const courseEntries = (courses as any[]).filter((c: any) => c.code === code)
       const names = [...new Set(courseEntries.map((c: any) => c.name?.trim()).filter(Boolean))]
-      const name = names[0] || code
-      const mEntries = marksGrouped.get(code)
-      if (mEntries && mEntries.length > 0) {
-        const total = mEntries.reduce((s: number, m: any) => s + (m.total || 0), 0)
-        const maxTotal = mEntries.reduce((s: number, m: any) => s + (m.maxTotal || 0), 0)
+      const mEntries = marksGrouped.get(code) || []
+      const name = names[0] || mEntries[0]?.name || code
+      if (mEntries.length > 0) {
+        const total = mEntries.reduce((s: number, m: any) => {
+          if (m.total !== undefined) return s + Number(m.total || 0)
+          if (m.marks !== undefined) {
+            const parsed = parseFloat(String(m.marks || "0"))
+            return s + (!isNaN(parsed) ? parsed : 0)
+          }
+          return s
+        }, 0)
+        const maxTotal = mEntries.reduce((s: number, m: any) => {
+          if (m.maxTotal !== undefined) return s + Number(m.maxTotal || 0)
+          if (m.marks !== undefined) return s + 50
+          return s
+        }, 0)
         return { code, name, total, maxTotal, tests: mEntries.flatMap((m: any) => m.tests || []),
           test1: mEntries.reduce((s: number, m: any) => s + (m.test1 || 0), 0) || null,
           test1_max: mEntries.reduce((s: number, m: any) => s + (m.test1_max || 0), 0),
@@ -268,7 +307,7 @@ export function AboutSection() {
       }
       return { code, name, total: 0, maxTotal: 0, tests: [], test1: null, test1_max: 0, test2: null, test2_max: 0, test3: null, test3_max: 0, grade: undefined }
     })
-  }, [codes, marks])
+  }, [codes, courses, effectiveMarks])
   const totalScored = mergedMarks.reduce((s, m) => s + (m.total || 0), 0)
   const totalMax    = mergedMarks.reduce((s, m) => s + (m.maxTotal || 0), 0)
   const marksPercent = totalMax > 0 ? Math.round((totalScored / totalMax) * 100) : 0
@@ -577,13 +616,24 @@ export function AboutSection() {
         </div>
         <div className="rounded-2xl px-4 py-3.5 bg-zinc-900/40 ring-1 ring-white/5">
           <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest">Marks</p>
-          <p className={`text-xl font-bold font-display mt-1 ${marksPercent >= 60 ? "text-emerald-400" : "text-amber-400"}`}>{marksPercent}%</p>
-          <p className="text-[10px] mt-0.5 text-zinc-500">{totalScored.toFixed(1)} / {totalMax}</p>
+          {totalMax > 0 ? (
+            <>
+              <p className={`text-xl font-bold font-display mt-1 ${marksPercent >= 60 ? "text-emerald-400" : "text-amber-400"}`}>{marksPercent}%</p>
+              <p className="text-[10px] mt-0.5 text-zinc-500">{totalScored.toFixed(1)} / {totalMax}</p>
+            </>
+          ) : (
+            <>
+              <p className="text-xl font-bold font-display mt-1 text-zinc-500">—</p>
+              <p className="text-[10px] mt-0.5 text-zinc-500">No marks yet</p>
+            </>
+          )}
         </div>
         <div className="rounded-2xl px-4 py-3.5 bg-zinc-900/40 ring-1 ring-white/5">
           <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest">Credits</p>
           <p className="text-xl font-bold font-display mt-1 text-cyan-400">{totalCredits}</p>
-          <p className="text-[10px] mt-0.5 text-zinc-500">{uniqueCourses.length} courses</p>
+          <p className="text-[10px] mt-0.5 text-zinc-500">
+            {uniqueCourses.length > 0 ? `${uniqueCourses.length} courses` : "Credits Earned"}
+          </p>
         </div>
       </motion.div>
 
