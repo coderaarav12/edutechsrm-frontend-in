@@ -335,19 +335,22 @@ export function StudentPortalModal() {
                 )}
               </div>
 
-              {/* Centered Large CAPTCHA Input */}
+              {/* Centered Large CAPTCHA Input - Case Sensitive */}
               <input
                 type="text"
                 value={captcha}
                 onChange={(e) => setCaptcha(e.target.value)}
-                placeholder="Enter 6 characters"
+                placeholder="Enter characters exactly"
                 maxLength={8}
                 autoFocus
                 autoCapitalize="none"
                 autoCorrect="off"
                 spellCheck={false}
-                className="w-full rounded-xl bg-zinc-900/90 border border-white/15 px-3 py-2.5 text-base text-zinc-100 font-mono text-center tracking-[0.25em] uppercase font-bold focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 outline-none transition-all placeholder:tracking-normal placeholder:normal-case placeholder:font-normal placeholder:text-zinc-600 placeholder:text-xs"
+                className="w-full rounded-xl bg-zinc-900/90 border border-white/15 px-3 py-2.5 text-base text-zinc-100 font-mono text-center tracking-[0.2em] font-semibold focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 outline-none transition-all placeholder:tracking-normal placeholder:font-normal placeholder:text-zinc-600 placeholder:text-xs"
               />
+              <p className="text-[9px] text-zinc-500 text-center mt-1">
+                Case-sensitive: type uppercase and lowercase exactly as shown.
+              </p>
             </div>
 
             {/* Error / Success feedback */}
