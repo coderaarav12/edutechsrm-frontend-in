@@ -1,2 +1,2 @@
-export const APP_RUNTIME_VERSION = "2026-08-27.13-58-31";
+export const APP_RUNTIME_VERSION = "2026-08-27.14-48-23";
 export const LIVE_RUNTIME_POLL_MS = 5000;

@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server"
-import { rateLimit, getClientIP } from "@/lib/rate-limiter"
+import { rateLimit } from "@/lib/rate-limiter"
 
-const AI_BACKEND_URL = process.env.NEXT_PUBLIC_AI_BACKEND_URL
+const AI_BACKEND_URL =
+  process.env.AI_BACKEND_URL ||
+  process.env.NEXT_PUBLIC_AI_BACKEND_URL ||
+  "https://edutechsrm-ai-backend.goelaarav777.workers.dev"
 
 const DAILY_AI_LIMIT = 15
 const AI_RATE_WINDOW_MS = 24 * 60 * 60 * 1000
@@ -52,9 +55,14 @@ export async function POST(req: Request) {
       body.temperature = 0.3
     }
 
-    const upstream = await fetch(`${AI_BACKEND_URL!.replace(/\/$/, "")}/api/chat`, {
+    const backendEndpoint = `${AI_BACKEND_URL.replace(/\/$/, "")}/api/chat`
+    const upstream = await fetch(backendEndpoint, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "x-access-token": token,
+      },
       body: JSON.stringify(body),
     })
 
@@ -66,7 +74,8 @@ export async function POST(req: Request) {
         "Content-Type": upstream.headers.get("content-type") || "application/json",
       },
     })
-  } catch {
+  } catch (err) {
+    console.error("[api/ai/chat] Upstream error:", err)
     return NextResponse.json({ error: "Failed to reach AI backend" }, { status: 500, headers: API_HEADERS })
   }
 }
