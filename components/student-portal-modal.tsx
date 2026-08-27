@@ -13,13 +13,14 @@ import {
   Loader2,
   Sparkles,
   ShieldCheck,
-  Edit2,
+  Edit3,
   KeyRound,
+  ChevronDown,
 } from "lucide-react"
 import { useStudentPortal } from "@/lib/student-portal-context"
 import { useAuth } from "@/lib/auth-context"
 
-// NetID is the email prefix (e.g. ag0892) before @srmist.edu.in, NOT the roll number (RA...)
+// NetID is strictly the 2-alpha + 4-digit prefix (e.g. ag0892) before @srmist.edu.in
 function detectNetId(user: any): string {
   if (typeof window !== "undefined") {
     const directNetId = localStorage.getItem("edutechsrm_netid")?.trim().toLowerCase()
@@ -80,9 +81,8 @@ export function StudentPortalModal() {
   const { user } = useAuth()
 
   const [netId, setNetId] = useState("")
-  const [isEditingNetId, setIsEditingNetId] = useState(false)
   const [password, setPassword] = useState("")
-  const [isEditingPassword, setIsEditingPassword] = useState(false)
+  const [showFullForm, setShowFullForm] = useState(false)
   const [captcha, setCaptcha] = useState("")
   const [captchaImage, setCaptchaImage] = useState("")
   const [sessionId, setSessionId] = useState("")
@@ -100,18 +100,15 @@ export function StudentPortalModal() {
     const detected = detectNetId(user)
     if (detected) {
       setNetId(detected)
-      setIsEditingNetId(false)
-    } else {
-      setIsEditingNetId(true)
     }
 
     const savedPass = getStoredPassword()
     if (savedPass) {
       setPassword(savedPass)
-      setIsEditingPassword(false)
+      setShowFullForm(false) // Has saved credentials -> Show fast CAPTCHA-only view
     } else {
       setPassword("")
-      setIsEditingPassword(true)
+      setShowFullForm(true) // First time -> Show full form
     }
 
     void loadCaptcha()
@@ -148,11 +145,13 @@ export function StudentPortalModal() {
     const cleanNetId = netId.trim().toLowerCase()
     if (!cleanNetId) {
       setError("Please enter your NetID (e.g. ag0892).")
+      setShowFullForm(true)
       return
     }
 
     if (!password) {
       setError("Please enter your Student Portal password.")
+      setShowFullForm(true)
       return
     }
 
@@ -163,10 +162,10 @@ export function StudentPortalModal() {
 
     const res = await loginPortal(cleanNetId, password, captcha, sessionId)
     if (res.success) {
-      setSuccess("Resynced! Fresh attendance and semester grades are now live.")
+      setSuccess("Resynced! Live attendance and semester marks updated.")
       setTimeout(() => {
         closePortalLogin()
-      }, 900)
+      }, 800)
     } else {
       setError(res.error || "Authentication failed.")
       if (res.captchaImage) {
@@ -184,7 +183,7 @@ export function StudentPortalModal() {
 
   if (!isLoginModalOpen) return null
 
-  const isQuickResync = Boolean(netId && !isEditingNetId && password && !isEditingPassword)
+  const isCaptchaOnlyMode = Boolean(netId && password && !showFullForm)
 
   return (
     <AnimatePresence>
@@ -196,8 +195,8 @@ export function StudentPortalModal() {
           initial={{ opacity: 0, y: 30, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 30, scale: 0.98 }}
-          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          className="relative w-full max-w-md max-sm:rounded-t-3xl sm:rounded-3xl p-5 sm:p-7 overflow-hidden bg-zinc-950 border border-white/10 ring-1 ring-white/5 shadow-2xl max-h-[92dvh] overflow-y-auto"
+          transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+          className="relative w-full max-w-sm max-sm:rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 overflow-hidden bg-zinc-950 border border-white/10 ring-1 ring-white/5 shadow-2xl max-h-[92dvh] overflow-y-auto"
         >
           {/* Mobile Drag Indicator */}
           <div className="w-10 h-1 rounded-full bg-zinc-800 mx-auto mb-4 sm:hidden" />
@@ -211,168 +210,138 @@ export function StudentPortalModal() {
           </button>
 
           {/* Header */}
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-cyan-500/15 text-cyan-400 ring-1 ring-cyan-500/25 shrink-0">
-              <GraduationCap className="w-5 h-5" />
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-cyan-500/15 text-cyan-400 ring-1 ring-cyan-500/25 shrink-0">
+              <GraduationCap className="w-4 h-4" />
             </div>
             <div>
-              <p className="text-zinc-500 font-bold text-[10px] uppercase tracking-widest">
-                {isQuickResync ? "Quick Portal Resync" : isSessionExpired ? "Session Expired" : "Student Portal Scraper"}
+              <p className="text-zinc-500 font-bold text-[9px] uppercase tracking-widest">
+                {isCaptchaOnlyMode ? "Quick Verification" : isSessionExpired ? "Session Expired" : "Student Portal"}
               </p>
-              <h3 className="text-lg font-bold text-zinc-100 tracking-tight font-display">
-                {isQuickResync ? "Verify Captcha to Resync" : isSessionExpired ? "Reconnect Student Portal" : "Connect Student Portal"}
+              <h3 className="text-base font-bold text-zinc-100 tracking-tight font-display">
+                {isCaptchaOnlyMode ? "Enter CAPTCHA to Resync" : "Connect Student Portal"}
               </h3>
             </div>
           </div>
 
-          <p className="text-xs text-zinc-400 mb-5 leading-relaxed">
-            {isQuickResync
-              ? "Your credentials are auto-saved. Simply type the CAPTCHA to fetch fresh attendance and marks."
-              : isSessionExpired
-              ? "Your portal session has expired. Verify your password and captcha to re-authenticate."
-              : "Connect once to unlock all semester grades, CGPA, credits, and live portal attendance."}
-          </p>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Translucent NetID field */}
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-                  NetID
-                </label>
-                {netId && !isEditingNetId ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-emerald-400/90 flex items-center gap-1 font-mono">
-                      <ShieldCheck className="w-3 h-3" /> Auto-linked
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setIsEditingNetId(true)}
-                      className="text-[10px] text-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-0.5"
-                    >
-                      <Edit2 className="w-2.5 h-2.5" /> Edit
-                    </button>
-                  </div>
-                ) : null}
+          {/* Locked Identity Pill in Captcha-Only Mode */}
+          {isCaptchaOnlyMode && (
+            <div className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-zinc-900/80 border border-white/5 mb-4 text-xs">
+              <div className="flex items-center gap-2 font-mono">
+                <span className="text-zinc-300 font-semibold">{netId}</span>
+                <span className="text-[10px] text-emerald-400 flex items-center gap-0.5">
+                  <ShieldCheck className="w-3 h-3" /> Saved
+                </span>
               </div>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={netId}
-                  onChange={(e) => setNetId(e.target.value)}
-                  placeholder="e.g. ag0892"
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                  spellCheck={false}
-                  readOnly={!isEditingNetId && Boolean(netId)}
-                  disabled={!isEditingNetId && Boolean(netId)}
-                  className={`w-full rounded-xl px-3.5 py-2.5 text-sm font-mono transition-all outline-none ${
-                    !isEditingNetId && Boolean(netId)
-                      ? "bg-zinc-900/40 border border-white/5 text-zinc-300 opacity-75 cursor-not-allowed select-none"
-                      : "bg-zinc-900/80 border border-white/10 text-zinc-100 focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/20"
-                  }`}
-                />
-                <User className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-              </div>
+              <button
+                type="button"
+                onClick={() => setShowFullForm(true)}
+                className="text-[10px] text-zinc-500 hover:text-cyan-400 flex items-center gap-1 transition-colors"
+              >
+                <Edit3 className="w-2.5 h-2.5" /> Edit
+              </button>
             </div>
+          )}
 
-            {/* Password field with Saved status & Edit toggle */}
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-                  Portal Password
-                </label>
-                {password && !isEditingPassword ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-emerald-400/90 flex items-center gap-1 font-mono">
-                      <KeyRound className="w-3 h-3" /> Saved
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setIsEditingPassword(true)}
-                      className="text-[10px] text-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-0.5"
-                    >
-                      <Edit2 className="w-2.5 h-2.5" /> Edit
-                    </button>
+          <form onSubmit={handleSubmit} className="space-y-3.5">
+            {/* Full Form Fields (Only shown on First Setup or when clicking Edit) */}
+            {!isCaptchaOnlyMode && (
+              <div className="space-y-3 p-3 rounded-2xl bg-zinc-900/40 border border-white/5">
+                {/* NetID */}
+                <div>
+                  <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-400 mb-1">
+                    NetID (e.g. ag0892)
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={netId}
+                      onChange={(e) => setNetId(e.target.value)}
+                      placeholder="ag0892"
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      spellCheck={false}
+                      className="w-full rounded-xl bg-zinc-900/90 border border-white/10 px-3 py-2 text-xs text-zinc-100 font-mono focus:border-cyan-400/50 outline-none transition-all"
+                    />
+                    <User className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
                   </div>
-                ) : null}
-              </div>
-              <div className="relative">
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter student portal password"
-                  autoComplete="current-password"
-                  readOnly={!isEditingPassword && Boolean(password)}
-                  disabled={!isEditingPassword && Boolean(password)}
-                  className={`w-full rounded-xl px-3.5 py-2.5 text-sm font-mono transition-all outline-none ${
-                    !isEditingPassword && Boolean(password)
-                      ? "bg-zinc-900/40 border border-white/5 text-zinc-300 opacity-75 cursor-not-allowed select-none"
-                      : "bg-zinc-900/80 border border-white/10 text-zinc-100 focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/20"
-                  }`}
-                />
-                <Lock className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-              </div>
-            </div>
+                </div>
 
-            {/* Captcha */}
+                {/* Password */}
+                <div>
+                  <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-400 mb-1">
+                    Portal Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Enter portal password"
+                      autoComplete="current-password"
+                      className="w-full rounded-xl bg-zinc-900/90 border border-white/10 px-3 py-2 text-xs text-zinc-100 font-mono focus:border-cyan-400/50 outline-none transition-all"
+                    />
+                    <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
+                  </div>
+                  <p className="text-[9px] text-zinc-500 mt-1">Saved on device so you only solve captcha in future.</p>
+                </div>
+              </div>
+            )}
+
+            {/* Captcha Section */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-                  CAPTCHA Code
+                <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-400">
+                  Solve CAPTCHA
                 </label>
                 <button
                   type="button"
                   onClick={() => loadCaptcha(sessionId)}
                   disabled={captchaLoading}
-                  className="text-[11px] font-medium text-cyan-400 hover:text-cyan-300 flex items-center gap-1 transition-colors disabled:opacity-50"
+                  className="text-[10px] font-medium text-cyan-400 hover:text-cyan-300 flex items-center gap-1 transition-colors disabled:opacity-50"
                 >
-                  <RefreshCw className={`w-3 h-3 ${captchaLoading ? "animate-spin" : ""}`} />
-                  Refresh Captcha
+                  <RefreshCw className={`w-2.5 h-2.5 ${captchaLoading ? "animate-spin" : ""}`} />
+                  Refresh
                 </button>
               </div>
 
-              <div className="flex items-center gap-2 mb-2">
-                <div className="flex-1 h-14 rounded-xl bg-zinc-900 border border-white/10 flex items-center justify-center p-1.5 overflow-hidden">
-                  {captchaLoading ? (
-                    <div className="flex items-center gap-2 text-xs text-zinc-500">
-                      <Loader2 className="w-4 h-4 animate-spin text-cyan-400" />
-                      Fetching CAPTCHA...
-                    </div>
-                  ) : captchaImage ? (
-                    <img
-                      src={captchaImage}
-                      alt="Portal CAPTCHA"
-                      className="max-h-full object-contain rounded bg-white/5 p-0.5"
-                    />
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => loadCaptcha()}
-                      className="text-xs text-cyan-400 underline"
-                    >
-                      Click to load CAPTCHA
-                    </button>
-                  )}
-                </div>
+              {/* Captcha Image Container */}
+              <div className="h-16 rounded-2xl bg-zinc-900 border border-white/10 flex items-center justify-center p-1.5 overflow-hidden mb-2.5 shadow-inner">
+                {captchaLoading ? (
+                  <div className="flex items-center gap-2 text-xs text-zinc-500">
+                    <Loader2 className="w-4 h-4 animate-spin text-cyan-400" />
+                    Fetching CAPTCHA...
+                  </div>
+                ) : captchaImage ? (
+                  <img
+                    src={captchaImage}
+                    alt="Portal CAPTCHA"
+                    className="max-h-full object-contain rounded bg-white/5 p-1"
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => loadCaptcha()}
+                    className="text-xs text-cyan-400 underline"
+                  >
+                    Click to load CAPTCHA
+                  </button>
+                )}
               </div>
 
+              {/* Centered Large CAPTCHA Input */}
               <input
                 type="text"
                 value={captcha}
                 onChange={(e) => setCaptcha(e.target.value)}
-                placeholder="Enter characters exactly"
+                placeholder="Enter 6 characters"
                 maxLength={8}
-                autoFocus={Boolean(netId && password && !isEditingPassword)}
+                autoFocus
                 autoCapitalize="none"
                 autoCorrect="off"
                 spellCheck={false}
-                className="w-full rounded-xl bg-zinc-900/80 border border-white/10 px-3.5 py-2.5 text-sm text-zinc-100 font-mono text-center tracking-widest focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/20 outline-none transition-all"
+                className="w-full rounded-xl bg-zinc-900/90 border border-white/15 px-3 py-2.5 text-base text-zinc-100 font-mono text-center tracking-[0.25em] uppercase font-bold focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 outline-none transition-all placeholder:tracking-normal placeholder:normal-case placeholder:font-normal placeholder:text-zinc-600 placeholder:text-xs"
               />
-              <p className="text-[10px] text-zinc-500 text-center mt-1">
-                Case-sensitive: type letters and numbers exactly as shown above.
-              </p>
             </div>
 
             {/* Error / Success feedback */}
@@ -380,9 +349,9 @@ export function StudentPortalModal() {
               <motion.div
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-start gap-2.5 text-xs text-rose-300"
+                className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-start gap-2 text-xs text-rose-300"
               >
-                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                 <span>{error}</span>
               </motion.div>
             )}
@@ -391,36 +360,29 @@ export function StudentPortalModal() {
               <motion.div
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-start gap-2.5 text-xs text-emerald-300"
+                className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-start gap-2 text-xs text-emerald-300"
               >
-                <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+                <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                 <span>{success}</span>
               </motion.div>
             )}
 
-            {/* Buttons */}
-            <div className="grid grid-cols-2 gap-2.5 pt-2">
-              <button
-                type="button"
-                onClick={closePortalLogin}
-                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-zinc-400 hover:text-zinc-200 bg-zinc-900 hover:bg-zinc-800 border border-white/5 transition-all"
-              >
-                Dismiss
-              </button>
+            {/* Action Button */}
+            <div className="pt-1">
               <button
                 type="submit"
-                disabled={isSyncing || captchaLoading}
-                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-zinc-950 bg-emerald-400 hover:bg-emerald-300 disabled:opacity-50 transition-all flex items-center justify-center gap-1.5 shadow-md shadow-emerald-500/20"
+                disabled={isSyncing || captchaLoading || !captcha.trim()}
+                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-zinc-950 bg-emerald-400 hover:bg-emerald-300 disabled:opacity-40 transition-all flex items-center justify-center gap-1.5 shadow-md shadow-emerald-500/20"
               >
                 {isSyncing ? (
                   <>
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    Resyncing...
+                    Resyncing Portal...
                   </>
                 ) : (
                   <>
                     <Sparkles className="w-3.5 h-3.5" />
-                    {isQuickResync ? "Resync Now" : isSessionExpired ? "Re-authenticate" : "Authenticate"}
+                    {isCaptchaOnlyMode ? "Verify & Resync" : "Connect & Save"}
                   </>
                 )}
               </button>
