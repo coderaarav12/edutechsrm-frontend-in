@@ -5,6 +5,7 @@ import {
   AlertCircle, Loader2, Shield, Trash2, X,
   BarChart3, MessageSquareText, Megaphone, Ban, Users, Wrench,
   EyeOff, LogOut, UserX2, Check, Key, Smartphone, Megaphone as AnnounceIcon,
+  ServerCog,
   UploadCloud, ImageOff, Plus, Save,
 } from "lucide-react"
 import { useAdminControl } from "@/lib/admin-control"
@@ -408,6 +409,7 @@ export function MobileAppSettingsTab({
   const [changelog, setChangelog] = useState<Array<{ version: string; code: number; date: string; changes: string[] }>>(
     Array.isArray(mobileAppSettings?.update?.changelog) ? mobileAppSettings.update.changelog : []
   )
+const [attendanceSource, setAttendanceSource] = useState<"backend" | "portal">(mobileAppSettings?.update?.attendanceSource === "portal" ? "portal" : "backend")
   const [updSaving, setUpdSaving] = useState(false)
   const [updStatus, setUpdStatus] = useState<{ text: string; error: boolean } | null>(null)
 
@@ -421,6 +423,7 @@ export function MobileAppSettingsTab({
     setForceUpdate(Boolean(mobileAppSettings.update?.forceUpdate))
     setUpdateUrl(mobileAppSettings.update?.updateUrl || "")
     setChangelog(Array.isArray(mobileAppSettings.update?.changelog) ? mobileAppSettings.update.changelog : [])
+setAttendanceSource(mobileAppSettings.update?.attendanceSource === "portal" ? "portal" : "backend")
   }, [mobileAppSettings])
 
   const updateAnn = useCallback((id: string, patch: Partial<{ enabled: boolean; title: string; body: string; imageUrl: string }>) => {
@@ -484,6 +487,7 @@ export function MobileAppSettingsTab({
         forceUpdate,
         updateUrl: updateUrl.trim(),
         changelog,
+        attendanceSource,
       },
     })
     if (!r.success) { setUpdStatus({ text: r.error || "Failed to save", error: true }) }
@@ -516,6 +520,79 @@ export function MobileAppSettingsTab({
 
   return (
     <div className="space-y-6">
+      <Card>
+        <SectionHeader
+          label="Attendance"
+          title="Attendance Source Switch"
+          color={attendanceSource === "portal" ? "#22d3ee" : "#34d399"}
+          icon={ServerCog}
+        />
+        <div className="space-y-4">
+          <div className="flex items-start justify-between gap-4 rounded-xl bg-zinc-900/60 ring-1 ring-white/5 p-4">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-zinc-200">
+                Current source: <span className={attendanceSource === "portal" ? "text-cyan-400" : "text-emerald-400"}>{attendanceSource === "portal" ? "Student Portal Scraper" : "Primary backend"}</span>
+              </p>
+              <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
+                Switch this only when the normal attendance backend is unavailable. The attendance page can then use the student portal scraper for login and scraping.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => setAttendanceSource("backend")}
+                className="px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all"
+                style={{
+                  background: attendanceSource === "backend" ? "rgba(52,211,153,0.14)" : "rgba(255,255,255,0.04)",
+                  color: attendanceSource === "backend" ? "#34d399" : "#71717a",
+                  border: attendanceSource === "backend" ? "1px solid rgba(52,211,153,0.25)" : "1px solid rgba(255,255,255,0.06)",
+                }}
+              >
+                Primary
+              </button>
+              <button
+                type="button"
+                onClick={() => setAttendanceSource("portal")}
+                className="px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all"
+                style={{
+                  background: attendanceSource === "portal" ? "rgba(34,211,238,0.14)" : "rgba(255,255,255,0.04)",
+                  color: attendanceSource === "portal" ? "#22d3ee" : "#71717a",
+                  border: attendanceSource === "portal" ? "1px solid rgba(34,211,238,0.25)" : "1px solid rgba(255,255,255,0.06)",
+                }}
+              >
+                Student Portal
+              </button>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-white/5 bg-zinc-900/40 px-4 py-3 text-xs text-zinc-500 leading-relaxed">
+            The student portal scraper backend is wired through the deployment environment variables, not the admin panel.
+          </div>
+
+          <button
+            type="button"
+            onClick={async () => {
+              const r = await updateMobileAppSettings({
+                update: {
+                  ...(mobileAppSettings?.update ?? {}),
+                  attendanceSource,
+                },
+              })
+              if (!r.success) {
+                setUpdStatus({ text: r.error || "Failed to save attendance source", error: true })
+              } else {
+                setUpdStatus({ text: "Attendance source saved", error: false })
+              }
+            }}
+            disabled={adminLoading}
+            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-xs uppercase tracking-wider bg-cyan-500/15 text-cyan-300 hover:bg-cyan-500/20 transition-all disabled:opacity-40"
+          >
+            <Save className="w-3.5 h-3.5" />
+            Save Attendance Source
+          </button>
+        </div>
+      </Card>
+
       {/* ── App announcements ── */}
       <Card>
         <div className="flex items-start justify-between mb-5">

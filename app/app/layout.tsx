@@ -12,6 +12,8 @@ import { MaintenanceOverlay } from "@/components/maintenance-overlay"
 import { AppSidebar } from "@/components/app-sidebar"
 import { LoginSyncScreen, UpdateOverlay, DataUnavailableScreen } from "@/components/app-shell-ui"
 import { AndroidAnnouncementModal, useAndroidAnnouncement } from "@/components/android-announcement"
+import { StudentPortalModal } from "@/components/student-portal-modal"
+import { SemesterGradesModal } from "@/components/semester-grades-modal"
 import type { TabType } from "@/lib/app-types"
 import { VALID_TABS } from "@/lib/app-types"
 import { writeCachedPhoto } from "@/lib/photo-cache"
@@ -395,6 +397,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <ChangelogModalV2 isOpen={showV2Changelog} onClose={closeV2Changelog}
         onViewUpdates={() => { closeV2Changelog(); navigate("updates") }} />
       <AndroidAnnouncementModal isOpen={showAndroidAnnouncement} onClose={dismissAndroidAnnouncement} />
+      <StudentPortalModal />
+      <SemesterGradesModal />
       <ThemePanel open={showThemePanel} onClose={() => setShowThemePanel(false)} />
       <div className="min-h-screen relative overflow-hidden flex flex-col selection:bg-emerald-500/30">
         <Navbar activeTab={activeTab} setActiveTab={(tab) => navigate(tab as TabType)} minimised={minimised} setMinimised={setMinimised} />

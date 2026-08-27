@@ -34,10 +34,13 @@ jobs:
           NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.TURNSTILE_SITE_KEY }}
           TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
           NEXT_PUBLIC_AI_BACKEND_URL: ${{ secrets.NEXT_PUBLIC_AI_BACKEND_URL }}
+          STUDENT_PORTAL_BACKEND_URL: ${{ secrets.STUDENT_PORTAL_BACKEND_URL }}
+          NEXT_PUBLIC_STUDENT_PORTAL_BACKEND_URL: ${{ secrets.STUDENT_PORTAL_BACKEND_URL }}
       - name: Set backend URL secrets
         run: |
           echo "${{ secrets.SRM_BACKEND_URL }}" | npx wrangler secret put SRM_BACKEND_URL
           echo "${{ secrets.BACKEND_URL }}" | npx wrangler secret put BACKEND_URL
+          echo "${{ secrets.STUDENT_PORTAL_BACKEND_URL }}" | npx wrangler secret put STUDENT_PORTAL_BACKEND_URL
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN_IN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID_IN }}
