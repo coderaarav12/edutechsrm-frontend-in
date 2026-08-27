@@ -14,6 +14,7 @@ import {
   Sparkles,
   ShieldCheck,
   Edit2,
+  KeyRound,
 } from "lucide-react"
 import { useStudentPortal } from "@/lib/student-portal-context"
 import { useAuth } from "@/lib/auth-context"
@@ -61,6 +62,18 @@ function detectNetId(user: any): string {
   return ""
 }
 
+function getStoredPassword(): string {
+  if (typeof window === "undefined") return ""
+  try {
+    const raw = localStorage.getItem("edutechsrm_student_portal_creds_v2")
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      return typeof parsed?.password === "string" ? parsed.password : ""
+    }
+  } catch {}
+  return ""
+}
+
 export function StudentPortalModal() {
   const { isLoginModalOpen, closePortalLogin, fetchCaptcha, loginPortal, isSyncing, isSessionExpired } =
     useStudentPortal()
@@ -69,6 +82,7 @@ export function StudentPortalModal() {
   const [netId, setNetId] = useState("")
   const [isEditingNetId, setIsEditingNetId] = useState(false)
   const [password, setPassword] = useState("")
+  const [isEditingPassword, setIsEditingPassword] = useState(false)
   const [captcha, setCaptcha] = useState("")
   const [captchaImage, setCaptchaImage] = useState("")
   const [sessionId, setSessionId] = useState("")
@@ -76,13 +90,12 @@ export function StudentPortalModal() {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
 
-  // Auto-populate NetID from login email prefix
+  // Auto-populate NetID and stored Password
   useEffect(() => {
     if (!isLoginModalOpen) return
     setError("")
     setSuccess("")
     setCaptcha("")
-    setPassword("")
 
     const detected = detectNetId(user)
     if (detected) {
@@ -90,6 +103,15 @@ export function StudentPortalModal() {
       setIsEditingNetId(false)
     } else {
       setIsEditingNetId(true)
+    }
+
+    const savedPass = getStoredPassword()
+    if (savedPass) {
+      setPassword(savedPass)
+      setIsEditingPassword(false)
+    } else {
+      setPassword("")
+      setIsEditingPassword(true)
     }
 
     void loadCaptcha()
@@ -125,7 +147,7 @@ export function StudentPortalModal() {
 
     const cleanNetId = netId.trim().toLowerCase()
     if (!cleanNetId) {
-      setError("Please enter your NetID.")
+      setError("Please enter your NetID (e.g. ag0892).")
       return
     }
 
@@ -141,10 +163,10 @@ export function StudentPortalModal() {
 
     const res = await loginPortal(cleanNetId, password, captcha, sessionId)
     if (res.success) {
-      setSuccess("Connected! All semester grades and attendance are now synced.")
+      setSuccess("Resynced! Fresh attendance and semester grades are now live.")
       setTimeout(() => {
         closePortalLogin()
-      }, 1000)
+      }, 900)
     } else {
       setError(res.error || "Authentication failed.")
       if (res.captchaImage) {
@@ -161,6 +183,8 @@ export function StudentPortalModal() {
   }
 
   if (!isLoginModalOpen) return null
+
+  const isQuickResync = Boolean(netId && !isEditingNetId && password && !isEditingPassword)
 
   return (
     <AnimatePresence>
@@ -187,28 +211,30 @@ export function StudentPortalModal() {
           </button>
 
           {/* Header */}
-          <div className="flex items-center gap-3 mb-5">
+          <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-cyan-500/15 text-cyan-400 ring-1 ring-cyan-500/25 shrink-0">
               <GraduationCap className="w-5 h-5" />
             </div>
             <div>
               <p className="text-zinc-500 font-bold text-[10px] uppercase tracking-widest">
-                {isSessionExpired ? "Session Expired" : "Student Portal Scraper"}
+                {isQuickResync ? "Quick Portal Resync" : isSessionExpired ? "Session Expired" : "Student Portal Scraper"}
               </p>
               <h3 className="text-lg font-bold text-zinc-100 tracking-tight font-display">
-                {isSessionExpired ? "Reconnect Student Portal" : "Connect Student Portal"}
+                {isQuickResync ? "Verify Captcha to Resync" : isSessionExpired ? "Reconnect Student Portal" : "Connect Student Portal"}
               </h3>
             </div>
           </div>
 
           <p className="text-xs text-zinc-400 mb-5 leading-relaxed">
-            {isSessionExpired
-              ? "Your Student Portal session has expired. Enter your portal password and captcha to re-authenticate."
+            {isQuickResync
+              ? "Your credentials are auto-saved. Simply type the CAPTCHA to fetch fresh attendance and marks."
+              : isSessionExpired
+              ? "Your portal session has expired. Verify your password and captcha to re-authenticate."
               : "Connect once to unlock all semester grades, CGPA, credits, and live portal attendance."}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Translucent NetID field (email prefix before @srmist.edu.in) */}
+            {/* Translucent NetID field */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
@@ -250,11 +276,27 @@ export function StudentPortalModal() {
               </div>
             </div>
 
-            {/* Password */}
+            {/* Password field with Saved status & Edit toggle */}
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5">
-                Portal Password
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                  Portal Password
+                </label>
+                {password && !isEditingPassword ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-emerald-400/90 flex items-center gap-1 font-mono">
+                      <KeyRound className="w-3 h-3" /> Saved
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingPassword(true)}
+                      className="text-[10px] text-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-0.5"
+                    >
+                      <Edit2 className="w-2.5 h-2.5" /> Edit
+                    </button>
+                  </div>
+                ) : null}
+              </div>
               <div className="relative">
                 <input
                   type="password"
@@ -262,8 +304,13 @@ export function StudentPortalModal() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter student portal password"
                   autoComplete="current-password"
-                  autoFocus={Boolean(netId && !isEditingNetId)}
-                  className="w-full rounded-xl bg-zinc-900/80 border border-white/10 px-3.5 py-2.5 text-sm text-zinc-100 font-mono focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/20 outline-none transition-all"
+                  readOnly={!isEditingPassword && Boolean(password)}
+                  disabled={!isEditingPassword && Boolean(password)}
+                  className={`w-full rounded-xl px-3.5 py-2.5 text-sm font-mono transition-all outline-none ${
+                    !isEditingPassword && Boolean(password)
+                      ? "bg-zinc-900/40 border border-white/5 text-zinc-300 opacity-75 cursor-not-allowed select-none"
+                      : "bg-zinc-900/80 border border-white/10 text-zinc-100 focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/20"
+                  }`}
                 />
                 <Lock className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
               </div>
@@ -317,13 +364,14 @@ export function StudentPortalModal() {
                 onChange={(e) => setCaptcha(e.target.value)}
                 placeholder="Enter characters exactly"
                 maxLength={8}
+                autoFocus={Boolean(netId && password && !isEditingPassword)}
                 autoCapitalize="none"
                 autoCorrect="off"
                 spellCheck={false}
                 className="w-full rounded-xl bg-zinc-900/80 border border-white/10 px-3.5 py-2.5 text-sm text-zinc-100 font-mono text-center tracking-widest focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/20 outline-none transition-all"
               />
               <p className="text-[10px] text-zinc-500 text-center mt-1">
-                Case-sensitive: type uppercase and lowercase letters exactly as shown above.
+                Case-sensitive: type letters and numbers exactly as shown above.
               </p>
             </div>
 
@@ -367,12 +415,12 @@ export function StudentPortalModal() {
                 {isSyncing ? (
                   <>
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    Connecting...
+                    Resyncing...
                   </>
                 ) : (
                   <>
                     <Sparkles className="w-3.5 h-3.5" />
-                    {isSessionExpired ? "Re-authenticate" : "Authenticate"}
+                    {isQuickResync ? "Resync Now" : isSessionExpired ? "Re-authenticate" : "Authenticate"}
                   </>
                 )}
               </button>

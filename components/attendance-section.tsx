@@ -369,6 +369,18 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
         </div>
         <div className="flex items-center gap-2">
           <AIPromoBadge page="attendance" />
+          {attendanceSource === "portal" && (
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={openPortalLogin}
+              disabled={isLoading || isSyncing}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/25 transition-all shadow-sm disabled:opacity-50"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? "animate-spin" : ""}`} />
+              <span className="hidden sm:inline">Resync Portal</span>
+              <span className="sm:hidden">Resync</span>
+            </motion.button>
+          )}
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={refreshAttendance}
