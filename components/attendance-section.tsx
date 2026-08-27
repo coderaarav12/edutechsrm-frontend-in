@@ -39,7 +39,7 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
     dateToDoMap = {},
     courses = [],
   } = useAuth() as any
-  const { portalData, syncPortalData, openPortalLogin, isSessionExpired } = useStudentPortal()
+  const { portalData, syncPortalData, openPortalLogin, isSessionExpired, isSyncing } = useStudentPortal()
   const { odMlEntries } = useCustomPlanner()
   const [isLoginOpen, setIsLoginOpen] = useState(false)
   const [attendanceSource, setAttendanceSource] = useState<"backend" | "portal">("backend")
