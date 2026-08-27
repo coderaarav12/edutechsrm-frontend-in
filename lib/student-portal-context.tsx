@@ -267,14 +267,18 @@ export function StudentPortalProvider({ children }: { children: ReactNode }) {
 
         setPortalData(newPortalData)
         setIsSessionExpired(false)
-        writeCachedPortalData(newPortalData)
+        const cleanNetId = netId.trim().toLowerCase()
         if (typeof window !== "undefined") {
           if (finalSessionId) {
             localStorage.setItem("edutechsrm_student_portal_session_id", finalSessionId)
           }
+          if (cleanNetId && !/^ra\d/i.test(cleanNetId)) {
+            localStorage.setItem("edutechsrm_netid", cleanNetId)
+            localStorage.setItem("edutechsrm_srm_email", `${cleanNetId}@srmist.edu.in`)
+          }
         }
         writeStoredCredentials({
-          netId: netId.trim().toLowerCase(),
+          netId: cleanNetId,
           password: pass,
           savedAt: new Date().toISOString(),
         })

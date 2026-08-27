@@ -162,6 +162,12 @@ export function StudentPortalModal() {
 
     const res = await loginPortal(cleanNetId, password, captcha, sessionId)
     if (res.success) {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("edutechsrm_netid", cleanNetId)
+        localStorage.setItem("edutechsrm_srm_email", `${cleanNetId}@srmist.edu.in`)
+      }
+      setNetId(cleanNetId)
+      setShowFullForm(false)
       setSuccess("Resynced! Live attendance and semester marks updated.")
       setTimeout(() => {
         closePortalLogin()
