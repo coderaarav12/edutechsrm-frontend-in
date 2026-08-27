@@ -21,7 +21,7 @@ import { AIPromoBadge } from "@/components/ai-promo-badge"
 
 export function MarksSection() {
   const { isAuthenticated, marks, courses, isLoading, refreshData, user } = useAuth()
-  const { portalData, isPortalConnected, isSessionExpired, openGradesModal, openPortalLogin } = useStudentPortal()
+  const { portalData, isPortalConnected, isSessionExpired, openGradesModal, openPortalLogin, isSyncing } = useStudentPortal()
   const [isLoginOpen, setIsLoginOpen] = useState(false)
   const [expandedCard, setExpandedCard] = useState<string | null>(null)
 
