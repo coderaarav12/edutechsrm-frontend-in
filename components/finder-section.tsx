@@ -66,6 +66,7 @@ function SkeletonCard() {
 
 function FacultyCard({ f }: { f: Faculty }) {
   const [copiedType, setCopiedType] = useState<"email" | "phone" | null>(null)
+  const [imgError, setImgError] = useState(false)
 
   const copyToClipboard = (text: string, type: "email" | "phone") => {
     navigator.clipboard.writeText(text)
@@ -80,6 +81,11 @@ function FacultyCard({ f }: { f: Faculty }) {
     return clean.slice(0, 2).toUpperCase() || "SR"
   }, [f.name])
 
+  const proxiedImageUrl = useMemo(() => {
+    if (!f.photoUrl || imgError) return null
+    return `/api/finder/image?url=${encodeURIComponent(f.photoUrl)}`
+  }, [f.photoUrl, imgError])
+
   return (
     <motion.div
       layout
@@ -90,10 +96,20 @@ function FacultyCard({ f }: { f: Faculty }) {
       className="group relative rounded-2xl border border-white/5 p-4 bg-zinc-900/50 hover:bg-zinc-900/80 hover:border-emerald-500/30 transition-all flex flex-col justify-between shadow-md hover:shadow-xl hover:shadow-black/40"
     >
       <div>
-        {/* Header: Initials Avatar & Name */}
+        {/* Header: Photo or Initials Avatar & Name */}
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-zinc-800 border border-emerald-500/20 flex items-center justify-center shrink-0 text-xs font-black text-emerald-400 shadow-inner">
-            {initials}
+          <div className="relative w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500/20 to-zinc-800 border border-emerald-500/20 flex items-center justify-center shrink-0 overflow-hidden text-xs font-black text-emerald-400 shadow-inner">
+            {proxiedImageUrl ? (
+              <img
+                src={proxiedImageUrl}
+                alt={f.name}
+                className="w-full h-full object-cover rounded-xl"
+                onError={() => setImgError(true)}
+                loading="lazy"
+              />
+            ) : (
+              <span>{initials}</span>
+            )}
           </div>
 
           <div className="min-w-0 flex-1">
