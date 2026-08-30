@@ -86,8 +86,17 @@ export async function GET(request: NextRequest) {
       facultyId: (r["Faculty Id."] || r["Faculty Id"] || `FAC${String(i).padStart(4, "0")}`).trim(),
       name: r["Faculty Name"].trim(),
       designation: (r["Designation"] || "Faculty").trim(),
-      department: (r["Department"] || "NWC").trim(),
-      staffRoom: (r["Staff Room"] || "Not Assigned").trim(),
+      department: (r["Department"] || "General").trim(),
+      fullDepartment: (r["Full Department"] || r["Department"] || "").trim(),
+      college: (r["College"] || "").trim(),
+      campus: (r["Campus"] || "Kattankulathur - Chennai").trim(),
+      staffRoom: (r["Staff Room"] || "Faculty Cabin").trim(),
+      email: (r["Email"] || "").trim(),
+      phone: (r["Phone"] || "").trim(),
+      specialization: (r["Specialization"] || "").trim(),
+      experience: (r["Experience"] || "").trim(),
+      profileUrl: (r["Profile URL"] || "").trim(),
+      photoUrl: (r["Photo URL"] || "").trim(),
     }))
 
     const { searchParams } = new URL(request.url)
@@ -97,8 +106,23 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(50, Math.max(1, parseInt(searchParams.get("limit") || "8")))
 
     let filtered = faculty
-    if (dept) filtered = filtered.filter(f => f.department.toLowerCase() === dept.toLowerCase())
-    if (q) filtered = filtered.filter(f => f.name.toLowerCase().includes(q) || f.facultyId.toLowerCase().includes(q))
+    if (dept && dept !== "All") {
+      filtered = filtered.filter(f => 
+        f.department.toLowerCase() === dept.toLowerCase() ||
+        f.fullDepartment.toLowerCase().includes(dept.toLowerCase())
+      )
+    }
+    if (q) {
+      filtered = filtered.filter(f => 
+        f.name.toLowerCase().includes(q) || 
+        f.facultyId.toLowerCase().includes(q) ||
+        f.email.toLowerCase().includes(q) ||
+        f.specialization.toLowerCase().includes(q) ||
+        f.department.toLowerCase().includes(q) ||
+        f.fullDepartment.toLowerCase().includes(q) ||
+        f.designation.toLowerCase().includes(q)
+      )
+    }
 
     const departments = [...new Set(faculty.map(f => f.department).filter(Boolean))].sort()
     const total = filtered.length
