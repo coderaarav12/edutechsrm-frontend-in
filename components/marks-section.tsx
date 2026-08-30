@@ -81,7 +81,7 @@ export function MarksSection() {
       const name =
         names[0] ||
         unified?.name ||
-        portalEntries[0]?.description ||
+        portalEntries[0]?.name ||
         marksEntries[0]?.name ||
         code
 
@@ -136,12 +136,13 @@ export function MarksSection() {
       // Case B: Portal internal marks exist
       if (portalEntries.length > 0) {
         const tests = portalEntries.map((p: any) => {
-          const scoredNum = parseFloat(String(p.marks || "0"))
+          const scoredNum = typeof p.markObtained === "number" ? p.markObtained : parseFloat(String(p.rawMarkText || "0"))
           const validNum = !isNaN(scoredNum) ? scoredNum : 0
+          const maxNum = typeof p.maxMark === "number" && p.maxMark > 0 ? p.maxMark : 50
           return {
-            test: p.description || "Internal Test",
+            test: p.name || "Internal Test",
             scored: validNum,
-            max: 50,
+            max: maxNum,
           }
         })
         const total = tests.reduce((s: number, t: any) => s + t.scored, 0)
