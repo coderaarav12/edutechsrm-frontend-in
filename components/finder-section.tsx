@@ -4,7 +4,8 @@ import { useState, useEffect, useMemo, useCallback, useSyncExternalStore } from 
 import { motion, AnimatePresence } from "framer-motion"
 import { 
   IdCard, Search, X, ChevronLeft, ChevronRight, Users, AlertCircle, 
-  MapPin, Building2, Mail, Phone, ExternalLink, Sparkles, GraduationCap, Copy, Check
+  MapPin, Building2, Mail, Phone, ExternalLink, Sparkles, GraduationCap, Copy, Check,
+  ChevronDown
 } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
@@ -26,44 +27,38 @@ interface Faculty {
   photoUrl?: string
 }
 
-const PRIMARY_DEPARTMENTS = [
-  "All",
-  "CTech",
-  "NWC",
-  "Cintel",
-  "DSBS",
-  "ECE",
-  "EEE",
-  "Mechanical",
-  "Civil",
-  "Biotech",
-  "Mathematics",
-  "Physics",
-  "Chemistry",
-  "Management",
-  "Law",
-  "Medical & Health",
-  "Nursing",
-  "Pharmacy",
-  "Physiotherapy",
-  "Architecture",
-  "Agriculture"
+const PRIMARY_DEPT_TABS = [
+  { id: "All", label: "All Departments" },
+  { id: "CTech", label: "CTech" },
+  { id: "NWC", label: "NWC" },
+  { id: "Cintel", label: "Cintel" },
+  { id: "DSBS", label: "DSBS" },
+  { id: "ECE", label: "ECE" },
+  { id: "EEE", label: "EEE" },
+  { id: "Mechanical", label: "Mechanical" },
+  { id: "Civil", label: "Civil" },
+  { id: "Biotech", label: "Biotech" },
+  { id: "Mathematics", label: "Maths" },
+  { id: "Physics", label: "Physics" },
+  { id: "Chemistry", label: "Chemistry" },
+  { id: "Management", label: "Management" },
+  { id: "Law", label: "Law" },
+  { id: "Medical & Health", label: "Medical" },
 ]
 
 function SkeletonCard() {
   return (
-    <div className="rounded-xl border border-white/5 p-4 bg-zinc-900/60 animate-pulse flex flex-col justify-between h-[230px]">
+    <div className="rounded-2xl border border-white/5 p-4 bg-zinc-900/40 animate-pulse flex flex-col justify-between h-[230px]">
       <div className="flex items-start gap-3">
-        <div className="w-12 h-12 rounded-xl bg-zinc-800 shrink-0" />
+        <div className="w-10 h-10 rounded-xl bg-zinc-800 shrink-0" />
         <div className="space-y-2 flex-1">
           <div className="h-4 bg-zinc-800 rounded w-3/4" />
           <div className="h-3 bg-zinc-800/70 rounded w-1/2" />
-          <div className="h-3 bg-zinc-800/50 rounded w-2/3" />
         </div>
       </div>
-      <div className="space-y-2 pt-3 border-t border-white/5">
-        <div className="h-3 bg-zinc-800/60 rounded w-5/6" />
-        <div className="h-3 bg-zinc-800/40 rounded w-4/6" />
+      <div className="h-10 bg-zinc-800/50 rounded-xl my-2" />
+      <div className="space-y-1.5 pt-2 border-t border-white/5">
+        <div className="h-3 bg-zinc-800/60 rounded w-4/5" />
       </div>
     </div>
   )
@@ -71,7 +66,6 @@ function SkeletonCard() {
 
 function FacultyCard({ f }: { f: Faculty }) {
   const [copiedType, setCopiedType] = useState<"email" | "phone" | null>(null)
-  const [imgError, setImgError] = useState(false)
 
   const copyToClipboard = (text: string, type: "email" | "phone") => {
     navigator.clipboard.writeText(text)
@@ -89,32 +83,22 @@ function FacultyCard({ f }: { f: Faculty }) {
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, scale: 0.96 }}
+      initial={{ opacity: 0, scale: 0.97 }}
       animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.96 }}
+      exit={{ opacity: 0, scale: 0.97 }}
       transition={{ duration: 0.2 }}
-      className="group relative rounded-xl border border-white/5 p-4 bg-zinc-900/60 hover:bg-zinc-900/90 hover:border-emerald-500/30 transition-all flex flex-col justify-between shadow-lg shadow-black/20"
+      className="group relative rounded-2xl border border-white/5 p-4 bg-zinc-900/50 hover:bg-zinc-900/80 hover:border-emerald-500/30 transition-all flex flex-col justify-between shadow-md hover:shadow-xl hover:shadow-black/40"
     >
       <div>
-        {/* Header: Photo & Title */}
+        {/* Header: Initials Avatar & Name */}
         <div className="flex items-start gap-3">
-          <div className="relative w-12 h-12 rounded-xl bg-zinc-800/80 border border-white/10 overflow-hidden shrink-0 flex items-center justify-center text-xs font-bold text-emerald-400">
-            {f.photoUrl && !imgError ? (
-              <img
-                src={f.photoUrl}
-                alt={f.name}
-                className="w-full h-full object-cover"
-                onError={() => setImgError(true)}
-                loading="lazy"
-              />
-            ) : (
-              <span>{initials}</span>
-            )}
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-zinc-800 border border-emerald-500/20 flex items-center justify-center shrink-0 text-xs font-black text-emerald-400 shadow-inner">
+            {initials}
           </div>
 
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-1">
-              <h3 className="text-sm font-bold text-zinc-100 truncate group-hover:text-emerald-400 transition-colors" title={f.name}>
+              <h3 className="text-sm font-bold text-zinc-100 truncate group-hover:text-emerald-300 transition-colors" title={f.name}>
                 {f.name}
               </h3>
               {f.profileUrl && (
@@ -123,53 +107,53 @@ function FacultyCard({ f }: { f: Faculty }) {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-zinc-500 hover:text-emerald-400 p-0.5 rounded transition-colors shrink-0"
-                  title="View Official SRMIST Profile"
+                  title="Official SRMIST Profile"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
                 </a>
               )}
             </div>
 
-            <p className="text-[11px] text-emerald-400/90 font-medium line-clamp-1" title={f.designation}>
+            <p className="text-[11px] text-emerald-400/90 font-medium truncate" title={f.designation}>
               {f.designation}
             </p>
 
             <div className="mt-1 flex items-center gap-1.5 flex-wrap">
-              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-zinc-800 text-zinc-300 border border-white/5">
                 {f.department}
               </span>
               {f.facultyId && f.facultyId !== "Not Assigned" && !f.facultyId.startsWith("FAC") && (
                 <span className="text-[10px] text-zinc-500 font-mono">
-                  ID: {f.facultyId}
+                  #{f.facultyId}
                 </span>
               )}
             </div>
           </div>
         </div>
 
-        {/* Metadata Details */}
-        <div className="mt-3.5 space-y-1.5 text-[11px] text-zinc-400">
-          {/* Staff Room / Cabin */}
-          <div className="flex items-center gap-1.5">
-            <MapPin className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
-            <span className="text-zinc-300 font-medium truncate" title={f.staffRoom}>
-              {f.staffRoom || "Main Campus"}
+        {/* Cabin / Staff Room Highlight */}
+        <div className="mt-3 bg-emerald-500/5 border border-emerald-500/15 rounded-xl px-2.5 py-1.5 flex items-center gap-2">
+          <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+          <div className="min-w-0 flex-1">
+            <span className="text-[11px] font-semibold text-emerald-300 truncate block" title={f.staffRoom}>
+              {f.staffRoom || "Faculty Cabin"}
             </span>
           </div>
+        </div>
 
-          {/* Full Department / College if available */}
+        {/* Details: Specialization & Full Dept */}
+        <div className="mt-2.5 space-y-1.5 text-[11px] text-zinc-400">
           {f.fullDepartment && f.fullDepartment !== f.department && (
             <div className="flex items-center gap-1.5">
               <Building2 className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
-              <span className="text-zinc-400 truncate" title={f.fullDepartment}>
+              <span className="text-zinc-400 truncate text-[10.5px]" title={f.fullDepartment}>
                 {f.fullDepartment}
               </span>
             </div>
           )}
 
-          {/* Specialization */}
           {f.specialization && (
-            <div className="flex items-start gap-1.5 pt-0.5">
+            <div className="flex items-start gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-amber-400/80 shrink-0 mt-0.5" />
               <span className="text-zinc-400 line-clamp-2 text-[10.5px]" title={f.specialization}>
                 {f.specialization}
@@ -177,10 +161,9 @@ function FacultyCard({ f }: { f: Faculty }) {
             </div>
           )}
 
-          {/* Experience */}
           {f.experience && (
             <div className="flex items-center gap-1.5">
-              <GraduationCap className="w-3.5 h-3.5 text-blue-400/80 shrink-0" />
+              <GraduationCap className="w-3.5 h-3.5 text-sky-400/80 shrink-0" />
               <span className="text-zinc-400 truncate text-[10.5px]" title={f.experience}>
                 {f.experience}
               </span>
@@ -190,7 +173,7 @@ function FacultyCard({ f }: { f: Faculty }) {
       </div>
 
       {/* Footer Contact Actions */}
-      <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between gap-2">
+      <div className="mt-3.5 pt-2.5 border-t border-white/5 flex items-center justify-between gap-2">
         {f.email ? (
           <div className="flex items-center gap-1.5 min-w-0 flex-1">
             <a
@@ -199,7 +182,7 @@ function FacultyCard({ f }: { f: Faculty }) {
               title={`Email: ${f.email}`}
             >
               <Mail className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-              <span className="truncate font-mono">{f.email}</span>
+              <span className="truncate font-mono text-[10.5px]">{f.email}</span>
             </a>
             <button
               onClick={() => copyToClipboard(f.email!, "email")}
@@ -214,17 +197,18 @@ function FacultyCard({ f }: { f: Faculty }) {
             </button>
           </div>
         ) : (
-          <span className="text-[10px] text-zinc-600 italic">No email listed</span>
+          <span className="text-[10px] text-zinc-600 italic">No email</span>
         )}
 
         {f.phone && (
           <div className="flex items-center gap-1 shrink-0">
             <a
               href={`tel:${f.phone}`}
-              className="text-zinc-400 hover:text-emerald-400 p-1 rounded hover:bg-white/5 transition-colors"
+              className="flex items-center gap-1 text-[10.5px] font-mono text-zinc-400 hover:text-emerald-400 px-1.5 py-0.5 rounded bg-zinc-800/80 border border-white/5 transition-colors"
               title={`Call: ${f.phone}`}
             >
-              <Phone className="w-3.5 h-3.5" />
+              <Phone className="w-3 h-3 text-emerald-400" />
+              <span>Call</span>
             </a>
           </div>
         )}
@@ -255,7 +239,7 @@ export function FinderSection() {
     () => window.matchMedia("(max-width: 1023px)").matches,
     () => false
   )
-  const pageSize = isMobile ? 6 : 20
+  const pageSize = isMobile ? 8 : 20
 
   const fetchData = useCallback(async (dept: string, q: string, p: number) => {
     setLoading(true)
@@ -325,30 +309,34 @@ export function FinderSection() {
     return pages
   }, [page, totalPages])
 
+  const isCustomDepartment = useMemo(() => {
+    return department !== "All" && !PRIMARY_DEPT_TABS.some(tab => tab.id === department)
+  }, [department])
+
   return (
     <div className="min-h-full pt-[3.75rem] pb-20 px-3 sm:px-4 lg:px-8 lg:pb-8 w-full max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
+      {/* Header Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6">
         <div>
-          <p className="text-zinc-500 font-bold text-[10px] uppercase tracking-widest mb-1">Directory</p>
-          <h1 className="text-3xl font-bold text-zinc-100 tracking-tight font-display flex items-center gap-3">
+          <p className="text-zinc-500 font-bold text-[10px] uppercase tracking-widest mb-1">Campus Directory</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight font-display flex items-center gap-2.5">
             Faculty Finder
             <span className="text-xs px-2.5 py-0.5 rounded-full font-sans font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               {totalCount > 0 ? `${totalCount.toLocaleString()} Faculty` : "SRMIST KTR"}
             </span>
           </h1>
           <p className="text-xs mt-1 text-zinc-400">
-            Search professors, staff rooms, official emails, contact numbers & research areas across SRMIST Kattankulathur.
+            Quickly locate staff rooms, faculty cabins, official emails, and research areas.
           </p>
         </div>
       </div>
 
-      {/* Search Bar */}
+      {/* Search Input */}
       <div className="relative mb-5">
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
         <input
           type="text"
-          placeholder="Search by name, faculty ID, email, specialization, or department..."
+          placeholder="Search by teacher name, faculty ID, staff room, email, or department..."
           value={search}
           onChange={(e) => { setSearch(e.target.value); setShowSuggestions(true); setPage(1) }}
           onFocus={() => setShowSuggestions(true)}
@@ -364,7 +352,7 @@ export function FinderSection() {
           </button>
         )}
 
-        {/* Instant Search Suggestions */}
+        {/* Suggestion Dropdown */}
         <AnimatePresence>
           {showSuggestions && suggestions.length > 0 && (
             <motion.div
@@ -393,31 +381,27 @@ export function FinderSection() {
         </AnimatePresence>
       </div>
 
-      {/* Department Filter Tabs */}
-      <div className="mb-6 space-y-3">
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-          {PRIMARY_DEPARTMENTS.map((d) => (
-            <motion.button
-              key={d}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => { setDepartment(d); setSearch(""); setPage(1) }}
-              className={`whitespace-nowrap py-1.5 px-3.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all shrink-0 ${
-                department === d
-                  ? "bg-emerald-500 text-black shadow-lg shadow-emerald-500/20 font-extrabold"
-                  : "bg-zinc-900/60 text-zinc-400 border border-white/5 hover:text-zinc-200 hover:border-white/10"
-              }`}
-            >
-              {d}
-            </motion.button>
-          ))}
-        </div>
+      {/* Clean Unified Department Filter Bar */}
+      <div className="mb-6 flex flex-wrap items-center gap-1.5">
+        {PRIMARY_DEPT_TABS.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => { setDepartment(tab.id); setSearch(""); setPage(1) }}
+            className={`py-1.5 px-3 rounded-lg text-xs font-semibold transition-all ${
+              department === tab.id
+                ? "bg-emerald-500 text-black shadow-md shadow-emerald-500/20 font-bold"
+                : "bg-zinc-900/60 text-zinc-400 border border-white/5 hover:text-zinc-200 hover:bg-zinc-800"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
 
-        {/* All Departments Selector Dropdown */}
+        {/* Integrated All Departments Selector */}
         {allDepartments.length > 0 && (
-          <div className="flex items-center gap-2 text-xs text-zinc-400">
-            <span>Or filter by specific department:</span>
+          <div className="relative inline-block">
             <select
-              value={PRIMARY_DEPARTMENTS.includes(department) ? "" : department}
+              value={isCustomDepartment ? department : ""}
               onChange={(e) => {
                 if (e.target.value) {
                   setDepartment(e.target.value)
@@ -425,22 +409,29 @@ export function FinderSection() {
                   setPage(1)
                 }
               }}
-              className="bg-zinc-900 border border-white/10 rounded-lg px-3 py-1 text-xs text-zinc-200 focus:outline-none focus:border-emerald-500/40"
+              className={`appearance-none py-1.5 pl-3 pr-7 rounded-lg text-xs font-semibold cursor-pointer focus:outline-none transition-all ${
+                isCustomDepartment
+                  ? "bg-emerald-500 text-black font-bold shadow-md shadow-emerald-500/20"
+                  : "bg-zinc-900/60 text-zinc-400 border border-white/5 hover:text-zinc-200 hover:bg-zinc-800"
+              }`}
             >
-              <option value="">Choose department ({allDepartments.length})...</option>
+              <option value="" disabled className="bg-zinc-900 text-zinc-400">
+                More Departments ({allDepartments.length})...
+              </option>
               {allDepartments.map((dept) => (
-                <option key={dept} value={dept}>
+                <option key={dept} value={dept} className="bg-zinc-900 text-zinc-200">
                   {dept}
                 </option>
               ))}
             </select>
+            <ChevronDown className={`w-3 h-3 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none ${isCustomDepartment ? "text-black" : "text-zinc-500"}`} />
           </div>
         )}
       </div>
 
-      {/* Content Grid */}
+      {/* Faculty Cards Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
           {Array.from({ length: pageSize }).map((_, i) => <SkeletonCard key={i} />)}
         </div>
       ) : error ? (
@@ -469,7 +460,7 @@ export function FinderSection() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
             <AnimatePresence mode="popLayout">
               {faculty.map((f) => (
                 <FacultyCard key={f.id} f={f} />
@@ -477,56 +468,53 @@ export function FinderSection() {
             </AnimatePresence>
           </div>
 
-          {/* Pagination Controls */}
+          {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-10">
+            <div className="flex items-center justify-center gap-1.5 mt-10">
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={() => goToPage(page - 1)}
                 disabled={page === 1}
-                className="w-9 h-9 rounded-lg flex items-center justify-center bg-zinc-900/60 border border-white/5 disabled:opacity-30 disabled:cursor-not-allowed hover:border-emerald-500/30 transition-colors"
+                className="w-8 h-8 rounded-lg flex items-center justify-center bg-zinc-900/60 border border-white/5 disabled:opacity-30 disabled:cursor-not-allowed hover:border-emerald-500/30 transition-colors"
               >
                 <ChevronLeft className="w-4 h-4 text-zinc-400" />
               </motion.button>
               
               {pageNumbers[0] > 1 && (
                 <>
-                  <motion.button
-                    whileTap={{ scale: 0.9 }}
+                  <button
                     onClick={() => goToPage(1)}
-                    className="w-9 h-9 rounded-lg text-xs font-bold bg-zinc-900/60 border border-white/5 text-zinc-400 hover:border-emerald-500/30"
+                    className="w-8 h-8 rounded-lg text-xs font-bold bg-zinc-900/60 border border-white/5 text-zinc-400 hover:border-emerald-500/30"
                   >
                     1
-                  </motion.button>
-                  {pageNumbers[0] > 2 && <span className="text-zinc-600 px-1">...</span>}
+                  </button>
+                  {pageNumbers[0] > 2 && <span className="text-zinc-600 px-0.5 text-xs">...</span>}
                 </>
               )}
 
               {pageNumbers.map((p) => (
-                <motion.button
+                <button
                   key={p}
-                  whileTap={{ scale: 0.9 }}
                   onClick={() => goToPage(p)}
-                  className={`w-9 h-9 rounded-lg text-xs font-bold transition-all ${
+                  className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
                     page === p
                       ? "bg-emerald-500 text-black shadow-md shadow-emerald-500/20 font-extrabold"
                       : "bg-zinc-900/60 border border-white/5 text-zinc-400 hover:border-emerald-500/30"
                   }`}
                 >
                   {p}
-                </motion.button>
+                </button>
               ))}
 
               {pageNumbers[pageNumbers.length - 1] < totalPages && (
                 <>
-                  {pageNumbers[pageNumbers.length - 1] < totalPages - 1 && <span className="text-zinc-600 px-1">...</span>}
-                  <motion.button
-                    whileTap={{ scale: 0.9 }}
+                  {pageNumbers[pageNumbers.length - 1] < totalPages - 1 && <span className="text-zinc-600 px-0.5 text-xs">...</span>}
+                  <button
                     onClick={() => goToPage(totalPages)}
-                    className="w-9 h-9 rounded-lg text-xs font-bold bg-zinc-900/60 border border-white/5 text-zinc-400 hover:border-emerald-500/30"
+                    className="w-8 h-8 rounded-lg text-xs font-bold bg-zinc-900/60 border border-white/5 text-zinc-400 hover:border-emerald-500/30"
                   >
                     {totalPages}
-                  </motion.button>
+                  </button>
                 </>
               )}
 
@@ -534,7 +522,7 @@ export function FinderSection() {
                 whileTap={{ scale: 0.9 }}
                 onClick={() => goToPage(page + 1)}
                 disabled={page === totalPages}
-                className="w-9 h-9 rounded-lg flex items-center justify-center bg-zinc-900/60 border border-white/5 disabled:opacity-30 disabled:cursor-not-allowed hover:border-emerald-500/30 transition-colors"
+                className="w-8 h-8 rounded-lg flex items-center justify-center bg-zinc-900/60 border border-white/5 disabled:opacity-30 disabled:cursor-not-allowed hover:border-emerald-500/30 transition-colors"
               >
                 <ChevronRight className="w-4 h-4 text-zinc-400" />
               </motion.button>
@@ -545,3 +533,4 @@ export function FinderSection() {
     </div>
   )
 }
+
