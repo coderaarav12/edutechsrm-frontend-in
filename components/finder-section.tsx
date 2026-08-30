@@ -397,52 +397,54 @@ export function FinderSection() {
         </AnimatePresence>
       </div>
 
-      {/* Clean Unified Department Filter Bar */}
-      <div className="mb-6 flex flex-wrap items-center gap-1.5">
-        {PRIMARY_DEPT_TABS.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => { setDepartment(tab.id); setSearch(""); setPage(1) }}
-            className={`py-1.5 px-3 rounded-lg text-xs font-semibold transition-all ${
-              department === tab.id
-                ? "bg-emerald-500 text-black shadow-md shadow-emerald-500/20 font-bold"
-                : "bg-zinc-900/60 text-zinc-400 border border-white/5 hover:text-zinc-200 hover:bg-zinc-800"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-
-        {/* Integrated All Departments Selector */}
-        {allDepartments.length > 0 && (
-          <div className="relative inline-block">
-            <select
-              value={isCustomDepartment ? department : ""}
-              onChange={(e) => {
-                if (e.target.value) {
-                  setDepartment(e.target.value)
-                  setSearch("")
-                  setPage(1)
-                }
-              }}
-              className={`appearance-none py-1.5 pl-3 pr-7 rounded-lg text-xs font-semibold cursor-pointer focus:outline-none transition-all ${
-                isCustomDepartment
-                  ? "bg-emerald-500 text-black font-bold shadow-md shadow-emerald-500/20"
-                  : "bg-zinc-900/60 text-zinc-400 border border-white/5 hover:text-zinc-200 hover:bg-zinc-800"
+      {/* Clean Single-Row Horizontal Department Filter */}
+      <div className="mb-6">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none scroll-smooth">
+          {PRIMARY_DEPT_TABS.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => { setDepartment(tab.id); setSearch(""); setPage(1) }}
+              className={`whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-semibold shrink-0 transition-all ${
+                department === tab.id
+                  ? "bg-emerald-500 text-black shadow-lg shadow-emerald-500/25 font-bold scale-[1.02]"
+                  : "bg-zinc-900/70 text-zinc-400 border border-white/5 hover:text-zinc-200 hover:bg-zinc-800"
               }`}
             >
-              <option value="" disabled className="bg-zinc-900 text-zinc-400">
-                More Departments ({allDepartments.length})...
-              </option>
-              {allDepartments.map((dept) => (
-                <option key={dept} value={dept} className="bg-zinc-900 text-zinc-200">
-                  {dept}
+              {tab.label}
+            </button>
+          ))}
+
+          {/* Integrated All Departments Selector */}
+          {allDepartments.length > 0 && (
+            <div className="relative shrink-0">
+              <select
+                value={isCustomDepartment ? department : ""}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    setDepartment(e.target.value)
+                    setSearch("")
+                    setPage(1)
+                  }
+                }}
+                className={`appearance-none whitespace-nowrap px-3.5 py-2 pr-7 rounded-xl text-xs font-semibold cursor-pointer focus:outline-none transition-all ${
+                  isCustomDepartment
+                    ? "bg-emerald-500 text-black font-bold shadow-lg shadow-emerald-500/25"
+                    : "bg-zinc-900/70 text-zinc-400 border border-white/5 hover:text-zinc-200 hover:bg-zinc-800"
+                }`}
+              >
+                <option value="" disabled className="bg-zinc-900 text-zinc-400">
+                  More Departments ({allDepartments.length})...
                 </option>
-              ))}
-            </select>
-            <ChevronDown className={`w-3 h-3 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none ${isCustomDepartment ? "text-black" : "text-zinc-500"}`} />
-          </div>
-        )}
+                {allDepartments.map((dept) => (
+                  <option key={dept} value={dept} className="bg-zinc-900 text-zinc-200">
+                    {dept}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className={`w-3.5 h-3.5 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none ${isCustomDepartment ? "text-black" : "text-zinc-500"}`} />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Faculty Cards Grid */}
