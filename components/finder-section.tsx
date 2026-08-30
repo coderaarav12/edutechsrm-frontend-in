@@ -96,9 +96,9 @@ function FacultyCard({ f }: { f: Faculty }) {
       className="group relative rounded-2xl border border-white/5 p-4 bg-zinc-900/50 hover:bg-zinc-900/80 hover:border-emerald-500/30 transition-all flex flex-col justify-between shadow-md hover:shadow-xl hover:shadow-black/40"
     >
       <div>
-        {/* Header: Photo or Initials Avatar & Name */}
-        <div className="flex items-start gap-3">
-          <div className="relative w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500/20 to-zinc-800 border border-emerald-500/20 flex items-center justify-center shrink-0 overflow-hidden text-xs font-black text-emerald-400 shadow-inner">
+        {/* Header: Photo & Name */}
+        <div className="flex items-start gap-3.5">
+          <div className="relative w-12 h-12 rounded-xl bg-zinc-800/90 border border-white/10 flex items-center justify-center shrink-0 overflow-hidden text-xs font-black text-emerald-400 shadow-md">
             {proxiedImageUrl ? (
               <img
                 src={proxiedImageUrl}
@@ -108,7 +108,7 @@ function FacultyCard({ f }: { f: Faculty }) {
                 loading="lazy"
               />
             ) : (
-              <span>{initials}</span>
+              <span className="text-xs font-bold tracking-wider">{initials}</span>
             )}
           </div>
 
