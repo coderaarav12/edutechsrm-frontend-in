@@ -68,6 +68,10 @@ function FacultyCard({ f }: { f: Faculty }) {
   const [copiedType, setCopiedType] = useState<"email" | "phone" | null>(null)
   const [imgError, setImgError] = useState(false)
 
+  useEffect(() => {
+    setImgError(false)
+  }, [f.photoUrl])
+
   const copyToClipboard = (text: string, type: "email" | "phone") => {
     navigator.clipboard.writeText(text)
     setCopiedType(type)

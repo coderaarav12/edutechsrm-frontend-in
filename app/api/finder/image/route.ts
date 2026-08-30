@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-export const runtime = "edge"
+export const dynamic = "force-dynamic"
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -24,15 +24,13 @@ export async function GET(request: NextRequest) {
     const res = await fetch(imageUrl, {
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-        "Referer": "https://www.srmist.edu.in/",
+        "Referer": "https://www.srmist.edu.in/faculty/",
         "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+        "Sec-Fetch-Dest": "image",
+        "Sec-Fetch-Mode": "no-cors",
+        "Sec-Fetch-Site": "same-origin",
       },
-      // Cache edge response for 7 days
-      cf: {
-        cacheTtl: 604800,
-        cacheEverything: true,
-      },
-    } as RequestInit)
+    })
 
     if (!res.ok) {
       return new NextResponse("Failed to fetch image", { status: res.status })
@@ -46,10 +44,12 @@ export async function GET(request: NextRequest) {
         "Content-Type": contentType,
         "Cache-Control": "public, max-age=604800, s-maxage=2592000, stale-while-revalidate=86400, immutable",
         "Access-Control-Allow-Origin": "*",
+        "Cross-Origin-Resource-Policy": "cross-origin",
       },
     })
   } catch (err) {
-    console.error("[image-proxy] Error:", err)
+    console.error("[image-proxy] Fetch error:", err)
     return new NextResponse("Internal server error", { status: 500 })
   }
 }
+
