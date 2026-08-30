@@ -391,7 +391,7 @@ export function FinderSection() {
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-zinc-100 truncate">{f.name}</p>
                     <p className="text-[11px] text-zinc-400 truncate">
-                      {f.designation} &bull; <span className="text-emerald-400">{f.department}</span> {f.staffRoom ? `&bull; ${f.staffRoom}` : ""}
+                      {f.designation} • <span className="text-emerald-400">{f.department}</span>{f.staffRoom ? ` • ${f.staffRoom}` : ""}
                     </p>
                   </div>
                 </button>
