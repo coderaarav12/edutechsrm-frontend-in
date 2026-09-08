@@ -1,0 +1,198 @@
+<USER_REQUEST>
+THIS IS A VISUAL FEEDBACK + REFINEMENT PASS ON THE CURRENT IMPLEMENTATION.
+
+The current version has improved dramatically in terms of visual identity.
+
+DO NOT THROW AWAY THE CURRENT ART DIRECTION.
+
+The funky editorial typography, serif/italic treatments, asymmetric compositions and overall personality are GOOD.
+
+However, the implementation currently has several visual problems that need to be corrected.
+
+This pass should focus on:
+
+1. REDUCING NORMAL TEXT
+2. MAKING THE HERO / TOP OF PAGE MUCH MORE ALIVE
+3. BRINGING BACK THE STRONG FUNKY TYPOGRAPHY THROUGHOUT THE EXPERIENCE
+4. FIXING THE HORIZONTAL-SCROLL VISUAL COMPOSITION
+5. REMOVING THE ATTENDANCE SECTION
+6. CREATING ACTUALLY INTERESTING THEME MODES
+7. CREATING A PROPER MOBILE-NATIVE COMPOSITION
+8. ADDING A BEAUTIFUL GOOGLE PLAY APP PROMOTION
+9. EXPERIMENTING WITH MORE TYPOGRAPHIC PERSONALITY
+
+Do not simply add more effects.
+
+Make the page more intentional.
+
+==================================================
+1. THE BIGGEST PROBLEM: TOO MUCH NORMAL TEXT
+==================================================
+
+The current page has beautiful artistic typography, but there is too much ordinary explanatory copy around it.
+
+This makes the page feel crowded and destroys the visual impact of the art typography.
+
+Perform a ruthless editorial reduction.
+
+Whenever a large typographic statement already communicates the idea, remove the explanatory paragraph.
+
+The hierarchy should be:
+
+BIG ARTISTIC STATEMENT
+
+↓
+
+small supporting phrase if absolutely necessary
+
+↓
+
+PRODUCT / VISUAL
+
+That's it.
+
+Do NOT repeatedly use:
+
+headline
+subtitle
+paragraph
+paragraph
+metadata
+button
+feature description
+
+This is making the page feel like a marketing template.
+
+The user should be able to scroll through large areas where typography and visuals are doing almost all of the communication.
+
+Use significantly LESS ordinary body text.
+
+If a sentence is not essential, DELETE IT.
+
+Do not replace deleted text with an
+<truncated 15865 bytes>
+l the design.
+
+The ideal feeling is:
+
+TYPOGRAPHY
+
+moves
+
+↓
+
+PRODUCT
+
+emerges
+
+↓
+
+ARROW
+
+connects
+
+↓
+
+NEXT VISUAL
+
+enters
+
+↓
+
+previous visual disappears
+
+Do not animate every word independently.
+
+Use fewer, more meaningful movements.
+
+The animation should feel expensive because of timing and choreography.
+
+==================================================
+17. FINAL SELF-CRITIQUE
+==================================================
+
+After implementation, review the entire page again.
+
+Do not just check for bugs.
+
+Act as a senior creative director.
+
+Ask:
+
+WHY DOES THIS STILL FEEL LIKE A WEBSITE TEMPLATE?
+
+WHY IS THERE TOO MUCH TEXT?
+
+WHICH ELEMENTS ARE COMPETING?
+
+WHICH COMPOSITIONS ARE TOO PLAIN?
+
+WHERE DOES THE EYE GET BORED?
+
+WHERE DOES THE DESIGN FEEL OVERFILLED?
+
+WHERE SHOULD THERE BE MORE EMPTY SPACE?
+
+WHICH TYPOGRAPHIC MOMENTS ARE THE STRONGEST?
+
+WHICH FONT TREATMENTS FEEL GENERIC?
+
+DO THE MODES ACTUALLY FEEL DIFFERENT?
+
+DOES SKETCHBOOK LOOK LIKE A REAL ARTISTIC MEDIUM?
+
+DOES MOBILE LOOK DESIGNED OR JUST SHRUNK?
+
+DOES THE PLAY STORE SECTION LOOK LIKE A REAL PRODUCT AD?
+
+DO THE HORIZONTAL SCROLL SECTIONS FEEL LIKE COMPOSITIONS OR CAROUSELS?
+
+Then fix the problems you identify.
+
+Do not simply report them.
+
+==================================================
+FINAL DESIGN PRINCIPLE
+==================================================
+
+THE CURRENT ART DIRECTION IS GOOD.
+
+DO NOT DESTROY IT.
+
+MAKE IT BOLDER.
+
+MAKE IT LESS CROWDED.
+
+MAKE IT MORE EXPERIMENTAL.
+
+MAKE THE TYPOGRAPHY MORE INTERESTING.
+
+MAKE THE HERO MORE ALIVE.
+
+MAKE THE MOBILE EXPERIENCE ACTUALLY MOBILE.
+
+MAKE THE MODES ACTUALLY DIFFERENT.
+
+AND MOST IMPORTANTLY:
+
+LESS EXPLANATION.
+
+MORE ART.
+
+LESS UI.
+
+MORE COMPOSITION.
+
+LESS TEMPLATE.
+
+MORE PERSONALITY.
+
+LESS DECORATION.
+
+MORE DESIGN.
+
+Proceed with the implementation.
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-09-07T23:51:17+05:30.
+</ADDITIONAL_METADATA>

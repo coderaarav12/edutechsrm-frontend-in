@@ -1,4 +1,10 @@
-import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare"
+let initOpenNextCloudflareForDev = () => {}
+try {
+  ;({ initOpenNextCloudflareForDev } = await import("@opennextjs/cloudflare"))
+} catch {
+  // Cloudflare dev adapter is optional (e.g. installs with dev deps omitted).
+  // Local `next dev` / `next build` work fine without it; only `opennextjs-cloudflare preview/deploy` need it.
+}
 
 initOpenNextCloudflareForDev()
 

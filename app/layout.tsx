@@ -1,12 +1,13 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
-import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google"
+import { Inter, JetBrains_Mono, Space_Grotesk, Newsreader, Caveat } from "next/font/google"
 import "./globals.css"
 import { Providers } from "./providers"
 import { PageTransition } from "@/components/page-transition"
 import { PwaInstallCapture } from "@/components/pwa-install-capture"
 import { ServiceWorkerRegister } from "@/components/service-worker-register"
 import { CustomCursor } from "@/components/custom-cursor"
+import { ThemeCurtainWipe } from "@/components/theme-curtain-wipe"
 import Script from "next/script"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -18,6 +19,16 @@ const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
   variable: "--font-display",
   weight: ["500", "600", "700"],
+})
+const newsreader = Newsreader({
+  subsets: ["latin"],
+  variable: "--font-serif",
+  style: ["normal", "italic"],
+})
+const caveat = Caveat({
+  subsets: ["latin"],
+  variable: "--font-hand",
+  weight: ["400", "600", "700"],
 })
 
 export const metadata: Metadata = {
@@ -246,11 +257,12 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.className} ${jetbrainsMono.variable} ${spaceGrotesk.variable} font-sans antialiased`}>
+      <body className={`${inter.className} ${jetbrainsMono.variable} ${spaceGrotesk.variable} ${newsreader.variable} ${caveat.variable} font-sans antialiased`}>
         <Providers>
           <PwaInstallCapture />
           <ServiceWorkerRegister />
           <CustomCursor />
+          <ThemeCurtainWipe />
           <PageTransition>{children}</PageTransition>
         </Providers>
       </body>

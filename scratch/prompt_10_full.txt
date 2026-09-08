@@ -1,0 +1,958 @@
+<USER_REQUEST>
+THIS IS A VISUAL FEEDBACK + REFINEMENT PASS ON THE CURRENT IMPLEMENTATION.
+
+The current version has improved dramatically in terms of visual identity.
+
+DO NOT THROW AWAY THE CURRENT ART DIRECTION.
+
+The funky editorial typography, serif/italic treatments, asymmetric compositions and overall personality are GOOD.
+
+However, the implementation currently has several visual problems that need to be corrected.
+
+This pass should focus on:
+
+1. REDUCING NORMAL TEXT
+2. MAKING THE HERO / TOP OF PAGE MUCH MORE ALIVE
+3. BRINGING BACK THE STRONG FUNKY TYPOGRAPHY THROUGHOUT THE EXPERIENCE
+4. FIXING THE HORIZONTAL-SCROLL VISUAL COMPOSITION
+5. REMOVING THE ATTENDANCE SECTION
+6. CREATING ACTUALLY INTERESTING THEME MODES
+7. CREATING A PROPER MOBILE-NATIVE COMPOSITION
+8. ADDING A BEAUTIFUL GOOGLE PLAY APP PROMOTION
+9. EXPERIMENTING WITH MORE TYPOGRAPHIC PERSONALITY
+
+Do not simply add more effects.
+
+Make the page more intentional.
+
+==================================================
+1. THE BIGGEST PROBLEM: TOO MUCH NORMAL TEXT
+==================================================
+
+The current page has beautiful artistic typography, but there is too much ordinary explanatory copy around it.
+
+This makes the page feel crowded and destroys the visual impact of the art typography.
+
+Perform a ruthless editorial reduction.
+
+Whenever a large typographic statement already communicates the idea, remove the explanatory paragraph.
+
+The hierarchy should be:
+
+BIG ARTISTIC STATEMENT
+
+↓
+
+small supporting phrase if absolutely necessary
+
+↓
+
+PRODUCT / VISUAL
+
+That's it.
+
+Do NOT repeatedly use:
+
+headline
+subtitle
+paragraph
+paragraph
+metadata
+button
+feature description
+
+This is making the page feel like a marketing template.
+
+The user should be able to scroll through large areas where typography and visuals are doing almost all of the communication.
+
+Use significantly LESS ordinary body text.
+
+If a sentence is not essential, DELETE IT.
+
+Do not replace deleted text with another sentence.
+
+Empty space is allowed.
+
+==================================================
+2. THE ART TYPOGRAPHY MUST BECOME THE STAR AGAIN
+==================================================
+
+The new funky/editorial typography from the previous implementation was one of the strongest parts of the design.
+
+It has now become too diluted.
+
+Bring that personality back.
+
+I want significantly more experimentation with typography.
+
+Do not use one artistic font treatment mechanically throughout the entire website.
+
+Explore different combinations and treatments such as:
+
+- elegant serif italics
+- expressive editorial display fonts
+- oversized grotesk
+- condensed display typography
+- high-contrast serif
+- italic display text
+- handwritten/calligraphic accents
+- slightly unusual letter spacing
+- oversized individual words
+- mixed type weights
+- words partially overlapping product UI
+- words moving independently during scroll
+- text following curved/visual paths where appropriate
+- giant cropped typography extending beyond the viewport
+
+The website should feel like a designer is experimenting with typography.
+
+BUT:
+
+Do not turn it into a typography showcase.
+
+Typography must still communicate hierarchy.
+
+Use variety intentionally.
+
+Try multiple strong font combinations yourself.
+
+Do not assume the current font combination is the final answer.
+
+You have creative freedom to test different fonts available through Google Fonts / next/font or existing project assets.
+
+However, keep the total font system coherent.
+
+I want:
+
+LESS GENERIC BODY TEXT.
+
+MORE DISTINCTIVE DISPLAY TYPE.
+
+==================================================
+3. HERO / TOP OF PAGE NEEDS TO BE MUCH MORE ALIVE
+==================================================
+
+The current top of the landing page is too plain.
+
+There is too much empty space without enough visual storytelling.
+
+I want the first viewport to feel ALIVE before the main headline fully arrives.
+
+Do NOT fill it with random gradients or generic particles.
+
+Instead create controlled, playful visual fragments.
+
+Think:
+
+student chaos scattered across a designer canvas.
+
+Possible elements:
+
+- tiny timetable fragments
+- a floating class notification
+- tiny calendar scraps
+- a syllabus filename
+- attendance warning
+- day-order label
+- campus location marker
+- tiny handwritten notes
+- arrows
+- circles
+- underlines
+- crossed-out fragments
+- tiny UI pieces
+- miniature product screenshots
+- floating numbers
+- small student-world observations
+
+These elements should have subtle motion.
+
+Some can drift.
+
+Some can slide.
+
+Some can rotate slightly.
+
+Some can disappear behind the headline.
+
+Some can get pulled toward the product.
+
+Some can react to scrolling.
+
+The animation should feel like CONTROLLED CHAOS.
+
+Not a particle system.
+
+Not random floating blobs.
+
+Not cyberpunk.
+
+The opening should feel like a beautifully designed student's brain before everything gets organized.
+
+Then the chaos should converge into EduTechSRM.
+
+==================================================
+4. HERO TYPOGRAPHY
+==================================================
+
+The hero needs stronger visual hierarchy.
+
+The main artistic statement should be substantially larger and more dominant.
+
+Do not let tiny supporting copy compete with it.
+
+For example, conceptually:
+
+COLLEGE IS
+CHAOTIC.
+
+YOUR TOOLS
+SHOULDN'T BE.
+
+But use the strongest existing copy if it is better.
+
+One or two words can use the expressive serif / italic / funky treatment.
+
+Other words can use the primary display font.
+
+The contrast is important.
+
+Do not make every word the same font.
+
+==================================================
+5. THE TYPEWRITER / STORY SECTION
+==================================================
+
+There is currently a section where the story/typewriter text suddenly becomes extremely small.
+
+THIS NEEDS TO BE FIXED.
+
+The story text should NOT become tiny just because it is being revealed character-by-character.
+
+If the typewriter is an important storytelling moment:
+
+MAKE IT LARGE ENOUGH TO READ.
+
+It should feel like a cinematic statement.
+
+Use:
+
+large display typography
+
++
+
+short lines
+
++
+
+dramatic spacing
+
+rather than tiny paragraphs.
+
+The text should remain visually important while it is being typed.
+
+Do not sacrifice typography just to fit more words.
+
+Also reduce the amount of text being typed.
+
+A shorter statement displayed beautifully is much stronger than a long paragraph typed onto the screen.
+
+==================================================
+6. HORIZONTAL SCROLL / FEATURE COMPOSITION
+==================================================
+
+The horizontal scrolling sections currently do not have the visual relationship I want.
+
+The typography and the moving product/features feel disconnected.
+
+I want the horizontal motion to feel like a DESIGNED GRAPHIC COMPOSITION.
+
+The text should visually interact with the moving content.
+
+For example:
+
+A large phrase sits on the canvas.
+
+An arrow emerges FROM the phrase.
+
+The arrow points outward toward the product/tool moving horizontally.
+
+As the user scrolls:
+
+TEXT
+
+→
+
+ARROW
+
+→
+
+PRODUCT
+
+→
+
+NEXT PRODUCT
+
+The arrow/line should physically connect the typography to the moving UI.
+
+Do not simply place an arrow icon beside the text.
+
+It should feel like the composition itself is drawing a connection.
+
+The relationship should be obvious in a paused screenshot.
+
+Use:
+
+- large typography
+- directional lines
+- curved arrows where appropriate
+- labels
+- cropped product previews
+- overlapping elements
+- horizontal motion
+- subtle parallax
+
+The horizontal scroll should feel like one large editorial poster moving through space.
+
+Not like a carousel.
+
+==================================================
+7. REMOVE THE ATTENDANCE EQUATION SECTION
+==================================================
+
+REMOVE the current giant Attendance Equation / 83.4% section as a major standalone scene.
+
+It does not fit the current visual story.
+
+The current attendance dashboard composition looks too much like a conventional analytics SaaS dashboard.
+
+Do not try to redesign that exact section again.
+
+Remove it from the main narrative.
+
+Attendance can still appear as:
+
+- a small product preview
+- a tiny student-world fragment
+- a product screenshot in another scene
+- a small feature reference
+
+But there should NOT be a huge standalone attendance analytics scene.
+
+==================================================
+8. PRODUCT UI
+==================================================
+
+Keep the strongest product cinematography.
+
+The UI should be treated as a visual object.
+
+Use:
+
+- overlap
+- scale
+- depth
+- cropping
+- perspective
+- movement
+- partial visibility
+- layering
+
+Avoid surrounding every product screenshot with explanatory paragraphs.
+
+Let the interface speak.
+
+The visual hierarchy should often be:
+
+TYPOGRAPHY
+
++
+
+PRODUCT
+
++
+
+tiny label
+
+and nothing else.
+
+==================================================
+9. CREATE ACTUALLY INTERESTING MODES
+==================================================
+
+The current theme modes are NOT what I want.
+
+Do not create:
+
+Dark mode
+Light mode
+Blue mode
+
+Those are just color themes.
+
+I want genuine ART-DIRECTION MODES.
+
+The content stays the same.
+
+The visual universe changes.
+
+Create a theme architecture that supports this.
+
+At minimum, experiment with these directions:
+
+--------------------------------
+MODE 01 — NIGHT / CURRENT
+--------------------------------
+
+Keep the current dark cinematic design as the default.
+
+Black / charcoal.
+
+Emerald.
+
+Editorial typography.
+
+Subtle grain.
+
+Product UI emerging from darkness.
+
+This is the premium default.
+
+Do not unnecessarily redesign it.
+
+--------------------------------
+MODE 02 — SKETCHBOOK
+--------------------------------
+
+THIS NEEDS TO BE COMPLETELY REWORKED FROM THE CURRENT ATTEMPT.
+
+It must NOT look like:
+
+dark blue + white.
+
+It must NOT look like a normal light theme.
+
+It should feel like a BEAUTIFUL ARTIST'S SKETCHBOOK / DESIGNER NOTEBOOK.
+
+Imagine:
+
+warm ivory paper
+
+ink
+
+graphite
+
+charcoal pencil
+
+emerald marker
+
+handwritten annotations
+
+rough but intentional lines
+
+paper texture
+
+small doodles
+
+arrows
+
+circled words
+
+underlines
+
+cross-outs
+
+margin notes
+
+rough architectural sketches
+
+taped product screenshots
+
+printed screenshots
+
+subtle paper shadows
+
+slightly imperfect geometry
+
+The art should look physically drawn onto paper.
+
+Product screenshots should feel like they were placed into a designer's notebook.
+
+For example:
+
+A screenshot with a hand-drawn circle around the important button.
+
+A handwritten annotation pointing toward a feature.
+
+A large serif headline partially written over the paper.
+
+A rough arrow connecting two ideas.
+
+A tiny note in the margin.
+
+This should look BEAUTIFUL.
+
+Not childish.
+
+Not school-project-like.
+
+Not "white mode."
+
+Not blue-and-white.
+
+Think:
+
+DESIGNER SKETCHBOOK
++
+EDITORIAL MAGAZINE
++
+ARCHITECTURAL NOTES
++
+EDUTECHSRM.
+
+--------------------------------
+MODE 03 — PRINT / POSTER
+--------------------------------
+
+Experiment with a bold printed-poster aesthetic.
+
+Warm paper or slightly tinted background.
+
+Large typography.
+
+Ink-like textures.
+
+Limited print colors.
+
+Slightly imperfect print registration.
+
+Large graphic shapes.
+
+Editorial composition.
+
+Product screenshots presented almost like magazine photography.
+
+This mode should feel tactile.
+
+--------------------------------
+MODE 04 — Y2K / DIGITAL
+--------------------------------
+
+Experiment with a tasteful early-digital aesthetic.
+
+Do NOT make it ugly retro Windows.
+
+Think:
+
+chrome
+
+silver
+
+slightly glossy surfaces
+
+strange futuristic typography
+
+early web inspiration
+
+digital gradients
+
+small interface details
+
+unexpected shapes
+
+subtle pixel/bitmap details
+
+But keep it premium.
+
+This can be the fun mode.
+
+--------------------------------
+MODE 05 — SYSTEM
+--------------------------------
+
+A more technical experimental mode.
+
+Monospace typography.
+
+System labels.
+
+Coordinates.
+
+Minimal green/white interface.
+
+Terminal-inspired details.
+
+But keep it elegant.
+
+Do not turn the entire website into a hacker terminal.
+
+--------------------------------
+
+You do NOT need to implement all five if one direction is clearly weaker.
+
+Experiment creatively.
+
+The requirement is:
+
+THE MODES MUST FEEL LIKE DIFFERENT WORLDS.
+
+Not different background colors.
+
+==================================================
+10. THEME SWITCHER
+==================================================
+
+Make the theme selector feel like part of the website.
+
+Do not use a generic settings dropdown.
+
+It could be:
+
+a small visual dial
+
+a palette icon
+
+a tiny mode selector
+
+or an elegant floating control.
+
+When opened, show the visual identities.
+
+Example:
+
+NIGHT
+SKETCH
+PRINT
+Y2K
+SYSTEM
+
+Keep it subtle.
+
+Do not dominate the navigation.
+
+==================================================
+11. MOBILE NEEDS A REAL REDESIGN
+==================================================
+
+The current mobile version is not good enough.
+
+Do NOT simply scale the desktop design down.
+
+Create a genuinely mobile-native composition.
+
+Desktop and mobile can use the same design system, but the compositions can be different.
+
+On mobile:
+
+- rethink hero composition
+- rethink typography scale
+- rethink object placement
+- rethink product screen sizes
+- rethink horizontal-scroll scenes
+- rethink navigation
+- rethink theme selector
+- rethink spacing
+- rethink section heights
+
+Mobile should feel intentionally designed.
+
+It should not feel like:
+
+"desktop squeezed into 390px."
+
+Use vertical storytelling.
+
+Large typography.
+
+Short copy.
+
+Product UI appearing between typographic moments.
+
+Use simpler depth on mobile while preserving the visual identity.
+
+No horizontal overflow.
+
+No awkward tiny typography.
+
+No tiny desktop layouts.
+
+==================================================
+12. GOOGLE PLAY APP ADVERTISEMENT
+==================================================
+
+Create a BEAUTIFUL promotional moment for the EduTechSRM Android application.
+
+This should feel like an actual premium product advertisement.
+
+Not:
+
+"Download our app"
+
+with a boring button.
+
+Think:
+
+YOUR COLLEGE.
+IN YOUR POCKET.
+
+Large phone.
+
+Real EduTechSRM Android UI.
+
+Beautiful product composition.
+
+Google Play badge.
+
+Short supporting copy.
+
+Strong typography.
+
+Scroll-linked phone movement.
+
+The phone can enter from outside the viewport and settle into the composition.
+
+The product UI should be the hero.
+
+Make this section visually desirable.
+
+IMPORTANT VISIBILITY:
+
+LAPTOP / DESKTOP:
+SHOW IT.
+
+ANDROID:
+SHOW IT.
+
+IPHONE:
+DO NOT SHOW IT.
+
+IPAD:
+DO NOT SHOW IT.
+
+For Apple devices, the Android promotion should be completely absent from the visual flow.
+
+Do not show an empty section.
+
+Do not show a disabled button.
+
+Do not show Google Play on iPhone.
+
+On non-Android devices, simply omit the Android promotion.
+
+Preserve the existing web-app CTA where appropriate.
+
+Use robust device detection rather than fragile user-agent assumptions where practical.
+
+==================================================
+13. DESKTOP MUST REMAIN THE REFERENCE
+==================================================
+
+The current desktop visual identity is finally moving in the right direction.
+
+Do NOT redesign desktop unnecessarily.
+
+Preserve:
+
+- current strong typography direction
+- current editorial compositions
+- current scroll choreography
+- current product presentation
+- current navigation structure where it works
+
+Make targeted improvements.
+
+The biggest desktop changes should be:
+
+LESS NORMAL TEXT
+
+MORE VISUAL BREATHING ROOM
+
+MORE ALIVE HERO
+
+BETTER HORIZONTAL COMPOSITIONS
+
+REMOVAL OF ATTENDANCE SCENE
+
+BETTER THEME SYSTEM
+
+PLAY STORE PROMOTION
+
+Do not accidentally turn the current desktop into another completely different generic design.
+
+==================================================
+14. EXPERIMENTATION IS ENCOURAGED
+==================================================
+
+I want you to explore.
+
+If you discover a font that creates a significantly better editorial composition, test it.
+
+If you discover a better hero composition, use it.
+
+If a section can communicate an idea with one giant word instead of three paragraphs, do it.
+
+If a product screenshot looks better partially cropped, crop it.
+
+If an element looks better outside the grid, let it break the grid.
+
+If an animation becomes stronger by removing three moving elements, remove them.
+
+Do not blindly follow existing components.
+
+You are allowed to make creative decisions.
+
+But every experiment must improve the visual experience.
+
+==================================================
+15. DO NOT ADD RANDOM DECORATION
+==================================================
+
+Do NOT solve the empty hero by adding:
+
+- random particles
+- generic blobs
+- endless floating circles
+- excessive gradients
+- neon glows
+- meaningless 3D objects
+
+The visual fragments should relate to:
+
+STUDENT LIFE
+PRODUCT
+CAMPUS
+COLLEGE CHAOS
+
+Every decorative element should have a reason to exist.
+
+==================================================
+16. MOTION
+==================================================
+
+Keep the strong GSAP / ScrollTrigger foundation.
+
+Use motion to reveal the design.
+
+The ideal feeling is:
+
+TYPOGRAPHY
+
+moves
+
+↓
+
+PRODUCT
+
+emerges
+
+↓
+
+ARROW
+
+connects
+
+↓
+
+NEXT VISUAL
+
+enters
+
+↓
+
+previous visual disappears
+
+Do not animate every word independently.
+
+Use fewer, more meaningful movements.
+
+The animation should feel expensive because of timing and choreography.
+
+==================================================
+17. FINAL SELF-CRITIQUE
+==================================================
+
+After implementation, review the entire page again.
+
+Do not just check for bugs.
+
+Act as a senior creative director.
+
+Ask:
+
+WHY DOES THIS STILL FEEL LIKE A WEBSITE TEMPLATE?
+
+WHY IS THERE TOO MUCH TEXT?
+
+WHICH ELEMENTS ARE COMPETING?
+
+WHICH COMPOSITIONS ARE TOO PLAIN?
+
+WHERE DOES THE EYE GET BORED?
+
+WHERE DOES THE DESIGN FEEL OVERFILLED?
+
+WHERE SHOULD THERE BE MORE EMPTY SPACE?
+
+WHICH TYPOGRAPHIC MOMENTS ARE THE STRONGEST?
+
+WHICH FONT TREATMENTS FEEL GENERIC?
+
+DO THE MODES ACTUALLY FEEL DIFFERENT?
+
+DOES SKETCHBOOK LOOK LIKE A REAL ARTISTIC MEDIUM?
+
+DOES MOBILE LOOK DESIGNED OR JUST SHRUNK?
+
+DOES THE PLAY STORE SECTION LOOK LIKE A REAL PRODUCT AD?
+
+DO THE HORIZONTAL SCROLL SECTIONS FEEL LIKE COMPOSITIONS OR CAROUSELS?
+
+Then fix the problems you identify.
+
+Do not simply report them.
+
+==================================================
+FINAL DESIGN PRINCIPLE
+==================================================
+
+THE CURRENT ART DIRECTION IS GOOD.
+
+DO NOT DESTROY IT.
+
+MAKE IT BOLDER.
+
+MAKE IT LESS CROWDED.
+
+MAKE IT MORE EXPERIMENTAL.
+
+MAKE THE TYPOGRAPHY MORE INTERESTING.
+
+MAKE THE HERO MORE ALIVE.
+
+MAKE THE MOBILE EXPERIENCE ACTUALLY MOBILE.
+
+MAKE THE MODES ACTUALLY DIFFERENT.
+
+AND MOST IMPORTANTLY:
+
+LESS EXPLANATION.
+
+MORE ART.
+
+LESS UI.
+
+MORE COMPOSITION.
+
+LESS TEMPLATE.
+
+MORE PERSONALITY.
+
+LESS DECORATION.
+
+MORE DESIGN.
+
+Proceed with the implementation.
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-09-07T23:51:17+05:30.
+</ADDITIONAL_METADATA>

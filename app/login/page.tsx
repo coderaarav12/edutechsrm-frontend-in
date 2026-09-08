@@ -5,16 +5,10 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { Eye, EyeOff, Loader2, Lock, Mail, AlertCircle, ArrowLeft, Rocket, Smartphone } from "lucide-react"
+import { Eye, EyeOff, Loader2, Lock, Mail, AlertCircle, ArrowLeft, Rocket, Moon, Sparkles } from "lucide-react"
 import { loginToSRM } from "@/lib/srm-api"
 import { useAuth } from "@/lib/auth-context"
-import { InstallPrompt } from "@/components/install-prompt"
 import { TurnstileWidget } from "@/components/turnstile-widget"
-
-function isAndroid() {
-  if (typeof navigator === "undefined") return false
-  return /android/i.test(navigator.userAgent)
-}
 
 export default function LoginPage() {
   const router = useRouter()
@@ -31,6 +25,45 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [mode, setMode] = useState<"night" | "poster">("night")
+
+  useEffect(() => {
+    try {
+      const saved = (localStorage.getItem("edutechsrm-landing-mode") || localStorage.getItem("edutechsrm_landing_mode")) as string
+      const initialMode = saved === "poster" ? "poster" : "night"
+      setMode(initialMode)
+      if (typeof document !== "undefined") {
+        document.documentElement.setAttribute("data-landing-mode", initialMode)
+        document.body.style.backgroundColor = initialMode === "poster" ? "#f7f5f0" : "#070a0e"
+      }
+    } catch { /* noop */ }
+
+    const onModeChange = (e: Event) => {
+      const m = (e as CustomEvent).detail
+      if (m === "poster" || m === "night") {
+        setMode(m)
+        if (typeof document !== "undefined") {
+          document.documentElement.setAttribute("data-landing-mode", m)
+          document.body.style.backgroundColor = m === "poster" ? "#f7f5f0" : "#070a0e"
+        }
+      }
+    }
+    window.addEventListener("landing-mode-change", onModeChange)
+    return () => window.removeEventListener("landing-mode-change", onModeChange)
+  }, [])
+
+  const handleModeChange = (nextMode: "night" | "poster") => {
+    setMode(nextMode)
+    if (typeof document !== "undefined") {
+      document.documentElement.setAttribute("data-landing-mode", nextMode)
+      document.body.style.backgroundColor = nextMode === "poster" ? "#f7f5f0" : "#070a0e"
+    }
+    try {
+      localStorage.setItem("edutechsrm_landing_mode", nextMode)
+      localStorage.setItem("edutechsrm-landing-mode", nextMode)
+      window.dispatchEvent(new CustomEvent("landing-mode-change", { detail: nextMode }))
+    } catch { /* noop */ }
+  }
 
   useEffect(() => {
     if (isAuthenticated) router.replace("/")
@@ -113,118 +146,314 @@ export default function LoginPage() {
   return (
     <>
       <style>{`
-        .login-input { width: 100%; height: 48px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.10); background: linear-gradient(180deg, rgba(8,11,16,0.95), rgba(7,10,14,0.9)); color: #d4d4d8; padding-left: 40px; padding-right: 12px; outline: none; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); transition: border-color 0.2s; font-size: 14px; }
-        .login-input:focus { border-color: rgba(52,211,153,0.4); box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 0 0 3px rgba(52,211,153,0.08); }
+        .login-input { width: 100%; height: 50px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,0.12); background: rgba(8,11,16,0.92); color: #f4f4f5; padding-left: 42px; padding-right: 12px; outline: none; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); transition: all 0.2s; font-size: 14px; }
+        .login-input:focus { border-color: #34d399; box-shadow: 0 0 0 3px rgba(52,211,153,0.15); }
         .login-input::placeholder { color: #52525b; }
-        .login-btn { width: 100%; border-radius: 14px; border: 1px solid rgba(255,255,255,0.16); cursor: pointer; height: 50px; font-weight: 900; font-size: 17px; color: #07120d; background: linear-gradient(135deg, #34d399, #10b981); box-shadow: 0 12px 28px rgba(16,185,129,0.30); transition: all 0.2s; letter-spacing: 0.01em; }
+        .login-btn { width: 100%; border-radius: 14px; border: 1px solid rgba(255,255,255,0.16); cursor: pointer; height: 50px; font-weight: 900; font-size: 16px; color: #07120d; background: linear-gradient(135deg, #34d399, #10b981); box-shadow: 0 12px 28px rgba(16,185,129,0.30); transition: all 0.2s; letter-spacing: 0.01em; }
         .login-btn:hover { box-shadow: 0 16px 36px rgba(16,185,129,0.40); transform: translateY(-1px); }
         .login-btn:active { transform: translateY(0); box-shadow: 0 6px 16px rgba(16,185,129,0.25); }
         .login-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        /* Poster Mode Styles */
+        html[data-landing-mode="poster"] .login-page-bg {
+          background-color: #f7f5f0 !important;
+          background-image: 
+            linear-gradient(to right, rgba(17, 17, 17, 0.035) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(17, 17, 17, 0.035) 1px, transparent 1px) !important;
+          background-size: 54px 54px !important;
+          color: #111111 !important;
+        }
+        html[data-landing-mode="poster"] .login-card-container {
+          background: #ffffff !important;
+          border: 2.5px solid #111111 !important;
+          box-shadow: 8px 8px 0px #111111 !important;
+          color: #111111 !important;
+        }
+        html[data-landing-mode="poster"] .login-hero-heading {
+          color: #111111 !important;
+        }
+        html[data-landing-mode="poster"] .login-hero-sub {
+          color: #27272a !important;
+        }
+        html[data-landing-mode="poster"] .login-input {
+          background: #ffffff !important;
+          border: 2px solid #111111 !important;
+          color: #111111 !important;
+          box-shadow: 2px 2px 0px #111111 !important;
+        }
+        html[data-landing-mode="poster"] .login-input:focus {
+          border-color: #059669 !important;
+          box-shadow: 3px 3px 0px #111111 !important;
+        }
+        html[data-landing-mode="poster"] .login-input::placeholder {
+          color: #71717a !important;
+        }
+        html[data-landing-mode="poster"] .login-btn {
+          background: #111111 !important;
+          color: #ffffff !important;
+          border: 2px solid #111111 !important;
+          box-shadow: 4px 4px 0px #111111 !important;
+        }
+        html[data-landing-mode="poster"] .login-btn:hover {
+          background: #27272a !important;
+          color: #ffffff !important;
+          box-shadow: 6px 6px 0px #111111 !important;
+        }
+        html[data-landing-mode="poster"] .login-badge-telemetry {
+          background: #ffffff !important;
+          border: 2px solid #111111 !important;
+          color: #111111 !important;
+          box-shadow: 3px 3px 0px #111111 !important;
+        }
+        html[data-landing-mode="poster"] .login-note-sticker {
+          background: #fef08a !important;
+          border: 2px solid #111111 !important;
+          color: #111111 !important;
+          box-shadow: 4px 4px 0px #111111 !important;
+        }
+        html[data-landing-mode="poster"] .login-note-sticker p {
+          color: #78350f !important;
+        }
+        html[data-landing-mode="poster"] .login-note-sticker span {
+          color: #92400e !important;
+        }
+        html[data-landing-mode="poster"] .login-feature-item {
+          background: #ffffff !important;
+          border: 2px solid #111111 !important;
+          box-shadow: 4px 4px 0px #111111 !important;
+          color: #111111 !important;
+        }
+        html[data-landing-mode="poster"] .login-feature-item span {
+          color: #111111 !important;
+        }
+        html[data-landing-mode="poster"] .login-return-btn {
+          background: #ffffff !important;
+          border: 2px solid #111111 !important;
+          color: #111111 !important;
+          box-shadow: 3px 3px 0px #111111 !important;
+        }
+        html[data-landing-mode="poster"] .login-bottom-bar {
+          color: #27272a !important;
+          border-color: rgba(17,17,17,0.15) !important;
+        }
+        html[data-landing-mode="poster"] .login-sync-badge {
+          background: #ffffff !important;
+          border: 1.5px solid #111111 !important;
+          color: #059669 !important;
+          box-shadow: 2px 2px 0px #111111 !important;
+        }
       `}</style>
-      <div className="relative flex min-h-dvh items-center justify-center px-4 sm:px-6">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
-          {isAndroid() ? (
-            <a href="https://play.google.com/store/apps/details?id=in.edutechsrm.app" target="_blank" rel="noopener noreferrer" className="block mb-3.5">
-              <div className="relative rounded-xl border border-emerald-500/20 px-3 py-2.5 overflow-hidden flex items-center gap-2.5 bg-emerald-500/[0.06]">
-                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-400/30 to-transparent" />
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-emerald-500/10 ring-1 ring-emerald-500/20">
-                  <Smartphone size={13} className="text-emerald-400" />
-                </div>
-                <p className="text-xs text-zinc-400 flex-1 min-w-0 leading-tight">
-                  <span className="text-zinc-200 font-semibold">Get the Android app</span>
-                  <span> — on Play Store</span>
-                </p>
-                <span className="px-3 py-1.5 rounded-lg text-[11px] font-bold whitespace-nowrap shrink-0 bg-emerald-500 text-zinc-950">
-                  Open
-                </span>
-              </div>
-            </a>
-          ) : (
-            <InstallPrompt />
-          )}
-          <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-white/[0.035] p-6 backdrop-blur-2xl sm:p-8" style={{ boxShadow: "0 24px 64px rgba(0,0,0,0.50)" }}>
 
-            <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-zinc-400 mb-5 transition-colors hover:text-zinc-300">
-              <ArrowLeft className="h-3.5 w-3.5" /> Back to home
-            </Link>
+      <div className="login-page-bg relative min-h-screen bg-[#070a0e] text-zinc-100 flex flex-col justify-between selection:bg-emerald-400 selection:text-black">
+        {/* Top Header */}
+        <div className="w-full pt-6 px-4 sm:px-8 max-w-7xl mx-auto flex items-center justify-between z-20">
+          <Link href="/" className="login-return-btn inline-flex items-center gap-2 text-xs font-mono font-bold tracking-wider uppercase px-3.5 py-2 rounded-xl border border-white/15 bg-white/[0.04] hover:bg-white/[0.08] transition-all backdrop-blur-md text-zinc-300 hover:text-white">
+            <ArrowLeft className="h-3.5 w-3.5" /> Return Home
+          </Link>
 
-            <div className="text-center mb-6">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border bg-zinc-950/50" style={{ borderColor: "rgba(52,211,153,0.267)", color: "#34d399" }}>
-                <Lock className="h-6 w-6" />
-              </div>
-              <h1 className="font-display text-2xl font-black tracking-tight text-zinc-50 sm:text-[26px]">Sign in to edutechsrm</h1>
-              <p className="mt-2 text-sm text-zinc-400">Secure SRM login with live data sync.</p>
+          <div className="flex items-center gap-3">
+            <span className="login-sync-badge hidden sm:inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-emerald-400 px-3 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> Live Academia Sync
+            </span>
+
+            {/* Dark / Poster Switcher */}
+            <div
+              className="inline-flex items-center rounded-xl p-1 gap-1 border transition-colors"
+              style={{
+                background: mode === "poster" ? "#ffffff" : "rgba(255,255,255,0.06)",
+                borderColor: mode === "poster" ? "#111111" : "rgba(255,255,255,0.12)",
+                borderWidth: mode === "poster" ? 2 : 1,
+                boxShadow: mode === "poster" ? "3px 3px 0px #111111" : undefined,
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => handleModeChange("night")}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all"
+                style={{
+                  background: mode === "night" ? "rgba(255,255,255,0.14)" : "transparent",
+                  color: mode === "night" ? "#ffffff" : "#444444",
+                }}
+              >
+                <Moon className="h-3 w-3" />
+                <span>Dark</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleModeChange("poster")}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all"
+                style={{
+                  background: mode === "poster" ? "#111111" : "transparent",
+                  color: mode === "poster" ? "#ffffff" : "rgba(255,255,255,0.5)",
+                }}
+              >
+                <Sparkles className="h-3 w-3" />
+                <span>Poster</span>
+              </button>
             </div>
-
-            {!showCaptchaStep ? (
-              <form onSubmit={submitLogin} className="flex flex-col gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-[0.12em] text-zinc-500">SRM Email</label>
-                  <div className="relative">
-                    <Mail className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: "#52525b" }} />
-                    <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="yourid or yourid@srmist.edu.in" autoComplete="username" required className="login-input" />
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-[0.12em] text-zinc-500">Academia Password</label>
-                  <div className="relative">
-                    <Lock className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: "#52525b" }} />
-                    <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Academia password" autoComplete="current-password" required className="login-input" style={{ paddingRight: 44 }} />
-                    <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-lg border bg-white/[0.03] text-zinc-500 hover:text-zinc-300 transition-colors" style={{ width: 28, height: 28, borderColor: "rgba(255,255,255,0.1)" }}>
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                  <a href="https://academia.srmist.edu.in/reset" target="_blank" rel="noopener noreferrer" className="text-[11px] transition-colors text-center mt-2" style={{ color: "#71717a" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.color = "#a1a1aa" }}
-                    onMouseLeave={(e) => { e.currentTarget.style.color = "#71717a" }}>
-                    Can't get in? Recover account
-                  </a>
-                </div>
-
-                {error && (
-                  <div className="flex gap-2 rounded-xl border p-2.5 text-sm" style={{ borderColor: "rgba(248,113,113,0.18)", background: "rgba(248,113,113,0.07)", color: "#f87171" }}>
-                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />{error}
-                  </div>
-                )}
-
-                {showTurnstile && (
-                  <TurnstileWidget key={turnstileKey} onSuccess={(token) => setTurnstileToken(token)} />
-                )}
-                <button type="submit" disabled={isLoading || (showTurnstile && !turnstileToken)} className="login-btn">
-                  {isLoading ? <span className="inline-flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />Connecting...</span> : "Continue"}
-                </button>
-              </form>
-            ) : (
-              <form onSubmit={submitCaptcha} className="flex flex-col gap-4">
-                {captchaImage && (
-                  <div className="overflow-hidden rounded-xl bg-white p-2">
-                    <img src={captchaImage.startsWith("data:") ? captchaImage : `data:image/png;base64,${captchaImage}`} alt="CAPTCHA" className="h-20 w-full object-contain" />
-                  </div>
-                )}
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-[0.12em] text-zinc-500">Enter CAPTCHA</label>
-                  <input value={captchaAnswer} onChange={(e) => setCaptchaAnswer(e.target.value)} placeholder="Type the text above" required className="login-input" style={{ paddingLeft: 12 }} />
-                </div>
-                {error && (
-                  <div className="flex gap-2 rounded-xl border p-2.5 text-sm" style={{ borderColor: "rgba(248,113,113,0.18)", background: "rgba(248,113,113,0.07)", color: "#f87171" }}>
-                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />{error}
-                  </div>
-                )}
-                <button type="submit" disabled={isLoading} className="login-btn">
-                  {isLoading ? <span className="inline-flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />Verifying...</span> : "Verify and continue"}
-                </button>
-              </form>
-            )}
-
-            <p className="mt-5 text-center text-[11px] leading-relaxed text-zinc-600">
-              By signing in, you agree to our{" "}
-              <Link href="/terms" className="underline decoration-zinc-600 transition-colors hover:text-zinc-400 hover:decoration-zinc-400">Terms</Link>{" "}
-              and{" "}
-              <Link href="/privacy" className="underline decoration-zinc-600 transition-colors hover:text-zinc-400 hover:decoration-zinc-400">Privacy Policy</Link>.
-            </p>
           </div>
-        </motion.div>
+        </div>
+
+        {/* Main Content Area */}
+        <div className="relative flex-1 flex items-center justify-center px-4 py-12 sm:px-6 z-10">
+          <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            
+            {/* Left Column: Creative Editorial Hero & Live Telemetry (Desktop/Laptop only) */}
+            <motion.div 
+              initial={{ opacity: 0, x: -25 }} 
+              animate={{ opacity: 1, x: 0 }} 
+              transition={{ duration: 0.5 }}
+              className="hidden lg:block lg:col-span-6 space-y-6 text-left"
+            >
+              <div className="login-badge-telemetry inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-xs font-mono font-bold tracking-wider uppercase text-zinc-300 backdrop-blur-md">
+                <Lock className="h-3.5 w-3.5 text-emerald-400" /> SYS_AUTH // 001 PROTOCOL
+              </div>
+
+              <h1 className="login-hero-heading text-3xl sm:text-5xl font-black font-display tracking-tight text-white leading-[1.08]">
+                Sign in to your <br />
+                <span className="font-serif italic font-normal text-emerald-400">academic ledger.</span>
+              </h1>
+
+              <p className="login-hero-sub text-sm sm:text-base text-zinc-400 leading-relaxed max-w-lg">
+                Direct authentication against SRM Academia. Timetable, day orders, attendance records, internal marks, and GradeX calculator synchronized in milliseconds.
+              </p>
+
+              {/* Editorial Feature Badges */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                <div className="login-feature-item rounded-2xl border border-white/10 bg-white/[0.03] p-3.5 backdrop-blur-md flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center shrink-0">
+                    <Lock className="w-4 h-4 text-emerald-400" />
+                  </div>
+                  <div>
+                    <span className="block text-xs font-bold font-mono tracking-wide text-zinc-200">Zero Password Storage</span>
+                    <span className="block text-[11px] text-zinc-400">Forwarded in-memory only</span>
+                  </div>
+                </div>
+
+                <div className="login-feature-item rounded-2xl border border-white/10 bg-white/[0.03] p-3.5 backdrop-blur-md flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-cyan-500/15 border border-cyan-500/25 flex items-center justify-center shrink-0">
+                    <Rocket className="w-4 h-4 text-cyan-400" />
+                  </div>
+                  <div>
+                    <span className="block text-xs font-bold font-mono tracking-wide text-zinc-200">Instant Offline Cache</span>
+                    <span className="block text-[11px] text-zinc-400">Works without campus WiFi</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Creative Handwritten Sticky Note */}
+              <div className="login-note-sticker relative inline-block rounded-2xl border border-amber-400/30 bg-amber-400/10 p-4 transform -rotate-1 max-w-md">
+                <p className="text-xs sm:text-sm font-handwriting text-amber-300 font-medium" style={{ fontFamily: "var(--font-caveat, 'Caveat', cursive)", fontSize: "17px", lineHeight: "1.3" }}>
+                  "Skip calculations, bunk risk alerts, and 79 subjects of notes will be unlocked immediately upon session verification."
+                </p>
+                <span className="block text-[10px] font-mono uppercase tracking-widest text-amber-400/70 mt-1">— EdutechSRM Core System</span>
+              </div>
+            </motion.div>
+
+            {/* Right Column: High-Craft Login Form */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="lg:col-span-6 w-full max-w-md mx-auto"
+            >
+              <div className="login-card-container relative overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.04] p-6 sm:p-8 backdrop-blur-2xl shadow-[0_24px_64px_rgba(0,0,0,0.50)]">
+                
+                <div className="text-center mb-6">
+                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
+                    <Lock className="h-5 w-5" />
+                  </div>
+                  <h2 className="text-xl sm:text-2xl font-black font-display tracking-tight">Academia Authentication</h2>
+                  <p className="mt-1 text-xs text-zinc-400">Enter your SRM student credentials</p>
+                </div>
+
+                {!showCaptchaStep ? (
+                  <form onSubmit={submitLogin} className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-400">SRM NetID / Email</label>
+                      <div className="relative">
+                        <Mail className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                        <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ab1234 or ab1234@srmist.edu.in" autoComplete="username" required className="login-input" />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-400">Academia Password</label>
+                        <a href="https://academia.srmist.edu.in/reset" target="_blank" rel="noopener noreferrer" className="text-[11px] text-zinc-400 hover:text-emerald-400 transition-colors">
+                          Forgot password?
+                        </a>
+                      </div>
+                      <div className="relative">
+                        <Lock className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                        <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••••••" autoComplete="current-password" required className="login-input" style={{ paddingRight: 44 }} />
+                        <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-lg border border-white/10 bg-white/[0.05] text-zinc-400 hover:text-white transition-colors" style={{ width: 32, height: 32 }}>
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    {error && (
+                      <div className="flex gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-400 leading-relaxed">
+                        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />{error}
+                      </div>
+                    )}
+
+                    {showTurnstile && (
+                      <TurnstileWidget key={turnstileKey} onSuccess={(token) => setTurnstileToken(token)} />
+                    )}
+
+                    <button type="submit" disabled={isLoading || (showTurnstile && !turnstileToken)} className="login-btn mt-1">
+                      {isLoading ? (
+                        <span className="inline-flex items-center gap-2">
+                          <Loader2 className="h-4 w-4 animate-spin" /> Verifying Credentials...
+                        </span>
+                      ) : (
+                        "Sign In to Portal"
+                      )}
+                    </button>
+                  </form>
+                ) : (
+                  <form onSubmit={submitCaptcha} className="flex flex-col gap-4">
+                    {captchaImage && (
+                      <div className="overflow-hidden rounded-2xl bg-white p-3 border border-white/20 text-center">
+                        <img src={captchaImage.startsWith("data:") ? captchaImage : `data:image/png;base64,${captchaImage}`} alt="CAPTCHA" className="h-20 w-full object-contain" />
+                      </div>
+                    )}
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-400">Enter Security CAPTCHA</label>
+                      <input value={captchaAnswer} onChange={(e) => setCaptchaAnswer(e.target.value)} placeholder="Enter letters shown above" required className="login-input" style={{ paddingLeft: 14 }} />
+                    </div>
+                    {error && (
+                      <div className="flex gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-400 leading-relaxed">
+                        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />{error}
+                      </div>
+                    )}
+                    <button type="submit" disabled={isLoading} className="login-btn">
+                      {isLoading ? <span className="inline-flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />Confirming...</span> : "Verify & Sign In"}
+                    </button>
+                  </form>
+                )}
+
+                <div className="mt-6 pt-5 border-t border-white/10 text-center">
+                  <p className="text-[11px] text-zinc-400 leading-relaxed">
+                    By authenticating, you accept the{" "}
+                    <Link href="/terms" className="text-emerald-400 underline decoration-emerald-400/40 hover:text-emerald-300">Terms of Service</Link>
+                    {" "}and{" "}
+                    <Link href="/privacy" className="text-emerald-400 underline decoration-emerald-400/40 hover:text-emerald-300">Privacy Policy</Link>.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Minimal Footer with status */}
+        <div className="login-bottom-bar w-full py-5 px-4 text-center z-10 border-t border-white/5">
+          <p className="login-bottom-bar text-[11px] font-mono text-zinc-400">
+            edutechsrm // Secure Reverse-Proxy Handshake // SRMIST KTR
+          </p>
+        </div>
       </div>
     </>
   )

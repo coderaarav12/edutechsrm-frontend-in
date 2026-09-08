@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Upload, Palette, Check, RotateCcw, Moon, Sun, Contrast, Sliders } from "lucide-react"
+import { X, Upload, Palette, Check, RotateCcw, Moon, Sparkles, Contrast, Sliders } from "lucide-react"
 import { PRESETS, useTheme, type ThemeMode, type CustomColors } from "@/lib/theme-context"
 
 interface ThemePanelProps {
@@ -10,11 +10,11 @@ interface ThemePanelProps {
   onClose: () => void
 }
 
-const MODES: { id: ThemeMode; label: string; icon: typeof Moon }[] = [
-  { id: "dark", label: "Dark", icon: Moon },
-  { id: "light", label: "Light", icon: Sun },
-  { id: "black", label: "Black", icon: Contrast },
-  { id: "custom", label: "Custom", icon: Sliders },
+const MODES: { id: ThemeMode; label: string; icon: typeof Moon; desc: string }[] = [
+  { id: "dark", label: "Dark", icon: Moon, desc: "Cyberpunk" },
+  { id: "poster", label: "Poster", icon: Sparkles, desc: "Swiss Paper" },
+  { id: "black", label: "Black", icon: Contrast, desc: "OLED" },
+  { id: "custom", label: "Custom", icon: Sliders, desc: "Studio" },
 ]
 
 const COLOR_SLOTS: { key: keyof CustomColors; label: string; desc: string }[] = [
@@ -108,7 +108,7 @@ export function ThemePanel({ open, onClose }: ThemePanelProps) {
                       <button
                         key={m.id}
                         onClick={() => setMode(m.id)}
-                        className="flex flex-col items-center gap-1.5 rounded-xl py-3 px-2 transition-all"
+                        className="flex flex-col items-center gap-1 rounded-xl py-2.5 px-2 transition-all cursor-pointer"
                         style={{
                           background: active ? "var(--accent-bg, rgba(52,211,153,0.1))" : "var(--element-bg, rgba(255,255,255,0.03))",
                           border: active ? "1px solid var(--accent-border, rgba(52,211,153,0.2))" : "1px solid var(--border-color, rgba(255,255,255,0.05))",
@@ -116,6 +116,7 @@ export function ThemePanel({ open, onClose }: ThemePanelProps) {
                       >
                         <Icon className="w-4 h-4" style={{ color: active ? "var(--accent-theme, #34d399)" : "var(--text-subtle)" }} />
                         <span className="text-[10px] font-bold" style={{ color: active ? "var(--accent-theme, #34d399)" : "var(--text-muted)" }}>{m.label}</span>
+                        <span className="text-[8px] opacity-60 truncate" style={{ color: "var(--text-subtle)" }}>{m.desc}</span>
                       </button>
                     )
                   })}
@@ -123,11 +124,18 @@ export function ThemePanel({ open, onClose }: ThemePanelProps) {
               </div>
 
               {/* Gallery presets */}
-              {(theme.mode === "dark" || theme.mode === "light" || theme.mode === "black") && (
+              {(theme.mode === "dark" || theme.mode === "poster" || theme.mode === "black") && (
                 <div className="px-5 pb-3">
-                  <p className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: "var(--text-subtle)" }}>Gallery Backgrounds</p>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "var(--text-subtle)" }}>
+                      {theme.mode === "poster" ? "Poster Paper & Cardstock Presets" : "Gallery Backgrounds"}
+                    </p>
+                    <span className="text-[9px] font-mono opacity-60" style={{ color: "var(--text-faint)" }}>
+                      {theme.mode === "poster" ? "Tactile Textures" : "Atmospheric Glows"}
+                    </span>
+                  </div>
                   <div className="grid grid-cols-4 gap-2.5">
-                    {PRESETS.filter(p => p.theme === theme.mode).map((preset) => {
+                    {PRESETS.filter(p => p.theme === (theme.mode === "poster" ? "poster" : "dark")).map((preset) => {
                       const active = theme.presetId === preset.id && !theme.customImage
                       return (
                         <button

@@ -128,72 +128,132 @@ export default function TermsPage() {
     <>
       <Header />
       <style>{`
-        @media (max-width: 640px) {
-          .legal-summary-grid { gap: .75rem !important; }
-          .legal-summary-card { display: flex; align-items: flex-start; gap: .85rem; border-radius: 20px !important; padding: 1rem !important; }
-          .legal-summary-card svg { margin: .1rem 0 0 !important; height: 1.25rem; width: 1.25rem; flex: 0 0 1.25rem; }
-          .legal-summary-card h3 { font-size: .98rem !important; line-height: 1.25; }
-          .legal-summary-card p { margin-top: .3rem !important; font-size: .78rem !important; line-height: 1.5 !important; }
+        /* Poster Mode Styles */
+        html[data-landing-mode="poster"] .terms-main-bg {
+          background-color: #f4efe6 !important;
+          background-image: 
+            radial-gradient(rgba(17,17,17,0.08) 1px, transparent 1px),
+            linear-gradient(to right, rgba(17,17,17,0.04) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(17,17,17,0.04) 1px, transparent 1px) !important;
+          background-size: 24px 24px, 48px 48px, 48px 48px !important;
+          color: #111111 !important;
+        }
+        html[data-landing-mode="poster"] .terms-editorial-heading {
+          color: #111111 !important;
+        }
+        html[data-landing-mode="poster"] .terms-editorial-sub {
+          color: #3f3f46 !important;
+        }
+        html[data-landing-mode="poster"] .terms-notice-card {
+          background: #fef08a !important;
+          border: 2.5px solid #111111 !important;
+          box-shadow: 8px 8px 0px #111111 !important;
+          color: #111111 !important;
+        }
+        html[data-landing-mode="poster"] .terms-notice-card h2,
+        html[data-landing-mode="poster"] .terms-notice-card p {
+          color: #111111 !important;
+        }
+        html[data-landing-mode="poster"] .terms-summary-card {
+          background: #ffffff !important;
+          border: 2px solid #111111 !important;
+          box-shadow: 4px 4px 0px #111111 !important;
+          color: #111111 !important;
+        }
+        html[data-landing-mode="poster"] .terms-summary-card h3,
+        html[data-landing-mode="poster"] .terms-summary-card p {
+          color: #111111 !important;
+        }
+        html[data-landing-mode="poster"] .terms-clause-card {
+          background: #ffffff !important;
+          border: 2px solid #111111 !important;
+          box-shadow: 4px 4px 0px #111111 !important;
+          color: #111111 !important;
+        }
+        html[data-landing-mode="poster"] .terms-clause-card h2 {
+          color: #111111 !important;
+        }
+        html[data-landing-mode="poster"] .terms-clause-card li {
+          color: #27272a !important;
+        }
+        html[data-landing-mode="poster"] .terms-contact-box {
+          background: #faf7f2 !important;
+          border: 2.5px solid #111111 !important;
+          box-shadow: 6px 6px 0px #111111 !important;
+          color: #111111 !important;
+        }
+        html[data-landing-mode="poster"] .terms-contact-box h2,
+        html[data-landing-mode="poster"] .terms-contact-box p {
+          color: #111111 !important;
         }
       `}</style>
 
-      <main className="min-h-screen px-4 pb-24 pt-28 text-zinc-50 sm:px-6 lg:px-16">
+      <main className="terms-main-bg relative min-h-screen bg-[#070a0e] px-4 pb-24 pt-28 text-zinc-50 sm:px-6 lg:px-16 transition-colors duration-300 selection:bg-emerald-400 selection:text-black">
         <section className="mx-auto max-w-5xl">
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-3xl text-center">
-            <span className="inline-flex items-center gap-2 rounded-full border border-amber-300/25 bg-amber-300/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-amber-300">
-              <Scale className="h-4 w-4" /> terms of service
+            <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-4 py-1.5 text-xs font-mono font-bold uppercase tracking-widest text-amber-400 backdrop-blur-md">
+              <Scale className="h-3.5 w-3.5" /> 001 // TERMS OF SERVICE
             </span>
-            <h1 className="font-display mt-6 text-4xl font-black tracking-tight sm:text-6xl">Terms, without the clutter.</h1>
-            <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-zinc-400">
-              Last updated: {updatedAt}. These terms explain how edutechsrm may be used and what responsibilities come with using it.
+            <h1 className="terms-editorial-heading font-display mt-6 text-4xl font-black tracking-tight sm:text-6xl leading-[1.05]">
+              Terms of service and use. <br />
+              <span className="font-serif italic font-normal text-amber-400">Clear, direct, and straightforward.</span>
+            </h1>
+            <p className="terms-editorial-sub mx-auto mt-5 max-w-2xl text-base leading-relaxed text-zinc-400">
+              Last updated: {updatedAt}. These terms explain how edutechsrm may be used, acceptable use standards, and user responsibilities while navigating campus tools.
             </p>
+
+            <div className="mt-4 inline-block transform -rotate-1 rounded-xl bg-amber-400/10 border border-amber-400/30 px-4 py-1.5">
+              <span className="font-handwriting text-amber-300 text-sm sm:text-base font-medium" style={{ fontFamily: "var(--font-caveat, 'Caveat', cursive)", fontSize: "18px" }}>
+                "Built by students, for students. Fair, open, and community-driven."
+              </span>
+            </div>
           </motion.div>
 
-          <motion.section initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mt-12 rounded-[34px] border border-amber-300/20 bg-amber-300/[0.055] p-6 backdrop-blur-2xl sm:p-8 transition md:hover:-translate-y-1 active:scale-[0.97]">
-            <div className="flex flex-col gap-5 sm:flex-row">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-amber-300/25 bg-amber-300/10 text-amber-300">
+          <motion.section initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="terms-notice-card mt-12 rounded-[34px] border border-amber-400/20 bg-amber-400/[0.055] p-6 backdrop-blur-2xl sm:p-8">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-amber-400/30 bg-amber-400/10 text-amber-400">
                 <AlertTriangle className="h-6 w-6" />
               </div>
               <div>
-                <h2 className="font-display text-2xl font-black text-amber-100">Important notice</h2>
-                <p className="mt-3 text-sm leading-7 text-zinc-300">
-                  edutechsrm is an independent student-built project. It is not affiliated with, endorsed by, or sponsored by SRM Institute of Science and Technology. Official academic records should always be verified through SRM's official systems.
+                <h2 className="font-display text-2xl font-black text-amber-200">Independent Academic Project</h2>
+                <p className="mt-1 text-xs sm:text-sm leading-relaxed text-zinc-300">
+                  edutechsrm is an independent student-built project. It is not affiliated with, officially endorsed by, or managed by SRM Institute of Science and Technology. Always cross-verify critical academic matters on official university portals.
                 </p>
               </div>
             </div>
           </motion.section>
 
-          <div className="legal-summary-grid mt-8 grid gap-4 md:grid-cols-3">
+          <div className="legal-summary-grid mt-8 grid gap-4 sm:grid-cols-3">
             {[
-              [ShieldCheck, "Independent", "Not an official SRM product."],
-              [BookOpen, "Academic tool", "Useful for planning, not official records."],
-              [Zap, "As available", "Features may change as SRM systems change."],
+              [ShieldCheck, "Community Project", "Not an official SRM product or enterprise entity."],
+              [BookOpen, "Academic Planning", "Calculations for planning; official grades rest on Academia."],
+              [Zap, "Dynamic Uptime", "Reverse-proxy updates as SRM portal updates in real time."],
             ].map(([Icon, title, text]) => (
-              <div key={String(title)} className="legal-summary-card rounded-[26px] border border-white/10 bg-white/[0.035] p-6 backdrop-blur-2xl transition md:hover:-translate-y-1 active:scale-[0.97]">
-                <Icon className="mb-5 h-6 w-6 text-amber-300" />
+              <div key={String(title)} className="terms-summary-card rounded-[24px] border border-white/10 bg-white/[0.03] p-5 backdrop-blur-md">
+                <Icon className="mb-4 h-5 w-5 text-amber-400" />
                 <div>
-                  <h3 className="font-display text-lg font-black">{String(title)}</h3>
-                  <p className="mt-2 text-sm leading-6 text-zinc-500">{String(text)}</p>
+                  <h3 className="font-display text-base font-black text-zinc-100">{String(title)}</h3>
+                  <p className="mt-1.5 text-xs leading-relaxed text-zinc-400">{String(text)}</p>
                 </div>
               </div>
             ))}
           </div>
 
-          <article className="mt-10 space-y-4">
+          <article className="mt-12 space-y-4">
             {sections.map((section, index) => (
               <motion.section
                 key={section.title}
-                initial={{ opacity: 0, y: 18 }}
+                initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.025 }}
-                className="rounded-[26px] border border-white/10 bg-zinc-950/45 p-6 backdrop-blur-2xl transition md:hover:-translate-y-1 active:scale-[0.97]"
+                transition={{ delay: index * 0.02 }}
+                className="terms-clause-card rounded-[28px] border border-white/10 bg-zinc-950/40 p-6 sm:p-8 backdrop-blur-2xl"
               >
-                <h2 className="font-display text-xl font-black text-zinc-50">{section.title}</h2>
+                <h2 className="font-display text-xl font-black text-zinc-100">{section.title}</h2>
                 <ul className="mt-4 space-y-3">
                   {section.body.map((item) => (
-                    <li key={item} className="flex gap-3 text-sm leading-7 text-zinc-400">
-                      <Sparkles className="mt-1.5 h-3.5 w-3.5 shrink-0 text-amber-300" />
+                    <li key={item} className="flex gap-3 text-xs sm:text-sm leading-relaxed text-zinc-400">
+                      <Sparkles className="mt-1 h-3.5 w-3.5 shrink-0 text-amber-400" />
                       <span>{item}</span>
                     </li>
                   ))}
@@ -202,15 +262,17 @@ export default function TermsPage() {
             ))}
           </article>
 
-          <section className="mt-8 rounded-[28px] border border-white/10 bg-white/[0.035] p-6 backdrop-blur-2xl transition md:hover:-translate-y-1 active:scale-[0.97]">
+          <section className="terms-contact-box mt-10 rounded-[28px] border border-white/10 bg-white/[0.035] p-6 sm:p-8 backdrop-blur-2xl">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="flex items-center gap-2 font-display text-xl font-black">
-                  <Mail className="h-5 w-5 text-amber-300" /> Contact
+                  <Mail className="h-5 w-5 text-amber-400" /> Terms & Compliance
                 </h2>
-                <p className="mt-2 text-sm leading-7 text-zinc-400">Questions about these Terms can be sent to admin@edutechsrm.in.</p>
+                <p className="mt-1 text-xs sm:text-sm leading-relaxed text-zinc-400">Inquiries regarding these Terms of Service can be sent to admin@edutechsrm.in.</p>
               </div>
-              <a href="mailto:admin@edutechsrm.in" className="rounded-2xl bg-amber-300 px-5 py-3 text-sm font-black text-zinc-950">Email</a>
+              <a href="mailto:admin@edutechsrm.in" className="rounded-xl bg-amber-400 px-5 py-2.5 text-xs font-mono font-black uppercase tracking-wider text-zinc-950 hover:bg-amber-300 transition-colors shrink-0 text-center">
+                Contact Developer
+              </a>
             </div>
           </section>
 

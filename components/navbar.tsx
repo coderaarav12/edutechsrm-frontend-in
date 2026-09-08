@@ -25,7 +25,7 @@ import {
   Map as MapIcon,
   WifiOff,
   Settings,
-  Sun,
+  Sparkles,
   TrendingUp,
   User,
   X,
@@ -185,32 +185,9 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
     return () => document.removeEventListener("click", dismiss)
   }, [showAiPrompt])
 
-  const toggleDarkLight = useCallback(() => {
-    const nextMode = theme.mode === "light" ? "dark" : "light"
-    const run = () => setMode(nextMode)
-    const docWithTransition = document as Document & {
-      startViewTransition?: (callback: () => void) => { finished: Promise<void> }
-    }
-
-    const overlay = document.createElement("div")
-    overlay.style.cssText =
-      "position:fixed;inset:0;pointer-events:none;z-index:9999;background:rgba(52,211,153,0.1);opacity:1;transition:opacity 420ms ease-out;"
-    document.body.appendChild(overlay)
-
-    if (typeof docWithTransition.startViewTransition === "function") {
-      docWithTransition.startViewTransition(run)
-      requestAnimationFrame(() => {
-        overlay.style.opacity = "0"
-      })
-      window.setTimeout(() => overlay.remove(), 460)
-      return
-    }
-
-    run()
-    requestAnimationFrame(() => {
-      overlay.style.opacity = "0"
-    })
-    window.setTimeout(() => overlay.remove(), 460)
+  const toggleThemeMode = useCallback(() => {
+    const nextMode = theme.mode === "poster" ? "dark" : "poster"
+    setMode(nextMode)
   }, [theme.mode, setMode])
 
   const handleShare = () => setShowSharePopup(true)
@@ -357,29 +334,31 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
           {/* ── Right: theme toggle + settings ── */}
           <div className="flex flex-1 justify-end items-center gap-1.5">
 
-            {/* ── Theme toggle ── */}
+            {/* ── Theme toggle (Dark <-> Poster) ── */}
             <button
-              onClick={toggleDarkLight}
-              className="flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300"
+              onClick={toggleThemeMode}
+              title={theme.mode === "poster" ? "Switch to Dark Mode" : "Switch to Poster Mode"}
+              aria-label={theme.mode === "poster" ? "Switch to Dark Mode" : "Switch to Poster Mode"}
+              className="flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300 cursor-pointer"
               style={{
-                color: theme.mode === "light" ? "#fbbf24" : "var(--text-faint, #52525b)",
-                background: theme.mode === "light" ? "rgba(251,191,36,0.08)" : "var(--element-bg, rgba(255,255,255,0.03))",
+                color: theme.mode === "poster" ? "#111111" : "var(--text-faint, #52525b)",
+                background: theme.mode === "poster" ? "rgba(17,17,17,0.08)" : "var(--element-bg, rgba(255,255,255,0.03))",
                 border: "1px solid var(--border-color, rgba(255,255,255,0.05))",
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = theme.mode === "light" ? "#fbbf24" : "#d4d4d8" }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = theme.mode === "light" ? "#fbbf24" : "var(--text-faint, #52525b)" }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = theme.mode === "poster" ? "#000000" : "#d4d4d8" }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = theme.mode === "poster" ? "#111111" : "var(--text-faint, #52525b)" }}
             >
                <AnimatePresence mode="wait" initial={false}>
                  <motion.div
-                   key={theme.mode === "light" ? "sun" : "moon"}
+                   key={theme.mode === "poster" ? "sparkles" : "moon"}
                    initial={{ rotate: -90, scale: 0.5, opacity: 0 }}
                    animate={{ rotate: 0, scale: 1, opacity: 1 }}
                    exit={{ rotate: 90, scale: 0.5, opacity: 0 }}
                    transition={{ duration: 0.35, ease: "easeOut" }}
                    style={{ display: "flex" }}
                 >
-                  {theme.mode === "light" ? (
-                    <Sun style={{ width: 13, height: 13 }} />
+                  {theme.mode === "poster" ? (
+                    <Sparkles style={{ width: 13, height: 13 }} />
                   ) : (
                     <Moon style={{ width: 13, height: 13 }} />
                   )}

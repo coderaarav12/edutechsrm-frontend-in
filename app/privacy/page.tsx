@@ -156,79 +156,147 @@ export default function PrivacyPage() {
     <>
       <Header />
       <style>{`
-        @media (max-width: 640px) {
-          .legal-summary-grid { gap: .75rem !important; }
-          .legal-summary-card { display: flex; align-items: flex-start; gap: .85rem; border-radius: 20px !important; padding: 1rem !important; }
-          .legal-summary-card svg { margin: .1rem 0 0 !important; height: 1.25rem; width: 1.25rem; flex: 0 0 1.25rem; }
-          .legal-summary-card h3 { font-size: .98rem !important; line-height: 1.25; }
-          .legal-summary-card p { margin-top: .3rem !important; font-size: .78rem !important; line-height: 1.5 !important; }
+        /* Poster Mode Styles */
+        html[data-landing-mode="poster"] .privacy-main-bg {
+          background-color: #f4efe6 !important;
+          background-image: 
+            radial-gradient(rgba(17,17,17,0.08) 1px, transparent 1px),
+            linear-gradient(to right, rgba(17,17,17,0.04) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(17,17,17,0.04) 1px, transparent 1px) !important;
+          background-size: 24px 24px, 48px 48px, 48px 48px !important;
+          color: #111111 !important;
+        }
+        html[data-landing-mode="poster"] .privacy-editorial-heading {
+          color: #111111 !important;
+        }
+        html[data-landing-mode="poster"] .privacy-editorial-sub {
+          color: #3f3f46 !important;
+        }
+        html[data-landing-mode="poster"] .privacy-commit-card {
+          background: #ffffff !important;
+          border: 2.5px solid #111111 !important;
+          box-shadow: 8px 8px 0px #111111 !important;
+          color: #111111 !important;
+        }
+        html[data-landing-mode="poster"] .privacy-commit-card h2,
+        html[data-landing-mode="poster"] .privacy-commit-card p {
+          color: #111111 !important;
+        }
+        html[data-landing-mode="poster"] .privacy-commit-item {
+          background: #faf7f2 !important;
+          border: 1.5px solid #111111 !important;
+          color: #111111 !important;
+        }
+        html[data-landing-mode="poster"] .privacy-commit-item p {
+          color: #111111 !important;
+        }
+        html[data-landing-mode="poster"] .privacy-summary-card {
+          background: #ffffff !important;
+          border: 2px solid #111111 !important;
+          box-shadow: 4px 4px 0px #111111 !important;
+          color: #111111 !important;
+        }
+        html[data-landing-mode="poster"] .privacy-summary-card h3,
+        html[data-landing-mode="poster"] .privacy-summary-card p {
+          color: #111111 !important;
+        }
+        html[data-landing-mode="poster"] .privacy-clause-card {
+          background: #ffffff !important;
+          border: 2px solid #111111 !important;
+          box-shadow: 4px 4px 0px #111111 !important;
+          color: #111111 !important;
+        }
+        html[data-landing-mode="poster"] .privacy-clause-card h2 {
+          color: #111111 !important;
+        }
+        html[data-landing-mode="poster"] .privacy-clause-card li {
+          color: #27272a !important;
+        }
+        html[data-landing-mode="poster"] .privacy-contact-box {
+          background: #faf7f2 !important;
+          border: 2.5px solid #111111 !important;
+          box-shadow: 6px 6px 0px #111111 !important;
+          color: #111111 !important;
+        }
+        html[data-landing-mode="poster"] .privacy-contact-box h2,
+        html[data-landing-mode="poster"] .privacy-contact-box p {
+          color: #111111 !important;
         }
       `}</style>
 
-      <main className="min-h-screen px-4 pb-24 pt-28 text-zinc-50 sm:px-6 lg:px-16">
+      <main className="privacy-main-bg relative min-h-screen bg-[#070a0e] px-4 pb-24 pt-28 text-zinc-50 sm:px-6 lg:px-16 transition-colors duration-300 selection:bg-emerald-400 selection:text-black">
         <section className="mx-auto max-w-5xl">
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-3xl text-center">
-            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/25 bg-emerald-300/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-emerald-300">
-              <Shield className="h-4 w-4" /> privacy policy
+            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-1.5 text-xs font-mono font-bold uppercase tracking-widest text-emerald-400 backdrop-blur-md">
+              <Shield className="h-3.5 w-3.5" /> 001 // PRIVACY PROTOCOL
             </span>
-            <h1 className="font-display mt-6 text-4xl font-black tracking-tight sm:text-6xl">Privacy, written clearly.</h1>
-            <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-zinc-400">
-              Last updated: {updatedAt}. This policy explains what edutechsrm processes, why it is needed, and how your SRM credentials are handled — including the fact that credentials pass through our server briefly during login to reach SRM Academia's official servers.
+            <h1 className="privacy-editorial-heading font-display mt-6 text-4xl font-black tracking-tight sm:text-6xl leading-[1.05]">
+              Privacy, security, and trust. <br />
+              <span className="font-serif italic font-normal text-emerald-400">Written with complete transparency.</span>
+            </h1>
+            <p className="privacy-editorial-sub mx-auto mt-5 max-w-2xl text-base leading-relaxed text-zinc-400">
+              Last updated: {updatedAt}. This document details precisely what edutechsrm accesses, why it is required, and how your credentials pass in-memory to SRM Academia without persistent storage.
             </p>
+
+            <div className="mt-4 inline-block transform -rotate-1 rounded-xl bg-amber-400/10 border border-amber-400/30 px-4 py-1.5">
+              <span className="font-handwriting text-amber-300 text-sm sm:text-base font-medium" style={{ fontFamily: "var(--font-caveat, 'Caveat', cursive)", fontSize: "18px" }}>
+                "Zero passwords stored. Zero analytics selling. Verified student architecture."
+              </span>
+            </div>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mt-12 rounded-[34px] border border-emerald-300/15 bg-emerald-300/[0.045] p-6 backdrop-blur-2xl sm:p-8 transition md:hover:-translate-y-1 active:scale-[0.97]">
+          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="privacy-commit-card mt-12 rounded-[34px] border border-emerald-400/20 bg-emerald-400/[0.045] p-6 backdrop-blur-2xl sm:p-8">
             <div className="mb-6 flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-300/25 bg-emerald-300/10 text-emerald-300">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-400/30 bg-emerald-400/10 text-emerald-400">
                 <Lock className="h-6 w-6" />
               </div>
               <div>
-                <h2 className="font-display text-2xl font-black">Key commitments</h2>
-                <p className="mt-1 text-sm text-zinc-500">The important parts first.</p>
+                <h2 className="font-display text-2xl font-black">Architectural Commitments</h2>
+                <p className="mt-0.5 text-xs font-mono uppercase tracking-wider text-zinc-400">Non-negotiable security principles</p>
               </div>
             </div>
             <div className="grid gap-3">
               {commitments.map((item) => (
-                <div key={item} className="flex gap-3 rounded-2xl border border-white/10 bg-white/[0.035] p-4 transition md:hover:-translate-y-1 active:scale-[0.97]">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" />
-                  <p className="text-sm leading-6 text-zinc-300">{item}</p>
+                <div key={item} className="privacy-commit-item flex gap-3.5 rounded-2xl border border-white/10 bg-white/[0.035] p-4 backdrop-blur-md">
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" />
+                  <p className="text-xs sm:text-sm leading-relaxed text-zinc-300">{item}</p>
                 </div>
               ))}
             </div>
           </motion.div>
 
-          <div className="legal-summary-grid mt-8 grid gap-4 md:grid-cols-3">
+          <div className="legal-summary-grid mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              [Lock, "Password", "Forwarded to SRM in real time, never stored or logged."],
-              [Database, "Session", "Stored temporarily for login persistence."],
-              [Bot, "AI", "Uses academic context, never credentials."],
-              [MapPin, "Location", "Optional, processed locally for campus map only."],
+              [Lock, "SRM Passwords", "Forwarded in-memory, never stored or cached."],
+              [Database, "Session State", "Stored locally on your device for fast re-sync."],
+              [Bot, "Contextual AI", "Only receives academic context, never passwords."],
+              [MapPin, "Campus GPS", "Optional, processed client-side with zero tracking."],
             ].map(([Icon, title, text]) => (
-              <div key={String(title)} className="legal-summary-card rounded-[26px] border border-white/10 bg-white/[0.035] p-6 backdrop-blur-2xl transition md:hover:-translate-y-1 active:scale-[0.97]">
-                <Icon className="mb-5 h-6 w-6 text-cyan-300" />
+              <div key={String(title)} className="privacy-summary-card rounded-[24px] border border-white/10 bg-white/[0.03] p-5 backdrop-blur-md">
+                <Icon className="mb-4 h-5 w-5 text-cyan-400" />
                 <div>
-                  <h3 className="font-display text-lg font-black">{String(title)}</h3>
-                  <p className="mt-2 text-sm leading-6 text-zinc-500">{String(text)}</p>
+                  <h3 className="font-display text-base font-black text-zinc-100">{String(title)}</h3>
+                  <p className="mt-1.5 text-xs leading-relaxed text-zinc-400">{String(text)}</p>
                 </div>
               </div>
             ))}
           </div>
 
-          <article className="mt-10 space-y-4">
+          <article className="mt-12 space-y-4">
             {sections.map((section, index) => (
               <motion.section
                 key={section.title}
-                initial={{ opacity: 0, y: 18 }}
+                initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.025 }}
-                className="rounded-[26px] border border-white/10 bg-zinc-950/45 p-6 backdrop-blur-2xl transition md:hover:-translate-y-1 active:scale-[0.97]"
+                transition={{ delay: index * 0.02 }}
+                className="privacy-clause-card rounded-[28px] border border-white/10 bg-zinc-950/40 p-6 sm:p-8 backdrop-blur-2xl"
               >
-                <h2 className="font-display text-xl font-black text-zinc-50">{section.title}</h2>
+                <h2 className="font-display text-xl font-black text-zinc-100">{section.title}</h2>
                 <ul className="mt-4 space-y-3">
                   {section.body.map((item) => (
-                    <li key={item} className="flex gap-3 text-sm leading-7 text-zinc-400">
-                      <Sparkles className="mt-1.5 h-3.5 w-3.5 shrink-0 text-emerald-300" />
+                    <li key={item} className="flex gap-3 text-xs sm:text-sm leading-relaxed text-zinc-400">
+                      <Sparkles className="mt-1 h-3.5 w-3.5 shrink-0 text-emerald-400" />
                       <span>{item}</span>
                     </li>
                   ))}
@@ -237,15 +305,17 @@ export default function PrivacyPage() {
             ))}
           </article>
 
-          <section className="mt-8 rounded-[28px] border border-white/10 bg-white/[0.035] p-6 backdrop-blur-2xl transition md:hover:-translate-y-1 active:scale-[0.97]">
+          <section className="privacy-contact-box mt-10 rounded-[28px] border border-white/10 bg-white/[0.035] p-6 sm:p-8 backdrop-blur-2xl">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="flex items-center gap-2 font-display text-xl font-black">
-                  <Mail className="h-5 w-5 text-emerald-300" /> Contact
+                  <Mail className="h-5 w-5 text-emerald-400" /> Security Inquiries
                 </h2>
-                <p className="mt-2 text-sm leading-7 text-zinc-400">Questions about privacy or data handling can be sent to admin@edutechsrm.in.</p>
+                <p className="mt-1 text-xs sm:text-sm leading-relaxed text-zinc-400">Questions or audit requests can be directed to admin@edutechsrm.in.</p>
               </div>
-              <a href="mailto:admin@edutechsrm.in" className="rounded-2xl bg-emerald-300 px-5 py-3 text-sm font-black text-zinc-950">Email</a>
+              <a href="mailto:admin@edutechsrm.in" className="rounded-xl bg-emerald-400 px-5 py-2.5 text-xs font-mono font-black uppercase tracking-wider text-zinc-950 hover:bg-emerald-300 transition-colors shrink-0 text-center">
+                Contact Developer
+              </a>
             </div>
           </section>
 

@@ -252,7 +252,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   // Hold sync screen for at least 1.5s for a smooth transition
   const [syncHold, setSyncHold] = useState(false)
 
-  const [activeTab, setActiveTab] = useState<TabType>("dashboard")
+  const [activeTab, setActiveTab] = useState<TabType>(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search)
+      const tabParam = params.get("tab") as TabType
+      if (tabParam && VALID_TABS.includes(tabParam)) return tabParam
+      const stored = sessionStorage.getItem("edutechsrm_initial_tab") as TabType
+      if (stored && VALID_TABS.includes(stored)) {
+        sessionStorage.removeItem("edutechsrm_initial_tab")
+        return stored
+      }
+    }
+    return "dashboard"
+  })
   const [visitedTabs, setVisitedTabs] = useState<Set<TabType>>(new Set())
 
   useEffect(() => {

@@ -15,7 +15,6 @@ import { LoginModal } from "@/components/login-modal"
 import { useAuth } from "@/lib/auth-context"
 import { MaintenanceOverlay } from "@/components/maintenance-overlay"
 import { UpdateOverlay } from "@/components/app-shell-ui"
-import { LandingSplash } from "@/components/landing-splash"
 
 function SessionExpiredModal({ onLogin }: { onLogin: () => void }) {
   return (
@@ -41,7 +40,6 @@ export default function Home() {
   const { isAuthenticated, isLoading, isLoginSyncing, sessionExpired, dismissSessionExpired } = useAuth()
   const router = useRouter()
   const [showLoginModal, setShowLoginModal] = useState(false)
-  const [showSplash, setShowSplash] = useState(true)
   const [mounted, setMounted] = useState(false)
   const hasRedirected = useRef(false)
   const wasLoginSyncing = useRef(false)
@@ -78,11 +76,6 @@ export default function Home() {
 
   // Wait for client mount to prevent SSR flash
   if (!mounted) return null
-
-  // Show splash screen for unauthenticated users before landing page
-  if (!isAuthenticated && !isLoading && showSplash) {
-    return <LandingSplash onFinish={() => setShowSplash(false)} />
-  }
 
   return (
     <>

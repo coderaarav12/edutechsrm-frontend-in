@@ -1,9 +1,22 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react"
+import { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import dynamic from "next/dynamic"
-import { Search, X, MapPin, Navigation, LocateFixed, Navigation2 } from "lucide-react"
+import {
+  Search,
+  X,
+  MapPin,
+  Navigation,
+  Compass,
+  Layers,
+  Locate,
+  Share2,
+  Check,
+  ChevronDown,
+  ArrowUpRight,
+  ExternalLink,
+  Flame,
+} from "lucide-react"
 import {
   BUILDINGS,
   CATEGORY_META,
@@ -14,161 +27,21 @@ import {
 } from "@/lib/campus-data"
 import type { Building, BuildingCategory } from "@/lib/campus-data"
 
-const MapView = dynamic(() => import("@/components/map-view"), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-full flex items-center justify-center" style={{ background: "rgba(9,9,11,0.6)" }}>
-      <div className="flex flex-col items-center gap-2">
-        <div className="w-5 h-5 rounded-full border-2 border-zinc-600 border-t-emerald-400 animate-spin" />
-        <span className="text-xs" style={{ color: "#52525b" }}>Loading map…</span>
-      </div>
-    </div>
-  ),
-})
-
 type CategoryFilter = BuildingCategory | "all"
 
 const FILTERS: { id: CategoryFilter; label: string }[] = [
-  { id: "all", label: "All" },
+  { id: "all", label: "All Landmarks" },
   ...CATEGORY_ORDER.map((c) => ({ id: c as CategoryFilter, label: CATEGORY_META[c].label })),
 ]
 
-function getDirectionsUrlSafe(lat: number, lng: number) {
-  try {
-    return getDirectionsUrl(lat, lng)
-  } catch {
-    return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
-  }
-}
-
-type GroupKey = BuildingCategory | "nearest"
-
-function regroupItems(items: Building[], nearest: boolean): { key: GroupKey; items: Building[] }[] {
-  if (nearest) return items.length ? [{ key: "nearest", items }] : []
-  return CATEGORY_ORDER.map((cat) => ({
-    key: cat,
-    items: items.filter((b) => b.category === cat),
-  })).filter((g) => g.items.length > 0)
-}
-
-function groupLabel(key: GroupKey) {
-  if (key === "nearest") return "Nearest to you"
-  return CATEGORY_META[key].label
-}
-
-function groupColor(key: GroupKey) {
-  if (key === "nearest") return "#34d399"
-  return CATEGORY_META[key].color
-}
-
-function BuildingCard({ b, isSelected, bDist, onToggle }: {
-  b: Building
-  isSelected: boolean
-  bDist: number | null
-  onToggle: (id: number) => void
-}) {
-  return (
-    <motion.button
-      id={`building-${b.id}`}
-      onClick={() => onToggle(b.id)}
-      whileTap={{ scale: 0.98 }}
-      aria-expanded={isSelected}
-      className="w-full text-left rounded-2xl overflow-hidden transition-colors"
-      style={{
-        background: isSelected
-          ? "linear-gradient(145deg, rgba(24,24,27,0.85), rgba(18,18,22,0.6))"
-          : "linear-gradient(145deg, rgba(24,24,27,0.55), rgba(18,18,22,0.4))",
-        border: isSelected ? `1px solid ${CATEGORY_META[b.category].color}40` : "1px solid rgba(255,255,255,0.05)",
-      }}
-    >
-      <div className="p-3 flex items-center gap-3 min-h-[48px]">
-        <div className="text-xl shrink-0">{b.icon}</div>
-        <div className="min-w-0 flex-1">
-          <div className="text-[13px] font-semibold leading-snug text-zinc-100">{b.name}</div>
-          <div className="flex items-center gap-2 mt-0.5">
-            <span className="text-[11px] text-zinc-500 truncate">{b.shortDesc}</span>
-            {bDist !== null && (
-              <span className="text-[11px] font-semibold shrink-0" style={{ color: "#34d399" }}>
-                {formatDistance(bDist)}
-              </span>
-            )}
-          </div>
-        </div>
-        <motion.svg
-          animate={{ rotate: isSelected ? 180 : 0 }}
-          transition={{ duration: 0.2 }}
-          width="14" height="14" viewBox="0 0 24 24" fill="none"
-          stroke="#71717a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-          className="shrink-0"
-        >
-          <polyline points="6 9 12 15 18 9" />
-        </motion.svg>
-      </div>
-      <AnimatePresence initial={false}>
-        {isSelected && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: "easeInOut" }}
-            className="overflow-hidden"
-          >
-            <div className="px-3 pb-3 pt-0">
-              <div className="h-px mb-2" style={{ background: "linear-gradient(90deg, rgba(52,211,153,0.15), transparent)" }} />
-              <p className="text-[11px] leading-relaxed text-zinc-400">{b.longDesc}</p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.button>
-  )
-}
-
-function GroupHeader({ kind, count, open, onToggle }: { kind: GroupKey; count: number; open: boolean; onToggle: () => void }) {
-  const color = groupColor(kind)
-  return (
-    <button
-      onClick={onToggle}
-      aria-expanded={open}
-      className="w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl border transition-all active:scale-[0.98]"
-      style={{
-        background: open
-          ? "linear-gradient(145deg, rgba(24,24,27,0.6), rgba(18,18,22,0.4))"
-          : `linear-gradient(145deg, ${color}0d, rgba(18,18,22,0.35))`,
-        border: open ? "1px solid rgba(255,255,255,0.06)" : `1px solid ${color}26`,
-        WebkitTapHighlightColor: "transparent",
-      }}
-    >
-      <span
-        className="w-2 h-2 rounded-full shrink-0"
-        style={{ background: color, boxShadow: `0 0 8px ${color}80` }}
-      />
-      <span className="flex-1 min-w-0 text-left">
-        <span className="block text-[12px] font-extrabold uppercase tracking-[0.12em] text-zinc-100">{groupLabel(kind)}</span>
-        {!open && (
-          <span className="block text-[10px] text-zinc-500 mt-0.5">
-            {count} {count === 1 ? "location" : "locations"} — tap to expand
-          </span>
-        )}
-      </span>
-      <span
-        className="shrink-0 min-w-[34px] px-2 py-1 rounded-lg text-[10px] font-bold text-center"
-        style={{ background: `${color}1a`, color }}
-      >
-        {count}
-      </span>
-      <motion.svg
-        animate={{ rotate: open ? 180 : 0 }}
-        transition={{ duration: 0.2 }}
-        width="14" height="14" viewBox="0 0 24 24" fill="none"
-        stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-        className="shrink-0"
-      >
-        <polyline points="6 9 12 15 18 9" />
-      </motion.svg>
-    </button>
-  )
-}
+const KEY_CAMPUS_HOTSPOTS = [
+  { id: 1, name: "UB Block", icon: "🏛️", lat: 12.8233083, lng: 80.0424496 },
+  { id: 2, name: "Tech Park", icon: "💻", lat: 12.824648, lng: 80.04533 },
+  { id: 43, name: "Java Green", icon: "🍜", lat: 12.823636, lng: 80.044062 },
+  { id: 14, name: "Library", icon: "📚", lat: 12.823285, lng: 80.042586 },
+  { id: 13, name: "Auditorium", icon: "🎭", lat: 12.824652, lng: 80.046601 },
+  { id: 35, name: "Main Gate", icon: "🚉", lat: 12.822000, lng: 80.038500 },
+]
 
 export function CampusMapSection({
   standalone = false,
@@ -181,503 +54,785 @@ export function CampusMapSection({
   initialCategory?: CategoryFilter
   initialBuildingId?: number | null
 }) {
-  const [selectedId, setSelectedId] = useState<number | null>(initialBuildingId)
-  const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null)
-  const [posStatus, setPosStatus] = useState<"idle" | "loading" | "denied" | "unsupported">("idle")
   const [searchQuery, setSearchQuery] = useState(initialQuery)
-  const [searchFocused, setSearchFocused] = useState(false)
   const [category, setCategory] = useState<CategoryFilter>(initialCategory)
+  const [selectedId, setSelectedId] = useState<number | null>(initialBuildingId)
+  const [mapType, setMapType] = useState<"roadmap" | "satellite">("roadmap")
+  const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null)
+  const [posLoading, setPosLoading] = useState(false)
   const [sortNearest, setSortNearest] = useState(false)
-  const [groupOverrides, setGroupOverrides] = useState<Record<string, boolean>>(() =>
-    initialBuildingId ? { [BUILDINGS.find((b) => b.id === initialBuildingId)?.category ?? "academic"]: true } : {},
-  )
-  const selectedRef = useRef<HTMLDivElement | null>(null)
-  const mapWrapRef = useRef<HTMLDivElement | null>(null)
-  const [mapBoxHeight, setMapBoxHeight] = useState(0)
-
-  const isDesktop = useSyncExternalStore(
-    useCallback((cb: () => void) => {
-      const mq = window.matchMedia("(min-width: 1024px)")
-      mq.addEventListener("change", cb)
-      return () => mq.removeEventListener("change", cb)
-    }, []),
-    () => window.matchMedia("(min-width: 1024px)").matches,
-    () => false,
-  )
+  const [copied, setCopied] = useState(false)
+  // Collapsed by default as requested
+  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({})
+  const mapSectionRef = useRef<HTMLDivElement>(null)
+  const [isSearchFocused, setIsSearchFocused] = useState(false)
+  const searchContainerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const el = mapWrapRef.current
-    if (!el) return
-    const update = () => setMapBoxHeight(el.getBoundingClientRect().height)
-    update()
-    const ro = new ResizeObserver(update)
-    ro.observe(el)
-    window.addEventListener("resize", update)
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setIsSearchFocused(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  // Theme detection
+  const [isPoster, setIsPoster] = useState(false)
+  useEffect(() => {
+    const check = () => {
+      if (typeof document !== "undefined") {
+        const m = document.documentElement.getAttribute("data-landing-mode") || localStorage.getItem("edutechsrm-landing-mode")
+        setIsPoster(m === "poster")
+      }
+    }
+    check()
+    window.addEventListener("landing-mode-change", check)
+    window.addEventListener("storage", check)
     return () => {
-      ro.disconnect()
-      window.removeEventListener("resize", update)
+      window.removeEventListener("landing-mode-change", check)
+      window.removeEventListener("storage", check)
     }
   }, [])
 
+  // Geolocation
   const requestLocation = useCallback(() => {
-    if (!("geolocation" in navigator)) {
-      setPosStatus("unsupported")
-      return
-    }
-    setPosStatus("loading")
+    if (!navigator.geolocation) return
+    setPosLoading(true)
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setUserPos({ lat: pos.coords.latitude, lng: pos.coords.longitude })
-        setPosStatus("idle")
+        setSortNearest(true)
+        setPosLoading(false)
       },
       () => {
-        setUserPos(null)
-        setPosStatus("denied")
+        setPosLoading(false)
       },
-      { enableHighAccuracy: true, timeout: 10000 },
+      { timeout: 8000, enableHighAccuracy: true }
     )
   }, [])
 
-  useEffect(() => {
-    if ("geolocation" in navigator) {
-      requestLocation()
-    } else {
-      setPosStatus("unsupported")
-    }
-  }, [requestLocation])
-
+  // Filtered & sorted buildings
   const filteredBuildings = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase()
     let list = BUILDINGS.filter((b) => {
-      if (category !== "all" && b.category !== category) return false
-      if (!q) return true
-      return (
+      const matchCat = category === "all" || b.category === category
+      const q = searchQuery.toLowerCase().trim()
+      const matchSearch =
+        !q ||
         b.name.toLowerCase().includes(q) ||
         b.shortDesc.toLowerCase().includes(q) ||
-        b.longDesc.toLowerCase().includes(q) ||
-        CATEGORY_META[b.category].label.toLowerCase().includes(q)
-      )
+        b.longDesc.toLowerCase().includes(q)
+      return matchCat && matchSearch
     })
+
     if (sortNearest && userPos) {
-      list = [...list].sort(
-        (a, b) =>
-          haversineDistance(userPos.lat, userPos.lng, a.lat, a.lng) -
-          haversineDistance(userPos.lat, userPos.lng, b.lat, b.lng),
-      )
-    }
-    return list
-  }, [searchQuery, category, sortNearest, userPos])
-
-  const selectedBuilding = useMemo(
-    () => BUILDINGS.find((b) => b.id === selectedId) ?? null,
-    [selectedId],
-  )
-
-  const distance = useMemo(() => {
-    if (!userPos || !selectedBuilding) return null
-    return haversineDistance(userPos.lat, userPos.lng, selectedBuilding.lat, selectedBuilding.lng)
-  }, [userPos, selectedBuilding])
-
-  const scrollSelectedIntoView = useCallback(() => {
-    requestAnimationFrame(() => {
-      selectedRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" })
-    })
-  }, [])
-
-  const toggleSelect = useCallback(
-    (id: number) => {
-      setSelectedId((prev) => (prev === id ? null : id))
-      scrollSelectedIntoView()
-    },
-    [scrollSelectedIntoView],
-  )
-
-  const handleMapSelect = useCallback(
-    (id: number) => {
-      setSelectedId(id)
-      const b = BUILDINGS.find((x) => x.id === id)
-      if (b) {
-        const key = sortNearest && userPos ? "nearest" : b.category
-        setGroupOverrides((prev) => (prev[key] ? prev : { ...prev, [key]: true }))
-      }
-      scrollSelectedIntoView()
-    },
-    [sortNearest, userPos, scrollSelectedIntoView],
-  )
-
-  const handleSearchPick = useCallback(
-    (b: Building) => {
-      setSelectedId(b.id)
-      const key = sortNearest && userPos ? "nearest" : b.category
-      setGroupOverrides((prev) => (prev[key] ? prev : { ...prev, [key]: true }))
-      setSearchQuery("")
-      setSearchFocused(false)
-      requestAnimationFrame(() => {
-        document.getElementById(`building-${b.id}`)?.scrollIntoView({ behavior: "smooth", block: "nearest" })
+      list = [...list].sort((a, b) => {
+        const distA = haversineDistance(userPos.lat, userPos.lng, a.lat, a.lng)
+        const distB = haversineDistance(userPos.lat, userPos.lng, b.lat, b.lng)
+        return distA - distB
       })
-    },
-    [sortNearest, userPos],
+    }
+
+    return list
+  }, [category, searchQuery, sortNearest, userPos])
+
+  // Selected building object
+  const selectedBuilding = useMemo(
+    () => (selectedId ? BUILDINGS.find((b) => b.id === selectedId) || null : null),
+    [selectedId]
   )
 
-  const grouped = useMemo(() => {
-    if (sortNearest && userPos) {
-      return [{ category: "nearest" as const, items: filteredBuildings }]
+  // Center coordinate for Google Maps embed
+  const mapCenter = useMemo(() => {
+    if (selectedBuilding) {
+      return { lat: selectedBuilding.lat, lng: selectedBuilding.lng }
+    }
+    return { lat: 12.823636, lng: 80.044062 } // SRM Campus Central
+  }, [selectedBuilding])
+
+  // Share building handler
+  const handleShare = () => {
+    const url = typeof window !== "undefined" ? window.location.href : "https://edutechsrm.in/explore"
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
+  // Toggle category accordion
+  const toggleCategory = (cat: string) => {
+    setOpenCategories((prev) => ({ ...prev, [cat]: !prev[cat] }))
+  }
+
+  // Grouped buildings for directory list
+  const groupedBuildings = useMemo(() => {
+    if (category !== "all") {
+      return [{ key: category, label: CATEGORY_META[category]?.label || "Landmarks", items: filteredBuildings }]
     }
     return CATEGORY_ORDER.map((cat) => ({
-      category: cat,
+      key: cat,
+      label: CATEGORY_META[cat]?.label || cat,
       items: filteredBuildings.filter((b) => b.category === cat),
     })).filter((g) => g.items.length > 0)
-  }, [filteredBuildings, sortNearest, userPos])
+  }, [category, filteredBuildings])
 
-  const nearest = sortNearest && !!userPos
+  // Autocomplete search suggestions for instant floating dropdown
+  const searchSuggestions = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim()
+    if (!q) return []
+    return BUILDINGS.filter(
+      (b) =>
+        b.name.toLowerCase().includes(q) ||
+        b.shortDesc.toLowerCase().includes(q) ||
+        b.longDesc.toLowerCase().includes(q)
+    ).slice(0, 8)
+  }, [searchQuery])
 
-  const isGroupOpen = useCallback(
-    (key: GroupKey) => groupOverrides[key] ?? isDesktop,
-    [groupOverrides, isDesktop],
-  )
+  const handleSelectSuggestion = (b: (typeof BUILDINGS)[0]) => {
+    setSelectedId(b.id)
+    setIsSearchFocused(false)
+    setOpenCategories((prev) => ({ ...prev, [b.category]: true }))
+    if (mapSectionRef.current) {
+      const yOffset = -90
+      const y = mapSectionRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset
+      window.scrollTo({ top: y, behavior: "smooth" })
+    }
+  }
 
-  const toggleGroup = useCallback((key: GroupKey) => {
-    setGroupOverrides((prev) => ({ ...prev, [key]: !(prev[key] ?? isDesktop) }))
-  }, [isDesktop])
-
-  // Desktop: side list fills the map's height; the rest flows into a grid below.
-  const flatOrdered = useMemo(() => grouped.flatMap((g) => g.items), [grouped])
-  const sideCapacity = useMemo(() => {
-    if (!isDesktop || mapBoxHeight <= 0) return Infinity
-    const reserved = (selectedBuilding ? 190 : 30)
-    const available = Math.max(80, mapBoxHeight - reserved)
-    return Math.max(2, Math.floor(available / 86))
-  }, [isDesktop, mapBoxHeight, selectedBuilding])
-  const sideItems = useMemo(() => flatOrdered.slice(0, sideCapacity), [flatOrdered, sideCapacity])
-  const gridItems = useMemo(() => flatOrdered.slice(sideCapacity), [flatOrdered, sideCapacity])
-  const sideGroups = useMemo(() => regroupItems(sideItems, nearest), [sideItems, nearest])
-  const gridGroups = useMemo(() => regroupItems(gridItems, nearest), [gridItems, nearest])
-
-  const showNoResults = filteredBuildings.length === 0 && (searchQuery.trim() || category !== "all")
+  const handleSelectBuilding = (id: number) => {
+    setSelectedId(id)
+    if (mapSectionRef.current) {
+      const yOffset = -90
+      const y = mapSectionRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset
+      window.scrollTo({ top: y, behavior: "smooth" })
+    }
+  }
 
   return (
-    <div className="min-h-full pt-[3.75rem] pb-[calc(5rem+env(safe-area-inset-bottom))] px-3 sm:px-4 lg:px-8 lg:pb-8 w-full" style={standalone ? { paddingTop: "5.5rem", paddingBottom: "3rem" } : undefined}>
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <p className="text-zinc-500 font-bold text-[10px] uppercase tracking-widest mb-1">Campus</p>
-          <h1 className="text-3xl font-bold text-zinc-100 tracking-tight font-display">Campus Map</h1>
-          <p className="text-xs mt-1 text-zinc-500">Navigate SRM Kattankulathur — blocks, hostels & facilities.</p>
-        </div>
-      </div>
+    <div className={`radar-shell w-full min-h-screen transition-colors duration-300 ${isPoster ? "bg-[#f4efe6] text-[#111111]" : "bg-[#070a0e] text-zinc-100"}`}>
+      
+      {/* Dynamic Global Theme Overrides */}
+      <style>{`
+        [data-landing-mode="poster"] .radar-shell {
+          background-color: #f4efe6 !important;
+          color: #111111 !important;
+        }
+        [data-landing-mode="poster"] .radar-search-input {
+          background: #ffffff !important;
+          border: 2px solid #111111 !important;
+          color: #111111 !important;
+          box-shadow: 3px 3px 0px #111111 !important;
+        }
+        [data-landing-mode="poster"] .radar-search-input::placeholder {
+          color: #666666 !important;
+        }
+        [data-landing-mode="poster"] .radar-pill {
+          background: #ffffff !important;
+          border: 1.5px solid #111111 !important;
+          color: #111111 !important;
+          box-shadow: 2px 2px 0px #111111 !important;
+        }
+        [data-landing-mode="poster"] .radar-pill.is-active {
+          background: #111111 !important;
+          color: #ffffff !important;
+          box-shadow: 3px 3px 0px #111111 !important;
+        }
+        [data-landing-mode="poster"] .radar-card {
+          background: #ffffff !important;
+          border: 2px solid #111111 !important;
+          box-shadow: 4px 4px 0px #111111 !important;
+          color: #111111 !important;
+        }
+        [data-landing-mode="poster"] .radar-card-selected {
+          background: #ffffff !important;
+          border: 2.5px solid #111111 !important;
+          box-shadow: 6px 6px 0px #111111 !important;
+        }
+        [data-landing-mode="poster"] .radar-cockpit-box {
+          background: #ffffff !important;
+          border: 2.5px solid #111111 !important;
+          box-shadow: 8px 8px 0px #111111 !important;
+        }
+        [data-landing-mode="poster"] .radar-btn-primary {
+          background: #111111 !important;
+          color: #ffffff !important;
+          border: 2px solid #111111 !important;
+          box-shadow: 3px 3px 0px #111111 !important;
+        }
+        [data-landing-mode="poster"] .radar-btn-secondary {
+          background: #ffffff !important;
+          color: #111111 !important;
+          border: 1.5px solid #111111 !important;
+          box-shadow: 2px 2px 0px #111111 !important;
+        }
+        [data-landing-mode="poster"] .radar-hotspot-chip {
+          background: #ffffff !important;
+          border: 1.5px solid #111111 !important;
+          color: #111111 !important;
+          box-shadow: 2px 2px 0px #111111 !important;
+        }
+        [data-landing-mode="poster"] .radar-hotspot-chip.is-active {
+          background: #111111 !important;
+          color: #ffffff !important;
+        }
+        [data-landing-mode="poster"] .radar-hotspot-chip.is-active span {
+          color: #ffffff !important;
+        }
+      `}</style>
 
-      {/* Sticky search + filters */}
-      <div
-        className="sticky top-[52px] z-30 -mx-3 px-3 sm:-mx-4 sm:px-4 lg:mx-0 lg:px-0 pt-1.5 pb-2.5"
-        style={{ background: "var(--page-bg, #09090b)", backdropFilter: "blur(12px)", top: standalone ? 68 : 52 }}
-      >
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-          <input
-            type="text"
-            placeholder="Search buildings, hostels, labs…"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onFocus={() => setSearchFocused(true)}
-            onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
-            aria-label="Search campus buildings"
-            className="w-full pl-9 pr-9 py-2.5 bg-zinc-900/70 border border-white/5 rounded-xl text-zinc-100 text-sm placeholder-zinc-500 focus:outline-none focus:border-emerald-500/40 transition-colors"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              aria-label="Clear search"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors p-1"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
-          <AnimatePresence>
-            {searchFocused && searchQuery.trim() && (
-              <motion.div
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                className="absolute top-full left-0 right-0 mt-1 z-10 rounded-xl border border-white/5 bg-zinc-900/95 backdrop-blur-xl overflow-hidden"
-              >
-                {filteredBuildings.length > 0 ? (
-                  <>
-                    {filteredBuildings.slice(0, 8).map((b) => (
-                      <button
-                        key={b.id}
-                        onMouseDown={() => handleSearchPick(b)}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-white/5 transition-colors"
-                      >
-                        <span className="text-base shrink-0">{b.icon}</span>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-xs font-semibold text-zinc-100 truncate">{b.name}</p>
-                          <p className="text-[10px] text-zinc-500">{b.shortDesc}</p>
-                        </div>
-                        <span className="shrink-0 text-[10px] font-semibold" style={{ color: CATEGORY_META[b.category].color }}>
-                          {CATEGORY_META[b.category].label.replace(" Blocks", "").replace("accommodation", "Hostel")}
-                        </span>
-                      </button>
-                    ))}
-                    {filteredBuildings.length > 8 && (
-                      <div className="px-3 py-1.5 text-center text-[10px] text-zinc-500">
-                        +{filteredBuildings.length - 8} more
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="px-3 py-3 text-center text-xs text-zinc-500">No buildings found</div>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Category filters */}
-        <div className="flex gap-2 mt-2.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {FILTERS.map((f) => {
-            const active = category === f.id
-            return (
-              <motion.button
-                key={f.id}
-                whileTap={{ scale: 0.93 }}
-                onClick={() => setCategory(f.id)}
-                aria-pressed={active}
-                className={`shrink-0 min-h-[40px] px-3.5 py-2 text-xs font-bold whitespace-nowrap rounded-lg border transition-all ${
-                  active
-                    ? "bg-zinc-800 text-emerald-400 shadow-md border-white/5"
-                    : "bg-transparent text-zinc-500 border-transparent hover:text-zinc-300 hover:bg-white/5"
-                }`}
-              >
-                {f.label}
-              </motion.button>
-            )
-          })}
-          {userPos && (
-            <motion.button
-              whileTap={{ scale: 0.93 }}
-              onClick={() => setSortNearest((v) => !v)}
-              aria-pressed={sortNearest}
-              className={`shrink-0 min-h-[40px] px-3.5 py-2 text-xs font-bold whitespace-nowrap rounded-lg border transition-all ${
-                sortNearest
-                  ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/25"
-                  : "bg-transparent text-zinc-500 border-transparent hover:text-zinc-300 hover:bg-white/5"
-              }`}
-            >
-              Nearest
-            </motion.button>
-          )}
-        </div>
-      </div>
-
-      {/* Map + list */}
-      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-6 lg:items-start">
-        {/* Map */}
-        <div ref={mapWrapRef} className="lg:sticky" style={{ top: standalone ? 156 : 140 }}>
-          <div
-            className="campus-map-wrap relative rounded-2xl overflow-hidden h-[38vh] min-h-[300px] max-h-[460px] lg:h-[52vh] lg:min-h-[400px] lg:max-h-[540px] isolate z-0"
-            style={{ background: "#0f172a", border: "1px solid rgba(255,255,255,0.06)" }}
-          >
-            <MapView buildings={BUILDINGS} selectedId={selectedId} userPos={userPos} onSelect={handleMapSelect} />
-
-            {/* Locate me */}
-            <button
-              onClick={requestLocation}
-              aria-label="Locate my position"
-              className="absolute top-3 right-3 z-[400] w-11 h-11 rounded-full flex items-center justify-center transition-all hover:opacity-90"
+      <div className="mx-auto max-w-7xl px-4 pt-24 pb-20 sm:px-6 lg:px-8">
+        
+        {/* ── 1. Tactical Command Masthead ── */}
+        <div className="mb-8">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="inline-flex items-center gap-2 rounded-full border px-3.5 py-1 text-xs font-mono font-bold uppercase tracking-wider"
               style={{
-                background: "rgba(15,23,42,0.9)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                color: "#e2e8f0",
-                boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
+                borderColor: isPoster ? "#111111" : "rgba(52,211,153,0.3)",
+                background: isPoster ? "#ffffff" : "rgba(52,211,153,0.1)",
+                color: isPoster ? "#111111" : "#34d399",
+                boxShadow: isPoster ? "2px 2px 0px #111111" : "none",
               }}
             >
-              <LocateFixed className={`w-4.5 h-4.5 ${posStatus === "loading" ? "animate-spin" : ""}`} />
-            </button>
+              <Compass className="h-3.5 w-3.5 animate-spin" style={{ animationDuration: "12s" }} />
+              <span>003 // CAMPUS RADAR & CARTOGRAPHY • 250 ACRES</span>
+            </div>
 
-            {/* Location status pill */}
-            {posStatus === "loading" && (
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-[400] px-3 py-1.5 rounded-xl text-xs font-semibold"
-                style={{ background: "rgba(15,23,42,0.9)", color: "#94a3b8", border: "1px solid rgba(255,255,255,0.08)" }}>
-                <span className="inline-block w-2 h-2 rounded-full bg-amber-400 animate-pulse mr-2 align-middle" />
-                Getting your location…
-              </div>
-            )}
-            {posStatus === "denied" && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleShare}
+                className="radar-btn-secondary inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-mono font-bold transition-all"
+                style={{
+                  background: isPoster ? "#ffffff" : "rgba(255,255,255,0.05)",
+                  border: isPoster ? "1.5px solid #111111" : "1px solid rgba(255,255,255,0.1)",
+                  color: isPoster ? "#111111" : "#d4d4d8",
+                }}
+              >
+                {copied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Share2 className="h-3.5 w-3.5" />}
+                <span>{copied ? "Link Copied!" : "Share Radar"}</span>
+              </button>
+
               <button
                 onClick={requestLocation}
-                className="absolute bottom-3 left-1/2 -translate-x-1/2 z-[400] px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors"
-                style={{ background: "rgba(15,23,42,0.9)", color: "#fca5a5", border: "1px solid rgba(248,113,113,0.2)" }}
+                disabled={posLoading}
+                className="radar-btn-secondary inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-mono font-bold transition-all"
+                style={{
+                  background: isPoster ? "#ffffff" : "rgba(255,255,255,0.05)",
+                  border: isPoster ? "1.5px solid #111111" : "1px solid rgba(255,255,255,0.1)",
+                  color: isPoster ? "#111111" : userPos ? "#34d399" : "#d4d4d8",
+                }}
               >
-                Location blocked — tap to retry
+                <Locate className={`h-3.5 w-3.5 ${posLoading ? "animate-pulse" : ""}`} />
+                <span>{userPos ? "GPS Active" : "Detect Location"}</span>
+              </button>
+            </div>
+          </div>
+
+          <h1 className="font-display mt-5 text-3xl font-black tracking-tight sm:text-5xl lg:text-6xl leading-[1.05]"
+            style={{ color: isPoster ? "#111111" : "#ffffff" }}
+          >
+            SRMIST KTR Campus Radar. <br className="hidden sm:inline" />
+            <span className="font-serif italic font-normal" style={{ color: isPoster ? "#059669" : "#34d399" }}>
+              Find any room before the professor does.
+            </span>
+          </h1>
+
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed sm:text-base font-sans"
+            style={{ color: isPoster ? "#444444" : "#a1a1aa" }}
+          >
+            Real-time walking estimates, floor directories, faculty cabins, food courts, and transit walkways across SRM Institute of Science and Technology, Kattankulathur. Zero login required.
+          </p>
+        </div>
+
+        {/* ── 2. Unified Search with Live Dropdown & Category Switcher Bar ── */}
+        <div className="mb-6 space-y-3">
+          <div ref={searchContainerRef} className="relative z-30">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 z-10" style={{ color: isPoster ? "#111111" : "#71717a" }} />
+            <input
+              type="text"
+              placeholder="Search 100+ blocks, faculty cabins, labs, or food stalls (e.g. 'Tech Park', 'Subway', 'UB Block')..."
+              value={searchQuery}
+              onFocus={() => setIsSearchFocused(true)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value)
+                setIsSearchFocused(true)
+              }}
+              className="radar-search-input w-full rounded-2xl py-3.5 pl-11 pr-10 text-sm font-sans font-medium transition-all focus:outline-none"
+              style={{
+                background: isPoster ? "#ffffff" : "rgba(255,255,255,0.04)",
+                border: isPoster ? "2px solid #111111" : "1px solid rgba(255,255,255,0.1)",
+                color: isPoster ? "#111111" : "#ffffff",
+                boxShadow: isPoster ? "3px 3px 0px #111111" : "none",
+              }}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => {
+                  setSearchQuery("")
+                  setIsSearchFocused(false)
+                }}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-zinc-200 z-10"
+              >
+                <X className="h-4 w-4" />
               </button>
             )}
+
+            {/* Instant Floating Autocomplete Dropdown */}
+            <AnimatePresence>
+              {isSearchFocused && searchQuery.trim().length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute left-0 right-0 top-full mt-2 z-50 rounded-2xl overflow-hidden shadow-2xl"
+                  style={{
+                    background: isPoster ? "#ffffff" : "#0d1117",
+                    border: isPoster ? "2.5px solid #111111" : "1px solid rgba(255,255,255,0.14)",
+                    boxShadow: isPoster ? "6px 6px 0px #111111" : "0 24px 48px rgba(0,0,0,0.6)",
+                  }}
+                >
+                  <div className="px-3.5 py-2.5 border-b flex items-center justify-between"
+                    style={{
+                      background: isPoster ? "#faf7f2" : "rgba(255,255,255,0.03)",
+                      borderColor: isPoster ? "#111111" : "rgba(255,255,255,0.08)",
+                    }}
+                  >
+                    <span className="font-mono text-[11px] font-bold uppercase tracking-wider"
+                      style={{ color: isPoster ? "#111111" : "#a1a1aa" }}
+                    >
+                      {searchSuggestions.length} Matching Places
+                    </span>
+                    <span className="font-mono text-[10px]" style={{ color: isPoster ? "#666666" : "#71717a" }}>
+                      Tap to highlight on map
+                    </span>
+                  </div>
+
+                  <div className="max-h-[300px] overflow-y-auto p-1.5 space-y-1">
+                    {searchSuggestions.length === 0 ? (
+                      <div className="py-6 text-center">
+                        <p className="text-xs font-mono" style={{ color: isPoster ? "#666666" : "#71717a" }}>
+                          No campus locations found for &ldquo;{searchQuery}&rdquo;
+                        </p>
+                      </div>
+                    ) : (
+                      searchSuggestions.map((b) => (
+                        <button
+                          key={b.id}
+                          type="button"
+                          onClick={() => handleSelectSuggestion(b)}
+                          className="w-full text-left flex items-center justify-between p-2.5 rounded-xl transition-all"
+                          style={{
+                            background: "transparent",
+                            color: isPoster ? "#111111" : "#ffffff",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = isPoster ? "#faf7f2" : "rgba(255,255,255,0.06)"
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = "transparent"
+                          }}
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <span className="text-xl shrink-0">{b.icon}</span>
+                            <div className="min-w-0">
+                              <p className="font-display text-xs sm:text-sm font-bold truncate">
+                                {b.name}
+                              </p>
+                              <p className="text-[11px] truncate mt-0.5 font-sans"
+                                style={{ color: isPoster ? "#666666" : "#a1a1aa" }}
+                              >
+                                {b.shortDesc}
+                              </p>
+                            </div>
+                          </div>
+                          <span className="shrink-0 font-mono text-[10px] font-bold uppercase px-2 py-0.5 rounded-md ml-2"
+                            style={{
+                              background: isPoster ? "#f4efe6" : "rgba(255,255,255,0.06)",
+                              color: isPoster ? "#111111" : CATEGORY_META[b.category]?.color || "#34d399",
+                              border: isPoster ? "1px solid #111111" : "none",
+                            }}
+                          >
+                            {CATEGORY_META[b.category]?.label.split(" ")[0]}
+                          </span>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Filter Pills Carousel */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+            {FILTERS.map((f) => {
+              const active = category === f.id
+              return (
+                <button
+                  key={f.id}
+                  onClick={() => setCategory(f.id)}
+                  className={`radar-pill shrink-0 inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-mono font-bold transition-all active:scale-[0.97] ${active ? "is-active" : ""}`}
+                  style={{
+                    background: active
+                      ? isPoster ? "#111111" : "#34d399"
+                      : isPoster ? "#ffffff" : "rgba(255,255,255,0.03)",
+                    color: active
+                      ? isPoster ? "#ffffff" : "#09090b"
+                      : isPoster ? "#111111" : "#a1a1aa",
+                    border: isPoster ? "1.5px solid #111111" : "1px solid rgba(255,255,255,0.08)",
+                    boxShadow: isPoster ? (active ? "3px 3px 0px #111111" : "2px 2px 0px #111111") : "none",
+                  }}
+                >
+                  <span>{f.label}</span>
+                </button>
+              )
+            })}
           </div>
         </div>
 
-        {/* List */}
-        <div className="mt-4 lg:mt-0 min-w-0">
-          <AnimatePresence>
-            {selectedBuilding && (
-              <motion.div
-                key={`selected-${selectedBuilding.id}`}
-                ref={selectedRef}
-                initial={{ opacity: 0, y: -8, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -8, scale: 0.98 }}
-                className="mb-3 rounded-2xl p-4"
+        {/* ── 3. The Interactive Cartography Cockpit ── */}
+        <div ref={mapSectionRef} className="flex flex-col gap-5">
+          <div className="radar-cockpit-box relative overflow-hidden rounded-3xl"
+            style={{
+              background: isPoster ? "#ffffff" : "#0c1017",
+              border: isPoster ? "2.5px solid #111111" : "1px solid rgba(255,255,255,0.12)",
+              boxShadow: isPoster ? "8px 8px 0px #111111" : "0 20px 40px rgba(0,0,0,0.4)",
+            }}
+          >
+            {/* Map Header Bar: Map Mode Switcher & GPS Telemetry */}
+            <div className="flex items-center justify-between border-b px-4 py-3"
+              style={{
+                background: isPoster ? "#faf7f2" : "rgba(255,255,255,0.02)",
+                borderColor: isPoster ? "#111111" : "rgba(255,255,255,0.08)",
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
+                <span className="font-mono text-xs font-bold uppercase tracking-wider" style={{ color: isPoster ? "#111111" : "#34d399" }}>
+                  LIVE SRMIST SATELLITE
+                </span>
+              </div>
+
+              <div className="flex items-center rounded-xl p-1"
                 style={{
-                  background: "linear-gradient(145deg, rgba(24,24,27,0.85), rgba(18,18,22,0.6))",
-                  border: "1px solid rgba(52,211,153,0.2)",
-                  boxShadow: "0 14px 30px rgba(0,0,0,0.25)",
+                  background: isPoster ? "#ffffff" : "rgba(0,0,0,0.4)",
+                  border: isPoster ? "1.5px solid #111111" : "1px solid rgba(255,255,255,0.1)",
                 }}
               >
-                <div className="flex items-start gap-3">
-                  <div className="text-3xl shrink-0">{selectedBuilding.icon}</div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-zinc-100 leading-snug">{selectedBuilding.name}</p>
-                    <p className="text-[11px] mt-0.5" style={{ color: CATEGORY_META[selectedBuilding.category].color }}>
-                      {CATEGORY_META[selectedBuilding.category].label}
-                    </p>
-                    {distance !== null ? (
-                      <p className="text-lg font-black tracking-tight mt-1" style={{ color: "#34d399" }}>
-                        {formatDistance(distance)}
-                        <span className="text-[10px] font-semibold text-zinc-500 ml-1.5">from you</span>
-                      </p>
-                    ) : posStatus === "idle" || posStatus === "loading" ? (
-                      <p className="text-[11px] mt-1 text-zinc-500">
-                        {posStatus === "loading" ? "Fetching your location…" : "Allow location to see distance."}
-                      </p>
-                    ) : (
-                      <p className="text-[11px] mt-1 text-red-400/80">Distance unavailable without location.</p>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => setSelectedId(null)}
-                    aria-label="Dismiss"
-                    className="shrink-0 p-1.5 rounded-full text-zinc-500 hover:text-zinc-300 hover:bg-white/5 transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-                <p className="text-xs leading-relaxed mt-3 text-zinc-400">{selectedBuilding.longDesc}</p>
-                <div className="flex gap-2 mt-4">
-                  <a
-                    href={getDirectionsUrlSafe(selectedBuilding.lat, selectedBuilding.lng)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all hover:opacity-90"
-                    style={{ background: "linear-gradient(135deg,#10b981,#34d399)", color: "#09090b" }}
-                  >
-                    <Navigation className="w-4 h-4" />
-                    Get Directions
-                  </a>
-                  {userPos && (
-                    <button
-                      onClick={() => { setSelectedId(null); setSortNearest(true) }}
-                      className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all"
-                      style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#d4d4d8" }}
-                    >
-                      <Navigation2 className="w-4 h-4" />
-                      Nearest
-                    </button>
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                <button
+                  onClick={() => setMapType("roadmap")}
+                  className="rounded-lg px-2.5 py-1 text-[11px] font-mono font-bold transition-all"
+                  style={{
+                    background: mapType === "roadmap" ? (isPoster ? "#111111" : "#34d399") : "transparent",
+                    color: mapType === "roadmap" ? (isPoster ? "#ffffff" : "#09090b") : (isPoster ? "#666666" : "#a1a1aa"),
+                  }}
+                >
+                  Map
+                </button>
+                <button
+                  onClick={() => setMapType("satellite")}
+                  className="rounded-lg px-2.5 py-1 text-[11px] font-mono font-bold transition-all"
+                  style={{
+                    background: mapType === "satellite" ? (isPoster ? "#111111" : "#34d399") : "transparent",
+                    color: mapType === "satellite" ? (isPoster ? "#ffffff" : "#09090b") : (isPoster ? "#666666" : "#a1a1aa"),
+                  }}
+                >
+                  Satellite
+                </button>
+              </div>
+            </div>
 
-          {showNoResults ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <MapPin className="w-10 h-10 text-zinc-600 mb-4" />
-              <h3 className="text-lg font-bold text-zinc-100 mb-1">No buildings found</h3>
-              <p className="text-sm text-zinc-500 mb-6">Try a different search or filter.</p>
-              <button
-                onClick={() => { setSearchQuery(""); setCategory("all"); setSortNearest(false) }}
-                className="px-5 py-2 bg-zinc-800 border border-white/5 text-zinc-300 rounded-xl text-xs font-bold hover:bg-zinc-700 transition-colors"
+            {/* Real Google Map Embed Container */}
+            <div className="relative h-[380px] sm:h-[480px] lg:h-[520px] w-full bg-[#0a0f16]">
+              <iframe
+                key={`${mapCenter.lat}-${mapCenter.lng}-${mapType}`}
+                title="SRMIST KTR Campus Radar Map"
+                src={`https://www.google.com/maps?q=${mapCenter.lat},${mapCenter.lng}&z=17&t=${mapType === "satellite" ? "k" : "m"}&output=embed`}
+                className="absolute inset-0 h-full w-full border-0"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+
+              {/* GPS Coordinates HUD Pill */}
+              <div className="pointer-events-none absolute top-3 left-3 z-10 flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-[10px] font-bold shadow-lg"
+                style={{
+                  background: isPoster ? "rgba(255,255,255,0.95)" : "rgba(0,0,0,0.85)",
+                  color: isPoster ? "#111111" : "#34d399",
+                  border: isPoster ? "1.5px solid #111111" : "1px solid rgba(52,211,153,0.3)",
+                }}
               >
-                Clear Search & Filters
+                <Navigation className="h-3 w-3 text-emerald-400" />
+                <span>GPS: {mapCenter.lat.toFixed(4)}°N, {mapCenter.lng.toFixed(4)}°E</span>
+              </div>
+            </div>
+
+            {/* Bottom Quick Hotspot Strip */}
+            <div className="border-t p-3 flex items-center gap-2 overflow-x-auto scrollbar-none"
+              style={{
+                background: isPoster ? "#ffffff" : "rgba(255,255,255,0.02)",
+                borderColor: isPoster ? "#111111" : "rgba(255,255,255,0.08)",
+              }}
+            >
+              <span className="font-mono text-[10px] font-bold uppercase tracking-wider shrink-0 pl-1"
+                style={{ color: isPoster ? "#666666" : "#71717a" }}
+              >
+                KEY HUBS:
+              </span>
+              {KEY_CAMPUS_HOTSPOTS.map((hotspot) => {
+                const isActive = selectedId === hotspot.id
+                return (
+                  <button
+                    key={hotspot.id}
+                    onClick={() => handleSelectBuilding(hotspot.id)}
+                    className={`radar-hotspot-chip shrink-0 inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-mono font-bold transition-all ${isActive ? "is-active" : ""}`}
+                    style={{
+                      background: isActive
+                        ? isPoster ? "#111111" : "#34d399"
+                        : isPoster ? "#f4efe6" : "rgba(255,255,255,0.04)",
+                      color: isActive
+                        ? isPoster ? "#ffffff" : "#09090b"
+                        : isPoster ? "#111111" : "#d4d4d8",
+                      border: isPoster ? "1.5px solid #111111" : "1px solid rgba(255,255,255,0.08)",
+                      boxShadow: isPoster ? "2px 2px 0px #111111" : "none",
+                    }}
+                  >
+                    <span>{hotspot.icon}</span>
+                    <span>{hotspot.name}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Selected Landmark Highlight Card */}
+          {selectedBuilding && (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="radar-card-selected rounded-3xl p-5 sm:p-6"
+              style={{
+                background: isPoster ? "#ffffff" : "rgba(255,255,255,0.035)",
+                border: isPoster ? "2.5px solid #111111" : "1px solid rgba(52,211,153,0.3)",
+                boxShadow: isPoster ? "6px 6px 0px #111111" : "0 16px 36px rgba(0,0,0,0.3)",
+              }}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl text-2xl"
+                    style={{
+                      background: isPoster ? "#f4efe6" : "rgba(255,255,255,0.06)",
+                      border: isPoster ? "1.5px solid #111111" : "1px solid rgba(255,255,255,0.1)",
+                    }}
+                  >
+                    {selectedBuilding.icon}
+                  </div>
+                  <div>
+                    <h3 className="font-display text-lg font-black leading-tight sm:text-xl"
+                      style={{ color: isPoster ? "#111111" : "#ffffff" }}
+                    >
+                      {selectedBuilding.name}
+                    </h3>
+                    <p className="font-mono text-xs font-bold mt-0.5"
+                      style={{ color: isPoster ? "#059669" : CATEGORY_META[selectedBuilding.category]?.color || "#34d399" }}
+                    >
+                      {CATEGORY_META[selectedBuilding.category]?.label} • {selectedBuilding.shortDesc}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setSelectedId(null)}
+                  className="p-1.5 rounded-xl transition-colors"
+                  style={{
+                    background: isPoster ? "#f4efe6" : "rgba(255,255,255,0.08)",
+                    color: isPoster ? "#111111" : "#d4d4d8",
+                    border: isPoster ? "1px solid #111111" : "none",
+                  }}
+                  title="Close selection"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <p className="mt-4 text-sm leading-relaxed"
+                style={{ color: isPoster ? "#333333" : "#d4d4d8" }}
+              >
+                {selectedBuilding.longDesc}
+              </p>
+
+              <div className="mt-5 flex flex-wrap items-center gap-3">
+                <a
+                  href={getDirectionsUrl(selectedBuilding.lat, selectedBuilding.lng)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="radar-btn-primary inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-xs font-mono font-bold uppercase tracking-wider transition-all"
+                  style={{
+                    background: isPoster ? "#111111" : "#34d399",
+                    color: isPoster ? "#ffffff" : "#09090b",
+                    border: isPoster ? "2px solid #111111" : "none",
+                    boxShadow: isPoster ? "3px 3px 0px #111111" : "0 8px 20px rgba(52,211,153,0.3)",
+                  }}
+                >
+                  <Navigation className="h-3.5 w-3.5" />
+                  <span>Get Walking Directions</span>
+                  <ExternalLink className="h-3 w-3 opacity-70" />
+                </a>
+
+                {userPos && (
+                  <span className="font-mono text-xs font-bold"
+                    style={{ color: isPoster ? "#0b7a54" : "#34d399" }}
+                  >
+                    ~{formatDistance(haversineDistance(userPos.lat, userPos.lng, selectedBuilding.lat, selectedBuilding.lng))} away from your current location
+                  </span>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </div>
+
+        {/* ── 4. Campus Directory (Positioned Directly Below the Map) ── */}
+        <div className="mt-12 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-4"
+            style={{ borderColor: isPoster ? "rgba(17,17,17,0.15)" : "rgba(255,255,255,0.1)" }}
+          >
+            <div>
+              <div className="inline-flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-wider"
+                style={{ color: isPoster ? "#059669" : "#34d399" }}
+              >
+                <Layers className="h-3.5 w-3.5" />
+                <span>EXPLORE DIRECTORY</span>
+              </div>
+              <h2 className="font-display mt-1 text-2xl sm:text-3xl font-black"
+                style={{ color: isPoster ? "#111111" : "#ffffff" }}
+              >
+                Campus Directory ({filteredBuildings.length} Locations)
+              </h2>
+            </div>
+
+            <span className="font-mono text-xs" style={{ color: isPoster ? "#666666" : "#a1a1aa" }}>
+              Click any location to spotlight on the map above ↑
+            </span>
+          </div>
+
+          {filteredBuildings.length === 0 ? (
+            <div className="radar-card rounded-3xl p-8 text-center"
+              style={{
+                background: isPoster ? "#ffffff" : "rgba(255,255,255,0.03)",
+                border: isPoster ? "2px solid #111111" : "1px solid rgba(255,255,255,0.08)",
+              }}
+            >
+              <p className="font-display font-bold text-base" style={{ color: isPoster ? "#111111" : "#ffffff" }}>
+                No locations found matching &ldquo;{searchQuery}&rdquo;
+              </p>
+              <p className="text-xs mt-1 text-zinc-500">Try searching for &apos;UB&apos;, &apos;TP&apos;, or reset the category filter.</p>
+              <button
+                onClick={() => { setSearchQuery(""); setCategory("all") }}
+                className="radar-btn-primary mt-4 inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-mono font-bold"
+                style={{
+                  background: isPoster ? "#111111" : "#34d399",
+                  color: isPoster ? "#ffffff" : "#09090b",
+                }}
+              >
+                Reset Filters
               </button>
             </div>
           ) : (
-            <div className="space-y-4">
-              {sideGroups.map((group) => {
-                const open = isGroupOpen(group.key)
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+              {groupedBuildings.map((group) => {
+                const isOpen = Boolean(openCategories[group.key])
                 return (
-                  <div key={group.key}>
-                    <GroupHeader kind={group.key} count={group.items.length} open={open} onToggle={() => toggleGroup(group.key)} />
-                    <AnimatePresence initial={false}>
-                      {open && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.2, ease: "easeInOut" }}
-                          className="overflow-hidden"
-                        >
-                          <div className="space-y-1.5 pt-1">
-                            {group.items.map((b) => (
-                              <BuildingCard
-                                key={b.id}
-                                b={b}
-                                isSelected={selectedId === b.id}
-                                bDist={userPos ? haversineDistance(userPos.lat, userPos.lng, b.lat, b.lng) : null}
-                                onToggle={toggleSelect}
-                              />
-                            ))}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                  <div key={group.key} className="radar-card rounded-2xl p-4 transition-all"
+                    style={{
+                      background: isPoster ? "#ffffff" : "rgba(255,255,255,0.03)",
+                      border: isPoster ? "2px solid #111111" : "1px solid rgba(255,255,255,0.08)",
+                      boxShadow: isPoster ? "3px 3px 0px #111111" : "none",
+                    }}
+                  >
+                    <button
+                      onClick={() => toggleCategory(group.key)}
+                      className="w-full flex items-center justify-between py-1 font-mono text-xs font-bold uppercase tracking-wider transition-colors"
+                      style={{ color: isPoster ? "#111111" : "#a1a1aa" }}
+                    >
+                      <span className="flex items-center gap-2.5">
+                        <span className="h-2.5 w-2.5 rounded-full" style={{ background: CATEGORY_META[group.key as BuildingCategory]?.color || "#34d399" }} />
+                        <span className="text-sm font-bold">{group.label}</span>
+                        <span className="text-[11px] font-normal opacity-70">({group.items.length})</span>
+                      </span>
+                      <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                    </button>
+
+                    {isOpen && (
+                      <div className="mt-3.5 space-y-2.5 border-t pt-3"
+                        style={{ borderColor: isPoster ? "rgba(17,17,17,0.1)" : "rgba(255,255,255,0.08)" }}
+                      >
+                        {group.items.map((b) => {
+                          const isSelected = selectedId === b.id
+                          const dist = userPos ? haversineDistance(userPos.lat, userPos.lng, b.lat, b.lng) : null
+
+                          return (
+                            <div
+                              key={b.id}
+                              onClick={() => handleSelectBuilding(b.id)}
+                              className={`rounded-xl p-3 transition-all cursor-pointer ${
+                                isSelected ? "ring-2 ring-emerald-400 scale-[1.01]" : "hover:-translate-y-0.5"
+                              }`}
+                              style={{
+                                background: isSelected
+                                  ? isPoster ? "#f4efe6" : "rgba(52,211,153,0.1)"
+                                  : isPoster ? "#faf7f2" : "rgba(255,255,255,0.04)",
+                                border: isPoster ? "1.5px solid #111111" : "1px solid rgba(255,255,255,0.06)",
+                                boxShadow: isPoster ? "2px 2px 0px #111111" : "none",
+                              }}
+                            >
+                              <div className="flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                  <span className="text-xl shrink-0">{b.icon}</span>
+                                  <div className="min-w-0 flex-1">
+                                    <h4 className="font-display text-sm font-bold truncate"
+                                      style={{ color: isPoster ? "#111111" : "#ffffff" }}
+                                    >
+                                      {b.name}
+                                    </h4>
+                                    <p className="text-[11px] truncate mt-0.5 font-sans"
+                                      style={{ color: isPoster ? "#555555" : "#a1a1aa" }}
+                                    >
+                                      {b.shortDesc}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2 shrink-0">
+                                  {dist !== null && (
+                                    <span className="font-mono text-[10px] font-bold" style={{ color: isPoster ? "#0b7a54" : "#34d399" }}>
+                                      {formatDistance(dist)}
+                                    </span>
+                                  )}
+                                  <span className="font-mono text-[10px] uppercase font-bold flex items-center gap-0.5 px-2 py-0.5 rounded"
+                                    style={{
+                                      background: isPoster ? "#111111" : "rgba(52,211,153,0.15)",
+                                      color: isPoster ? "#ffffff" : "#34d399",
+                                    }}
+                                  >
+                                    <span>View</span>
+                                    <ArrowUpRight className="h-3 w-3" />
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
                   </div>
                 )
               })}
             </div>
           )}
         </div>
-      </div>
 
-      {/* Overflow grid (desktop only) */}
-      {isDesktop && gridGroups.length > 0 && (
-        <div className="mt-6 space-y-4">
-          <div className="flex items-center gap-2 px-1 py-1">
-            <span className="text-[10px] font-extrabold uppercase tracking-[0.18em]" style={{ color: "#a1a1aa" }}>
-              More locations
-            </span>
-            <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, rgba(255,255,255,0.08), transparent)" }} />
-            <span className="text-[10px] text-zinc-600 shrink-0">{gridItems.length}</span>
-          </div>
-          {gridGroups.map((group) => {
-            const open = isGroupOpen(group.key)
-            return (
-              <div key={group.key}>
-                <GroupHeader kind={group.key} count={group.items.length} open={open} onToggle={() => toggleGroup(group.key)} />
-                <AnimatePresence initial={false}>
-                  {open && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2, ease: "easeInOut" }}
-                      className="overflow-hidden"
-                    >
-                      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 pt-1">
-                        {group.items.map((b) => (
-                          <BuildingCard
-                            key={b.id}
-                            b={b}
-                            isSelected={selectedId === b.id}
-                            bDist={userPos ? haversineDistance(userPos.lat, userPos.lng, b.lat, b.lng) : null}
-                            onToggle={toggleSelect}
-                          />
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            )
-          })}
-        </div>
-      )}
+      </div>
     </div>
   )
 }

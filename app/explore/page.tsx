@@ -19,7 +19,7 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
   return (
     <>
       <Header />
-      <main className="min-h-screen w-full text-zinc-50">
+      <main className="min-h-screen w-full">
         <CampusMapSection
           standalone
           initialQuery={params.q ?? ""}

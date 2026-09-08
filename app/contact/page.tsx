@@ -1,172 +1,494 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import {
   Bookmark,
-  Bot,
-  Cloud,
-  Cpu,
   Github,
   Heart,
+  Instagram,
   Mail,
   MapPin,
-  Send,
   ShieldCheck,
   Terminal,
   Zap,
+  Check,
+  Copy,
+  ExternalLink,
+  Cpu,
 } from "lucide-react"
 import { Header } from "@/components/Header"
 import { useSupport } from "@/lib/use-support"
 import { SupportModal } from "@/components/support-modal"
 import { PublicFooter } from "@/components/public-footer"
 
-const contactLinks = [
+const verifiedSocials = [
   {
     icon: Mail,
-    label: "Email",
-    value: "admin@edutechsrm.in",
+    label: "Email / Bug Reports",
+    handle: "admin@edutechsrm.in",
     href: "mailto:admin@edutechsrm.in",
-    color: "#f472b6",
+    desc: "Direct bug reports, feature ideas & official inquiries",
+    badge: "Direct Mail",
+    accent: "#f59e0b",
+    isEmail: true,
+  },
+  {
+    icon: Instagram,
+    label: "Instagram Community",
+    handle: "@edutechsrm",
+    href: "https://www.instagram.com/edutechsrm",
+    desc: "Direct DMs, campus updates & feature announcements",
+    badge: "Active Daily",
+    accent: "#e1306c",
   },
   {
     icon: Github,
-    label: "GitHub",
-    value: "@coderaarav12",
+    label: "GitHub Repository",
+    handle: "@coderaarav12",
     href: "https://github.com/coderaarav12",
-    color: "#34d399",
+    desc: "Open-source codebase, releases & issue tracking",
+    badge: "Open Source",
+    accent: "#10b981",
   },
   {
     icon: Bookmark,
-    label: "LinkedIn",
-    value: "Connect with me",
+    label: "LinkedIn Profile",
+    handle: "in/aaravgoel12",
     href: "https://www.linkedin.com/in/aaravgoel12/",
-    color: "#0a66c2",
+    desc: "Professional background, tech stack & career journey",
+    badge: "Connect",
+    accent: "#0a66c2",
   },
 ]
 
 export default function ContactPage() {
   const { isSupportOpen, handleSupportClick, closeSupport } = useSupport()
+  const [copiedEmail, setCopiedEmail] = useState(false)
+  const [isPoster, setIsPoster] = useState(false)
+
+  useEffect(() => {
+    const check = () => {
+      if (typeof document !== "undefined") {
+        const saved = localStorage.getItem("edutechsrm-landing-mode")
+        const attr = document.documentElement.getAttribute("data-landing-mode")
+        setIsPoster(attr === "poster" || saved === "poster")
+      }
+    }
+    check()
+    window.addEventListener("landing-mode-change", check)
+    window.addEventListener("storage", check)
+    return () => {
+      window.removeEventListener("landing-mode-change", check)
+      window.removeEventListener("storage", check)
+    }
+  }, [])
+
+  const handleCopyEmail = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    navigator.clipboard.writeText("admin@edutechsrm.in")
+    setCopiedEmail(true)
+    setTimeout(() => setCopiedEmail(false), 2500)
+  }
 
   return (
     <>
       <Header />
       
-      <main className="min-h-screen px-4 pb-24 pt-28 text-zinc-50 sm:px-6 lg:px-16">
-        <section className="mx-auto max-w-6xl">
-          <motion.div initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-3xl text-center">
-            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/25 bg-emerald-300/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-emerald-300">
-              <Terminal className="h-4 w-4" /> contact
-            </span>
-            <h1 className="font-display mt-6 text-4xl font-black tracking-tight sm:text-6xl">
-              Contact the developer.
+      {/* Dynamic Theme Styles for Poster Mode */}
+      <style>{`
+        [data-landing-mode="poster"] .dev-page-shell {
+          background-color: #f4efe6 !important;
+          color: #111111 !important;
+        }
+        [data-landing-mode="poster"] .dev-card-brutal {
+          background: #ffffff !important;
+          border: 2.5px solid #111111 !important;
+          box-shadow: 6px 6px 0px #111111 !important;
+          color: #111111 !important;
+        }
+        [data-landing-mode="poster"] .dev-subcard {
+          background: #faf7f2 !important;
+          border: 2px solid #111111 !important;
+          box-shadow: 3px 3px 0px #111111 !important;
+          color: #111111 !important;
+        }
+        [data-landing-mode="poster"] .dev-btn-action {
+          background: #111111 !important;
+          color: #ffffff !important;
+          border: 2px solid #111111 !important;
+          box-shadow: 3px 3px 0px #111111 !important;
+        }
+        [data-landing-mode="poster"] .dev-tag-pill {
+          background: #ffffff !important;
+          border: 1.5px solid #111111 !important;
+          color: #111111 !important;
+          box-shadow: 2px 2px 0px #111111 !important;
+        }
+        [data-landing-mode="poster"] .dev-portrait-box {
+          border: 2.5px solid #111111 !important;
+          box-shadow: 4px 4px 0px #111111 !important;
+        }
+      `}</style>
+
+      <main className={`dev-page-shell relative min-h-screen pt-36 sm:pt-40 pb-20 px-3.5 sm:px-6 lg:px-12 transition-colors duration-300 ${isPoster ? "bg-[#f4efe6] text-[#111111]" : "bg-[#070a0e] text-zinc-100"}`}>
+        <div className="mx-auto max-w-5xl">
+          
+          {/* ── 1. Editorial Header ── */}
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
+            <div className="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-mono font-bold uppercase tracking-widest"
+              style={{
+                borderColor: isPoster ? "#111111" : "rgba(52,211,153,0.3)",
+                background: isPoster ? "#ffffff" : "rgba(52,211,153,0.1)",
+                color: isPoster ? "#111111" : "#34d399",
+                boxShadow: isPoster ? "2px 2px 0px #111111" : "none",
+              }}
+            >
+              <Terminal className="h-3.5 w-3.5" />
+              <span>CREATOR & SOLO ARCHITECT • SRMIST KTR</span>
+            </div>
+
+            <h1 className="font-display mt-5 text-4xl font-black tracking-tight sm:text-6xl leading-[1.05]"
+              style={{ color: isPoster ? "#111111" : "#ffffff" }}
+            >
+              One Developer. <br />
+              <span className="font-serif italic font-normal" style={{ color: isPoster ? "#059669" : "#34d399" }}>
+                1000+ Students Unthrottled.
+              </span>
             </h1>
-            <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-zinc-400">
-              Reach out for bugs, suggestions, support, or anything related to edutechsrm. Built and maintained by Aarav Goel, 2nd Year CSE AIML student at SRM IST KTR.
-            </p>
+
+            <div className="mt-4 inline-block transform -rotate-1 rounded-xl px-4 py-1.5"
+              style={{
+                background: isPoster ? "rgba(11,122,84,0.12)" : "rgba(251,191,36,0.1)",
+                border: isPoster ? "1.5px solid #111111" : "1px solid rgba(251,191,36,0.3)",
+              }}
+            >
+              <span className="font-handwriting text-sm sm:text-base font-medium"
+                style={{
+                  fontFamily: "var(--font-caveat, 'Caveat', cursive)",
+                  fontSize: "18px",
+                  color: isPoster ? "#0b7a54" : "#fcd34d",
+                }}
+              >
+                &ldquo;Built by a day scholar between morning campus commutes and lectures — because nobody should wait 15 minutes in a crowd just to check their room number.&rdquo;
+              </span>
+            </div>
           </motion.div>
 
+          {/* ── 2. The Main Developer Dossier Card ── */}
           <motion.div
-            initial={{ opacity: 0, y: 28 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.12 }}
-            className="mt-14 grid gap-8 rounded-[38px] border border-white/10 bg-white/[0.035] p-6 shadow-[0_30px_90px_rgba(0,0,0,0.35)] backdrop-blur-3xl md:grid-cols-[280px_minmax(0,1fr)] sm:p-8"
+            transition={{ delay: 0.1 }}
+            className="dev-card-brutal rounded-3xl p-6 sm:p-8 mb-10"
+            style={{
+              background: isPoster ? "#ffffff" : "rgba(255,255,255,0.035)",
+              border: isPoster ? "2.5px solid #111111" : "1px solid rgba(255,255,255,0.1)",
+              boxShadow: isPoster ? "6px 6px 0px #111111" : "0 25px 50px -12px rgba(0,0,0,0.5)",
+            }}
           >
-            <div className="flex flex-col items-center text-center">
-              <div className="relative h-56 w-56 overflow-hidden rounded-[30px] border-2 border-emerald-300/25 shadow-[0_18px_50px_rgba(52,211,153,0.14)]">
-                <img src="/aarav_goel.jpg" alt="Aarav Goel" className="h-full w-full object-cover" />
-                <div className="absolute inset-0 rounded-[28px] border border-white/10" />
-              </div>
-              <h2 className="font-display mt-6 text-3xl font-black">Aarav Goel</h2>
-              <p className="mt-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-zinc-500">
-                <MapPin className="h-3.5 w-3.5 text-cyan-300" /> 2nd Year CSE AIML · SRMIST KTR
-              </p>
-            </div>
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-12 items-center">
+              
+              {/* Left Column: Portrait & Identity */}
+              <div className="md:col-span-4 flex flex-col items-center text-center">
+                <div className="dev-portrait-box relative h-48 w-48 overflow-hidden rounded-2xl"
+                  style={{
+                    border: isPoster ? "2.5px solid #111111" : "2px solid rgba(52,211,153,0.3)",
+                    boxShadow: isPoster ? "4px 4px 0px #111111" : "0 15px 35px rgba(16,185,129,0.2)",
+                  }}
+                >
+                  <img src="/aarav_goel.jpg" alt="Aarav Goel" className="h-full w-full object-cover" />
+                </div>
 
-            <div className="min-w-0">
-              <div className="mb-6 flex flex-wrap gap-2">
-                {["SRM Student", "2nd Year", "CSE AIML", "Solo Dev", "Cloudflare", "AI"].map((tag) => (
-                  <span key={tag} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-zinc-400">
-                    {tag}
-                  </span>
-                ))}
-              </div>
+                <h2 className="font-display mt-4 text-2xl font-black" style={{ color: isPoster ? "#111111" : "#ffffff" }}>
+                  Aarav Goel
+                </h2>
 
-              <p className="text-sm leading-8 text-zinc-400">
-                I built edutechsrm to solve a real SRM student problem: slow navigation and scattered academic data. The system pulls live data from SRM, normalizes timetable, attendance, marks, and planner information into one interface, then layers edutechsrm AI on top for quick academic Q&A.
-              </p>
+                <div className="mt-1 flex items-center gap-1.5 font-mono text-xs font-bold uppercase tracking-wider"
+                  style={{ color: isPoster ? "#059669" : "#38bdf8" }}
+                >
+                  <MapPin className="h-3.5 w-3.5" />
+                  <span>SRMIST Kattankulathur</span>
+                </div>
 
-              <div className="mt-8 grid gap-3 sm:grid-cols-3">
-                {[
-                  [Cloud, "Cloudflare", "Workers and edge deploys"],
-                  [Cpu, "Context-aware AI", "Live academic data in prompts"],
-                  [Zap, "v2.1", "Faster UI and cleaner flows"],
-                ].map(([Icon, title, text]) => (
-                  <div key={String(title)} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition md:hover:-translate-y-1 active:scale-[0.97]">
-                    <Icon className="mb-4 h-5 w-5 text-violet-300" />
-                    <h3 className="font-display text-sm font-black text-zinc-50">{String(title)}</h3>
-                    <p className="mt-2 text-xs leading-5 text-zinc-500">{String(text)}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-8 grid gap-3 md:grid-cols-3">
-                {contactLinks.map((link) => (
-                  <a
-                    key={link.label}
-                    href={link.href}
-                    target={link.href.startsWith("http") ? "_blank" : undefined}
-                    rel={link.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                    className="group relative flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition hover:border-white/20 hover:bg-white/[0.055] md:hover:-translate-y-1 active:scale-[0.97]"
-                  >
-                    <div className="flex min-w-0 items-center gap-4">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border bg-zinc-950/45" style={{ borderColor: `${link.color}3d`, color: link.color }}>
-                        <link.icon className="h-5 w-5" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-display text-sm font-black text-zinc-100">{link.label}</p>
-                        <p className="truncate text-xs text-zinc-500">{link.value}</p>
-                      </div>
-                    </div>
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 text-zinc-500 opacity-0 transition group-hover:opacity-100 group-active:opacity-100">
-                      <Send className="h-4 w-4" />
+                <div className="mt-3 flex flex-wrap justify-center gap-1.5">
+                  {["2nd Year CSE (AIML)", "Day Scholar", "Solo Engineer"].map((tag) => (
+                    <span
+                      key={tag}
+                      className="dev-tag-pill rounded-full px-2.5 py-0.5 text-[10px] sm:text-[11px] font-mono font-bold uppercase"
+                      style={{
+                        background: isPoster ? "#faf7f2" : "rgba(255,255,255,0.05)",
+                        border: isPoster ? "1.5px solid #111111" : "1px solid rgba(255,255,255,0.1)",
+                        color: isPoster ? "#111111" : "#d4d4d8",
+                      }}
+                    >
+                      {tag}
                     </span>
-                  </a>
-                ))}
+                  ))}
+                </div>
+
+                <div className="mt-4 flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-mono font-bold"
+                  style={{
+                    background: isPoster ? "#faf7f2" : "rgba(16,185,129,0.1)",
+                    border: isPoster ? "1.5px solid #111111" : "1px solid rgba(16,185,129,0.3)",
+                    color: isPoster ? "#111111" : "#34d399",
+                  }}
+                >
+                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
+                  <span>STATUS: ACTIVELY DEVELOPING</span>
+                </div>
               </div>
+
+              {/* Right Column: Mission & Core Highlights */}
+              <div className="md:col-span-8 space-y-4">
+                <div>
+                  <h3 className="font-display text-lg font-bold mb-1.5" style={{ color: isPoster ? "#111111" : "#ffffff" }}>
+                    Student Autonomy Engine
+                  </h3>
+                  <p className="text-sm leading-relaxed font-sans" style={{ color: isPoster ? "#333333" : "#d4d4d8" }}>
+                    Built from scratch as an ultra-fast, client-side academic proxy for SRMIST students. It decrypts attendance records, calculates safe bunk margins, normalizes timetable schedules, and provides instant offline caching.
+                  </p>
+                </div>
+
+                {/* 4 Crisp Highlights */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="dev-subcard rounded-xl p-3"
+                    style={{
+                      background: isPoster ? "#faf7f2" : "rgba(255,255,255,0.03)",
+                      border: isPoster ? "2px solid #111111" : "1px solid rgba(255,255,255,0.08)",
+                      boxShadow: isPoster ? "3px 3px 0px #111111" : "none",
+                    }}
+                  >
+                    <div className="flex items-center gap-2 mb-1 font-mono text-xs font-bold" style={{ color: isPoster ? "#059669" : "#34d399" }}>
+                      <Zap className="h-3.5 w-3.5" />
+                      <span>120ms Edge Sync</span>
+                    </div>
+                    <p className="text-xs leading-relaxed" style={{ color: isPoster ? "#555555" : "#a1a1aa" }}>
+                      Parses Academia tables into structured JSON instantly on device.
+                    </p>
+                  </div>
+
+                  <div className="dev-subcard rounded-xl p-3"
+                    style={{
+                      background: isPoster ? "#faf7f2" : "rgba(255,255,255,0.03)",
+                      border: isPoster ? "2px solid #111111" : "1px solid rgba(255,255,255,0.08)",
+                      boxShadow: isPoster ? "3px 3px 0px #111111" : "none",
+                    }}
+                  >
+                    <div className="flex items-center gap-2 mb-1 font-mono text-xs font-bold" style={{ color: isPoster ? "#0284c7" : "#38bdf8" }}>
+                      <ShieldCheck className="h-3.5 w-3.5" />
+                      <span>Zero Passwords Stored</span>
+                    </div>
+                    <p className="text-xs leading-relaxed" style={{ color: isPoster ? "#555555" : "#a1a1aa" }}>
+                      Credentials never touch a database. Session tokens live in local RAM only.
+                    </p>
+                  </div>
+
+                  <div className="dev-subcard rounded-xl p-3"
+                    style={{
+                      background: isPoster ? "#faf7f2" : "rgba(255,255,255,0.03)",
+                      border: isPoster ? "2px solid #111111" : "1px solid rgba(255,255,255,0.08)",
+                      boxShadow: isPoster ? "3px 3px 0px #111111" : "none",
+                    }}
+                  >
+                    <div className="flex items-center gap-2 mb-1 font-mono text-xs font-bold" style={{ color: isPoster ? "#d97706" : "#fbbf24" }}>
+                      <Cpu className="h-3.5 w-3.5" />
+                      <span>Academic Intelligence</span>
+                    </div>
+                    <p className="text-xs leading-relaxed" style={{ color: isPoster ? "#555555" : "#a1a1aa" }}>
+                      Calculates internal mark cut-offs and safe skip predictions automatically.
+                    </p>
+                  </div>
+
+                  <div className="dev-subcard rounded-xl p-3"
+                    style={{
+                      background: isPoster ? "#faf7f2" : "rgba(255,255,255,0.03)",
+                      border: isPoster ? "2px solid #111111" : "1px solid rgba(255,255,255,0.08)",
+                      boxShadow: isPoster ? "3px 3px 0px #111111" : "none",
+                    }}
+                  >
+                    <div className="flex items-center gap-2 mb-1 font-mono text-xs font-bold" style={{ color: isPoster ? "#e11d48" : "#f472b6" }}>
+                      <Heart className="h-3.5 w-3.5" />
+                      <span>Free For Everyone</span>
+                    </div>
+                    <p className="text-xs leading-relaxed" style={{ color: isPoster ? "#555555" : "#a1a1aa" }}>
+                      Zero ads, zero subscriptions. 100% independent student utility.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Tech Stack */}
+                <div className="pt-1">
+                  <div className="flex flex-wrap gap-1.5 items-center">
+                    <span className="font-mono text-[11px] font-bold uppercase tracking-wider mr-1" style={{ color: isPoster ? "#666666" : "#71717a" }}>
+                      STACK:
+                    </span>
+                    {["Next.js 16", "React 19", "Turbopack", "TailwindCSS", "Cloudflare Workers", "PWA"].map((tech) => (
+                      <span
+                        key={tech}
+                        className="rounded-md px-2 py-0.5 text-[10px] font-mono font-bold"
+                        style={{
+                          background: isPoster ? "#ffffff" : "rgba(255,255,255,0.05)",
+                          border: isPoster ? "1.5px solid #111111" : "1px solid rgba(255,255,255,0.1)",
+                          color: isPoster ? "#111111" : "#e4e4e7",
+                        }}
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
             </div>
           </motion.div>
 
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            <div className="rounded-[28px] border border-emerald-300/15 bg-emerald-300/[0.045] p-6 backdrop-blur-2xl transition md:hover:-translate-y-1 active:scale-[0.97]">
-              <ShieldCheck className="mb-5 h-6 w-6 text-emerald-300" />
-              <h3 className="font-display text-xl font-black">Privacy note</h3>
-              <p className="mt-3 text-sm leading-7 text-zinc-400">
-                Do not send your SRM password over email or chat. edutechsrm never needs your raw password outside the secure login page.
-              </p>
+          {/* ── 3. Direct Contact Channels (Clean 2x2 Grid) ── */}
+          <div className="mb-10">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-mono text-xs font-bold uppercase tracking-widest" style={{ color: isPoster ? "#111111" : "#a1a1aa" }}>
+                DIRECT CONTACT & INQUIRIES
+              </h3>
+              <span className="font-mono text-[11px] text-zinc-500">Fastest replies via Email & Instagram</span>
             </div>
 
-            <div className="rounded-[28px] border border-violet-300/15 bg-violet-300/[0.045] p-6 backdrop-blur-2xl transition md:hover:-translate-y-1 active:scale-[0.97]">
-              <Heart className="mb-5 h-6 w-6 text-violet-300" />
-              <h3 className="font-display text-xl font-black">Support the project</h3>
-              <p className="mt-3 text-sm leading-7 text-zinc-400">Helps cover domain, Cloudflare subscriptions, and AI API costs.</p>
-              <button onClick={handleSupportClick} className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-violet-400 px-5 py-3 text-sm font-black text-zinc-950 transition hover:bg-violet-300">
-                <Heart className="h-4 w-4" /> Support
-              </button>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+              {verifiedSocials.map((channel) => (
+                <div
+                  key={channel.label}
+                  className="dev-card-brutal group rounded-2xl p-3 sm:p-4 transition-all flex flex-col justify-between hover:-translate-y-1"
+                  style={{
+                    background: isPoster ? "#ffffff" : "rgba(255,255,255,0.035)",
+                    border: isPoster ? "2px solid #111111" : "1px solid rgba(255,255,255,0.08)",
+                    boxShadow: isPoster ? "4px 4px 0px #111111" : "none",
+                  }}
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-2 sm:mb-3">
+                      <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl"
+                        style={{
+                          background: isPoster ? "#faf7f2" : "rgba(255,255,255,0.05)",
+                          border: isPoster ? "1.5px solid #111111" : "1px solid rgba(255,255,255,0.1)",
+                          color: channel.accent,
+                        }}
+                      >
+                        <channel.icon className="h-4 w-4" />
+                      </div>
+                      <span className="font-mono text-[9px] font-bold uppercase px-2 py-0.5 rounded-full"
+                        style={{
+                          background: isPoster ? "#111111" : "rgba(255,255,255,0.1)",
+                          color: isPoster ? "#ffffff" : "#d4d4d8",
+                        }}
+                      >
+                        {channel.badge}
+                      </span>
+                    </div>
+
+                    <h4 className="font-display font-bold text-sm sm:text-base leading-tight" style={{ color: isPoster ? "#111111" : "#ffffff" }}>
+                      {channel.label}
+                    </h4>
+                    <p className="font-mono text-xs font-bold mt-0.5 truncate" style={{ color: channel.accent }}>
+                      {channel.handle}
+                    </p>
+                    <p className="text-xs mt-1.5 leading-relaxed font-sans" style={{ color: isPoster ? "#555555" : "#a1a1aa" }}>
+                      {channel.desc}
+                    </p>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t flex items-center justify-between text-xs font-mono font-bold"
+                    style={{ borderColor: isPoster ? "rgba(17,17,17,0.1)" : "rgba(255,255,255,0.08)" }}
+                  >
+                    {channel.isEmail ? (
+                      <div className="flex items-center justify-between w-full gap-2">
+                        <a
+                          href={channel.href}
+                          className="hover:underline flex items-center gap-1"
+                          style={{ color: isPoster ? "#111111" : "#e4e4e7" }}
+                        >
+                          <span>Send Mail</span>
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                        <button
+                          onClick={handleCopyEmail}
+                          className="px-2 py-0.5 rounded-md text-[10px] flex items-center gap-1 transition-all"
+                          style={{
+                            background: isPoster ? "#f4efe6" : "rgba(255,255,255,0.08)",
+                            color: copiedEmail ? "#10b981" : isPoster ? "#111111" : "#d4d4d8",
+                            border: isPoster ? "1px solid #111111" : "1px solid rgba(255,255,255,0.15)",
+                          }}
+                        >
+                          {copiedEmail ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+                          <span>{copiedEmail ? "Copied" : "Copy"}</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <a
+                        href={channel.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-between w-full hover:underline"
+                        style={{ color: isPoster ? "#111111" : "#e4e4e7" }}
+                      >
+                        <span>Connect</span>
+                        <ExternalLink className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className="absolute left-[-9999px] h-px w-px overflow-hidden" aria-hidden="true">
-            <h2>Contact Aarav Goel, developer of edutechsrm</h2>
-            <p>Contact the edutechsrm developer for SRMIST KTR dashboard feedback, bug reports, suggestions, support, and edutechsrm AI questions.</p>
-            <h2>About edutechsrm AI for SRMIST KTR Students</h2>
-            <p>edutechsrm AI helps SRM students with timetable lookup, attendance shortage planning, bunk limit guidance, internal marks overview, and semester study tips.</p>
+          {/* ── 4. Clean Footer Callout: Security & Independent Server Costs ── */}
+          <div className="dev-card-brutal rounded-2xl p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4"
+            style={{
+              background: isPoster ? "#ffffff" : "rgba(255,255,255,0.03)",
+              border: isPoster ? "2.5px solid #111111" : "1px solid rgba(255,255,255,0.08)",
+              boxShadow: isPoster ? "4px 4px 0px #111111" : "none",
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                style={{
+                  background: isPoster ? "#faf7f2" : "rgba(52,211,153,0.1)",
+                  border: isPoster ? "1.5px solid #111111" : "1px solid rgba(52,211,153,0.3)",
+                  color: isPoster ? "#059669" : "#34d399",
+                }}
+              >
+                <ShieldCheck className="h-5 w-5" />
+              </div>
+              <div>
+                <h4 className="font-display font-bold text-xs sm:text-sm" style={{ color: isPoster ? "#111111" : "#ffffff" }}>
+                  Credential Integrity Protocol
+                </h4>
+                <p className="text-[11px] sm:text-xs font-sans mt-0.5" style={{ color: isPoster ? "#555555" : "#a1a1aa" }}>
+                  We will never ask for your SRM password over email, DMs, or WhatsApp. Login only inside the encrypted app.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={handleSupportClick}
+              className="dev-btn-action shrink-0 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-mono font-bold uppercase tracking-wider transition-all"
+              style={{
+                background: isPoster ? "#111111" : "#8b5cf6",
+                color: "#ffffff",
+                border: isPoster ? "2px solid #111111" : "none",
+                boxShadow: isPoster ? "3px 3px 0px #111111" : "0 8px 20px rgba(139,92,246,0.3)",
+              }}
+            >
+              <Heart className="h-3.5 w-3.5 text-pink-400" />
+              <span>Support Server Costs</span>
+            </button>
           </div>
-        </section>
+
+        </div>
 
         <SupportModal isOpen={isSupportOpen} onClose={closeSupport} />
       </main>
+
       <PublicFooter />
     </>
   )
 }
-

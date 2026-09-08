@@ -1,24 +1,94 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
+import gsap from "gsap"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { useAuth } from "@/lib/auth-context"
-import { ArrowRight, Book, Home, Info, LayoutDashboard, Mail, MapPin, Scale, Shield, Smartphone, X } from "lucide-react"
+import {
+  ArrowRight,
+  Home,
+  LayoutDashboard,
+  Mail,
+  MapPin,
+  Moon,
+  Share2,
+  Smartphone,
+  Sparkles,
+  X,
+} from "lucide-react"
 import { QrCode } from "./qr-code"
+
+export type LandingMode = "night" | "poster"
 
 interface HeaderProps {
   onLoginClick?: () => void
+  solid?: boolean
+  mode?: LandingMode | "paper" | "blueprint"
+  onModeChange?: (mode: LandingMode) => void
 }
 
-export function Header({ onLoginClick }: HeaderProps = {}) {
+export function Header({ onLoginClick, solid, mode, onModeChange }: HeaderProps = {}) {
+  const [internalMode, setInternalMode] = useState<LandingMode>(() => {
+    if (typeof window !== "undefined") {
+      const domMode = document.documentElement.getAttribute("data-landing-mode") as LandingMode
+      if (domMode === "poster" || domMode === "night") return domMode
+      const saved = localStorage.getItem("edutechsrm-landing-mode") as LandingMode
+      if (saved === "poster" || saved === "night") return saved
+    }
+    return mode === "poster" ? "poster" : "night"
+  })
+
+  useEffect(() => {
+    if (mode === "poster" || mode === "night") {
+      setInternalMode(mode as LandingMode)
+    }
+  }, [mode])
+
+  useEffect(() => {
+    const handleSync = (e: Event) => {
+      const customEvent = e as CustomEvent<LandingMode>
+      if (customEvent.detail) {
+        setInternalMode(customEvent.detail)
+      } else if (typeof document !== "undefined") {
+        const domMode = document.documentElement.getAttribute("data-landing-mode") as LandingMode
+        if (domMode) setInternalMode(domMode)
+      }
+    }
+    window.addEventListener("landing-mode-change", handleSync)
+    window.addEventListener("storage", handleSync)
+    return () => {
+      window.removeEventListener("landing-mode-change", handleSync)
+      window.removeEventListener("storage", handleSync)
+    }
+  }, [])
+
+  const currentMode: LandingMode =
+    onModeChange && (mode === "poster" || mode === "night")
+      ? (mode as LandingMode)
+      : internalMode
+
+  const isPoster = currentMode === "poster"
+
+  const handleModeSwitch = (newMode: LandingMode) => {
+    setInternalMode(newMode)
+    if (typeof document !== "undefined") {
+      document.documentElement.setAttribute("data-landing-mode", newMode)
+      localStorage.setItem("edutechsrm-landing-mode", newMode)
+      localStorage.setItem("edutechsrm_landing_mode", newMode)
+      window.dispatchEvent(new CustomEvent("landing-mode-change", { detail: newMode }))
+    }
+    if (onModeChange) onModeChange(newMode)
+  }
+
   const { isAuthenticated } = useAuth()
   const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const isLandingHeader = true
+  const elevated = scrolled || solid
   const [showSharePopup, setShowSharePopup] = useState(false)
+  const headerRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
@@ -26,9 +96,32 @@ export function Header({ onLoginClick }: HeaderProps = {}) {
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
 
+  /* GSAP smooth entrance */
+  useEffect(() => {
+    try {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
+    } catch {
+      /* noop */
+    }
+    if (!headerRef.current) return
+    const ctx = gsap.context(() => {
+      gsap.from(headerRef.current, {
+        y: -60,
+        opacity: 0,
+        duration: 0.8,
+        ease: "expo.out",
+        delay: 0.05,
+      })
+    })
+    return () => ctx.revert()
+  }, [])
+
   const handleLoginClick = () => {
     setMenuOpen(false)
-    if (isAuthenticated) { window.location.href = "/"; return }
+    if (isAuthenticated) {
+      window.location.href = "/"
+      return
+    }
     if (onLoginClick) onLoginClick()
     else window.location.href = "/login"
   }
@@ -36,146 +129,241 @@ export function Header({ onLoginClick }: HeaderProps = {}) {
   const navLinks = [
     { href: "/home", label: "Home", icon: Home },
     { href: "/explore", label: "Explore Map", icon: MapPin },
-    { href: "/about", label: "About", icon: Info },
-    { href: "/docs", label: "Docs", icon: Book },
     { href: "/download", label: "Download", icon: Smartphone },
-    { href: "/privacy", label: "Privacy", icon: Shield },
-    { href: "/terms", label: "Terms", icon: Scale },
-    { href: "/contact", label: "Contact", icon: Mail },
+    { href: "/contact", label: "Developer", icon: Mail },
   ]
 
   return (
     <>
       <header
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 100,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: scrolled ? "10px 24px" : isLandingHeader ? "16px 32px" : "16px 28px",
-          background: scrolled
-            ? "rgba(9,9,11,0.86)"
-            : isLandingHeader
-              ? "linear-gradient(180deg, rgba(7,9,15,0.78), rgba(7,9,15,0.18))"
-              : "transparent",
-          backdropFilter: scrolled || isLandingHeader ? "blur(18px)" : "none",
-          borderBottom: scrolled ? "1px solid rgba(255,255,255,0.05)" : "1px solid transparent",
-          transition: "all 0.35s cubic-bezier(0.16,1,0.3,1)",
-        }}
-        className={isLandingHeader ? "landing-public-header" : undefined}
+        ref={headerRef}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          isPoster
+            ? elevated
+              ? "bg-[#f7f5f0]/95 backdrop-blur-xl border-b-2 border-[#111111] shadow-[0_4px_20px_rgba(0,0,0,0.06)] py-3 px-4 sm:px-8 lg:px-12"
+              : "bg-[#f7f5f0]/80 backdrop-blur-md border-b border-[#111111]/10 py-4 px-4 sm:px-8 lg:px-12"
+            : elevated
+              ? "bg-[#06080d]/90 backdrop-blur-2xl border-b border-white/[0.08] shadow-[0_12px_32px_rgba(0,0,0,0.4)] py-3 px-4 sm:px-8 lg:px-12"
+              : "bg-transparent py-4 px-4 sm:px-8 lg:px-12"
+        }`}
         role="navigation"
         aria-label="Main navigation"
       >
-        <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 10 }}>
-           <span style={{ fontSize: 17, fontWeight: 800, color: "#f4f4f5", letterSpacing: "-0.3px", fontFamily: "'Space Grotesk', sans-serif" }}>
-             edutechsrm
-           </span>
-         </Link>
-
-        {/* Centre Social */}
-        <div className="desktop-social" style={{ display: "flex", alignItems: "center", justifyContent: "center", position: "absolute", left: "50%", transform: "translateX(-50%)", gap: 20 }}>
-          <a href="https://instagram.com/edutechsrm" target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", color: "rgba(161,161,170,0.5)", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "#d4d4d8"} onMouseLeave={e => e.currentTarget.style.color = "rgba(161,161,170,0.5)"}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-          </a>
-          <a href="https://linkedin.com/company/edutechsrm" target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", color: "rgba(161,161,170,0.5)", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "#d4d4d8"} onMouseLeave={e => e.currentTarget.style.color = "rgba(161,161,170,0.5)"}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
-          </a>
-        </div>
-
-        {/* Desktop Nav */}
-        <nav
-          style={{
-            display: "none",
-            alignItems: "center",
-            gap: 4,
-            padding: isLandingHeader ? "6px" : 0,
-            borderRadius: isLandingHeader ? 16 : 0,
-            border: isLandingHeader ? "1px solid rgba(255,255,255,0.08)" : "none",
-            background: isLandingHeader
-              ? "linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.025))"
-              : "transparent",
-            boxShadow: isLandingHeader ? "0 14px 36px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.06)" : "none",
-            backdropFilter: isLandingHeader ? "blur(18px)" : undefined,
-          }}
-          className="desktop-nav"
-        >
-          <button onClick={() => setShowSharePopup(true)}
-            style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "none", border: "none", cursor: "pointer", padding: "8px 10px", borderRadius: 11, color: "rgba(161,161,170,0.5)", transition: "color 0.2s" }}
-            onMouseEnter={e => e.currentTarget.style.color = "#d4d4d8"}
-            onMouseLeave={e => e.currentTarget.style.color = "rgba(161,161,170,0.5)"}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-          </button>
-          <div style={{ width: 1, height: 20, background: "rgba(255,255,255,0.08)", flexShrink: 0 }} />
-          {navLinks.map((link) => (
+        <div className="w-full flex items-center justify-between gap-4">
+          {/* ── Brand Wordmark (Left) ── */}
+          <div className="flex items-center gap-3 shrink-0">
             <Link
-              key={link.href}
-              href={link.href}
-              style={{
-                textDecoration: "none",
-                fontSize: 13.5,
-                fontWeight: isLandingHeader ? 700 : 500,
-                padding: "8px 14px",
-                borderRadius: 11,
-                color: pathname === link.href ? "#ecfeff" : "rgba(212,212,216,0.72)",
-                background: pathname === link.href
-                  ? "linear-gradient(135deg, rgba(52,211,153,0.16), rgba(34,211,238,0.10))"
-                  : "transparent",
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) => { if (pathname !== link.href) e.currentTarget.style.color = "#d4d4d8" }}
-              onMouseLeave={(e) => { if (pathname !== link.href) e.currentTarget.style.color = "rgba(161,161,170,0.7)" }}
+              href="/"
+              className="flex items-center gap-2 group no-underline"
+              aria-label="edutechsrm home"
             >
-              {link.label}
+              <span
+                className={`text-[18px] sm:text-[19px] font-black tracking-tight font-display transition-colors ${
+                  isPoster ? "text-[#111111]" : "text-white"
+                }`}
+              >
+                edutechsrm
+              </span>
             </Link>
-          ))}
-          <motion.button
-            style={{
-              padding: "9px 20px",
-              borderRadius: 10,
-              fontSize: 13,
-              fontWeight: 700,
-              border: "none",
-              cursor: "pointer",
-              fontFamily: "'Space Grotesk', sans-serif",
-              background: "linear-gradient(135deg,#34d399,#10b981)",
-              color: "#09090b",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              marginLeft: 10,
-              transition: "transform 0.2s, box-shadow 0.2s",
-              boxShadow: "0 0 12px rgba(16,185,129,0.25)",
-            }}
-            onClick={handleLoginClick}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-1px)" }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = "" }}
-          >
-            {isAuthenticated ? <><LayoutDashboard style={{ width: 14, height: 14 }} /> Dashboard</> : <>Login <ArrowRight style={{ width: 13, height: 13 }} /></>}
-          </motion.button>
-        </nav>
+          </div>
 
-        {/* Mobile share + Menu Toggle (same bordered group) */}
-        <div className="mobile-action-group menu-toggle" style={{ display: "flex", alignItems: "center", gap: 0, padding: "4px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.07)", background: "linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.025))", backdropFilter: "blur(18px)" }}>
-          <button onClick={() => setShowSharePopup(true)} className="mobile-share-btn" aria-label="Share" style={{ background: "none", border: "none", cursor: "pointer", width: 36, height: 36, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(161,161,170,0.6)" }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-          </button>
-          <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.08)", flexShrink: 0 }} />
-          <button onClick={() => setMenuOpen(true)} className="menu-toggle mobile-hamburger" aria-label="Open menu" style={{ background: "none", border: "none", cursor: "pointer", width: 36, height: 36, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(161,161,170,0.6)" }}>
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-              <rect x="2" y="5" width="16" height="1.6" rx="0.8" fill="currentColor" />
-              <rect x="2" y="9.2" width="16" height="1.6" rx="0.8" fill="currentColor" />
-              <rect x="2" y="13.4" width="16" height="1.6" rx="0.8" fill="currentColor" />
-            </svg>
-          </button>
+          {/* ── Central Navigation Island (Center) ── */}
+          <nav
+            className={`hidden lg:flex items-center gap-1 px-3 py-1.5 rounded-full transition-all duration-300 ${
+              isPoster
+                ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111]"
+                : "bg-white/[0.04] backdrop-blur-2xl border border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
+            }`}
+          >
+            {navLinks.map((link) => {
+              const isActive =
+                pathname === link.href || (link.href === "/home" && pathname === "/")
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  style={{ color: isActive && isPoster ? "#ffffff" : undefined }}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all no-underline ${
+                    isActive
+                      ? isPoster
+                        ? "bg-[#111111] text-white keep-white shadow-sm"
+                        : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                      : isPoster
+                        ? "text-[#111111]/70 hover:text-[#111111] hover:bg-[#111111]/[0.06]"
+                        : "text-zinc-400 hover:text-white hover:bg-white/[0.06]"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              )
+            })}
+          </nav>
+
+          {/* ── Right Actions & Utilities (Right) ── */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Social Icons (Discreet & Polished) */}
+            <div className="hidden xl:flex items-center gap-1 mr-1">
+              <a
+                href="https://instagram.com/edutechsrm"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Instagram @edutechsrm"
+                aria-label="Instagram"
+                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
+                  isPoster
+                    ? "text-[#111111]/70 hover:text-[#111111] hover:bg-black/5"
+                    : "text-zinc-400 hover:text-pink-400 hover:bg-pink-400/10"
+                }`}
+              >
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                </svg>
+              </a>
+
+              <a
+                href="https://linkedin.com/company/edutechsrm"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="LinkedIn @edutechsrm"
+                aria-label="LinkedIn"
+                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
+                  isPoster
+                    ? "text-[#111111]/70 hover:text-[#111111] hover:bg-black/5"
+                    : "text-zinc-400 hover:text-sky-400 hover:bg-sky-400/10"
+                }`}
+              >
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                  <rect x="2" y="9" width="4" height="12" />
+                  <circle cx="4" cy="4" r="2" />
+                </svg>
+              </a>
+
+              <button
+                type="button"
+                onClick={() => setShowSharePopup(true)}
+                title="Share edutechsrm"
+                aria-label="Share"
+                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
+                  isPoster
+                    ? "text-[#111111]/70 hover:text-[#111111] hover:bg-black/5"
+                    : "text-zinc-400 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                <Share2 size={14} />
+              </button>
+            </div>
+
+            {/* Segmented Mode Switcher (Dark / Poster) */}
+            <div
+              className={`inline-flex items-center p-1 rounded-xl transition-all ${
+                isPoster
+                  ? "bg-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111]"
+                  : "bg-white/[0.05] border border-white/10"
+              }`}
+            >
+              <button
+                type="button"
+                onClick={() => handleModeSwitch("night")}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  currentMode === "night"
+                    ? isPoster
+                      ? "bg-[#111111]/10 text-[#111111]"
+                      : "bg-white/20 text-white shadow-sm"
+                    : isPoster
+                      ? "text-[#111111]/50 hover:text-[#111111]"
+                      : "text-zinc-400 hover:text-white"
+                }`}
+                title="Switch to Dark Mode"
+              >
+                <Moon size={12} />
+                <span className="hidden sm:inline">Dark</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleModeSwitch("poster")}
+                style={{ color: currentMode === "poster" && isPoster ? "#ffffff" : undefined }}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  currentMode === "poster"
+                    ? isPoster
+                      ? "bg-[#111111] text-white keep-white shadow-sm"
+                      : "bg-white text-zinc-950 font-black shadow-sm"
+                    : isPoster
+                      ? "text-[#111111]/50 hover:text-[#111111]"
+                      : "text-zinc-400 hover:text-white"
+                }`}
+                title="Switch to Poster Mode"
+              >
+                <Sparkles size={12} />
+                <span className="hidden sm:inline">Poster</span>
+              </button>
+            </div>
+
+            {/* Primary Login / Dashboard CTA */}
+            <motion.button
+              whileTap={{ scale: 0.96 }}
+              onClick={handleLoginClick}
+              style={{ color: isPoster ? "#ffffff" : undefined }}
+              className={`hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black tracking-wide uppercase transition-all cursor-pointer keep-white ${
+                isPoster
+                  ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] hover:bg-zinc-800 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+                  : "bg-gradient-to-r from-emerald-400 to-teal-400 text-zinc-950 shadow-[0_0_20px_rgba(52,211,153,0.3)] hover:brightness-110"
+              }`}
+            >
+              {isAuthenticated ? (
+                <>
+                  <LayoutDashboard size={13} />
+                  <span>Dashboard</span>
+                </>
+              ) : (
+                <>
+                  <span>Login</span>
+                  <ArrowRight size={13} />
+                </>
+              )}
+            </motion.button>
+
+            {/* Mobile Hamburger Menu Toggle */}
+            <button
+              onClick={() => setMenuOpen(true)}
+              aria-label="Open menu"
+              className={`lg:hidden w-9 h-9 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
+                isPoster
+                  ? "bg-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] text-[#111111]"
+                  : "bg-white/[0.06] border border-white/10 text-white hover:bg-white/10"
+              }`}
+            >
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                <rect x="2" y="5" width="16" height="2" rx="1" fill="currentColor" />
+                <rect x="2" y="9" width="16" height="2" rx="1" fill="currentColor" />
+                <rect x="2" y="13" width="16" height="2" rx="1" fill="currentColor" />
+              </svg>
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Bottom-Sheet Menu */}
+      {/* ── Mobile Bottom-Sheet Navigation Menu ── */}
       <AnimatePresence>
         {menuOpen && (
           <>
@@ -184,343 +372,331 @@ export function Header({ onLoginClick }: HeaderProps = {}) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
+              transition={{ duration: 0.2 }}
               onClick={() => setMenuOpen(false)}
-              className="mobile-menu-backdrop"
+              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
             />
 
-            {/* Sheet */}
+            {/* Bottom Drawer */}
             <motion.div
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 28, stiffness: 300 }}
-              className="mobile-menu-sheet"
+              className={`fixed left-0 right-0 bottom-0 z-50 max-h-[85vh] rounded-t-3xl p-6 flex flex-col overflow-y-auto ${
+                isPoster
+                  ? "bg-[#f7f5f0] border-t-3 border-[#111111] text-[#111111] shadow-[0_-10px_35px_rgba(0,0,0,0.15)]"
+                  : "bg-zinc-950/95 border-t border-white/10 text-white backdrop-blur-2xl shadow-[0_-20px_60px_rgba(0,0,0,0.8)]"
+              }`}
             >
-              {/* Drag handle */}
-              <div className="mobile-menu-handle" />
+              {/* Drag Pill */}
+              <div
+                className={`w-10 h-1 rounded-full mx-auto mb-4 shrink-0 ${
+                  isPoster ? "bg-black/20" : "bg-white/20"
+                }`}
+              />
 
-              {/* Close button */}
-              <button
-                onClick={() => setMenuOpen(false)}
-                className="mobile-menu-sheet-close"
-                aria-label="Close menu"
-              >
-                <X size={18} />
-              </button>
-
-              {/* Brand */}
-              <div className="mobile-menu-sheet-brand">
+              {/* Close Button & Header */}
+              <div className="flex items-center justify-between mb-6">
                 <div>
-                  <p>edutechsrm</p>
-                  <span>Your SRM companion</span>
+                  <h3
+                    className={`text-base font-black font-display leading-none ${
+                      isPoster ? "text-[#111111]" : "text-white"
+                    }`}
+                  >
+                    edutechsrm
+                  </h3>
+                  <p
+                    className={`text-[11px] font-mono mt-0.5 ${
+                      isPoster ? "text-[#111111]/60" : "text-zinc-400"
+                    }`}
+                  >
+                    SRM Academic Companion
+                  </p>
                 </div>
+
+                <button
+                  onClick={() => setMenuOpen(false)}
+                  className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${
+                    isPoster
+                      ? "bg-white border-1.5 border-[#111111] text-[#111111]"
+                      : "bg-white/10 text-zinc-300 hover:text-white"
+                  }`}
+                  aria-label="Close menu"
+                >
+                  <X size={16} />
+                </button>
               </div>
 
-              {/* Nav links */}
-              <nav className="mobile-menu-sheet-nav">
-                {navLinks.map((link, i) => {
+              {/* Mobile Mode Switcher */}
+              <div
+                className={`flex gap-2 p-1 rounded-2xl mb-6 ${
+                  isPoster ? "bg-white border-2 border-[#111111]" : "bg-white/5 border border-white/10"
+                }`}
+              >
+                <button
+                  type="button"
+                  onClick={() => handleModeSwitch("night")}
+                  style={{ color: currentMode === "night" && !isPoster ? "#ffffff" : undefined }}
+                  className={`flex-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all ${
+                    currentMode === "night"
+                      ? isPoster
+                        ? "bg-[#111111]/10 text-[#111111]"
+                        : "bg-white/20 text-white keep-white font-black"
+                      : isPoster
+                        ? "text-[#111111]/50"
+                        : "text-zinc-400"
+                  }`}
+                >
+                  <Moon size={14} />
+                  <span>Dark Mode</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleModeSwitch("poster")}
+                  style={{ color: currentMode === "poster" && isPoster ? "#ffffff" : undefined }}
+                  className={`flex-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                    currentMode === "poster"
+                      ? isPoster
+                        ? "bg-[#111111] text-white keep-white font-black shadow-sm"
+                        : "bg-white text-zinc-950 font-black"
+                      : isPoster
+                        ? "text-[#111111]/50"
+                        : "text-zinc-400"
+                  }`}
+                >
+                  <Sparkles size={14} />
+                  <span style={{ color: currentMode === "poster" && isPoster ? "#ffffff" : undefined }}>Poster Mode</span>
+                </button>
+              </div>
+
+              {/* Navigation Links */}
+              <nav className="flex flex-col gap-2 mb-6">
+                {navLinks.map((link) => {
                   const Icon = link.icon
-                  const active = pathname === link.href
+                  const isActive = pathname === link.href
                   return (
-                    <motion.div
+                    <Link
                       key={link.href}
-                      initial={{ opacity: 0, x: -16 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -16 }}
-                      transition={{ delay: i * 0.04, duration: 0.3 }}
+                      href={link.href}
+                      onClick={() => setMenuOpen(false)}
+                      className={`flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-bold transition-all no-underline ${
+                        isActive
+                          ? isPoster
+                            ? "bg-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] text-[#111111]"
+                            : "bg-emerald-500/15 border border-emerald-500/30 text-emerald-300"
+                          : isPoster
+                            ? "text-[#111111]/80 hover:bg-black/5"
+                            : "text-zinc-300 hover:bg-white/5 hover:text-white"
+                      }`}
                     >
-                      <Link
-                        href={link.href}
-                        onClick={() => setMenuOpen(false)}
-                        className={`mobile-menu-sheet-link ${active ? "mobile-menu-sheet-link-active" : ""}`}
+                      <div
+                        className={`w-7 h-7 rounded-lg flex items-center justify-center ${
+                          isPoster
+                            ? "bg-black/5 text-[#111111]"
+                            : "bg-white/5 text-emerald-400"
+                        }`}
                       >
-                        <span className="mobile-menu-sheet-link-icon"><Icon size={16} /></span>
-                        <span>{link.label}</span>
-                        {active && <span className="mobile-menu-sheet-link-pill">Current</span>}
-                      </Link>
-                    </motion.div>
+                        <Icon size={15} />
+                      </div>
+                      <span className="flex-1">{link.label}</span>
+                      {isActive && (
+                        <span
+                          style={{ color: isPoster ? "#ffffff" : undefined }}
+                          className={`text-[9px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full keep-white ${
+                            isPoster ? "bg-[#111111] text-white" : "bg-emerald-400/20 text-emerald-300"
+                          }`}
+                        >
+                          Active
+                        </span>
+                      )}
+                    </Link>
                   )
                 })}
               </nav>
 
-              {/* CTA */}
-              <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 12 }}
-                transition={{ delay: 0.2, duration: 0.3 }}
-                className="mobile-menu-sheet-cta-wrap"
+              {/* Mobile Socials */}
+              <div className="flex gap-2.5 mb-6">
+                <a
+                  href="https://instagram.com/edutechsrm"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`flex-1 py-2.5 rounded-xl flex items-center justify-center gap-2 text-xs font-bold no-underline transition-all ${
+                    isPoster
+                      ? "bg-white border-1.5 border-[#111111] text-[#111111]"
+                      : "bg-pink-500/10 border border-pink-500/25 text-pink-300"
+                  }`}
+                >
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                  </svg>
+                  <span>Instagram</span>
+                </a>
+
+                <a
+                  href="https://linkedin.com/company/edutechsrm"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`flex-1 py-2.5 rounded-xl flex items-center justify-center gap-2 text-xs font-bold no-underline transition-all ${
+                    isPoster
+                      ? "bg-white border-1.5 border-[#111111] text-[#111111]"
+                      : "bg-sky-500/10 border border-sky-500/25 text-sky-300"
+                  }`}
+                >
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                    <rect x="2" y="9" width="4" height="12" />
+                    <circle cx="4" cy="4" r="2" />
+                  </svg>
+                  <span>LinkedIn</span>
+                </a>
+              </div>
+
+              {/* Mobile CTA */}
+              <button
+                onClick={handleLoginClick}
+                style={{ color: isPoster ? "#ffffff" : undefined }}
+                className={`w-full py-3.5 rounded-2xl text-sm font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer keep-white ${
+                  isPoster
+                    ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+                    : "bg-gradient-to-r from-emerald-400 to-teal-400 text-zinc-950 font-black shadow-lg"
+                }`}
               >
-                <button onClick={handleLoginClick} className="mobile-menu-sheet-cta">
-                  {isAuthenticated ? <><LayoutDashboard size={16} /> Return to Dashboard</> : <>Connect SRM Academia <ArrowRight size={16} /></>}
-                </button>
-                <p className="mobile-menu-sheet-note">Independent student project. Not affiliated with SRM.</p>
-              </motion.div>
+                {isAuthenticated ? (
+                  <>
+                    <LayoutDashboard size={16} />
+                    <span style={{ color: isPoster ? "#ffffff" : undefined }}>Go to Dashboard</span>
+                  </>
+                ) : (
+                  <>
+                    <span style={{ color: isPoster ? "#ffffff" : undefined }}>Connect SRM Academia</span>
+                    <ArrowRight size={16} />
+                  </>
+                )}
+              </button>
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
-      <style>{`
-        @media (min-width: 768px) {
-          .menu-toggle { display: none !important; }
-          .desktop-nav { display: flex !important; }
-        }
-        @media (max-width: 767px) {
-          .landing-public-header {
-            padding-left: 28px !important;
-            padding-right: 20px !important;
-          }
-          .landing-public-header a:first-child {
-            gap: 9px !important;
-          }
-        }
-        /* ── Animated hamburger ── */
-
-
-        /* ── Bottom-sheet backdrop ── */
-        .mobile-menu-backdrop {
-          position: fixed;
-          inset: 0;
-          z-index: 200;
-          background: rgba(0,0,0,0.5);
-          backdrop-filter: blur(4px);
-        }
-
-        /* ── Bottom-sheet panel ── */
-        .mobile-menu-sheet {
-          position: fixed;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          z-index: 201;
-          max-height: 82svh;
-          border-radius: 24px 24px 0 0;
-          background:
-            radial-gradient(ellipse at 20% 0%, rgba(52,211,153,0.10), transparent 50%),
-            rgba(7,9,15,0.98);
-          backdrop-filter: blur(28px);
-          border-top: 1px solid rgba(255,255,255,0.06);
-          box-shadow: 0 -20px 60px rgba(0,0,0,0.5);
-          padding: 12px 20px max(env(safe-area-inset-bottom, 12px), 16px);
-          display: flex;
-          flex-direction: column;
-          overflow-y: auto;
-        }
-        .mobile-menu-handle {
-          width: 36px;
-          height: 4px;
-          border-radius: 4px;
-          background: rgba(255,255,255,0.12);
-          margin: 0 auto 8px;
-          flex-shrink: 0;
-        }
-        .mobile-menu-sheet-close {
-          position: absolute;
-          top: 14px;
-          right: 14px;
-          width: 36px;
-          height: 36px;
-          border-radius: 10px;
-          border: 1px solid rgba(255,255,255,0.06);
-          background: rgba(255,255,255,0.04);
-          color: rgba(161,161,170,0.7);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: background 0.2s;
-          flex-shrink: 0;
-        }
-        .mobile-menu-sheet-close:hover {
-          background: rgba(255,255,255,0.08);
-          color: #d4d4d8;
-        }
-
-        /* ── Brand ── */
-        .mobile-menu-sheet-brand {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding-right: 44px;
-          margin-bottom: 16px;
-          flex-shrink: 0;
-        }
-        .mobile-menu-sheet-brand img {
-          width: 40px;
-          height: 40px;
-          border-radius: 12px;
-          object-fit: contain;
-        }
-        .mobile-menu-sheet-brand p {
-          margin: 0;
-          color: #f4f4f5;
-          font-family: "Space Grotesk", sans-serif;
-          font-size: 17px;
-          font-weight: 900;
-          letter-spacing: -0.02em;
-        }
-        .mobile-menu-sheet-brand span {
-          display: block;
-          margin-top: 1px;
-          color: rgba(161,161,170,0.6);
-          font-size: 11px;
-          font-weight: 600;
-        }
-
-        /* ── Nav links ── */
-        .mobile-menu-sheet-nav {
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-          flex: 1;
-          overflow-y: auto;
-          margin: 0 -4px;
-          padding: 0 4px;
-        }
-        .mobile-menu-sheet-link {
-          display: flex;
-          min-height: 50px;
-          align-items: center;
-          gap: 12px;
-          border-radius: 14px;
-          padding: 8px 12px;
-          text-decoration: none;
-          color: rgba(228,228,231,0.7);
-          font-family: "Space Grotesk", sans-serif;
-          font-size: 15px;
-          font-weight: 700;
-          letter-spacing: -0.01em;
-          transition: background 0.15s;
-        }
-        .mobile-menu-sheet-link:active {
-          background: rgba(255,255,255,0.06);
-        }
-        .mobile-menu-sheet-link-active {
-          background: linear-gradient(135deg, rgba(52,211,153,0.12), rgba(34,211,238,0.06));
-          color: #f4f4f5;
-        }
-        .mobile-menu-sheet-link-icon {
-          display: flex;
-          width: 34px;
-          height: 34px;
-          flex: 0 0 34px;
-          align-items: center;
-          justify-content: center;
-          border-radius: 10px;
-          background: rgba(9,9,11,0.5);
-          color: #34d399;
-        }
-        .mobile-menu-sheet-link-pill {
-          margin-left: auto;
-          border-radius: 999px;
-          background: rgba(52,211,153,0.12);
-          padding: 4px 7px;
-          color: #86efac;
-          font-size: 8px;
-          font-weight: 900;
-          letter-spacing: .08em;
-          text-transform: uppercase;
-        }
-
-        /* ── CTA ── */
-        .mobile-menu-sheet-cta-wrap {
-          display: grid;
-          gap: 10px;
-          margin-top: 14px;
-          flex-shrink: 0;
-        }
-        .mobile-menu-sheet-cta {
-          display: inline-flex;
-          min-height: 52px;
-          width: 100%;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          border: 0;
-          border-radius: 16px;
-          background: linear-gradient(135deg,#5ee6b4,#34d399);
-          color: #07120d;
-          font-family: "Space Grotesk", sans-serif;
-          font-size: 14px;
-          font-weight: 900;
-          cursor: pointer;
-          box-shadow: 0 12px 28px rgba(52,211,153,.18);
-          transition: transform 0.15s;
-        }
-        .mobile-menu-sheet-cta:active {
-          transform: scale(0.97);
-        }
-        .mobile-menu-sheet-note {
-          margin: 0;
-          text-align: center;
-          color: rgba(161,161,170,.5);
-          font-size: 10.5px;
-          line-height: 1.5;
-        }
-      `}</style>
-
-      {/* Share popup */}
+      {/* ── Share Modal ── */}
       <AnimatePresence>
         {showSharePopup && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             onClick={() => setShowSharePopup(false)}
-            className="fixed inset-0 z-[70] flex items-center justify-center p-4"
-            style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)" }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md"
           >
-            <motion.div initial={{ opacity: 0, y: 20, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.95 }}
-              transition={{ duration: 0.2 }} onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-sm rounded-3xl border p-6 text-center relative"
-              style={{ background: "var(--card-bg, #18181b)", borderColor: "rgba(255,255,255,0.08)" }}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.94 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.94 }}
+              transition={{ duration: 0.2 }}
+              onClick={(e) => e.stopPropagation()}
+              className={`w-full max-w-sm rounded-3xl p-6 text-center relative ${
+                isPoster
+                  ? "bg-[#f7f5f0] border-3 border-[#111111] shadow-[6px_6px_0px_#111111]"
+                  : "bg-zinc-900 border border-white/10 shadow-2xl"
+              }`}
             >
-              <button onClick={() => setShowSharePopup(false)}
-                className="absolute top-3 right-3 w-7 h-7 rounded-xl flex items-center justify-center text-zinc-500 hover:text-zinc-300 transition-colors"
-                style={{ background: "rgba(255,255,255,0.05)" }}
+              <button
+                onClick={() => setShowSharePopup(false)}
+                className={`absolute top-4 right-4 w-7 h-7 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
+                  isPoster
+                    ? "bg-white border-1.5 border-[#111111] text-[#111111]"
+                    : "bg-white/10 text-zinc-300 hover:text-white"
+                }`}
+                aria-label="Close share popup"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                <X size={14} />
               </button>
 
-              <h3 className="text-base font-black text-zinc-100 mb-1">Share edutechsrm</h3>
-              <p className="text-[11px] text-zinc-500 mb-5">Scan or share with friends</p>
+              <h3
+                className={`text-base font-black font-display mb-1 ${
+                  isPoster ? "text-[#111111]" : "text-white"
+                }`}
+              >
+                Share edutechsrm
+              </h3>
+              <p
+                className={`text-xs mb-5 font-mono ${
+                  isPoster ? "text-[#111111]/60" : "text-zinc-400"
+                }`}
+              >
+                Scan or share with friends
+              </p>
 
-              <div className="flex justify-center">
-                <QrCode size={260} />
+              <div
+                className={`flex justify-center p-3 rounded-2xl mb-5 ${
+                  isPoster ? "bg-white border-2 border-[#111111]" : "bg-black/40 border border-white/5"
+                }`}
+              >
+                <QrCode size={220} />
               </div>
 
-              <div className="mt-5 space-y-2">
-                <button onClick={async () => {
-                  const url = "https://edutechsrm.in"
-                  const title = "edutechsrm"
-                  const text = "SRM attendance, timetable & marks — all in one place"
-                  if (typeof navigator.share === "function") {
-                    try { await navigator.share({ title, text, url }) } catch {}
-                  } else {
-                    try { await navigator.clipboard.writeText(url) } catch {}
-                  }
-                }}
-                  className="w-full rounded-xl py-2.5 text-sm font-bold"
-                  style={{ background: "linear-gradient(135deg, #34d399, #10b981)", color: "#09090b" }}
+              <div className="flex flex-col gap-2.5">
+                <button
+                  onClick={async () => {
+                    const url = "https://edutechsrm.in"
+                    const title = "edutechsrm"
+                    const text = "SRM attendance, timetable & marks — all in one place"
+                    if (typeof navigator.share === "function") {
+                      try {
+                        await navigator.share({ title, text, url })
+                      } catch {}
+                    } else {
+                      try {
+                        await navigator.clipboard.writeText(url)
+                      } catch {}
+                    }
+                  }}
+                  className={`w-full py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+                    isPoster
+                      ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111]"
+                      : "bg-emerald-500 text-zinc-950 font-black shadow-md hover:bg-emerald-400"
+                  }`}
                 >
                   Share via apps
                 </button>
-                <button onClick={async (e) => {
-                  try {
-                    await navigator.clipboard.writeText("https://edutechsrm.in")
-                    const btn = e.currentTarget
-                    const orig = btn.textContent
-                    btn.textContent = "Copied!"
-                    btn.style.color = "#34d399"
-                    btn.style.borderColor = "rgba(52,211,153,0.3)"
-                    setTimeout(() => {
-                      btn.textContent = orig
-                      btn.style.color = "#a1a1aa"
-                      btn.style.borderColor = "rgba(255,255,255,0.1)"
-                    }, 1500)
-                  } catch {}
-                }}
-                  className="w-full rounded-xl py-2.5 text-sm font-bold border transition-colors"
-                  style={{ color: "#a1a1aa", borderColor: "rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.03)" }}
+                <button
+                  onClick={async (e) => {
+                    try {
+                      await navigator.clipboard.writeText("https://edutechsrm.in")
+                      const btn = e.currentTarget
+                      const orig = btn.textContent
+                      btn.textContent = "Copied!"
+                      setTimeout(() => {
+                        btn.textContent = orig
+                      }, 1500)
+                    } catch {}
+                  }}
+                  className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    isPoster
+                      ? "bg-white text-[#111111] border-2 border-[#111111]"
+                      : "bg-white/5 border border-white/10 text-zinc-300 hover:text-white"
+                  }`}
                 >
                   Copy link
                 </button>
@@ -532,3 +708,4 @@ export function Header({ onLoginClick }: HeaderProps = {}) {
     </>
   )
 }
+

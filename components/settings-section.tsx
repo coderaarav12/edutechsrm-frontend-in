@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import {
   Bot, Check, ChevronDown, Contrast, ExternalLink, Heart, Megaphone,
-  Moon, Palette, RotateCcw, Sliders, Sun, Upload, X, MessageSquareText,
+  Moon, Palette, RotateCcw, Sliders, Sparkles, Upload, X, MessageSquareText,
 } from "lucide-react"
 import { PRESETS, useTheme, type ThemeMode, type CustomColors } from "@/lib/theme-context"
 import { SupportModal } from "./support-modal"
@@ -13,11 +13,11 @@ import { QrCode } from "./qr-code"
 
 type TabType = "dashboard" | "timetable" | "attendance" | "courses" | "marks" | "calendar" | "gradex" | "about" | "planner" | "notes" | "updates" | "feedback" | "settings" | "ai"
 
-const MODES: { id: ThemeMode; label: string; icon: typeof Moon }[] = [
-  { id: "dark", label: "Dark", icon: Moon },
-  { id: "light", label: "Light", icon: Sun },
-  { id: "black", label: "Black", icon: Contrast },
-  { id: "custom", label: "Custom", icon: Sliders },
+const MODES: { id: ThemeMode; label: string; desc: string; icon: typeof Moon; badge?: string }[] = [
+  { id: "dark", label: "Dark", desc: "Cyberpunk Obsidian", icon: Moon, badge: "Default" },
+  { id: "poster", label: "Poster", desc: "Swiss Brutalist Paper", icon: Sparkles, badge: "Tactile" },
+  { id: "black", label: "Black", desc: "Pure 0-nit OLED", icon: Contrast, badge: "OLED" },
+  { id: "custom", label: "Custom", desc: "Studio Palette", icon: Sliders, badge: "Custom" },
 ]
 
 const COLOR_SLOTS: { key: keyof CustomColors; label: string; desc: string }[] = [
@@ -124,46 +124,62 @@ export function SettingsSection({ onNavigate }: SettingsSectionProps) {
       <div className="space-y-6">
         {/* ── Theme (collapsible) ── */}
         <motion.div ref={themeRef} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-          className="rounded-2xl border overflow-hidden"
-          style={{ background: "rgba(24,24,27,0.4)", borderColor: "rgba(255,255,255,0.08)" }}
+          className="rounded-2xl border overflow-hidden surface-card"
+          style={{ background: "var(--card-bg, rgba(24,24,27,0.4))", borderColor: "var(--border-color, rgba(255,255,255,0.08))" }}
         >
           <button onClick={() => setThemeOpen(o => !o)}
             className="w-full px-5 py-4 flex items-center gap-3 text-left transition-all hover:bg-zinc-900/30"
-            style={{ borderBottom: themeOpen ? "1px solid rgba(255,255,255,0.08)" : "none" }}
+            style={{ borderBottom: themeOpen ? "1px solid var(--border-color, rgba(255,255,255,0.08))" : "none" }}
           >
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-emerald-500/10" style={{ border: "1px solid rgba(52,211,153,0.2)" }}>
-              <Palette style={{ width: 18, height: 18, color: "#34d399" }} />
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: "var(--accent-bg, rgba(52,211,153,0.1))", border: "1px solid var(--accent-border, rgba(52,211,153,0.2))" }}>
+              <Palette style={{ width: 18, height: 18, color: "var(--accent-theme, #34d399)" }} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-zinc-100">Theme</p>
-              <p className="text-[11px] text-zinc-500">Backgrounds, colors & appearance</p>
+              <p className="text-sm font-bold" style={{ color: "var(--text-primary, #f4f4f5)" }}>Theme & Visuals</p>
+              <p className="text-[11px] text-zinc-500">Mode, brutalist paper textures, background gradients & custom palette</p>
             </div>
             <motion.div animate={{ rotate: themeOpen ? 180 : 0 }} transition={{ duration: 0.2 }} className="shrink-0">
-              <ChevronDown style={{ width: 18, height: 18, color: "rgba(255,255,255,0.5)" }} />
+              <ChevronDown style={{ width: 18, height: 18, color: "var(--text-subtle, rgba(255,255,255,0.5))" }} />
             </motion.div>
           </button>
 
           <AnimatePresence initial={false}>
             {themeOpen && (
               <motion.div key="theme-content" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
-                <div className="p-5 space-y-6 border-t border-zinc-800/50">
+                <div className="p-5 space-y-6" style={{ borderTop: "1px solid var(--border-color, rgba(255,255,255,0.08))" }}>
                   {/* Mode selector */}
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-3">Mode</p>
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Visual Aesthetic Mode</p>
+                      <span className="text-[10px] font-mono text-zinc-500">4 distinct styles</span>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       {MODES.map((m) => {
                         const active = theme.mode === m.id
                         const Icon = m.icon
                         return (
                           <button key={m.id} onClick={() => setMode(m.id)}
-                            className="flex flex-col items-center gap-1.5 rounded-xl py-3 px-2 transition-all"
+                            className="flex flex-col items-center justify-center text-center gap-1.5 rounded-xl py-3 px-2 transition-all group relative cursor-pointer"
                             style={{
-                              background: active ? "rgba(52,211,153,0.1)" : "rgba(255,255,255,0.02)",
-                              border: active ? "1px solid rgba(52,211,153,0.3)" : "1px solid rgba(255,255,255,0.08)",
+                              background: active ? "var(--accent-bg, rgba(52,211,153,0.1))" : "var(--element-bg, rgba(255,255,255,0.02))",
+                              border: active ? "1.5px solid var(--accent-theme, #34d399)" : "1px solid var(--border-color, rgba(255,255,255,0.08))",
                             }}
                           >
-                            <Icon style={{ width: 16, height: 16, color: active ? "#34d399" : "rgba(255,255,255,0.5)" }} />
-                            <span className="text-[10px] font-bold" style={{ color: active ? "#34d399" : "rgba(255,255,255,0.7)" }}>{m.label}</span>
+                            {m.badge && (
+                              <span className="absolute top-1.5 right-1.5 text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-full"
+                                style={{
+                                  background: active ? "var(--accent-theme, #34d399)" : "rgba(255,255,255,0.06)",
+                                  color: active ? (theme.mode === "poster" ? "#ffffff" : "#09090b") : "var(--text-subtle, #71717a)",
+                                }}>
+                                {m.badge}
+                              </span>
+                            )}
+                            <Icon style={{ width: 18, height: 18, color: active ? "var(--accent-theme, #34d399)" : "var(--text-subtle, rgba(255,255,255,0.5))" }} />
+                            <div>
+                              <p className="text-xs font-bold leading-tight" style={{ color: active ? "var(--accent-theme, #34d399)" : "var(--text-primary, #f4f4f5)" }}>{m.label}</p>
+                              <p className="text-[9px] text-zinc-500 leading-tight mt-0.5">{m.desc}</p>
+                            </div>
                           </button>
                         )
                       })}
@@ -171,28 +187,45 @@ export function SettingsSection({ onNavigate }: SettingsSectionProps) {
                   </div>
 
                   {/* Presets gallery */}
-                  {(theme.mode === "dark" || theme.mode === "light" || theme.mode === "black") && (
+                  {(theme.mode === "dark" || theme.mode === "poster" || theme.mode === "black") && (
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-3">Background presets</p>
-                      <div className="grid grid-cols-4 sm:grid-cols-6 gap-2.5">
-                        {PRESETS.filter(p => p.theme === theme.mode).map((preset) => {
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                          {theme.mode === "poster" ? "Poster Paper & Cardstock Presets" : "Background Presets"}
+                        </p>
+                        <span className="text-[10px] text-zinc-500 font-mono">
+                          {theme.mode === "poster" ? "Tactile Swiss brutalist textures" : "Curated ambient gradients"}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
+                        {PRESETS.filter(p => p.theme === (theme.mode === "poster" ? "poster" : "dark")).map((preset) => {
                           const active = theme.presetId === preset.id && !theme.customImage
                           return (
                             <button key={preset.id} onClick={() => setPreset(preset.id)}
-                              className="group relative rounded-xl overflow-hidden aspect-[4/3] transition-all"
+                              className="group relative rounded-xl overflow-hidden aspect-[4/3] transition-all cursor-pointer"
                               style={{
-                                outline: active ? "2px solid #34d399" : "1px solid rgba(255,255,255,0.08)",
+                                outline: active ? "2px solid var(--accent-theme, #34d399)" : "1px solid var(--border-color, rgba(255,255,255,0.08))",
                                 outlineOffset: active ? -2 : 0,
                               }}
                             >
                               <div className="absolute inset-0" style={{ background: preset.preview }} />
                               {active && (
-                                <div className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full flex items-center justify-center bg-emerald-500">
-                                  <Check className="w-2.5 h-2.5 text-zinc-950" />
+                                <div className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full flex items-center justify-center"
+                                  style={{ background: "var(--accent-theme, #34d399)" }}>
+                                  <Check className="w-2.5 h-2.5 text-black" />
                                 </div>
                               )}
-                              <div className="absolute bottom-0 left-0 right-0 p-1.5" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.6), transparent)" }}>
-                                <p className="text-[8px] font-semibold truncate leading-tight text-zinc-300">{preset.name}</p>
+                              <div className="absolute bottom-0 left-0 right-0 p-1.5"
+                                style={{
+                                  background: theme.mode === "poster" 
+                                    ? "rgba(247, 245, 240, 0.88)" 
+                                    : "linear-gradient(to top, rgba(0,0,0,0.7), transparent)",
+                                  borderTop: theme.mode === "poster" ? "1px solid rgba(17,17,17,0.08)" : "none",
+                                }}>
+                                <p className="text-[8px] font-semibold truncate leading-tight"
+                                  style={{ color: theme.mode === "poster" ? "#111111" : "#e4e4e7" }}>
+                                  {preset.name}
+                                </p>
                               </div>
                             </button>
                           )
@@ -204,21 +237,25 @@ export function SettingsSection({ onNavigate }: SettingsSectionProps) {
                   {/* Custom mode colors */}
                   {theme.mode === "custom" && (
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-3">Custom colors</p>
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Custom Color Palette</p>
+                        <span className="text-[10px] text-zinc-500 font-mono">Fine-tune UI tokens</span>
+                      </div>
                       <div className="space-y-3">
                         {COLOR_SLOTS.map((slot) => (
-                          <div key={slot.key} className="flex items-center gap-3 rounded-xl px-4 py-3" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                          <div key={slot.key} className="flex items-center gap-3 rounded-xl px-4 py-3" 
+                            style={{ background: "var(--element-bg, rgba(255,255,255,0.02))", border: "1px solid var(--border-color, rgba(255,255,255,0.08))" }}>
                             <div className="relative shrink-0">
                               <input type="color" value={theme.customColors[slot.key]}
                                 onChange={(e) => handleColorChange(slot.key, e.target.value)}
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-                              <div className="w-9 h-9 rounded-lg border-2" style={{ background: theme.customColors[slot.key], borderColor: "rgba(255,255,255,0.1)" }} />
+                              <div className="w-9 h-9 rounded-lg border-2" style={{ background: theme.customColors[slot.key], borderColor: "var(--border-medium, rgba(255,255,255,0.15))" }} />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-xs font-semibold text-zinc-100">{slot.label}</p>
-                              <p className="text-[9px] text-zinc-600">{slot.desc}</p>
+                              <p className="text-xs font-semibold" style={{ color: "var(--text-primary, #f4f4f5)" }}>{slot.label}</p>
+                              <p className="text-[9px] text-zinc-500">{slot.desc}</p>
                             </div>
-                            <span className="text-[10px] font-mono font-medium text-zinc-600">{theme.customColors[slot.key]}</span>
+                            <span className="text-[10px] font-mono font-medium text-zinc-500">{theme.customColors[slot.key]}</span>
                           </div>
                         ))}
                       </div>
@@ -227,26 +264,33 @@ export function SettingsSection({ onNavigate }: SettingsSectionProps) {
 
                   {/* Upload */}
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-3">Upload background</p>
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Dashboard Wallpaper</p>
+                      <span className="text-[10px] text-zinc-500 font-mono">Custom background layer</span>
+                    </div>
                     <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
                     <button onClick={() => fileInputRef.current?.click()}
-                      className="w-full flex items-center justify-center gap-3 rounded-xl px-4 py-4 border-2 border-dashed transition-all hover:border-emerald-500/30 hover:bg-emerald-500/5"
-                      style={{ borderColor: "rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.02)" }}>
-                      <Upload style={{ width: 18, height: 18, color: "rgba(255,255,255,0.5)" }} />
+                      className="w-full flex items-center justify-center gap-3 rounded-xl px-4 py-4 border-2 border-dashed transition-all cursor-pointer hover:border-emerald-500/40"
+                      style={{ 
+                        borderColor: "var(--border-color, rgba(255,255,255,0.1))", 
+                        background: "var(--element-bg, rgba(255,255,255,0.02))" 
+                      }}>
+                      <Upload style={{ width: 18, height: 18, color: "var(--text-subtle, rgba(255,255,255,0.5))" }} />
                       <div className="text-left">
-                        <p className="text-sm font-semibold text-zinc-100">Upload an image</p>
-                        <p className="text-[10px] text-zinc-600">JPG, PNG, WebP • Max 5MB</p>
+                        <p className="text-sm font-semibold" style={{ color: "var(--text-primary, #f4f4f5)" }}>Upload Custom Wallpaper</p>
+                        <p className="text-[10px] text-zinc-500">JPG, PNG, WebP • Max 5MB (Fills entire viewport)</p>
                       </div>
                     </button>
                     {uploadError && <p className="mt-2 text-[11px] font-medium text-red-400">{uploadError}</p>}
                     {theme.customImage && (
-                      <div className="mt-3 flex items-center gap-3 rounded-xl px-4 py-3" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                        <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0">
+                      <div className="mt-3 flex items-center gap-3 rounded-xl px-4 py-3" 
+                        style={{ background: "var(--element-bg, rgba(255,255,255,0.02))", border: "1px solid var(--border-color, rgba(255,255,255,0.08))" }}>
+                        <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border" style={{ borderColor: "var(--border-color, rgba(255,255,255,0.1))" }}>
                           <img src={theme.customImage} alt="" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-semibold truncate text-zinc-100">Custom background</p>
-                          <p className="text-[10px] text-zinc-600">Tap to replace</p>
+                          <p className="text-xs font-semibold truncate" style={{ color: "var(--text-primary, #f4f4f5)" }}>Custom wallpaper active</p>
+                          <p className="text-[10px] text-zinc-500">Click to change or replace file</p>
                         </div>
                         <button onClick={() => setCustomImage("")}
                           className="text-[10px] font-bold transition-colors shrink-0 text-red-400 hover:text-red-300">
@@ -257,13 +301,13 @@ export function SettingsSection({ onNavigate }: SettingsSectionProps) {
                   </div>
 
                   {/* Reset */}
-                  <div className="flex items-center justify-between pt-4" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
-                    <p className="text-[11px] text-zinc-600">Reset all theme settings</p>
+                  <div className="flex items-center justify-between pt-4" style={{ borderTop: "1px solid var(--border-color, rgba(255,255,255,0.08))" }}>
+                    <p className="text-[11px] text-zinc-500">Reset all theme customizations back to default</p>
                     <button onClick={resetTheme}
-                      className="flex items-center gap-1.5 text-[10px] font-bold transition-colors text-zinc-500 hover:text-zinc-300"
+                      className="flex items-center gap-1.5 text-[10px] font-bold transition-colors text-zinc-500 hover:text-emerald-400 cursor-pointer"
                     >
                       <RotateCcw style={{ width: 12, height: 12 }} />
-                      Reset
+                      Reset to Default
                     </button>
                   </div>
         </div>
