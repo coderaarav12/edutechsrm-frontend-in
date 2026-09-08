@@ -16,7 +16,45 @@ import { useAuth } from "@/lib/auth-context"
 import { MaintenanceOverlay } from "@/components/maintenance-overlay"
 import { UpdateOverlay } from "@/components/app-shell-ui"
 
+import { useOptionalTheme } from "@/lib/theme-context"
+
 function SessionExpiredModal({ onLogin }: { onLogin: () => void }) {
+  const themeContext = useOptionalTheme()
+  const isPoster =
+    themeContext?.theme?.mode === "poster" ||
+    (typeof document !== "undefined" &&
+      (document.documentElement.getAttribute("data-theme") === "poster" ||
+        document.documentElement.getAttribute("data-landing-mode") === "poster"))
+
+  if (isPoster) {
+    return (
+      <motion.div
+        onClick={(e) => e.stopPropagation()}
+        initial={{ scale: 0.92, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.94, opacity: 0 }}
+        transition={{ type: "spring", bounce: 0.22 }}
+        className="w-full max-w-sm rounded-[28px] border-[2.5px] border-[#111111] p-6 text-center bg-white shadow-[8px_8px_0px_#111111]"
+      >
+        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center bg-[#fee2e2] border-2 border-[#111111] shadow-[3px_3px_0px_#111111]">
+          <span className="text-2xl">⏳</span>
+        </div>
+        <span className="text-[10px] font-mono font-bold uppercase tracking-[0.18em] text-[#991b1b] bg-[#fee2e2] border border-[#111111] px-2.5 py-1 rounded-md shadow-[1.5px_1.5px_0px_#111111] inline-block">
+          Authentication Required
+        </span>
+        <h2 className="text-xl font-black mt-3 mb-1.5 text-[#111111]">Session expired</h2>
+        <p className="text-sm mb-1 text-[#444444]">Your session was replaced by a new sign-in on another device.</p>
+        <p className="text-xs mb-5 text-[#666666]">Please sign in again to regain access to your dashboard.</p>
+        <button
+          onClick={onLogin}
+          className="w-full py-3.5 rounded-xl text-sm font-black border-2 border-[#111111] bg-[#111111] text-white shadow-[3px_3px_0px_#111111] hover:translate-x-[1px] hover:translate-y-[1px] transition-all cursor-pointer"
+        >
+          Go to login
+        </button>
+      </motion.div>
+    )
+  }
+
   return (
     <motion.div onClick={(e) => e.stopPropagation()} initial={{ scale: 0.92, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.94, opacity: 0 }}
       transition={{ type: "spring", bounce: 0.22 }}

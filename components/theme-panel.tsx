@@ -55,6 +55,7 @@ export function ThemePanel({ open, onClose }: ThemePanelProps) {
   }
 
   const isUsingPreset = theme.mode !== "custom" && !theme.customImage
+  const isPoster = theme.mode === "poster"
 
   return (
     <AnimatePresence>
@@ -64,7 +65,7 @@ export function ThemePanel({ open, onClose }: ThemePanelProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            className={`absolute inset-0 backdrop-blur-sm ${isPoster ? "bg-black/50" : "bg-black/50"}`}
             onClick={onClose}
           />
           <motion.div
@@ -73,25 +74,43 @@ export function ThemePanel({ open, onClose }: ThemePanelProps) {
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: "spring", stiffness: 350, damping: 30 }}
             className="relative w-full max-w-lg rounded-2xl border overflow-hidden"
-            style={{
-              background: "var(--elevated-bg, rgba(24,24,27,0.98))",
-              borderColor: "var(--border-medium, rgba(255,255,255,0.08))",
-              boxShadow: "0 24px 80px rgba(0,0,0,0.5)",
-            }}
+            style={
+              isPoster
+                ? {
+                    background: "#ffffff",
+                    border: "2.5px solid #111111",
+                    boxShadow: "6px 6px 0px #111111",
+                    color: "#111111",
+                  }
+                : {
+                    background: "var(--elevated-bg, rgba(24,24,27,0.98))",
+                    borderColor: "var(--border-medium, rgba(255,255,255,0.08))",
+                    boxShadow: "0 24px 80px rgba(0,0,0,0.5)",
+                  }
+            }
           >
-            <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: "1px solid var(--border-color, rgba(255,255,255,0.05))" }}>
+            <div className="flex items-center justify-between px-5 py-4"
+              style={{ borderBottom: isPoster ? "2px solid #111111" : "1px solid var(--border-color, rgba(255,255,255,0.05))" }}>
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "var(--accent-bg, rgba(52,211,153,0.1))", border: "1px solid var(--accent-border, rgba(52,211,153,0.15))" }}>
-                  <Palette className="w-4 h-4" style={{ color: "var(--accent-theme, #34d399)" }} />
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+                  style={
+                    isPoster
+                      ? { background: "#f7f5f0", border: "2px solid #111111", boxShadow: "2px 2px 0px #111111" }
+                      : { background: "var(--accent-bg, rgba(52,211,153,0.1))", border: "1px solid var(--accent-border, rgba(52,211,153,0.15))" }
+                  }>
+                  <Palette className="w-4 h-4" style={{ color: isPoster ? "#111111" : "var(--accent-theme, #34d399)" }} />
                 </div>
                 <div>
-                  <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>Themes</p>
-                  <p className="text-[10px]" style={{ color: "var(--text-subtle)" }}>Customize your look</p>
+                  <p className="text-sm font-bold" style={{ color: isPoster ? "#111111" : "var(--text-primary)" }}>Themes</p>
+                  <p className="text-[10px]" style={{ color: isPoster ? "#666666" : "var(--text-subtle)" }}>Customize your look</p>
                 </div>
               </div>
-              <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center transition-all" style={{ color: "var(--text-subtle)" }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = "var(--text-primary)"; e.currentTarget.style.background = "var(--element-bg-hover, rgba(255,255,255,0.05))" }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-subtle)"; e.currentTarget.style.background = "" }}>
+              <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
+                style={
+                  isPoster
+                    ? { color: "#111111", background: "#f7f5f0", border: "1.5px solid #111111" }
+                    : { color: "var(--text-subtle)" }
+                }>
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -99,7 +118,7 @@ export function ThemePanel({ open, onClose }: ThemePanelProps) {
             <div className="overflow-y-auto" style={{ maxHeight: "75vh" }}>
               {/* Mode selector */}
               <div className="px-5 pt-5 pb-3">
-                <p className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: "var(--text-subtle)" }}>Mode</p>
+                <p className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: isPoster ? "#111111" : "var(--text-subtle)" }}>Mode</p>
                 <div className="grid grid-cols-4 gap-2">
                   {MODES.map((m) => {
                     const active = theme.mode === m.id
@@ -109,14 +128,22 @@ export function ThemePanel({ open, onClose }: ThemePanelProps) {
                         key={m.id}
                         onClick={() => setMode(m.id)}
                         className="flex flex-col items-center gap-1 rounded-xl py-2.5 px-2 transition-all cursor-pointer"
-                        style={{
-                          background: active ? "var(--accent-bg, rgba(52,211,153,0.1))" : "var(--element-bg, rgba(255,255,255,0.03))",
-                          border: active ? "1px solid var(--accent-border, rgba(52,211,153,0.2))" : "1px solid var(--border-color, rgba(255,255,255,0.05))",
-                        }}
+                        style={
+                          isPoster
+                            ? {
+                                background: active ? "#111111" : "#f7f5f0",
+                                border: "2px solid #111111",
+                                boxShadow: active ? "2px 2px 0px #111111" : "none",
+                              }
+                            : {
+                                background: active ? "var(--accent-bg, rgba(52,211,153,0.1))" : "var(--element-bg, rgba(255,255,255,0.03))",
+                                border: active ? "1px solid var(--accent-border, rgba(52,211,153,0.2))" : "1px solid var(--border-color, rgba(255,255,255,0.05))",
+                              }
+                        }
                       >
-                        <Icon className="w-4 h-4" style={{ color: active ? "var(--accent-theme, #34d399)" : "var(--text-subtle)" }} />
-                        <span className="text-[10px] font-bold" style={{ color: active ? "var(--accent-theme, #34d399)" : "var(--text-muted)" }}>{m.label}</span>
-                        <span className="text-[8px] opacity-60 truncate" style={{ color: "var(--text-subtle)" }}>{m.desc}</span>
+                        <Icon className="w-4 h-4" style={{ color: isPoster ? (active ? "#ffffff" : "#111111") : (active ? "var(--accent-theme, #34d399)" : "var(--text-subtle)") }} />
+                        <span className="text-[10px] font-bold" style={{ color: isPoster ? (active ? "#ffffff" : "#111111") : (active ? "var(--accent-theme, #34d399)" : "var(--text-muted)") }}>{m.label}</span>
+                        <span className="text-[8px] opacity-60 truncate" style={{ color: isPoster ? (active ? "#ffffff" : "#555555") : "var(--text-subtle)" }}>{m.desc}</span>
                       </button>
                     )
                   })}

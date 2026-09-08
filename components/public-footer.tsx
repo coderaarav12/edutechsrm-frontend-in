@@ -9,15 +9,23 @@ export function PublicFooter() {
 
   useEffect(() => {
     const checkMode = () => {
-      const mode = document.documentElement.getAttribute("data-landing-mode")
-      setIsPoster(mode === "poster")
+      if (typeof document !== "undefined") {
+        const mode =
+          document.documentElement.getAttribute("data-landing-mode") ||
+          document.documentElement.getAttribute("data-theme") ||
+          localStorage.getItem("edutechsrm-landing-mode") ||
+          localStorage.getItem("edutechsrm_landing_mode")
+        setIsPoster(mode === "poster")
+      }
     }
     checkMode()
     window.addEventListener("landing-mode-change", checkMode)
     window.addEventListener("storage", checkMode)
+    window.addEventListener("edutechsrm_theme_event", checkMode)
     return () => {
       window.removeEventListener("landing-mode-change", checkMode)
       window.removeEventListener("storage", checkMode)
+      window.removeEventListener("edutechsrm_theme_event", checkMode)
     }
   }, [])
 
@@ -35,22 +43,22 @@ export function PublicFooter() {
       }}
       role="contentinfo"
     >
-      <div className="mx-auto max-w-[1300px] px-6 py-16 sm:px-10 lg:py-20">
-        <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-12">
+      <div className="w-full px-6 sm:px-10 lg:px-14 xl:px-18 2xl:px-24 py-14 sm:py-18 lg:py-20">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-12 xl:gap-12 2xl:gap-16">
           
-          {/* Column 1 (5 cols): Monumental brand + mission + status */}
-          <div className="lg:col-span-5">
-            <Link href="/" className="inline-flex items-center text-2xl font-black tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+          {/* Column 1: Monumental brand + mission + status */}
+          <div className="lg:col-span-5 xl:col-span-4">
+            <Link href="/" className="inline-flex items-center text-2xl sm:text-3xl font-black tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               <span>edutechsrm</span>
             </Link>
 
-            <p className="mt-4 max-w-sm text-sm leading-relaxed" style={{ color: isPoster ? "#444444" : "#a1a1aa" }}>
+            <p className="mt-4 max-w-md xl:max-w-lg text-sm sm:text-base leading-relaxed" style={{ color: isPoster ? "#444444" : "#a1a1aa" }}>
               The high-speed academic operating system built for 1000+ students at SRMIST Kattankulathur. Real-time timetable, attendance limits, internal marks, and campus cartography.
             </p>
 
-            <div className="mt-6 flex flex-wrap items-center gap-3">
+            <div className="mt-6 flex flex-wrap items-center gap-2.5 sm:gap-3">
               <span
-                className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-mono font-bold"
+                className="inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-xs font-mono font-bold"
                 style={{
                   background: isPoster ? "#ffffff" : "rgba(52,211,153,0.1)",
                   border: isPoster ? "1.5px solid #111111" : "1px solid rgba(52,211,153,0.3)",
@@ -63,7 +71,7 @@ export function PublicFooter() {
               </span>
 
               <span
-                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-mono font-bold"
+                className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 text-xs font-mono font-bold"
                 style={{
                   background: isPoster ? "#ffffff" : "rgba(255,255,255,0.04)",
                   border: isPoster ? "1.5px solid #111111" : "1px solid rgba(255,255,255,0.1)",
@@ -128,15 +136,20 @@ export function PublicFooter() {
             </div>
           </div>
 
-          {/* Column 2 (2 cols): Core Engines */}
-          <div className="lg:col-span-2">
+          {/* Column 2: Core Engines */}
+          <div className="lg:col-span-2 xl:col-span-2">
             <h4 className="text-xs font-mono font-bold uppercase tracking-[0.2em]" style={{ color: isPoster ? "#111111" : "#71717a" }}>
               Core Systems
             </h4>
-            <ul className="mt-4 space-y-2.5 text-xs font-semibold">
+            <ul className="mt-4 space-y-3 text-xs sm:text-[13px] font-semibold">
               <li>
                 <Link href="/explore" className="transition hover:underline" style={{ color: isPoster ? "#333333" : "#d4d4d8" }}>
                   Campus Map Explorer
+                </Link>
+              </li>
+              <li>
+                <Link href="/faculty" className="transition hover:underline" style={{ color: isPoster ? "#333333" : "#d4d4d8" }}>
+                  Faculty Cabin Finder
                 </Link>
               </li>
               <li>
@@ -162,12 +175,12 @@ export function PublicFooter() {
             </ul>
           </div>
 
-          {/* Column 3 (2 cols): Platform */}
-          <div className="lg:col-span-2">
+          {/* Column 3: Platform */}
+          <div className="lg:col-span-2 xl:col-span-2">
             <h4 className="text-xs font-mono font-bold uppercase tracking-[0.2em]" style={{ color: isPoster ? "#111111" : "#71717a" }}>
               Platform
             </h4>
-            <ul className="mt-4 space-y-2.5 text-xs font-semibold">
+            <ul className="mt-4 space-y-3 text-xs sm:text-[13px] font-semibold">
               <li>
                 <Link href="/download" className="transition hover:underline" style={{ color: isPoster ? "#333333" : "#d4d4d8" }}>
                   Android App
@@ -203,40 +216,40 @@ export function PublicFooter() {
             </ul>
           </div>
 
-          {/* Column 4 (3 cols): Solo Developer Info */}
-          <div className="lg:col-span-3">
+          {/* Column 4: Solo Developer Info */}
+          <div className="lg:col-span-3 xl:col-span-4">
             <h4 className="text-xs font-mono font-bold uppercase tracking-[0.2em]" style={{ color: isPoster ? "#111111" : "#71717a" }}>
               Developer
             </h4>
             <div
-              className="mt-4 rounded-2xl p-4 transition"
+              className="mt-4 rounded-2xl p-5 sm:p-6 transition max-w-md xl:max-w-none"
               style={{
                 background: isPoster ? "#ffffff" : "rgba(255,255,255,0.03)",
                 border: isPoster ? "2px solid #111111" : "1px solid rgba(255,255,255,0.08)",
                 boxShadow: isPoster ? "4px 4px 0px #111111" : "none",
               }}
             >
-              <div className="flex items-center gap-3">
-                <img src="/aarav_goel.jpg" alt="Aarav Goel" className="h-10 w-10 rounded-xl object-cover" />
+              <div className="flex items-center gap-3.5">
+                <img src="/aarav_goel.jpg" alt="Aarav Goel" className="h-11 w-11 rounded-xl object-cover shrink-0" />
                 <div>
-                  <h5 className="font-display text-sm font-bold" style={{ color: isPoster ? "#111111" : "#ffffff" }}>
+                  <h5 className="font-display text-base font-bold" style={{ color: isPoster ? "#111111" : "#ffffff" }}>
                     Aarav Goel
                   </h5>
-                  <p className="text-[11px]" style={{ color: isPoster ? "#555555" : "#a1a1aa" }}>
+                  <p className="text-xs" style={{ color: isPoster ? "#555555" : "#a1a1aa" }}>
                     2nd Yr CSE AIML · SRMIST KTR
                   </p>
                 </div>
               </div>
-              <p className="mt-3 text-[11px] leading-relaxed" style={{ color: isPoster ? "#444444" : "#a1a1aa" }}>
+              <p className="mt-3.5 text-xs sm:text-[13px] leading-relaxed" style={{ color: isPoster ? "#444444" : "#a1a1aa" }}>
                 Built single-handedly to give SRM students an instant, modern academic experience.
               </p>
-              <div className="mt-3 flex items-center gap-2">
+              <div className="mt-4 flex items-center gap-2">
                 <Link
                   href="/contact"
-                  className="inline-flex items-center gap-1 text-[11px] font-bold transition hover:underline"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold transition hover:underline"
                   style={{ color: isPoster ? "#0b7a54" : "#34d399" }}
                 >
-                  <Terminal className="h-3 w-3" />
+                  <Terminal className="h-3.5 w-3.5" />
                   <span>Developer Profile & Contact →</span>
                 </Link>
               </div>
@@ -247,13 +260,13 @@ export function PublicFooter() {
 
         {/* Bottom Bar: Legal & Attribution */}
         <div
-          className="mt-14 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs"
+          className="mt-16 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs sm:text-sm"
           style={{
             borderTop: isPoster ? "1.5px solid rgba(17,17,17,0.15)" : "1px solid rgba(255,255,255,0.08)",
             color: isPoster ? "#666666" : "#71717a",
           }}
         >
-          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4">
+          <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 sm:gap-4">
             <span>© 2026 edutechsrm</span>
             <span>·</span>
             <span>Independent open project</span>
@@ -266,7 +279,7 @@ export function PublicFooter() {
             </Link>
           </div>
 
-          <div className="flex items-center gap-2 text-center sm:text-right">
+          <div className="flex items-center gap-2 text-center md:text-right text-xs">
             <span>Not affiliated with SRM Institute. Data fetched live from Academia.</span>
           </div>
         </div>

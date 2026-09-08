@@ -63,8 +63,11 @@ async function verifyToken(token: string): Promise<boolean> {
 
 export async function GET(request: NextRequest) {
   const token = request.headers.get("x-access-token")
-  if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  if (!(await verifyToken(token))) return NextResponse.json({ error: "Invalid session" }, { status: 401 })
+  if (token) {
+    if (!(await verifyToken(token))) {
+      return NextResponse.json({ error: "Invalid session" }, { status: 401 })
+    }
+  }
 
   prune()
   const ip = getClientIP(request)
@@ -117,6 +120,7 @@ export async function GET(request: NextRequest) {
         f.name.toLowerCase().includes(q) || 
         f.facultyId.toLowerCase().includes(q) ||
         f.email.toLowerCase().includes(q) ||
+        f.staffRoom.toLowerCase().includes(q) ||
         f.specialization.toLowerCase().includes(q) ||
         f.department.toLowerCase().includes(q) ||
         f.fullDepartment.toLowerCase().includes(q) ||

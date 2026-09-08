@@ -83,16 +83,22 @@ export function CampusMapSection({
   useEffect(() => {
     const check = () => {
       if (typeof document !== "undefined") {
-        const m = document.documentElement.getAttribute("data-landing-mode") || localStorage.getItem("edutechsrm-landing-mode")
+        const m =
+          document.documentElement.getAttribute("data-landing-mode") ||
+          document.documentElement.getAttribute("data-theme") ||
+          localStorage.getItem("edutechsrm-landing-mode") ||
+          localStorage.getItem("edutechsrm_landing_mode")
         setIsPoster(m === "poster")
       }
     }
     check()
     window.addEventListener("landing-mode-change", check)
     window.addEventListener("storage", check)
+    window.addEventListener("edutechsrm_theme_event", check)
     return () => {
       window.removeEventListener("landing-mode-change", check)
       window.removeEventListener("storage", check)
+      window.removeEventListener("edutechsrm_theme_event", check)
     }
   }, [])
 

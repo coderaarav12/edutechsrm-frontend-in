@@ -8,6 +8,7 @@ import {
   GraduationCap, Users, Moon, Coffee, Sunset, X, Hash, Award, Download, Sparkles, Clock3, Trash2,
 } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
+import { useTheme, useIsPosterTheme } from "@/lib/theme-context"
 import { LoginModal } from "./login-modal"
 import { expandCustomClassesByDate, getCoveredHoursForClass, useCustomPlanner } from "@/lib/custom-planner"
 import { AIPromoBadge } from "@/components/ai-promo-badge"
@@ -249,28 +250,37 @@ function DayClassesList({
   const now     = new Date()
   const nowMins = now.getHours() * 60 + now.getMinutes()
   const endMsg  = END_MESSAGES[now.getDate() % END_MESSAGES.length]
+  const isPoster = useIsPosterTheme()
 
   // Collapsed state for past classes
   const [showPast, setShowPast] = useState(false)
 
   if (selectedDay?.isWeekend) {
     return (
-      <div className="text-center py-16 bg-zinc-900/60 ring-1 ring-white/5  rounded-3xl p-8  overflow-hidden relative">
+      <div className={`text-center py-16 rounded-3xl p-8 overflow-hidden relative ${
+        isPoster
+          ? "bg-white border-2 border-[#111111] shadow-[4px_4px_0px_#111111]"
+          : "bg-zinc-900/60 ring-1 ring-white/5"
+      }`}>
         <motion.div
           animate={{ y: [0, -4, 0], opacity: [0.3, 0.6, 0.3] }}
           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           className="w-12 h-12 mx-auto mb-4"
         >
-          <Moon className="w-full h-full text-zinc-500/40" />
+          <Moon className={`w-full h-full ${isPoster ? "text-zinc-600" : "text-zinc-500/40"}`} />
         </motion.div>
-        <p className="text-lg font-semibold text-zinc-400">{selectedDay.dayName}</p>
+        <p className={`text-lg font-bold ${isPoster ? "text-[#111111]" : "text-zinc-400"}`}>{selectedDay.dayName}</p>
         {dateToHoliday[selectedDay.date] ? (
-          <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 ring-1 ring-emerald-500/20 text-emerald-400">
+          <div className={`mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-full ${
+            isPoster
+              ? "bg-[#fef3c7] text-[#111111] border-2 border-[#111111] shadow-[2px_2px_0px_#111111]"
+              : "bg-emerald-500/10 ring-1 ring-emerald-500/20 text-emerald-400"
+          }`}>
             <span className="text-lg"><HolidayIcon size="w-5 h-5" /></span>
-            <span className="font-medium">{dateToHoliday[selectedDay.date]}</span>
+            <span className="font-bold">{dateToHoliday[selectedDay.date]}</span>
           </div>
         ) : (
-          <p className="text-sm text-zinc-500/60 mt-1">No classes — enjoy your weekend!</p>
+          <p className={`text-sm mt-1 ${isPoster ? "text-zinc-600 font-medium" : "text-zinc-500/60"}`}>No classes — enjoy your weekend!</p>
         )}
       </div>
     )
@@ -282,18 +292,22 @@ function DayClassesList({
 
   if (selectedDayClasses.length === 0 && dayAssignments.length === 0) {
     return (
-      <div className="text-center py-16 bg-zinc-900/60 ring-1 ring-white/5  rounded-3xl p-8  overflow-hidden relative">
+      <div className={`text-center py-16 rounded-3xl p-8 overflow-hidden relative ${
+        isPoster
+          ? "bg-white border-2 border-[#111111] shadow-[4px_4px_0px_#111111]"
+          : "bg-zinc-900/60 ring-1 ring-white/5"
+      }`}>
         {selectedDay && dateToHoliday[selectedDay.date] ? (
           <>
             <div className="text-5xl mb-4"><HolidayIcon size="w-10 h-10" /></div>
-            <p className="text-xl font-bold text-emerald-400">{dateToHoliday[selectedDay.date]}</p>
-            <p className="text-sm text-zinc-400 mt-2">Holiday — no classes today</p>
+            <p className={`text-xl font-bold ${isPoster ? "text-[#111111]" : "text-emerald-400"}`}>{dateToHoliday[selectedDay.date]}</p>
+            <p className={`text-sm mt-2 ${isPoster ? "text-zinc-600 font-medium" : "text-zinc-400"}`}>Holiday — no classes today</p>
           </>
         ) : (
           <>
-            <Calendar className="w-12 h-12 mx-auto mb-4 text-zinc-500/40" />
-            <p className="text-lg font-semibold text-zinc-400">No Classes Scheduled</p>
-            <p className="text-sm text-zinc-500/60 mt-1">This may be a holiday or free day</p>
+            <Calendar className={`w-12 h-12 mx-auto mb-4 ${isPoster ? "text-zinc-600" : "text-zinc-500/40"}`} />
+            <p className={`text-lg font-bold ${isPoster ? "text-[#111111]" : "text-zinc-400"}`}>No Classes Scheduled</p>
+            <p className={`text-sm mt-1 ${isPoster ? "text-zinc-600 font-medium" : "text-zinc-500/60"}`}>This may be a holiday or free day</p>
           </>
         )}
       </div>
@@ -348,28 +362,36 @@ function DayClassesList({
           {/* Timeline gutter */}
           <div className="flex flex-col items-center shrink-0" style={{ width: 44 }}>
             {index === 0 ? (
-              <div className="w-0.5 flex-1 bg-gradient-to-b from-transparent via-zinc-700/50 to-zinc-700" />
+              <div className={`w-0.5 flex-1 ${isPoster ? "bg-zinc-400" : "bg-gradient-to-b from-transparent via-zinc-700/50 to-zinc-700"}`} />
             ) : (
-              <div className="w-0.5 flex-1 bg-zinc-700/50" />
+              <div className={`w-0.5 flex-1 ${isPoster ? "bg-zinc-400" : "bg-zinc-700/50"}`} />
             )}
             <TimelineDot
               isCurrent={isCurrentClass}
               isPast={dimmed && !isCurrentClass}
             />
-            <div className={`w-0.5 flex-1 ${index < selectedDayClasses.length - 1 ? "bg-zinc-700/50" : "bg-gradient-to-b from-zinc-700/50 to-transparent"}`} />
+            <div className={`w-0.5 flex-1 ${isPoster ? "bg-zinc-400" : (index < selectedDayClasses.length - 1 ? "bg-zinc-700/50" : "bg-gradient-to-b from-zinc-700/50 to-transparent")}`} />
           </div>
 
           {/* Content card */}
-          <div className={`flex-1 min-w-0 rounded-2xl p-4 ring-1 transition-all group relative overflow-hidden ${
-            isCurrentClass
-              ? "bg-zinc-900/60 ring-emerald-500/30 "
-              : dimmed
-                ? "bg-zinc-900/20 ring-white/5"
-                : "bg-zinc-900/40 ring-white/5 hover:ring-zinc-700 hover:bg-zinc-900/60 "
+          <div className={`flex-1 min-w-0 rounded-2xl p-4 transition-all group relative overflow-hidden ${
+            isPoster
+              ? (isCurrentClass
+                  ? "bg-white border-2 border-[#111111] shadow-[4px_4px_0px_#111111]"
+                  : dimmed
+                    ? "bg-zinc-100 border border-[#111111]/30 opacity-70"
+                    : "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] hover:shadow-[5px_5px_0px_#111111]")
+              : (isCurrentClass
+                  ? "bg-zinc-900/60 ring-1 ring-emerald-500/30"
+                  : dimmed
+                    ? "bg-zinc-900/20 ring-white/5"
+                    : "bg-zinc-900/40 ring-white/5 hover:ring-zinc-700 hover:bg-zinc-900/60")
           }`}>
-            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/0 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+            {!isPoster && (
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/0 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+            )}
 
-            {isCurrentClass && (
+            {isCurrentClass && !isPoster && (
               <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent animate-pulse" />
             )}
 
@@ -377,7 +399,9 @@ function DayClassesList({
               {/* Top row: code + type */}
               <div className="flex items-center justify-between gap-2 mb-1.5">
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className={`text-[11px] font-mono font-bold tracking-tight ${isCurrentClass ? "text-emerald-400" : dimmed ? "text-zinc-500" : "text-emerald-400"}`}>
+                  <span className={`text-[11px] font-mono font-bold tracking-tight ${
+                    isPoster ? "text-[#111111] font-black" : (isCurrentClass ? "text-emerald-400" : dimmed ? "text-zinc-500" : "text-emerald-400")
+                  }`}>
                     {classData.code}
                   </span>
                   {isCurrentClass && (
@@ -388,50 +412,70 @@ function DayClassesList({
                   )}
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className={`text-[9px] font-bold tabular-nums ${isCurrentClass ? "text-emerald-400/70" : dimmed ? "text-zinc-500" : "text-zinc-400"}`}>
+                  <span className={`text-[9px] font-bold tabular-nums ${
+                    isPoster ? "text-zinc-700" : (isCurrentClass ? "text-emerald-400/70" : dimmed ? "text-zinc-500" : "text-zinc-400")
+                  }`}>
                     {(classData.custom ? classData.time?.split(" - ")[0] : timeSlot?.time?.split(" - ")[0]) || classData.time?.split(" - ")[0]}
                     {" — "}
                     {(classData.custom ? classData.time?.split(" - ")[1] : timeSlot?.time?.split(" - ")[1]) || classData.time?.split(" - ")[1]}
                   </span>
                   {(() => {
                     const c = getCategoryFromSlot(classData.slot)
-                    const s = c === "Theory" ? "text-purple-400 bg-purple-500/10 ring-purple-500/20" : c === "Practical" ? "text-blue-400 bg-blue-500/10 ring-blue-500/20" : "text-emerald-400 bg-emerald-500/10 ring-emerald-500/20"
-                    return <span className={`text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ring-1 ${s}`}>{c}</span>
+                    const s = isPoster
+                      ? "bg-[#f4f4f0] text-[#111111] border border-[#111111] shadow-[1px_1px_0px_#111111]"
+                      : (c === "Theory" ? "text-purple-400 bg-purple-500/10 ring-purple-500/20" : c === "Practical" ? "text-blue-400 bg-blue-500/10 ring-blue-500/20" : "text-emerald-400 bg-emerald-500/10 ring-emerald-500/20")
+                    return <span className={`text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ${isPoster ? "" : "ring-1"} ${s}`}>{c}</span>
                   })()}
                   {classData.room?.toLowerCase().includes("online") && (
-                    <span className="text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ring-1 text-sky-400 bg-sky-500/10 ring-sky-500/20">Online</span>
+                    <span className={`text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ${
+                      isPoster ? "bg-sky-100 text-sky-950 border border-[#111111]" : "ring-1 text-sky-400 bg-sky-500/10 ring-sky-500/20"
+                    }`}>Online</span>
                   )}
                 </div>
               </div>
 
               {/* Class name */}
-              <p className={`font-semibold text-sm tracking-tight mb-2 ${dimmed ? "text-zinc-500" : "text-zinc-200"}`}>{classData.name}</p>
+              <p className={`font-semibold text-sm tracking-tight mb-2 ${
+                isPoster ? "text-[#111111] font-bold" : (dimmed ? "text-zinc-500" : "text-zinc-200")
+              }`}>{classData.name}</p>
 
               {/* Details row */}
-              <div className="flex flex-wrap gap-x-3 gap-y-0.5 mb-2 text-zinc-500 text-[10px]">
+              <div className={`flex flex-wrap gap-x-3 gap-y-0.5 mb-2 text-[10px] ${
+                isPoster ? "text-zinc-700 font-medium" : "text-zinc-500"
+              }`}>
                 {classData.room    && <span className="flex items-center gap-1"><MapPin className="w-2.5 h-2.5" />{classData.room}</span>}
                 {classData.faculty && <span className="flex items-center gap-1 truncate max-w-[130px]"><User className="w-2.5 h-2.5 shrink-0" />{classData.faculty}</span>}
                 {courseDetails     && <span className="flex items-center gap-1"><BookOpen className="w-2.5 h-2.5" />{courseDetails.credits} Cr</span>}
-                {classData.slot    && <span className="text-zinc-600">Slot {classData.slot}</span>}
+                {classData.slot    && <span className={isPoster ? "text-zinc-600 font-semibold" : "text-zinc-600"}>Slot {classData.slot}</span>}
               </div>
 
               {/* Attendance */}
               {att && (
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ring-1 ${
-                    attPct !== null && attPct >= 75 ? "text-emerald-400 bg-emerald-500/10 ring-emerald-500/20" :
-                    attPct !== null && attPct >= 65 ? "text-amber-400 bg-amber-500/10 ring-amber-500/20" :
-                    "text-red-400 bg-red-500/10 ring-red-500/20"
+                  <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
+                    isPoster
+                      ? "bg-white text-[#111111] border border-[#111111] shadow-[1px_1px_0px_#111111]"
+                      : (attPct !== null && attPct >= 75 ? "text-emerald-400 bg-emerald-500/10 ring-1 ring-emerald-500/20" :
+                        attPct !== null && attPct >= 65 ? "text-amber-400 bg-amber-500/10 ring-1 ring-amber-500/20" :
+                        "text-red-400 bg-red-500/10 ring-1 ring-red-500/20")
                   }`}>
                     {attPct}% attended
                   </span>
                   {skip > 0 && (
-                    <span className="text-[10px] px-2.5 py-0.5 rounded-full text-emerald-400 bg-emerald-500/10 ring-1 ring-emerald-500/20">
+                    <span className={`text-[10px] px-2.5 py-0.5 rounded-full ${
+                      isPoster
+                        ? "bg-[#dcfce7] text-emerald-950 font-bold border border-emerald-600 shadow-[1px_1px_0px_#111111]"
+                        : "text-emerald-400 bg-emerald-500/10 ring-1 ring-emerald-500/20"
+                    }`}>
                       Can skip {skip}
                     </span>
                   )}
                   {needed > 0 && (
-                    <span className="text-[10px] px-2.5 py-0.5 rounded-full text-red-400 bg-red-500/10 ring-1 ring-red-500/20">
+                    <span className={`text-[10px] px-2.5 py-0.5 rounded-full ${
+                      isPoster
+                        ? "bg-[#fee2e2] text-red-950 font-bold border border-red-600 shadow-[1px_1px_0px_#111111]"
+                        : "text-red-400 bg-red-500/10 ring-1 ring-red-500/20"
+                    }`}>
                       Need {needed} more
                     </span>
                   )}
@@ -603,6 +647,8 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
     courses, calendar, dateToDoMap, attendance,
     isLoading, refreshData, user,
   } = useAuth()
+  const { theme } = useTheme()
+  const isPoster = useIsPosterTheme()
   const { customClasses, assignments, updateAssignment, removeAssignment } = useCustomPlanner()
 
   const [isLoginOpen,      setIsLoginOpen]      = useState(false)
@@ -665,12 +711,18 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
 
   const dayOrderToClasses = useMemo(() => {
     const map: Record<number, typeof timetable> = {}
-    timetable.forEach((slot) => {
-      const do_ = slot.day_order
-      if (!map[do_]) map[do_] = []
-      if (!map[do_].find((s: any) => s.hour === slot.hour && s.code === slot.code)) map[do_].push(slot)
+    timetable.forEach((slot: any) => {
+      const do_ = slot.day_order ?? (slot.day ? Number(slot.day) : undefined)
+      if (do_ == null || Number.isNaN(Number(do_))) return
+      const doNum = Number(do_)
+      if (!map[doNum]) map[doNum] = []
+      if (!map[doNum].find((s: any) => s.hour === slot.hour && s.code === slot.code)) map[doNum].push(slot)
     })
-    Object.keys(map).forEach((k) => map[Number(k)].sort((a: any, b: any) => a.hour - b.hour))
+    Object.keys(map).forEach((k) => {
+      if (Array.isArray(map[Number(k)])) {
+        map[Number(k)].sort((a: any, b: any) => a.hour - b.hour)
+      }
+    })
     return map
   }, [timetable])
 
@@ -693,7 +745,9 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
       })
     })
     Object.keys(map).forEach((key) => {
-      map[Number(key)] = map[Number(key)].sort((a: any, b: any) => (a.hour - b.hour) || `${a.time || ""}`.localeCompare(`${b.time || ""}`))
+      if (Array.isArray(map[Number(key)])) {
+        map[Number(key)] = map[Number(key)].sort((a: any, b: any) => (a.hour - b.hour) || `${a.time || ""}`.localeCompare(`${b.time || ""}`))
+      }
     })
     return map
   }, [customClasses, dayOrderToClasses])
@@ -725,7 +779,9 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
 
     // Sort each date's classes by hour
     Object.keys(map).forEach((date) => {
-      map[date].sort((a: any, b: any) => a.hour - b.hour)
+      if (Array.isArray(map[date])) {
+        map[date].sort((a: any, b: any) => a.hour - b.hour)
+      }
     })
 
     // Ensure visible navigation dates exist — fall back to day_order-based schedule
@@ -1033,11 +1089,15 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
         {/* ── Header ── */}
         <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-zinc-500 font-bold text-[10px] uppercase tracking-widest">Weekly Rhythm</p>
+            <p className={`font-bold text-[10px] uppercase tracking-widest ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>Weekly Rhythm</p>
             <div className="flex items-center gap-2">
               <div className="hidden md:flex items-center gap-1.5">
                 <motion.button whileTap={{ scale: 0.9 }} onClick={handleExportDayOrders}
-                  className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20  px-4 py-2 rounded-xl transition-all border border-emerald-500/20">
+                  className={`flex items-center gap-2 text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl transition-all ${
+                    isPoster
+                      ? "bg-white text-[#111111] border-2 border-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-zinc-50"
+                      : "text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20"
+                  }`}>
                   <Download className={`w-3.5 h-3.5 ${isExporting ? "animate-pulse" : ""}`} />
                   {isExporting ? "..." : "Download"}
                 </motion.button>
@@ -1046,26 +1106,44 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
                     window.history.replaceState(null, "", "#custom-class")
                     onNavigate?.("about")
                   }}
-                  className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20  px-4 py-2 rounded-xl transition-all border border-emerald-500/20">
+                  className={`flex items-center gap-2 text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl transition-all ${
+                    isPoster
+                      ? "bg-white text-[#111111] border-2 border-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-zinc-50"
+                      : "text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20"
+                  }`}>
                   <BookOpen className="w-3.5 h-3.5" />
                   Add class
                 </motion.button>
               </div>
               <AIPromoBadge page="timetable" />
-              <div className="flex bg-zinc-900 rounded-lg p-0.5 border border-white/5 shadow-inner">
+              <div className={`flex rounded-lg p-0.5 ${
+                isPoster
+                  ? "bg-[#e8e6dc] border-2 border-[#111111] shadow-[2px_2px_0px_#111111]"
+                  : "bg-zinc-900 border border-white/5 shadow-inner"
+              }`}>
                 {(["today", "list", "week"] as const).map((mode, i) => (
                   <motion.button key={mode} whileTap={{ scale: 0.9 }} onClick={() => setViewMode(mode)}
-                    className={`h-7 w-7 flex items-center justify-center rounded transition-all ${
+                    className={`h-7 w-7 flex items-center justify-center rounded transition-all cursor-pointer ${
                       viewMode === mode
-                        ? "bg-zinc-800 text-zinc-100 shadow-md border border-white/5"
-                        : "text-zinc-500 hover:text-zinc-300"
-                    }`}>
-                    {i === 0 ? <Calendar className="w-3.5 h-3.5" /> : i === 1 ? <List className="w-3.5 h-3.5" /> : <Grid3X3 className="w-3.5 h-3.5" />}
+                        ? isPoster
+                          ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[1px_1px_0px_#111111] keep-white"
+                          : "bg-zinc-800 text-zinc-100 shadow-md border border-white/5"
+                        : isPoster
+                          ? "text-[#111111] hover:bg-black/10"
+                          : "text-zinc-500 hover:text-zinc-300"
+                    }`}
+                    style={isPoster && viewMode !== mode ? { color: "#111111" } : undefined}
+                    title={mode === "today" ? "Day View" : mode === "list" ? "List View" : "Week View"}>
+                    {i === 0 ? <Calendar className="w-3.5 h-3.5" strokeWidth={isPoster ? 2.5 : 2} /> : i === 1 ? <List className="w-3.5 h-3.5" strokeWidth={isPoster ? 2.5 : 2} /> : <Grid3X3 className="w-3.5 h-3.5" strokeWidth={isPoster ? 2.5 : 2} />}
                   </motion.button>
                 ))}
               </div>
               <motion.button whileTap={{ scale: 0.9 }} onClick={refreshData} disabled={isLoading}
-                className="flex items-center justify-center w-8 h-8 rounded-lg text-zinc-500 bg-zinc-900/60 ring-1 ring-white/5 hover:text-zinc-300 transition-all disabled:opacity-40">
+                className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all disabled:opacity-40 ${
+                  isPoster
+                    ? "bg-white text-[#111111] border-2 border-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-zinc-50"
+                    : "text-zinc-500 bg-zinc-900/60 ring-1 ring-white/5 hover:text-zinc-300"
+                }`}>
                 <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
               </motion.button>
             </div>
@@ -1073,15 +1151,27 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
 
           <div className="flex items-center gap-6">
             <div className="flex-1 min-w-0">
-              <h1 className="text-3xl font-bold text-zinc-100 tracking-tight font-display">My Timetable</h1>
+              <h1 className={`text-3xl font-bold tracking-tight font-display ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>My Timetable</h1>
               <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-zinc-800/60 text-zinc-300 ring-1 ring-white/5">
+                <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
+                  isPoster
+                    ? "bg-white text-[#111111] border border-[#111111] shadow-[1px_1px_0px_#111111]"
+                    : "bg-zinc-800/60 text-zinc-300 ring-1 ring-white/5"
+                }`}>
                   {user?.specialization || timetableMetadata?.section || "CS AIML"}
                 </span>
-                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-zinc-800/60 text-zinc-300 ring-1 ring-white/5">
+                <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
+                  isPoster
+                    ? "bg-white text-[#111111] border border-[#111111] shadow-[1px_1px_0px_#111111]"
+                    : "bg-zinc-800/60 text-zinc-300 ring-1 ring-white/5"
+                }`}>
                   Batch {timetableMetadata?.batch || "1"}
                 </span>
-                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-zinc-800/60 text-zinc-300 ring-1 ring-white/5">
+                <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
+                  isPoster
+                    ? "bg-white text-[#111111] border border-[#111111] shadow-[1px_1px_0px_#111111]"
+                    : "bg-zinc-800/60 text-zinc-300 ring-1 ring-white/5"
+                }`}>
                   {uniqueCourses} courses
                 </span>
               </div>
@@ -1090,9 +1180,13 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
             {/* Day order info popup */}
             {selectedDayOrder && (
               <div className="shrink-0">
-                <div className="bg-zinc-900/80 ring-1 ring-white/5 rounded-xl px-3 py-2 ">
-                  <p className="text-[8px] font-bold uppercase tracking-widest text-zinc-500 mb-0.5">Day Order</p>
-                  <p className="text-base font-black text-zinc-100 font-display text-center">{selectedDayOrder}</p>
+                <div className={`rounded-xl px-3 py-2 ${
+                  isPoster
+                    ? "bg-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111]"
+                    : "bg-zinc-900/80 ring-1 ring-white/5"
+                }`}>
+                  <p className={`text-[8px] font-bold uppercase tracking-widest mb-0.5 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>Day Order</p>
+                  <p className={`text-base font-black font-display text-center ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>{selectedDayOrder}</p>
                 </div>
               </div>
             )}
@@ -1102,7 +1196,11 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
         {/* Mobile action buttons */}
         <div className="md:hidden flex items-center gap-2 mb-6">
           <motion.button whileTap={{ scale: 0.98 }} onClick={handleExportDayOrders}
-            className="flex-1 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20  px-4 py-3 rounded-xl transition-all border border-emerald-500/20">
+            className={`flex-1 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider px-4 py-3 rounded-xl transition-all ${
+              isPoster
+                ? "bg-white text-[#111111] border-2 border-[#111111] shadow-[3px_3px_0px_#111111] hover:bg-zinc-50"
+                : "text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20"
+            }`}>
             <Download className={`w-4 h-4 ${isExporting ? "animate-pulse" : ""}`} />
             {isExporting ? "..." : "Download"}
           </motion.button>
@@ -1111,7 +1209,11 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
               window.history.replaceState(null, "", "#custom-class")
               onNavigate?.("about")
             }}
-            className="flex-1 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20  px-4 py-3 rounded-xl transition-all border border-emerald-500/20">
+            className={`flex-1 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider px-4 py-3 rounded-xl transition-all ${
+              isPoster
+                ? "bg-white text-[#111111] border-2 border-[#111111] shadow-[3px_3px_0px_#111111] hover:bg-zinc-50"
+                : "text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20"
+            }`}>
             <BookOpen className="w-4 h-4" />
             Add class
           </motion.button>
@@ -1120,14 +1222,20 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
         {/* ── 3-Week Navigation ── */}
         {viewMode === "today" && (
           <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-            <div className="flex items-center gap-1.5 p-1.5 rounded-xl bg-zinc-900 ring-1 ring-white/5 shadow-inner lg:justify-center">
+            <div className={`flex items-center gap-1.5 p-1.5 rounded-xl lg:justify-center ${
+              isPoster
+                ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111]"
+                : "bg-zinc-900 ring-1 ring-white/5 shadow-inner"
+            }`}>
               <motion.button whileTap={{ scale: 0.9 }} onClick={goToPrevDay}
-                className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0 text-zinc-500 hover:text-zinc-300 transition-colors">
+                className={`flex items-center justify-center w-8 h-8 rounded-lg shrink-0 transition-colors ${
+                  isPoster ? "text-[#111111] hover:bg-zinc-100" : "text-zinc-500 hover:text-zinc-300"
+                }`}>
                 <ChevronLeft className="w-4 h-4" />
               </motion.button>
 
-              <div ref={dayScrollRef} className="min-w-0 flex-1 max-w-[360px] overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                <div className="flex min-w-max gap-1 px-0.5 lg:justify-center">
+              <div ref={dayScrollRef} className="min-w-0 flex-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-0.5">
+                <div className="flex min-w-max gap-1 px-1 lg:justify-center">
                   {navDays.map((day, index) => {
                     const isSelected = selectedDayIndex === index
                     const holiday    = dateToHoliday[day.date]
@@ -1138,20 +1246,73 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
                         ref={(node) => { dayButtonRefs.current[index] = node }}
                         whileTap={{ scale: 0.93 }}
                         onClick={() => setSelectedDayIndex(index)}
-                        className={`flex flex-col items-center min-w-[68px] py-2.5 px-2 rounded-lg transition-all ${
+                        className={`flex flex-col items-center min-w-[52px] sm:min-w-[64px] py-2 px-1 sm:py-2.5 sm:px-2 rounded-lg transition-all cursor-pointer ${
                           isSelected
-                            ? "bg-zinc-800 shadow-md border border-white/5"
-                            : "bg-transparent border border-transparent"
+                            ? isPoster
+                              ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] keep-white"
+                              : "bg-zinc-800 shadow-md border border-white/5"
+                            : isPoster
+                              ? "bg-transparent border border-transparent hover:bg-[#e8e6dc]/60 hover:border-[#111111]/20 text-zinc-800"
+                              : "bg-transparent border border-transparent"
                         }`}
                       >
-                        <span className={`text-[9px] uppercase font-bold tracking-wider ${isSelected ? "text-emerald-400" : "text-zinc-500"}`}>{day.shortDay}</span>
-                        <span className={`text-base font-black leading-tight ${isSelected ? "text-emerald-400" : day.isToday ? "text-zinc-100" : "text-zinc-400"}`}>{day.dayNum}</span>
+                        <span className={`text-[9px] uppercase font-bold tracking-wider ${
+                          isSelected
+                            ? isPoster ? "text-white keep-white" : "text-emerald-400"
+                            : isPoster ? "text-zinc-700 font-bold" : "text-zinc-500"
+                        }`}>{day.shortDay}</span>
+                        <span className={`text-base font-black leading-tight ${
+                          isSelected
+                            ? isPoster ? "text-white keep-white" : "text-emerald-400"
+                            : day.isToday
+                            ? isPoster ? "text-[#111111]" : "text-zinc-100"
+                            : isPoster ? "text-[#111111]" : "text-zinc-400"
+                        }`}>{day.dayNum}</span>
                         {day.isToday ? (
-                          <span className={`text-[8px] font-black mt-0.5 ${isSelected ? "text-emerald-400" : "text-emerald-400/70"}`}>TODAY</span>
+                          <span
+                            className={`text-[8px] font-mono font-black mt-1 px-1.5 py-0.5 rounded tracking-wider leading-none select-none ${
+                              isSelected
+                                ? isPoster
+                                  ? "bg-white text-[#111111] border border-white shadow-xs"
+                                  : "bg-emerald-400 text-zinc-950 font-black"
+                                : isPoster
+                                  ? "bg-[#111111] text-white border border-[#111111]"
+                                  : "bg-emerald-500/15 text-emerald-400 border border-emerald-500/25"
+                            }`}
+                            style={isPoster ? (isSelected ? { background: "#ffffff", color: "#111111" } : { background: "#111111", color: "#ffffff" }) : undefined}
+                          >
+                            TODAY
+                          </span>
                         ) : isHoliday ? (
-                          <span className={`text-[8px] font-bold mt-0.5 ${isSelected ? "text-emerald-400" : "text-emerald-400/60"}`}>H</span>
+                          <span
+                            className={`text-[8px] font-mono font-black mt-1 px-1.5 py-0.5 rounded leading-none select-none border shadow-xs ${
+                              isSelected
+                                ? isPoster
+                                  ? "bg-amber-400 text-[#111111] border-amber-300"
+                                  : "text-amber-300 bg-amber-500/20 border-amber-400/30"
+                                : isPoster
+                                  ? "bg-amber-100 text-amber-900 border-amber-300"
+                                  : "text-amber-400 bg-amber-500/15 border-amber-500/30"
+                            }`}
+                            style={isPoster ? (isSelected ? { background: "#fbbf24", color: "#111111", borderColor: "#f59e0b" } : { background: "#fef3c7", color: "#78350f", borderColor: "#fcd34d" }) : undefined}
+                          >
+                            H
+                          </span>
                         ) : day.isWeekend ? (
-                          <span className={`text-[8px] mt-0.5 ${isSelected ? "text-zinc-400" : "text-zinc-600"}`}>W</span>
+                          <span
+                            className={`text-[8px] font-mono font-bold mt-1 px-1.5 py-0.5 rounded leading-none select-none border ${
+                              isSelected
+                                ? isPoster
+                                  ? "bg-white/20 text-white border-white/30"
+                                  : "text-zinc-300 bg-white/10 border-white/10"
+                                : isPoster
+                                  ? "bg-[#e5e2da] text-zinc-700 border-zinc-300"
+                                  : "text-zinc-500 bg-zinc-800/80 border-transparent"
+                            }`}
+                            style={isPoster ? (isSelected ? { background: "rgba(255,255,255,0.2)", color: "#ffffff", borderColor: "rgba(255,255,255,0.3)" } : { background: "#e5e2da", color: "#444444", borderColor: "#d4d0c5" }) : undefined}
+                          >
+                            W
+                          </span>
                         ) : null}
                       </motion.button>
                     )
@@ -1160,7 +1321,9 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
               </div>
 
               <motion.button whileTap={{ scale: 0.9 }} onClick={goToNextDay}
-                className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0 text-zinc-500 hover:text-zinc-300 transition-colors">
+                className={`flex items-center justify-center w-8 h-8 rounded-lg shrink-0 transition-colors ${
+                  isPoster ? "text-[#111111] hover:bg-zinc-100" : "text-zinc-500 hover:text-zinc-300"
+                }`}>
                 <ChevronRight className="w-4 h-4" />
               </motion.button>
             </div>
@@ -1168,7 +1331,11 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
             {!selectedDay?.isToday && (
               <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="flex justify-center mt-3">
                 <motion.button whileTap={{ scale: 0.95 }} onClick={goToToday}
-                  className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20  px-4 py-2 rounded-xl transition-all border border-emerald-500/20">
+                  className={`flex items-center gap-2 text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl transition-all ${
+                    isPoster
+                      ? "bg-white text-[#111111] border-2 border-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-zinc-50"
+                      : "text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20"
+                  }`}>
                   <Calendar className="w-3.5 h-3.5" /> Back to Today
                 </motion.button>
               </motion.div>
@@ -1193,12 +1360,12 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <div className={`w-2 h-2 rounded-full ${
-                    (selectedDay && dateToHoliday[selectedDay.date] && !selectedDayOrder) ? "bg-emerald-400" :
-                    selectedDay?.isWeekend ? "bg-zinc-500" : "bg-emerald-400"
+                    (selectedDay && dateToHoliday[selectedDay.date] && !selectedDayOrder) ? (isPoster ? "bg-emerald-600" : "bg-emerald-400") :
+                    selectedDay?.isWeekend ? (isPoster ? "bg-zinc-600" : "bg-zinc-500") : (isPoster ? "bg-emerald-600" : "bg-emerald-400")
                   }`} />
-                  <h2 className="text-lg font-bold text-zinc-100 tracking-tight">{selectedDay?.dayName}</h2>
+                  <h2 className={`text-lg font-bold tracking-tight ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>{selectedDay?.dayName}</h2>
                 </div>
-                <p className="text-xs text-zinc-500">{selectedDay?.dayNum} {selectedDay?.month}</p>
+                <p className={`text-xs ${isPoster ? "text-zinc-600 font-medium" : "text-zinc-500"}`}>{selectedDay?.dayNum} {selectedDay?.month}</p>
               </div>
 
               {/* Class list — no IIFE, no bracket artifacts */}
@@ -1231,40 +1398,66 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: di * 0.05 }}
-                    className={`bg-zinc-900/60 ring-1  rounded-3xl  overflow-hidden relative ${
-                      day.isToday ? "ring-emerald-500/30" : "ring-white/5"
+                    className={`rounded-3xl overflow-hidden relative ${
+                      isPoster
+                        ? (day.isToday
+                            ? "bg-white border-2 border-[#111111] shadow-[4px_4px_0px_#111111]"
+                            : "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111]")
+                        : (day.isToday ? "bg-zinc-900/60 ring-1 ring-emerald-500/30" : "bg-zinc-900/60 ring-1 ring-white/5")
                     }`}
                   >
                     {/* Day header */}
-                    <div className="flex items-center justify-between px-6 py-3 border-b border-white/5">
+                    <div className={`flex items-center justify-between px-6 py-3 ${
+                      isPoster ? "border-b border-[#111111]/15 bg-[#faf8f5]" : "border-b border-white/5"
+                    }`}>
                       <div className="flex items-center gap-3">
                         <div className="text-center">
-                          <p className={`text-[10px] font-bold uppercase tracking-widest ${day.isToday ? "text-emerald-400" : day.isWeekend ? "text-zinc-600" : "text-zinc-500"}`}>
+                          <p className={`text-[10px] font-bold uppercase tracking-widest ${
+                            isPoster
+                              ? "text-zinc-600 font-mono"
+                              : (day.isToday ? "text-emerald-400" : day.isWeekend ? "text-zinc-600" : "text-zinc-500")
+                          }`}>
                             {day.shortDay}
                           </p>
-                          <p className={`text-lg font-black leading-none ${day.isToday ? "text-emerald-400" : day.isWeekend ? "text-zinc-600" : "text-zinc-100"}`}>
+                          <p className={`text-lg font-black leading-none ${
+                            isPoster
+                              ? "text-[#111111]"
+                              : (day.isToday ? "text-emerald-400" : day.isWeekend ? "text-zinc-600" : "text-zinc-100")
+                          }`}>
                             {day.dayNum}
                           </p>
                         </div>
                         <div className="flex flex-wrap gap-1.5">
                           {dayOrder && !day.isWeekend && (
-                            <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-lg text-emerald-400 bg-emerald-500/10 ring-1 ring-emerald-500/20">
+                            <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-lg ${
+                              isPoster
+                                ? "bg-white text-[#111111] border border-[#111111] shadow-[1px_1px_0px_#111111]"
+                                : "text-emerald-400 bg-emerald-500/10 ring-1 ring-emerald-500/20"
+                            }`}>
                               DO {dayOrder}
                             </span>
                           )}
                           {day.isToday && (
-                            <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-lg text-emerald-400 bg-emerald-500/10 ring-1 ring-emerald-500/20">
+                            <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-lg ${
+                              isPoster
+                                ? "bg-[#111111] text-white border border-[#111111] shadow-[1px_1px_0px_#111111] keep-white"
+                                : "text-emerald-400 bg-emerald-500/10 ring-1 ring-emerald-500/20"
+                            }`}>
                               Today
                             </span>
                           )}
                           {holiday && !dayOrder && (
-                            <span className="text-[10px] font-bold px-2.5 py-1 rounded-lg text-emerald-400 bg-emerald-500/10 ring-1 ring-emerald-500/20">
+                            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg ${
+                              isPoster
+                                ? "bg-[#fef3c7] text-[#111111] border border-[#111111] shadow-[1px_1px_0px_#111111]"
+                                : "text-emerald-400 bg-emerald-500/10 ring-1 ring-emerald-500/20"
+                            }`}>
                               <HolidayIcon size="w-4 h-4" /> Holiday
                             </span>
                           )}
                         </div>
                       </div>
-                      <span className="text-[10px] text-zinc-500">
+                      <span className={`text-[10px] ${isPoster ? "text-zinc-600 font-medium" : "text-zinc-500"}`}>
                         {dayClasses.length > 0 ? `${dayClasses.length} class${dayClasses.length > 1 ? "es" : ""}` : ""}
                       </span>
                     </div>
@@ -1275,20 +1468,20 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
                           animate={{ y: [0, -2, 0], opacity: [0.5, 1, 0.5] }}
                           transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
                         >
-                          <Moon className="w-3.5 h-3.5 text-zinc-500" />
+                          <Moon className={`w-3.5 h-3.5 ${isPoster ? "text-zinc-600" : "text-zinc-500"}`} />
                         </motion.div>
-                        <span className="text-xs text-zinc-500">Weekend</span>
+                        <span className={`text-xs ${isPoster ? "text-zinc-600 font-medium" : "text-zinc-500"}`}>Weekend</span>
                       </div>
                     ) : holiday && !dayOrder ? (
                       <div className="px-6 py-5 flex items-center gap-2">
-                        <span className="text-xs text-emerald-400"><HolidayIcon size="w-4 h-4" /> {holiday}</span>
+                        <span className={`text-xs ${isPoster ? "text-[#111111] font-bold" : "text-emerald-400"}`}><HolidayIcon size="w-4 h-4" /> {holiday}</span>
                       </div>
                     ) : dayClasses.length === 0 ? (
                       <div className="px-6 py-5">
-                        <span className="text-xs text-zinc-500">No classes scheduled</span>
+                        <span className={`text-xs ${isPoster ? "text-zinc-600 font-medium" : "text-zinc-500"}`}>No classes scheduled</span>
                       </div>
                     ) : (
-                      <div className="divide-y divide-white/[0.04]">
+                      <div className={`divide-y ${isPoster ? "divide-[#111111]/10" : "divide-white/[0.04]"}`}>
                         {dayClasses.map((c: any) => {
                           const slot      = TIME_SLOTS.find(s => s.hour === c.hour)
                           const typeColors: Record<string, string> = {
@@ -1299,29 +1492,31 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
                           return (
                             <div key={`${day.date}-${c.hour}`}
                               className="flex items-center gap-4 px-6 py-3 relative transition-colors"
-                              style={{ background: isCurrent ? "rgba(16,185,129,0.03)" : "transparent" }}>
+                              style={{ background: isCurrent ? (isPoster ? "rgba(16,185,129,0.08)" : "rgba(16,185,129,0.03)") : "transparent" }}>
                               {isCurrent && (
-                                <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-emerald-400 " />
+                                <div className={`absolute left-0 top-0 bottom-0 ${isPoster ? "w-1 bg-[#111111]" : "w-0.5 bg-emerald-400"}`} />
                               )}
-                              <div className="w-0.5 h-8 rounded-full shrink-0"
-                                style={{ background: barColor, boxShadow: `0 0 6px ${barColor}60` }} />
+                              <div className="w-1 h-8 rounded-full shrink-0"
+                                style={{ background: isPoster ? "#111111" : barColor, boxShadow: isPoster ? "none" : `0 0 6px ${barColor}60` }} />
                               <div className="shrink-0 w-12">
-                                <p className={`text-[10px] font-black tabular-nums ${isCurrent ? "text-emerald-400" : "text-zinc-400"}`}>{slot?.short}</p>
-                                <p className="text-[8px] text-zinc-600">Hr {c.hour}</p>
+                                <p className={`text-[10px] font-black tabular-nums ${isPoster ? "text-[#111111]" : (isCurrent ? "text-emerald-400" : "text-zinc-400")}`}>{slot?.short}</p>
+                                <p className={`text-[8px] ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-600"}`}>Hr {c.hour}</p>
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-xs font-bold truncate text-zinc-200">{c.name}</p>
-                                <p className="text-[10px] truncate text-zinc-500">
+                                <p className={`text-xs font-bold truncate ${isPoster ? "text-[#111111]" : "text-zinc-200"}`}>{c.name}</p>
+                                <p className={`text-[10px] truncate ${isPoster ? "text-zinc-600 font-medium" : "text-zinc-500"}`}>
                                   {c.room && <span>{c.room} · </span>}{c.code}
                                 </p>
                               </div>
-                              <span className={`text-[9px] font-bold px-2 py-1 rounded-lg shrink-0 ring-1 ${
-                                c.type?.toLowerCase().includes("lab based") ? "text-amber-400 bg-amber-500/10 ring-amber-500/20" :
-                                c.type?.toLowerCase() === "theory" ? "text-purple-400 bg-purple-500/10 ring-purple-500/20" :
-                                c.type?.toLowerCase().includes("practical") || c.type?.toLowerCase() === "lab" ? "text-blue-400 bg-blue-500/10 ring-blue-500/20" :
-                                "text-emerald-400 bg-emerald-500/10 ring-emerald-500/20"
+                              <span className={`text-[9px] font-bold px-2 py-1 rounded-lg shrink-0 ${
+                                isPoster
+                                  ? "bg-[#f4f4f0] text-[#111111] border border-[#111111] shadow-[1px_1px_0px_#111111]"
+                                  : (c.type?.toLowerCase().includes("lab based") ? "ring-1 text-amber-400 bg-amber-500/10 ring-amber-500/20" :
+                                     c.type?.toLowerCase() === "theory" ? "ring-1 text-purple-400 bg-purple-500/10 ring-purple-500/20" :
+                                     c.type?.toLowerCase().includes("practical") || c.type?.toLowerCase() === "lab" ? "ring-1 text-blue-400 bg-blue-500/10 ring-blue-500/20" :
+                                     "ring-1 text-emerald-400 bg-emerald-500/10 ring-emerald-500/20")
                               }`}>
-                                {c.type === "Lab Based Theory" ? "LBT" : c.type?.slice(0, 3)}
+                                {c.type || "Theory"}
                               </span>
                             </div>
                           )
@@ -1337,8 +1532,10 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
           {/* Week Grid — compact scrollable table with tap-to-expand */}
           {viewMode === "week" && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              <p className="text-[10px] text-center mb-3 text-zinc-500">← Scroll horizontally · Tap a class for details →</p>
-              <div className="bg-zinc-900/60 ring-1 ring-white/5  rounded-3xl  overflow-hidden relative">
+              <p className={`text-[10px] text-center mb-3 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>← Scroll horizontally · Tap a class for details →</p>
+              <div className={`rounded-3xl overflow-hidden relative ${
+                isPoster ? "bg-white border-2 border-[#111111] shadow-[4px_4px_0px_#111111]" : "bg-zinc-900/60 ring-1 ring-white/5"
+              }`}>
                 <div className="overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden" style={{ WebkitOverflowScrolling: "touch" }}>
                   <div style={{ minWidth: 580 }}>
 
@@ -1482,11 +1679,15 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
                       animate={{ y: 0, opacity: 1 }}
                       exit={{ y: "100%", opacity: 0 }}
                       transition={{ type: "spring", damping: 28, stiffness: 340 }}
-                      className="fixed bottom-0 left-0 right-0 z-50 max-w-[480px] mx-auto bg-zinc-900/80 backdrop-blur-md border border-white/5 shadow-2xl rounded-t-3xl overflow-hidden"
+                      className={`fixed bottom-0 left-0 right-0 z-50 max-w-[480px] mx-auto rounded-t-3xl overflow-hidden ${
+                        isPoster
+                          ? "bg-white border-2 border-b-0 border-[#111111] shadow-[0px_-6px_20px_rgba(0,0,0,0.15)] text-[#111111]"
+                          : "bg-zinc-900/80 backdrop-blur-md border border-white/5 shadow-2xl"
+                      }`}
                     >
                       {/* Drag handle */}
                       <div className="flex justify-center pt-3 pb-1">
-                        <div className="w-9 h-1 rounded-full bg-white/15" />
+                        <div className={`w-9 h-1 rounded-full ${isPoster ? "bg-[#111111]/20" : "bg-white/15"}`} />
                       </div>
 
                       {(() => {
@@ -1512,16 +1713,20 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
                                       <span className="animate-ping absolute inset-0 rounded-full opacity-75 bg-emerald-400" />
                                       <span className="relative rounded-full h-1.5 w-1.5 bg-emerald-400" />
                                     </span>
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">
+                                    <span className={`text-[10px] font-bold uppercase tracking-widest ${isPoster ? "text-[#111111]" : "text-emerald-400"}`}>
                                       Happening Now
                                     </span>
                                   </div>
                                 )}
-                                <p className="text-[10px] font-mono font-bold text-emerald-400 mb-1">{c.code}</p>
-                                <p className="text-base font-bold text-zinc-100 leading-snug">{c.name}</p>
+                                <p className={`text-[10px] font-mono font-bold mb-1 ${isPoster ? "text-[#111111]" : "text-emerald-400"}`}>{c.code}</p>
+                                <p className={`text-base font-bold leading-snug ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>{c.name}</p>
                               </div>
                               <button onClick={() => setSelectedCell(null)}
-                                className="shrink-0 w-8 h-8 rounded-xl flex items-center justify-center mt-1 bg-white/[0.06] ring-1 ring-white/10 text-zinc-500">
+                                className={`shrink-0 w-8 h-8 rounded-xl flex items-center justify-center mt-1 transition-colors ${
+                                  isPoster
+                                    ? "bg-[#f7f5f0] border border-[#111111] text-[#111111] hover:bg-[#eae6dd]"
+                                    : "bg-white/[0.06] ring-1 ring-white/10 text-zinc-500"
+                                }`}>
                                 <X className="w-3.5 h-3.5" />
                               </button>
                             </div>
@@ -1530,13 +1735,21 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
                             <div className="flex items-center gap-2 mb-4">
                               {(() => {
                                 const cat = getCategoryFromSlot(c.slot)
-                                const st = cat === "Theory" ? "text-purple-400 bg-purple-500/10 ring-purple-500/20" : cat === "Practical" ? "text-blue-400 bg-blue-500/10 ring-blue-500/20" : "text-emerald-400 bg-emerald-500/10 ring-emerald-500/20"
+                                const st = isPoster
+                                  ? "text-[#111111] bg-[#f7f5f0] border border-[#111111]"
+                                  : (cat === "Theory" ? "text-purple-400 bg-purple-500/10 ring-purple-500/20" : cat === "Practical" ? "text-blue-400 bg-blue-500/10 ring-blue-500/20" : "text-emerald-400 bg-emerald-500/10 ring-emerald-500/20")
                                 return <span className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg ring-1 ${st}`}>{cat}</span>
                               })()}
                               {c.room?.toLowerCase().includes("online") && (
-                                <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg ring-1 text-sky-400 bg-sky-500/10 ring-sky-500/20">Online</span>
+                                <span className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg ring-1 ${
+                                  isPoster
+                                    ? "text-[#111111] bg-[#f7f5f0] border border-[#111111]"
+                                    : "text-sky-400 bg-sky-500/10 ring-sky-500/20"
+                                }`}>Online</span>
                               )}
-                              <span className="text-[10px] font-semibold px-3 py-1.5 rounded-lg bg-white/[0.03] text-zinc-400 ring-1 ring-white/5">
+                              <span className={`text-[10px] font-semibold px-3 py-1.5 rounded-lg ${
+                                isPoster ? "bg-[#f7f5f0] text-[#111111] border border-[#111111]" : "bg-white/[0.03] text-zinc-400 ring-1 ring-white/5"
+                              }`}>
                                 {ts.time} · Hr {ts.hour}
                               </span>
                             </div>
@@ -1549,40 +1762,48 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
                                 { icon: Hash,   label: "Slot",    value: c.slot    || "—" },
                                 { icon: Award,  label: "Credits", value: courseDetails ? `${courseDetails.credits} Cr` : "—" },
                               ].map(({ icon: Icon, label, value }) => (
-                                <div key={label} className="rounded-xl px-3 py-2.5 bg-white/[0.03] ring-1 ring-white/5">
+                                <div key={label} className={`rounded-xl px-3 py-2.5 ${
+                                  isPoster ? "bg-[#f7f5f0] border border-[#111111]" : "bg-white/[0.03] ring-1 ring-white/5"
+                                }`}>
                                   <div className="flex items-center gap-1.5 mb-0.5">
-                                    <Icon className="w-2.5 h-2.5 text-zinc-500" />
-                                    <p className="text-zinc-500 text-[9px] uppercase tracking-wider font-bold">{label}</p>
+                                    <Icon className={`w-2.5 h-2.5 ${isPoster ? "text-[#555555]" : "text-zinc-500"}`} />
+                                    <p className={`text-[9px] uppercase tracking-wider font-bold ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>{label}</p>
                                   </div>
-                                  <p className="text-xs font-bold truncate text-zinc-200">{value}</p>
+                                  <p className={`text-xs font-bold truncate ${isPoster ? "text-[#111111]" : "text-zinc-200"}`}>{value}</p>
                                 </div>
                               ))}
                             </div>
 
                             {/* Attendance bar */}
                             {att && attPct !== null && (
-                              <div className="rounded-xl px-4 py-3 bg-white/[0.03] ring-1 ring-white/5">
+                              <div className={`rounded-xl px-4 py-3 ${
+                                isPoster ? "bg-[#f7f5f0] border border-[#111111]" : "bg-white/[0.03] ring-1 ring-white/5"
+                              }`}>
                                 <div className="flex items-center justify-between mb-2">
-                                  <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Attendance</p>
-                                  <p className={`text-sm font-black ${attPct >= 75 ? "text-emerald-400" : attPct >= 65 ? "text-amber-400" : "text-red-400"}`}>
+                                  <p className={`text-[10px] font-bold uppercase tracking-widest ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>Attendance</p>
+                                  <p className={`text-sm font-black ${
+                                    isPoster ? "text-[#111111]" : (attPct >= 75 ? "text-emerald-400" : attPct >= 65 ? "text-amber-400" : "text-red-400")
+                                  }`}>
                                     {attPct}%
                                   </p>
                                 </div>
-                                <div className="w-full h-1.5 bg-zinc-950 rounded-full overflow-hidden shadow-inner ring-1 ring-white/5">
+                                <div className={`w-full h-1.5 rounded-full overflow-hidden shadow-inner ${isPoster ? "bg-[#e5e5e5] border border-[#111111]/20" : "bg-zinc-950 ring-1 ring-white/5"}`}>
                                   <motion.div
                                     initial={{ width: 0 }}
                                     animate={{ width: `${attPct}%` }}
                                     transition={{ duration: 0.7, ease: "easeOut" }}
                                     className={`h-full rounded-full ${
-                                      attPct >= 75 ? "bg-gradient-to-r from-emerald-500 to-emerald-400 "
-                                        : attPct >= 65 ? "bg-gradient-to-r from-amber-500 to-amber-400 "
-                                        : "bg-gradient-to-r from-red-500 to-red-400 "
+                                      isPoster
+                                        ? "bg-[#111111]"
+                                        : (attPct >= 75 ? "bg-gradient-to-r from-emerald-500 to-emerald-400 "
+                                          : attPct >= 65 ? "bg-gradient-to-r from-amber-500 to-amber-400 "
+                                          : "bg-gradient-to-r from-red-500 to-red-400 ")
                                     }`}
                                   />
                                 </div>
                                 <div className="flex justify-between mt-1.5">
-                                  <p className="text-zinc-500 text-[9px]">{att.attended}/{att.total} classes</p>
-                                  <p className="text-zinc-500 text-[9px]">Goal: 75%</p>
+                                  <p className={`text-[9px] ${isPoster ? "text-[#666666]" : "text-zinc-500"}`}>{att.attended}/{att.total} classes</p>
+                                  <p className={`text-[9px] ${isPoster ? "text-[#666666]" : "text-zinc-500"}`}>Goal: 75%</p>
                                 </div>
                               </div>
                             )}
@@ -1611,30 +1832,46 @@ export function TimetableSection({ onNavigate }: { onNavigate?: (tab: TabType) =
                       animate={{ y: 0, opacity: 1 }}
                       exit={{ y: "100%", opacity: 0 }}
                       transition={{ type: "spring", damping: 28, stiffness: 340 }}
-                      className="fixed bottom-0 left-0 right-0 z-50 max-w-[480px] mx-auto bg-zinc-900/80 backdrop-blur-md border border-emerald-500/15 shadow-2xl rounded-t-3xl overflow-hidden"
-                      style={{ boxShadow: "0 -16px 60px rgba(0,0,0,0.7), 0 0 40px rgba(16,185,129,0.06)" }}
+                      className={`fixed bottom-0 left-0 right-0 z-50 max-w-[480px] mx-auto rounded-t-3xl overflow-hidden ${
+                        isPoster
+                          ? "bg-white border-2 border-b-0 border-[#111111] shadow-[0px_-6px_20px_rgba(0,0,0,0.15)] text-[#111111]"
+                          : "bg-zinc-900/80 backdrop-blur-md border border-emerald-500/15 shadow-2xl"
+                      }`}
+                      style={isPoster ? {} : { boxShadow: "0 -16px 60px rgba(0,0,0,0.7), 0 0 40px rgba(16,185,129,0.06)" }}
                     >
                       <div className="flex justify-center pt-3 pb-1">
-                        <div className="w-9 h-1 rounded-full bg-white/15" />
+                        <div className={`w-9 h-1 rounded-full ${isPoster ? "bg-[#111111]/20" : "bg-white/15"}`} />
                       </div>
                       <div className="p-8">
                         <div className="flex items-center justify-between mb-4">
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">Holiday</p>
+                          <p className={`text-[10px] font-bold uppercase tracking-widest ${isPoster ? "text-[#111111]" : "text-emerald-400"}`}>Holiday</p>
                           <button onClick={() => setSelectedHoliday(null)}
-                            className="w-8 h-8 rounded-xl flex items-center justify-center bg-white/[0.06] ring-1 ring-white/10 text-zinc-500">
+                            className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${
+                              isPoster
+                                ? "bg-[#f7f5f0] border border-[#111111] text-[#111111] hover:bg-[#eae6dd]"
+                                : "bg-white/[0.06] ring-1 ring-white/10 text-zinc-500"
+                            }`}>
                             <X className="w-3.5 h-3.5" />
                           </button>
                         </div>
                         <div className="flex items-center gap-4">
-                          <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shrink-0 bg-emerald-500/10 ring-1 ring-emerald-500/20">
+                          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shrink-0 ${
+                            isPoster
+                              ? "bg-[#f7f5f0] border-2 border-[#111111] shadow-[2px_2px_0px_#111111]"
+                              : "bg-emerald-500/10 ring-1 ring-emerald-500/20"
+                          }`}>
                             <HolidayIcon size="w-4 h-4" />
                           </div>
                           <div>
-                            <p className="text-lg font-bold text-zinc-100 leading-tight">{selectedHoliday.name}</p>
-                            <p className="text-xs mt-1 text-zinc-500">
+                            <p className={`text-lg font-bold leading-tight ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>{selectedHoliday.name}</p>
+                            <p className={`text-xs mt-1 ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>
                               {new Date(selectedHoliday.date).toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })}
                             </p>
-                            <span className="inline-block mt-2 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg text-emerald-400 bg-emerald-500/10 ring-1 ring-emerald-500/20">
+                            <span className={`inline-block mt-2 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg ${
+                              isPoster
+                                ? "bg-[#111111] text-white border border-[#111111]"
+                                : "text-emerald-400 bg-emerald-500/10 ring-1 ring-emerald-500/20"
+                            }`}>
                               No classes scheduled
                             </span>
                           </div>

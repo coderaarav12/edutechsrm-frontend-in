@@ -5,19 +5,22 @@ import type { CSSProperties } from "react"
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 import {
   AlertTriangle, ArrowRight, ArrowUpRight, BarChart3, BookOpen, Bot, CalendarDays, Calculator,
-  CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, Clock, FileText, GraduationCap, IdCard, Lock, MapPin,
-  MessageSquareText, Navigation, RefreshCw, Shield, Sparkles, SlidersHorizontal, TrendingUp, Zap,
+  CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, Clock, Coffee, FileCode, FileText, GraduationCap, IdCard, Lock, MapPin,
+  MessageSquareText, Navigation, RefreshCw, Shield, Sparkles, SlidersHorizontal, TrendingUp, Wifi, Zap,
 } from "lucide-react"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { Header, type LandingMode } from "@/components/Header"
-import { SEOStructuredData } from "@/components/seo-structured-data"
+import { SEOStructuredData } from "@/components/seo-structured-data" // kept for legacy only
 import { FloatingAppAction } from "@/components/floating-app-action"
 import { CampusShowcase } from "@/components/campus-cinema"
 import { PublicFooter } from "@/components/public-footer"
 import { useAuth } from "@/lib/auth-context"
 import { useTheme } from "@/lib/theme-context"
 import { WelcomeSplash } from "@/components/welcome-splash"
+import { ModeSelectionModal } from "@/components/mode-selection-modal"
+import { flushSync } from "react-dom"
+import { performThemeTransition } from "@/lib/theme-transition"
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger)
@@ -311,31 +314,35 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
   const [isAndroidUser, setIsAndroidUser] = useState(false)
   const [isAppleDevice, setIsAppleDevice] = useState(false)
   const lastTouchTime = useRef(0)
-  const [showSplash, setShowSplash] = useState(() => {
-    if (typeof window === "undefined") return false
-    // Only show for non-authenticated users, once per session
-    try {
-      return !sessionStorage.getItem("edutechsrm-splash-shown")
-    } catch { return true }
-  })
+  const [showSplash, setShowSplash] = useState(true)
+  const [showModeModal, setShowModeModal] = useState(false)
 
   useEffect(() => {
     try {
       const saved = (localStorage.getItem("edutechsrm-landing-mode") || localStorage.getItem("edutechsrm_landing_mode")) as string
       const initialMode = saved === "night" ? "night" : "poster"
+      const themeName = initialMode === "poster" ? "poster" : "dark"
       setMode(initialMode)
       if (typeof document !== "undefined") {
         document.documentElement.setAttribute("data-landing-mode", initialMode)
+        document.documentElement.setAttribute("data-theme", themeName)
+        document.body.setAttribute("data-landing-mode", initialMode)
+        document.body.setAttribute("data-theme", themeName)
         document.body.style.backgroundColor = initialMode === "poster" ? "#f7f5f0" : "#06080d"
       }
     } catch { /* noop */ }
 
     const onModeChange = (e: Event) => {
-      const m = (e as CustomEvent).detail
+      const detail = (e as CustomEvent).detail
+      const m = typeof detail === "string" ? detail : detail?.mode
       if (m === "poster" || m === "night") {
+        const themeName = m === "poster" ? "poster" : "dark"
         setMode(m)
         if (typeof document !== "undefined") {
           document.documentElement.setAttribute("data-landing-mode", m)
+          document.documentElement.setAttribute("data-theme", themeName)
+          document.body.setAttribute("data-landing-mode", m)
+          document.body.setAttribute("data-theme", themeName)
           document.body.style.backgroundColor = m === "poster" ? "#f7f5f0" : "#06080d"
         }
       }
@@ -344,18 +351,47 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
     return () => window.removeEventListener("landing-mode-change", onModeChange)
   }, [])
 
-  const handleModeChange = (nextMode: LandingMode) => {
+  const handleModeChange = (nextMode: LandingMode, coords?: { x: number; y: number }) => {
     const validMode = nextMode === "poster" ? "poster" : "night"
-    setMode(validMode)
-    if (typeof document !== "undefined") {
-      document.documentElement.setAttribute("data-landing-mode", validMode)
-      document.body.style.backgroundColor = validMode === "poster" ? "#f7f5f0" : "#06080d"
+    const themeName = validMode === "poster" ? "poster" : "dark"
+
+    const applyTheme = () => {
+      try {
+        flushSync(() => {
+          setMode(validMode)
+        })
+      } catch {
+        setMode(validMode)
+      }
+      if (typeof document !== "undefined") {
+        document.documentElement.setAttribute("data-landing-mode", validMode)
+        document.documentElement.setAttribute("data-theme", themeName)
+        document.body.setAttribute("data-landing-mode", validMode)
+        document.body.setAttribute("data-theme", themeName)
+        document.body.style.backgroundColor = validMode === "poster" ? "#f7f5f0" : "#06080d"
+      }
+      try {
+        localStorage.setItem("edutechsrm_landing_mode", validMode)
+        localStorage.setItem("edutechsrm-landing-mode", validMode)
+        const themeObj = {
+          mode: themeName,
+          presetId: validMode === "poster" ? "poster-cardstock" : "default",
+          customImage: null,
+          customColors: { pageBg: "#09090b", cardBg: "#18181b", textPrimary: "#f4f4f5", accent: "#34d399" },
+        }
+        localStorage.setItem("edutechsrm_theme", JSON.stringify(themeObj))
+        localStorage.setItem("edutechsrm-theme", JSON.stringify(themeObj))
+        window.dispatchEvent(new CustomEvent("landing-mode-change", {
+          detail: { mode: validMode, ...(coords || {}) }
+        }))
+      } catch { /* noop */ }
     }
-    try {
-      localStorage.setItem("edutechsrm_landing_mode", validMode)
-      localStorage.setItem("edutechsrm-landing-mode", validMode)
-      window.dispatchEvent(new CustomEvent("landing-mode-change", { detail: validMode }))
-    } catch { /* noop */ }
+
+    performThemeTransition({
+      nextMode: validMode,
+      coords,
+      applyTheme,
+    })
   }
 
   useEffect(() => {
@@ -462,12 +498,14 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
     if (reduce) return
 
     const ctx = gsap.context(() => {
+      const isMobile = window.innerWidth < 768
+
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: "#top",
           start: "top top",
           end: "bottom bottom",
-          scrub: 1.1,
+          scrub: isMobile ? 0.6 : 1.1,
         },
       })
 
@@ -475,10 +513,10 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
       tl.to(".hero-chip-attendance", { x: -140, y: -45, rotation: -12, opacity: 0, ease: "none", duration: 0.12 }, 0)
         .to(".hero-chip-timetable", { y: -70, rotation: -8, opacity: 0, ease: "none", duration: 0.12 }, 0.01)
         .to(".hero-chip-caution", { x: 140, y: -45, rotation: 14, opacity: 0, ease: "none", duration: 0.12 }, 0)
-        .to(".hero-chip-campus", { x: -120, y: 55, rotation: 10, opacity: 0, ease: "none", duration: 0.12 }, 0.01)
-        .to(".hero-chip-syllabus", { x: 120, y: -30, rotation: 12, opacity: 0, ease: "none", duration: 0.12 }, 0.02)
-        .to(".hero-chip-bunk", { x: 130, y: 50, rotation: -12, opacity: 0, ease: "none", duration: 0.12 }, 0.02)
+        .to(".hero-chip-campus", { x: -120, y: -30, rotation: 10, opacity: 0, ease: "none", duration: 0.12 }, 0.01)
+        .to(".hero-chip-bunk", { x: 140, y: -10, rotation: 12, opacity: 0, ease: "none", duration: 0.12 }, 0.02)
         .to(".hero-chip-mobile", { opacity: 0, y: -20, ease: "none", duration: 0.10 }, 0)
+        .to(".hero-chip-laptop", { opacity: 0, ease: "none", duration: 0.12 }, 0.01)
         .to(".hero-headline-wrap", { y: -40, opacity: 0, scale: 0.95, ease: "none", duration: 0.13 }, 0.02)
         .to(".hero-welcome-block", { autoAlpha: 0, ease: "none", duration: 0.14 }, 0.02)
 
@@ -486,7 +524,7 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
       // "College is thousands of frantic moments."
       tl.fromTo(".story-act-1", { opacity: 0, y: 40, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, ease: "none", duration: 0.04 }, 0.14)
         .to(".story-act-1", { opacity: 1, duration: 0.09 }, 0.18)
-        .to(".story-act-1", { opacity: 0, y: -40, filter: "blur(6px)", ease: "none", duration: 0.04 }, 0.27)
+        .to(".story-act-1", { opacity: 0, y: -40, ...(isMobile ? {} : { filter: "blur(6px)" }), ease: "none", duration: 0.04 }, 0.27)
 
       // ── Act 2: Moment 02 - The Memories Flood (0.31 -> 0.49) ──
       tl.fromTo(".story-act-2", { opacity: 0 }, { opacity: 1, ease: "none", duration: 0.03 }, 0.31)
@@ -509,7 +547,7 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
       // "EVERYTHING IS SOMEWHERE. NOTHING IS TOGETHER."
       tl.fromTo(".story-act-3", { opacity: 0, y: 50, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, ease: "none", duration: 0.04 }, 0.49)
         .to(".story-act-3", { opacity: 1, duration: 0.10 }, 0.53)
-        .to(".story-act-3", { opacity: 0, y: -45, filter: "blur(6px)", ease: "none", duration: 0.04 }, 0.63)
+        .to(".story-act-3", { opacity: 0, y: -45, ...(isMobile ? {} : { filter: "blur(6px)" }), ease: "none", duration: 0.04 }, 0.63)
 
       // ── Act 4: Moment 04 - The Synthesis (0.67 -> 0.85) ──
       // "EVERY PIECE FINDS ITS PLACE."
@@ -522,14 +560,17 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
         .to(".story-act-4", { opacity: 1, duration: 0.09 }, 0.72)
         .to(".synth-card-1", { x: 25, scale: 0.95, ease: "none", duration: 0.04 }, 0.81)
         .to(".synth-card-4", { x: -25, scale: 0.95, ease: "none", duration: 0.04 }, 0.81)
-        .to(".story-act-4", { opacity: 0, y: -45, filter: "blur(6px)", ease: "none", duration: 0.04 }, 0.82)
+        .to(".story-act-4", { opacity: 0, y: -45, ...(isMobile ? {} : { filter: "blur(6px)" }), ease: "none", duration: 0.04 }, 0.82)
 
       // ── Act 5: Moment 05 - The Emotional Resolution (0.85 -> 1.00) ──
       tl.fromTo(".story-act-5", { opacity: 0, y: 40, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, ease: "none", duration: 0.04 }, 0.85)
         .set(".story-act-5", { pointerEvents: "auto" }, 0.87)
         .to(".story-act-5", { opacity: 1, duration: 0.12 }, 0.88)
 
-      gsap.to(".hero-orb", { scale: 1.12, opacity: 0.85, duration: 4.2, yoyo: true, repeat: -1, ease: "sine.inOut" })
+      // Only pulse the orb on desktop — it's purely decorative and burns GPU on mobile
+      if (!isMobile) {
+        gsap.to(".hero-orb", { scale: 1.12, opacity: 0.85, duration: 4.2, yoyo: true, repeat: -1, ease: "sine.inOut" })
+      }
     }, rootRef)
 
     return () => ctx.revert()
@@ -619,19 +660,26 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
 
   return (
     <>
-      {/* Welcome splash — only for non-authenticated visitors, once per session */}
+      {/* Welcome splash — shows every time for non-authenticated visitors */}
       {!isAuthenticated && showSplash && (
         <WelcomeSplash
           isPoster={isPoster}
           onComplete={() => {
             setShowSplash(false)
-            try { sessionStorage.setItem("edutechsrm-splash-shown", "1") } catch {}
+            try {
+              const dismissed = sessionStorage.getItem("edutechsrm_mode_prompt_seen")
+              if (!dismissed) {
+                setShowModeModal(true)
+              }
+            } catch {
+              setShowModeModal(true)
+            }
           }}
         />
       )}
-      <SEOStructuredData />
+      {/* JSON-LD structured data is server-rendered in app/layout.tsx — no client duplicate needed */}
       <style>{`
-        .landing-root{font-family:var(--font-sans),Inter,ui-sans-serif,system-ui,sans-serif;background-color:var(--lm-bg,#06080d);color:var(--lm-text-primary,#f4f4f5);overflow-x:clip;transition:background-color .4s cubic-bezier(0.16,1,0.3,1),color .3s ease}
+        .landing-root{font-family:var(--font-sans),Inter,ui-sans-serif,system-ui,sans-serif;background-color:var(--lm-bg,#06080d);color:var(--lm-text-primary,#f4f4f5);overflow-x:clip;}
 
         /* ══════════════════════════════════════════════════════════════════════
            SWISS / BRUTALIST POSTER MODE
@@ -868,6 +916,52 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
         [data-landing-mode="poster"] .memory-card .text-zinc-500 {
           color: #555555 !important;
         }
+        .tactile-postit {
+          background: rgba(45, 34, 15, 0.88);
+          border: 1px solid rgba(245, 158, 11, 0.35);
+        }
+        [data-landing-mode="poster"] .tactile-postit {
+          background: #fefce8 !important;
+          border: 2px solid #111111 !important;
+          box-shadow: 4px 4px 0px #111111 !important;
+          color: #111111 !important;
+        }
+        [data-landing-mode="poster"] .tactile-postit .text-amber-200,
+        [data-landing-mode="poster"] .tactile-postit .text-amber-300 {
+          color: #78350f !important;
+        }
+        .tactile-stamp-red {
+          border: 1.5px dashed rgba(244, 63, 94, 0.7);
+          background: rgba(244, 63, 94, 0.15);
+          color: #fda4af;
+        }
+        [data-landing-mode="poster"] .tactile-stamp-red {
+          border: 2px dashed #dc2626 !important;
+          background: #fee2e2 !important;
+          color: #991b1b !important;
+        }
+        .tactile-stamp-emerald {
+          border: 1.5px solid rgba(52, 211, 153, 0.4);
+          background: rgba(16, 185, 129, 0.15);
+          color: #6ee7b7;
+        }
+        [data-landing-mode="poster"] .tactile-stamp-emerald {
+          border: 2px solid #047857 !important;
+          background: #d1fae5 !important;
+          color: #065f46 !important;
+        }
+        .tactile-washi-tape {
+          background: rgba(255, 255, 255, 0.14);
+          border: 1px solid rgba(255, 255, 255, 0.18);
+          backdrop-filter: blur(4px);
+        }
+        [data-landing-mode="poster"] .tactile-washi-tape {
+          background: rgba(217, 119, 6, 0.22) !important;
+          border: 1px solid rgba(17, 17, 17, 0.3) !important;
+        }
+        [data-landing-mode="poster"] .tactile-chip .font-hand {
+          color: #047857 !important;
+        }
         [data-landing-mode="poster"] .story-tabs-pill {
           background-color: #ffffff !important;
           border: 2px solid #111111 !important;
@@ -961,6 +1055,43 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
         }
         [data-landing-mode="poster"] .campus-infocard button:hover {
           background: #222222 !important;
+        }
+        [data-landing-mode="poster"] #campus .campus-telemetry-strip {
+          background-color: #ffffff !important;
+          border: 2px solid #111111 !important;
+          box-shadow: 2px 2px 0px #111111 !important;
+        }
+        [data-landing-mode="poster"] #campus .campus-telemetry-strip > div {
+          border-color: #111111 !important;
+        }
+        [data-landing-mode="poster"] #campus .campus-telemetry-strip span {
+          color: #111111 !important;
+        }
+        [data-landing-mode="poster"] #campus .campus-telemetry-strip span.font-mono {
+          color: #555555 !important;
+        }
+        [data-landing-mode="poster"] #campus .campus-cta-radar {
+          background: #111111 !important;
+          background-color: #111111 !important;
+          color: #ffffff !important;
+          border: 2px solid #111111 !important;
+          box-shadow: 2px 2px 0px #111111 !important;
+        }
+        [data-landing-mode="poster"] #campus .campus-cta-radar span {
+          color: #ffffff !important;
+        }
+        [data-landing-mode="poster"] #campus .campus-cta-radar svg {
+          color: #34d399 !important;
+        }
+        [data-landing-mode="poster"] #campus .campus-cta-blocks {
+          background-color: #ffffff !important;
+          color: #111111 !important;
+          border: 2px solid #111111 !important;
+          box-shadow: 2px 2px 0px #111111 !important;
+        }
+        [data-landing-mode="poster"] #campus .campus-cta-blocks span,
+        [data-landing-mode="poster"] #campus .campus-cta-blocks svg {
+          color: #111111 !important;
         }
         [data-landing-mode="poster"] .faq-accordion-item {
           background-color: #ffffff !important;
@@ -1247,7 +1378,7 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
 
                   <div className="flex flex-wrap items-center gap-2.5 mb-2.5 sm:mb-4">
                     <div className="inline-flex items-center gap-2 rounded-full border border-rose-500/30 bg-rose-500/15 px-3 py-0.5 sm:px-3.5 sm:py-1 text-[10px] font-mono uppercase tracking-[0.2em] text-rose-300 backdrop-blur-md shadow-sm">
-                      <span className="h-1.5 w-1.5 rounded-full bg-rose-400 animate-ping" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-rose-400 animate-pulse" />
                       Scene 01 // Student Reality
                     </div>
                     <div className="hero-trust-badge inline-flex items-center gap-2 rounded-full px-3 py-0.5 sm:px-3.5 sm:py-1 text-[10px] font-mono uppercase tracking-wider font-bold transition-all">
@@ -1299,8 +1430,8 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
 
                 {/* Floating tactile student reality fragments & micro marks framing the screen */}
                 <div className="pointer-events-none absolute inset-0 overflow-hidden z-20">
-                  {/* Fragment 1 (Top Left): Attendance Debarment Warning Gauge */}
-                  <div className="hero-chip-attendance absolute top-[2.5%] sm:top-[9%] left-[2%] sm:left-[3%] flex flex-col gap-1 sm:gap-1.5 rounded-xl sm:rounded-2xl tactile-chip p-2 sm:p-3.5 rotate-[1.5deg] sm:rotate-[2.5deg] max-w-[155px] xs:max-w-[185px] sm:max-w-[230px]">
+                  {/* Fragment 1 (Top Left): Attendance Debarment Warning Gauge (Dynamic/Rotating outward on scroll - No tape) */}
+                  <div className="hero-chip-attendance absolute top-[3%] left-[2%] sm:left-[3%] flex flex-col gap-1 sm:gap-1.5 rounded-xl sm:rounded-2xl tactile-chip p-2 sm:p-3.5 rotate-[-6deg] sm:rotate-[-7.5deg] max-w-[155px] xs:max-w-[185px] sm:max-w-[230px] select-none">
                     <div className="flex items-center justify-between gap-1.5 sm:gap-2">
                       <span className="font-mono text-[8.5px] sm:text-[10px] font-bold text-rose-300 uppercase tracking-wider flex items-center gap-1">
                         <span className="h-1.5 w-1.5 rounded-full bg-rose-400 animate-ping" />
@@ -1318,8 +1449,8 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
                     <span className="font-mono text-[7.5px] sm:text-[9px] text-rose-400/80">safe skips remaining: 0</span>
                   </div>
 
-                  {/* Fragment 2 (Top Center-Left): Mini Timetable Schedule Slot */}
-                  <div className="hero-chip-timetable absolute top-[9%] left-[29%] hidden lg:flex items-center gap-3 rounded-2xl tactile-chip px-4 py-2.5 rotate-[-2deg]">
+                  {/* Fragment 2 (Top Center-Left, Staggered Down): Mini Timetable Schedule Slot (Dynamic/Rotating outward on scroll - No tape) */}
+                  <div className="hero-chip-timetable absolute top-[14%] left-[17%] xl:left-[19%] hidden lg:flex items-center gap-3 rounded-2xl tactile-chip px-4 py-2.5 rotate-[4.5deg] select-none">
                     <span className="rounded-lg bg-emerald-400/15 border border-emerald-400/30 px-2 py-1 font-mono text-[11px] font-bold text-emerald-300">
                       Slot B · 08:00 AM
                     </span>
@@ -1329,8 +1460,30 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
                     </div>
                   </div>
 
-                  {/* Fragment 3 (Top Right): DO 4 or 5 Caution Chip */}
-                  <div className="hero-chip-caution absolute top-[2.5%] sm:top-[9%] right-[2%] sm:right-[4%] flex items-center gap-1.5 sm:gap-2.5 rounded-xl sm:rounded-2xl tactile-chip px-2.5 py-1.5 sm:px-4 sm:py-2.5 rotate-[-1.5deg] sm:rotate-[-2.5deg] max-w-[145px] xs:max-w-[180px] sm:max-w-none">
+                  {/* Laptop Fragment A (Top Center): SRM OD Approval Form (Static & taped - just dissolves on scroll) */}
+                  <div className="hero-chip-laptop absolute top-[2.5%] left-[45%] xl:left-[47%] hidden lg:flex flex-col gap-1 rounded-2xl tactile-chip p-3 rotate-[-4.5deg] max-w-[220px] select-none border-amber-500/30">
+                    {/* Washi tape anchoring it to poster */}
+                    <div className="tactile-washi-tape absolute -top-2.5 left-8 w-12 h-3.5 rounded-xs rotate-[3deg] pointer-events-none" />
+                    <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-1">
+                      <span className="font-mono text-[9px] font-black uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
+                        <GraduationCap className="h-3 w-3 text-amber-400" />
+                        OD FORM #408
+                      </span>
+                      <span className="font-mono text-[8px] font-black bg-amber-500/15 text-amber-400 px-1.5 py-0.5 rounded border border-amber-500/30">
+                        PENDING HOD
+                      </span>
+                    </div>
+                    <div className="font-hand text-xs text-amber-200 leading-tight">
+                      &quot;Need 3 physical printouts &amp; parent letter&quot;
+                    </div>
+                    <div className="font-mono text-[8px] text-zinc-400 flex items-center justify-between pt-0.5">
+                      <span>Milan Fest · 3 slots</span>
+                      <span className="text-rose-400 font-bold">FA: &quot;Meet after 4 PM&quot;</span>
+                    </div>
+                  </div>
+
+                  {/* Fragment 3 (Top Right): DO 4 or 5 Caution Chip (Dynamic/Rotating outward on scroll - No tape) */}
+                  <div className="hero-chip-caution absolute top-[4%] right-[11%] xl:right-[13%] flex items-center gap-1.5 sm:gap-2.5 rounded-xl sm:rounded-2xl tactile-chip px-2.5 py-1.5 sm:px-4 sm:py-2.5 rotate-[8.5deg] max-w-[145px] xs:max-w-[180px] sm:max-w-none select-none">
                     <span className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-amber-400 animate-pulse shrink-0" />
                     <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-1.5">
                       <span className="font-mono text-[8.5px] sm:text-xs text-amber-200 font-bold leading-tight">DO 4 or 5?</span>
@@ -1338,8 +1491,98 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
                     </div>
                   </div>
 
-                  {/* Fragment 4 (Bottom Left): Campus Locator */}
-                  <div className="hero-chip-campus absolute bottom-[8.5%] sm:bottom-[16%] left-[2%] sm:left-[4%] flex items-center gap-2 sm:gap-3 rounded-xl sm:rounded-2xl tactile-chip px-2.5 py-1.5 sm:px-4 sm:py-3 rotate-[-1.5deg] max-w-[160px] xs:max-w-[200px] sm:max-w-none">
+                  {/* Laptop Fragment B (Upper-Right): Handwritten 28-Page Assignment Sheet (Static & taped - just dissolves on scroll) */}
+                  <div className="hero-chip-laptop absolute top-[16%] right-[2.5%] xl:right-[3.5%] hidden lg:flex flex-col gap-1.5 rounded-2xl tactile-chip tactile-postit p-3.5 rotate-[-6.5deg] max-w-[225px] select-none">
+                    {/* Washi tape anchoring it to poster */}
+                    <div className="tactile-washi-tape absolute -top-2.5 left-4 w-12 h-3.5 rounded-xs rotate-[-8deg] pointer-events-none" />
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-mono text-[9px] font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                        <BookOpen className="h-3 w-3" />
+                        ASSIGNMENT 02
+                      </span>
+                      <span className="tactile-stamp-red font-mono text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-tight rotate-[4deg]">
+                        DUE 8:00 AM
+                      </span>
+                    </div>
+                    <div className="font-hand text-xs text-amber-200 leading-snug">
+                      &quot;Handwriting 28 pages of code on ruled A4 sheets at 3 AM...&quot;
+                    </div>
+                    <div className="flex items-center justify-between pt-0.5 font-mono text-[8.5px] text-zinc-400">
+                      <span className="text-purple-400 font-bold">18CSC302J</span>
+                      <span>Slot C submission</span>
+                    </div>
+                  </div>
+
+                  {/* Laptop Fragment C (Mid-Right): Lab Observation Manual (Static & taped - just dissolves on scroll) */}
+                  <div className="hero-chip-laptop absolute top-[43%] right-[2%] xl:right-[3%] hidden lg:flex flex-col gap-1.5 rounded-2xl tactile-chip p-3.5 rotate-[6.5deg] max-w-[230px] select-none border-rose-500/30">
+                    {/* Washi tape anchoring it to poster */}
+                    <div className="tactile-washi-tape absolute -top-2.5 right-6 w-14 h-3.5 rounded-xs rotate-[-5deg] pointer-events-none" />
+                    <div className="flex items-center justify-between border-b border-white/10 pb-1">
+                      <span className="font-mono text-[9px] font-bold text-rose-300 uppercase tracking-wider flex items-center gap-1">
+                        <FileText className="h-3 w-3 text-rose-400" />
+                        EXP 06 OBSERVATION
+                      </span>
+                      <span className="tactile-stamp-red font-mono text-[7.5px] font-black px-1.5 py-0.5 rounded rotate-[-2deg]">
+                        RE-DO IN PENCIL ✕
+                      </span>
+                    </div>
+                    <div className="font-hand text-xs text-rose-200 leading-tight">
+                      &quot;Circuit graph drawn in ballpoint pen — redo before 4 PM or zero!&quot;
+                    </div>
+                    <div className="font-mono text-[8px] text-zinc-400 flex items-center justify-between pt-0.5">
+                      <span>— Lab In-charge</span>
+                      <span className="text-amber-400 font-bold">needs 12 printouts</span>
+                    </div>
+                  </div>
+
+                  {/* Laptop Fragment D (Lower Mid-Right): SGPA Target 9.20 (Static & taped - just dissolves on scroll) */}
+                  <div className="hero-chip-laptop absolute bottom-[27%] right-[15%] xl:right-[18%] hidden lg:flex flex-col gap-1.5 rounded-2xl tactile-chip p-3.5 rotate-[-5.5deg] max-w-[220px] select-none border-emerald-400/30">
+                    {/* Washi tape anchoring it to poster */}
+                    <div className="tactile-washi-tape absolute -top-2.5 left-10 w-12 h-3.5 rounded-xs rotate-[-3deg] pointer-events-none" />
+                    <div className="flex items-center justify-between gap-1.5">
+                      <span className="font-mono text-[9px] font-bold text-emerald-300 uppercase tracking-wider flex items-center gap-1">
+                        <TrendingUp className="h-3 w-3 text-emerald-400" />
+                        Target 9.20 SGPA
+                      </span>
+                      <span className="tactile-stamp-emerald font-mono text-[7.5px] font-black px-1.5 py-0.5 rounded uppercase">
+                        DEAN&apos;S LIST
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-1 font-mono text-[9px] text-zinc-300 pt-0.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-zinc-400">DAA (Slot C)</span>
+                        <span className="font-bold text-emerald-300">Need 22/25 in CA2</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-zinc-400">OS (Slot E)</span>
+                        <span className="font-bold text-emerald-400">Safe for O grade</span>
+                      </div>
+                    </div>
+                    <div className="font-hand text-[11px] text-emerald-300/90 -rotate-1 pt-0.5">
+                      &quot;3 internal marks = 0.2 GPA bump&quot;
+                    </div>
+                  </div>
+
+                  {/* Laptop Fragment E (Bottom Mid-Left): Tech Park Elevator Queue (Static & taped - just dissolves on scroll) */}
+                  <div className="hero-chip-laptop absolute bottom-[12%] left-[17%] xl:left-[19%] hidden lg:flex items-center gap-3 rounded-2xl tactile-chip px-3.5 py-2.5 rotate-[-6deg] max-w-[230px] select-none border-sky-400/30">
+                    {/* Washi tape anchoring it to poster */}
+                    <div className="tactile-washi-tape absolute -top-2 right-6 w-10 h-3 rounded-xs rotate-[4deg] pointer-events-none" />
+                    <div className="h-7 w-7 rounded-xl bg-sky-500/15 border border-sky-400/30 flex items-center justify-center shrink-0">
+                      <Coffee className="h-3.5 w-3.5 text-sky-300" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono text-[9.5px] font-bold text-sky-200">TP Lift Queue: ~48</span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse" />
+                      </div>
+                      <div className="font-hand text-xs text-sky-300 leading-tight">
+                        stairs = 3m 20s · skip the wait
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Fragment 4 (Bottom Left): Campus Locator (Dynamic/Rotating outward on scroll - No tape) */}
+                  <div className="hero-chip-campus absolute bottom-[18%] sm:bottom-[16%] lg:bottom-[4%] left-[2%] sm:left-[3%] flex items-center gap-2 sm:gap-3 rounded-xl sm:rounded-2xl tactile-chip px-2.5 py-1.5 sm:px-4 sm:py-3 rotate-[5deg] max-w-[160px] xs:max-w-[200px] sm:max-w-none select-none">
                     <span className="h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-sky-400 shrink-0" />
                     <div className="min-w-0">
                       <div className="font-mono text-[8.5px] sm:text-xs font-bold text-sky-200 truncate">TP402 Tech Park</div>
@@ -1347,14 +1590,8 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
                     </div>
                   </div>
 
-                  {/* Fragment 5 (Right Center): Missing Syllabus Snippet */}
-                  <div className="hero-chip-syllabus absolute top-[36%] right-[4%] hidden lg:flex items-center gap-2 rounded-xl tactile-chip px-3.5 py-2 rotate-[2.5deg]">
-                    <span className="font-mono text-xs text-violet-200">18CSC302J_Syllabus.pdf</span>
-                    <span className="rounded bg-rose-500/25 border border-rose-500/40 px-1.5 py-0.5 font-mono text-[9px] text-rose-300 font-bold">404 NOT ON DRIVE</span>
-                  </div>
-
-                  {/* Fragment 6 (Bottom Right): Bunk Equation */}
-                  <div className="hero-chip-bunk absolute bottom-[8.5%] sm:bottom-[18%] right-[2%] sm:right-[5%] flex flex-col gap-0.5 sm:gap-1 rounded-xl sm:rounded-2xl tactile-chip p-2 sm:p-3.5 rotate-[-2deg] sm:rotate-[-3deg] max-w-[145px] xs:max-w-[185px] sm:max-w-none">
+                  {/* Fragment 6 (Bottom Right): Bunk Equation (Dynamic/Rotating outward on scroll - No tape) */}
+                  <div className="hero-chip-bunk absolute bottom-[18%] sm:bottom-[20%] lg:bottom-[14%] right-[2%] sm:right-[3%] flex flex-col gap-0.5 sm:gap-1 rounded-xl sm:rounded-2xl tactile-chip p-2 sm:p-3.5 rotate-[6.5deg] max-w-[145px] xs:max-w-[185px] sm:max-w-none select-none">
                     <div className="flex items-center justify-between gap-1.5 sm:gap-3 text-[8px] sm:text-[10px] font-mono text-emerald-400 font-bold">
                       <span>BUNK MATH</span>
                       <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -1998,7 +2235,7 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
 
 
 
-          <CampusShowcase />
+          <CampusShowcase isPoster={isPoster} />
 
           {/* ── 004: REAL-SCREEN GALLERY / THE INTERFACE ATLAS ── */}
           <section id="atlas" className="mx-auto w-full max-w-[1280px] px-5 pt-8 pb-28 sm:px-8 scroll-mt-28">
@@ -2137,7 +2374,7 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
                     <svg width="120" height="20" viewBox="0 0 120 20" fill="none" className="text-cyan-400">
                       <path d="M0 10H112M112 10L104 4M112 10L104 16" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                    <span className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-2.5 py-0.5 text-[10px] font-bold text-cyan-300">01 → 10 SLIDE</span>
+                    <span className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-2.5 py-0.5 text-[10px] font-bold text-cyan-300">01 → 11 SLIDE</span>
                   </div>
                 </div>
               </div>
@@ -2169,22 +2406,52 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
                         <span className="mt-4 block h-0.5 w-8 rounded-full transition-all duration-300 group-hover:w-14" style={{ background: f.color }} aria-hidden="true" />
                       </article>
                     ))}
-                    <article data-od-id="feature-card-try-free" className="rail-card relative overflow-hidden rounded-3xl border border-emerald-400/25 bg-gradient-to-br from-emerald-400/10 via-white/[0.02] to-violet-400/10 p-7 text-left backdrop-blur-xl shadow-[0_16px_40px_rgba(0,0,0,0.5)]">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-400/30 bg-emerald-400/10 text-emerald-300">
-                        <Zap className="h-6 w-6" />
+                    <article
+                      data-od-id="feature-card-how-it-works"
+                      className="surface-card rail-card group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-emerald-500/[0.08] via-white/[0.02] to-transparent p-7 text-left backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 shadow-[0_16px_40px_rgba(0,0,0,0.5)]"
+                    >
+                      <div className="pointer-events-none absolute -top-12 right-0 h-32 w-32 rounded-full blur-3xl transition opacity-20 group-hover:opacity-35" style={{ background: "#34d399" }} aria-hidden="true" />
+                      <div className="flex items-start justify-between">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-400/35 bg-emerald-400/10 text-emerald-300 transition-transform duration-300 group-hover:scale-105">
+                          <Zap className="h-5 w-5" />
+                        </div>
+                        <span className="font-mono text-xs font-bold tracking-widest text-zinc-600">// 11</span>
                       </div>
-                      <h3 className="font-display mt-5 text-xl font-bold text-white">How it works</h3>
-                      <p className="mt-2 min-h-[48px] text-[13px] leading-relaxed text-zinc-300 font-sans">Login → live sync → plan with AI. Three steps, dashboard alive in under a minute.</p>
+                      <h3 className="font-display mt-5 text-xl font-bold tracking-tight text-white">How It Works</h3>
+                      
+                      {/* Structured 3-step timeline */}
+                      <div className="mt-3 space-y-2 font-mono text-[11px]">
+                        <div className="flex items-center gap-2.5 text-zinc-300">
+                          <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded bg-emerald-400/20 font-bold text-emerald-400 text-[10px]">1</span>
+                          <span>Connect SRM Academia creds</span>
+                        </div>
+                        <div className="flex items-center gap-2.5 text-zinc-300">
+                          <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded bg-cyan-400/20 font-bold text-cyan-400 text-[10px]">2</span>
+                          <span>Live-sync marks & timetable</span>
+                        </div>
+                        <div className="flex items-center gap-2.5 text-zinc-300">
+                          <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded bg-violet-400/20 font-bold text-violet-400 text-[10px]">3</span>
+                          <span>AI bunk planner & alerts</span>
+                        </div>
+                      </div>
+
+                      <p className="font-hand text-sm text-emerald-300/90 mt-2.5">
+                        ↳ &ldquo;under 60s from zero to synced.&rdquo;
+                      </p>
+
                       <button
                         onClick={goLogin}
-                        className={`mt-4 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-black transition-all cursor-pointer ${
+                        className={`keep-white mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-xs font-black transition-all cursor-pointer ${
                           isPoster
                             ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-zinc-800"
-                            : "btn-shine bg-gradient-to-r from-emerald-300 to-teal-300 text-zinc-950 hover:brightness-110"
+                            : "btn-shine bg-gradient-to-r from-emerald-300 via-teal-300 to-emerald-400 text-zinc-950 shadow-[0_4px_20px_rgba(52,211,153,0.3)] hover:brightness-110"
                         }`}
+                        style={isPoster ? { color: "#ffffff", backgroundColor: "#111111" } : undefined}
                       >
-                        <span style={{ color: isPoster ? "#ffffff" : undefined }}>Try it free</span>
-                        <ArrowUpRight className="h-4 w-4" style={{ color: isPoster ? "#ffffff" : undefined }} />
+                        <span className="keep-white font-mono uppercase tracking-wider" style={isPoster ? { color: "#ffffff" } : undefined}>
+                          Launch Dashboard
+                        </span>
+                        <ArrowUpRight className={`h-4 w-4 ${isPoster ? "keep-white text-emerald-400" : "text-zinc-950 stroke-[2.5]"}`} style={isPoster ? { color: "#34d399" } : undefined} />
                       </button>
                     </article>
                     <div className="rail-gutter" aria-hidden="true" />
@@ -2234,18 +2501,19 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
                       href={PLAY_STORE_URL}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`inline-flex items-center gap-3.5 rounded-2xl px-7 py-4 text-sm font-black transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] ${
+                      className={`keep-white inline-flex items-center gap-3.5 rounded-2xl px-7 py-4 text-sm font-black transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] ${
                         isPoster
                           ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[4px_4px_0px_#111111] hover:bg-zinc-800"
                           : "btn-shine bg-gradient-to-r from-emerald-300 via-teal-300 to-emerald-400 text-zinc-950 shadow-[0_12px_40px_rgba(52,211,153,0.35)] hover:brightness-110"
                       }`}
+                      style={isPoster ? { color: "#ffffff", backgroundColor: "#111111" } : undefined}
                     >
-                      <svg className={`h-5 w-5 fill-current shrink-0 ${isPoster ? "text-white" : "text-zinc-950"}`} viewBox="0 0 24 24">
+                      <svg className={`h-5 w-5 fill-current shrink-0 ${isPoster ? "keep-white text-white" : "text-zinc-950"}`} style={isPoster ? { color: "#ffffff" } : undefined} viewBox="0 0 24 24">
                         <path d="M3.609 1.814L13.793 12 3.61 22.186a2.38 2.38 0 0 1-.61-.986V2.8a2.38 2.38 0 0 1 .609-.986zm11.255 9.115l2.463-1.422-9.61-5.548 7.147 6.97zm2.463 2.142l-2.463-1.422-7.147 6.97 9.61-5.548zm1.06-1.071c.677.391.677 1.029 0 1.42l-2.029 1.171-2.463-2.463 2.463-2.463 2.029 1.171z" />
                       </svg>
                       <div className="text-left">
-                        <div className={`text-[10px] uppercase font-mono tracking-widest leading-none ${isPoster ? "text-zinc-400" : "text-zinc-800"}`}>GET IT ON</div>
-                        <div className={`text-base font-black leading-tight ${isPoster ? "text-white" : ""}`}>Google Play</div>
+                        <div className={`keep-white text-[10px] uppercase font-mono tracking-widest leading-none ${isPoster ? "text-zinc-400" : "text-zinc-800"}`} style={isPoster ? { color: "#9ca3af" } : undefined}>GET IT ON</div>
+                        <div className={`keep-white text-base font-black leading-tight ${isPoster ? "text-white" : ""}`} style={isPoster ? { color: "#ffffff" } : undefined}>Google Play</div>
                       </div>
                     </a>
 
@@ -2411,6 +2679,25 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
         </main>
 
         <PublicFooter />
+        <ModeSelectionModal
+          isOpen={showModeModal}
+          currentMode={mode}
+          onSelectMode={(next, coords) => handleModeChange(next, coords)}
+          onConfirm={() => {
+            try {
+              sessionStorage.setItem("edutechsrm_mode_prompt_seen", "1")
+              localStorage.setItem("edutechsrm_theme_chosen_v1", "true")
+            } catch {}
+            setShowModeModal(false)
+          }}
+          onClose={() => {
+            try {
+              sessionStorage.setItem("edutechsrm_mode_prompt_seen", "1")
+              localStorage.setItem("edutechsrm_theme_chosen_v1", "true")
+            } catch {}
+            setShowModeModal(false)
+          }}
+        />
         <FloatingAppAction onLogin={onEnterApp ?? goLogin} mode={mode} onModeChange={handleModeChange} />
       </div>
     </>

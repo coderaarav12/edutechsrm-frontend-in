@@ -81,24 +81,41 @@ const SECTION_MAP: Record<TabType, (props: { onNavigate: (tab: TabType) => void;
 }
 
 function DisabledPageOverlay({ reason }: { reason: string }) {
+  const { theme } = useTheme()
+  const isPoster = theme?.mode === "poster" || (theme as any) === "poster" || (typeof document !== "undefined" && (document.documentElement.getAttribute("data-theme") === "poster" || document.documentElement.getAttribute("data-landing-mode") === "poster"))
+
   return (
     <div className="absolute inset-0 z-10 flex items-center justify-center p-4"
       style={{ backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}>
       <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
         className="w-full max-w-sm rounded-[28px] border p-6 text-center"
-        style={{
-          background: "linear-gradient(135deg, rgba(248,113,113,0.12), rgba(251,146,60,0.06))",
-          borderColor: "rgba(248,113,113,0.25)",
-          boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
-        }}>
+        style={
+          isPoster
+            ? {
+                background: "#ffffff",
+                borderColor: "#111111",
+                borderWidth: "2.5px",
+                borderStyle: "solid",
+                boxShadow: "6px 6px 0px #111111",
+              }
+            : {
+                background: "linear-gradient(135deg, rgba(248,113,113,0.12), rgba(251,146,60,0.06))",
+                borderColor: "rgba(248,113,113,0.25)",
+                boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+              }
+        }>
         <div className="w-14 h-14 mx-auto mb-4 rounded-2xl flex items-center justify-center"
-          style={{ background: "rgba(248,113,113,0.15)", border: "1px solid rgba(248,113,113,0.2)" }}>
-          <svg className="w-6 h-6" style={{ color: "#f87171" }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          style={
+            isPoster
+              ? { background: "#fee2e2", border: "2px solid #111111" }
+              : { background: "rgba(248,113,113,0.15)", border: "1px solid rgba(248,113,113,0.2)" }
+          }>
+          <svg className="w-6 h-6" style={{ color: isPoster ? "#e11d48" : "#f87171" }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <rect width="18" height="18" x="3" y="3" rx="2" /><path d="M9 9l6 6" /><path d="M15 9l-6 6" />
           </svg>
         </div>
-        <h3 className="text-lg font-black" style={{ color: "#fca5a5" }}>Feature Disabled</h3>
-        <p className="text-sm mt-2 leading-relaxed" style={{ color: "#fda4af" }}>{reason}</p>
+        <h3 className="text-lg font-black" style={{ color: isPoster ? "#111111" : "#fca5a5" }}>Feature Disabled</h3>
+        <p className="text-sm mt-2 leading-relaxed" style={{ color: isPoster ? "#555555" : "#fda4af" }}>{reason}</p>
       </motion.div>
     </div>
   )
@@ -191,50 +208,14 @@ function useMidnightRefreshWindow() {
   return { show: show && !dismissed, dismiss: useCallback(() => setDismissed(true), []) }
 }
 
-function ChangelogModalV2({ isOpen, onClose, onViewUpdates }: { isOpen: boolean; onClose: () => void; onViewUpdates: () => void }) {
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
-          onClick={onClose}>
-          <motion.div initial={{ opacity: 0, y: 14, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 6, scale: 0.98 }}
-            transition={{ duration: 0.2 }} onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-xl rounded-3xl border p-6 sm:p-7"
-            style={{ background: "rgba(9,9,11,0.96)", borderColor: "rgba(52,211,153,0.22)", boxShadow: "0 28px 70px rgba(0,0,0,0.6)" }}>
-            <div className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em]"
-              style={{ color: "#86efac", borderColor: "rgba(52,211,153,0.35)", background: "rgba(52,211,153,0.09)" }}>Version 2 Is Live</div>
-            <h2 className="mt-3 text-2xl sm:text-3xl font-black tracking-tight" style={{ color: "#f4f4f5" }}>What&apos;s new in v2.1</h2>
-            <p className="mt-2 text-sm" style={{ color: "#a1a1aa" }}>Complete redesign: all pages rebuilt with a new UI system, better structure, and faster workflows.</p>
-            <div className="mt-5 space-y-2.5">
-              {["Every major page has been redesigned from the ground up (mobile + laptop)","Theme customization with multiple visual modes and UI styles","Improved laptop/desktop layout for cleaner daily workflow","OD/ML implementation with planner integration and attendance impact mode","Proper App Settings section with smoother controls and better structure","Profile section update with new navigation flow","New edutechsrm AI assistant tab with student-aware answers and quick redirects","Performance and transition polish for smoother real-world usage"].map((item) => (
-                <div key={item} className="flex items-start gap-2.5 text-sm" style={{ color: "#d4d4d8" }}>
-                  <span className="mt-1 h-1.5 w-1.5 rounded-full" style={{ background: "#34d399" }} />
-                  <span>{item}</span>
-                </div>
-              ))}
-            </div>
-            <div className="mt-6 flex flex-col sm:flex-row gap-3">
-              <button onClick={onViewUpdates} className="w-full rounded-xl px-4 py-2.5 text-sm font-bold border"
-                style={{ color: "#d4d4d8", borderColor: "rgba(255,255,255,0.16)", background: "rgba(255,255,255,0.02)" }}>View Full Release Updates</button>
-              <button onClick={onClose} className="w-full rounded-xl px-4 py-2.5 text-sm font-bold"
-                style={{ background: "linear-gradient(135deg, #34d399, #10b981)", color: "#0b0f14" }}>Continue</button>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  )
-}
-
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoginSyncing, isBackgroundSyncing, isManualRefresh, user, disabledPages, logout, token } = useAuth()
+  const { isAuthenticated, isLoading, isLoginSyncing, isBackgroundSyncing, isManualRefresh, user, disabledPages, logout, token } = useAuth()
   const router = useRouter()
   const [minimised, setMinimised] = useState(false)
   const [showThemePanel, setShowThemePanel] = useState(false)
-  const [showV2Changelog, setShowV2Changelog] = useState(false)
   const { show: showMidnightBanner, dismiss: dismissMidnightBanner } = useMidnightRefreshWindow()
   const { show: showAndroidAnnouncement, dismiss: dismissAndroidAnnouncement } = useAndroidAnnouncement()
+
   const wasLoginSyncing = useRef(false)
   const hasShownDashboard = useRef(false)
   const [photoReady, setPhotoReady] = useState(false)
@@ -268,8 +249,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [visitedTabs, setVisitedTabs] = useState<Set<TabType>>(new Set())
 
   useEffect(() => {
-    if (!isAuthenticated) router.replace("/")
-  }, [isAuthenticated, router])
+    if (!isAuthenticated && !isLoading) router.replace("/")
+  }, [isAuthenticated, isLoading, router])
+
 
   // On page reload for returning users: wait for photo before showing dashboard
   useEffect(() => {
@@ -327,20 +309,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       setVisitedTabs(new Set(VALID_TABS))
     }
   }, [isAuthenticated])
-
-  useEffect(() => {
-    if (!isAuthenticated) return
-    try {
-      const key = "edutechsrm_changelog_seen_v2_1"
-      const hasSeen = window.localStorage.getItem(key) === "1"
-      if (!hasSeen) setShowV2Changelog(true)
-    } catch { setShowV2Changelog(true) }
-  }, [isAuthenticated])
-
-  const closeV2Changelog = useCallback(() => {
-    try { window.localStorage.setItem("edutechsrm_changelog_seen_v2_1", "1") } catch {}
-    setShowV2Changelog(false)
-  }, [])
 
   const navigate = useCallback((tab: TabType) => {
     setActiveTab(tab)
@@ -406,8 +374,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <MidnightRefreshBanner show={showMidnightBanner} dismiss={dismissMidnightBanner} />
       <MaintenanceOverlay />
       <UpdateOverlay />
-      <ChangelogModalV2 isOpen={showV2Changelog} onClose={closeV2Changelog}
-        onViewUpdates={() => { closeV2Changelog(); navigate("updates") }} />
       <AndroidAnnouncementModal isOpen={showAndroidAnnouncement} onClose={dismissAndroidAnnouncement} />
       <StudentPortalModal />
       <SemesterGradesModal />

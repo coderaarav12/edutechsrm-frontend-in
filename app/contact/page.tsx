@@ -65,14 +65,18 @@ const verifiedSocials = [
 export default function ContactPage() {
   const { isSupportOpen, handleSupportClick, closeSupport } = useSupport()
   const [copiedEmail, setCopiedEmail] = useState(false)
-  const [isPoster, setIsPoster] = useState(false)
+  const [isPoster, setIsPoster] = useState(true)
 
   useEffect(() => {
     const check = () => {
       if (typeof document !== "undefined") {
-        const saved = localStorage.getItem("edutechsrm-landing-mode")
-        const attr = document.documentElement.getAttribute("data-landing-mode")
-        setIsPoster(attr === "poster" || saved === "poster")
+        const attr = document.documentElement.getAttribute("data-landing-mode") || document.documentElement.getAttribute("data-theme")
+        if (attr === "poster" || attr === "night" || attr === "dark") {
+          setIsPoster(attr === "poster")
+          return
+        }
+        const saved = localStorage.getItem("edutechsrm-landing-mode") || localStorage.getItem("edutechsrm_landing_mode")
+        setIsPoster(saved !== "night")
       }
     }
     check()

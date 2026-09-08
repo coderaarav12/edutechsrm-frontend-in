@@ -32,7 +32,8 @@ import {
   IdCard,
 } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
-import { useTheme } from "@/lib/theme-context"
+import { useTheme, useIsPosterTheme } from "@/lib/theme-context"
+import { performThemeTransition } from "@/lib/theme-transition"
 import { LoginModal } from "./login-modal"
 import { SignOutModal } from "./signout-modal"
 import { SupportModal } from "./support-modal"
@@ -126,6 +127,7 @@ const SUBTITLES: Record<TabType, string> = {
   feedback: "Send feedback",
   ai: "AI assistant & chat",
   finder: "Faculty staff room locator",
+  calculator: "CGPA & internal calculators",
   map: "Campus map & navigation",
 }
 
@@ -138,6 +140,7 @@ function SRMLogo() {
 }
 
 export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: NavbarProps) {
+  const isPoster = useIsPosterTheme()
   const [isLoginOpen, setIsLoginOpen] = useState(false)
   const [isSignOutOpen, setIsSignOutOpen] = useState(false)
   const [openCategory, setOpenCategory] = useState<string | null>(null)
@@ -185,9 +188,17 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
     return () => document.removeEventListener("click", dismiss)
   }, [showAiPrompt])
 
-  const toggleThemeMode = useCallback(() => {
+  const toggleThemeMode = useCallback((e?: React.MouseEvent) => {
     const nextMode = theme.mode === "poster" ? "dark" : "poster"
-    setMode(nextMode)
+    const rect = e?.currentTarget?.getBoundingClientRect?.()
+    const coords = rect ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 } : undefined
+    performThemeTransition({
+      nextMode: nextMode === "poster" ? "poster" : "night",
+      coords,
+      applyTheme: () => {
+        setMode(nextMode)
+      },
+    })
   }, [theme.mode, setMode])
 
   const handleShare = () => setShowSharePopup(true)
@@ -628,16 +639,18 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
                 maxWidth: 340,
                 borderRadius: 20,
                 overflow: "hidden",
-                background: `color-mix(in srgb, ${catColor}08, var(--elevated-bg, rgba(24,24,27,0.98)) 85%)`,
-                backdropFilter: "blur(28px) saturate(180%)",
-                WebkitBackdropFilter: "blur(28px) saturate(180%)",
-                border: `1px solid ${catColor}20`,
-                boxShadow: `0 12px 48px ${catColor}08, 0 0 0 0 rgba(0,0,0,0.4)`,
+                background: isPoster
+                  ? "#ffffff"
+                  : `color-mix(in srgb, ${catColor}08, var(--elevated-bg, rgba(24,24,27,0.98)) 85%)`,
+                backdropFilter: isPoster ? "none" : "blur(28px) saturate(180%)",
+                WebkitBackdropFilter: isPoster ? "none" : "blur(28px) saturate(180%)",
+                border: isPoster ? "2px solid #111111" : `1px solid ${catColor}20`,
+                boxShadow: isPoster ? "5px 5px 0px #111111" : `0 12px 48px ${catColor}08, 0 0 0 0 rgba(0,0,0,0.4)`,
               }}
               onClick={(e) => e.stopPropagation()}
             >
               {/* Top color bar */}
-              <div style={{ height: 3, background: `linear-gradient(90deg, ${catColor}00, ${catColor}, ${catColor}00)`, opacity: 0.6 }} />
+              <div style={{ height: 3, background: isPoster ? "#111111" : `linear-gradient(90deg, ${catColor}00, ${catColor}, ${catColor}00)`, opacity: isPoster ? 1 : 0.6 }} />
               <div style={{ padding: "10px 10px 12px" }}>
                 {/* Category row with icon + name */}
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14, padding: "0 4px" }}>
@@ -649,20 +662,21 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      background: `${catColor}18`,
+                      background: isPoster ? "#111111" : `${catColor}18`,
+                      border: isPoster ? "1px solid #111111" : "none",
                     }}
                   >
                     {openCategory === "academics" ? (
-                      <BookOpen style={{ width: 13, height: 13, color: catColor }} />
+                      <BookOpen style={{ width: 13, height: 13, color: isPoster ? "#ffffff" : catColor }} />
                     ) : openCategory === "tools" ? (
-                      <LayoutDashboard style={{ width: 13, height: 13, color: catColor }} />
+                      <LayoutDashboard style={{ width: 13, height: 13, color: isPoster ? "#ffffff" : catColor }} />
                     ) : openCategory === "account" ? (
-                      <User style={{ width: 13, height: 13, color: catColor }} />
+                      <User style={{ width: 13, height: 13, color: isPoster ? "#ffffff" : catColor }} />
                     ) : (
-                      <Bot style={{ width: 13, height: 13, color: catColor }} />
+                      <Bot style={{ width: 13, height: 13, color: isPoster ? "#ffffff" : catColor }} />
                     )}
                   </div>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: catColor, fontFamily: "'Space Grotesk', sans-serif" }}>
+                  <span style={{ fontSize: 14, fontWeight: isPoster ? 800 : 700, color: isPoster ? "#111111" : catColor, fontFamily: "'Space Grotesk', sans-serif" }}>
                     {openCategory === "academics"
                       ? "Academics"
                       : openCategory === "tools"
@@ -707,13 +721,20 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
                             display: "flex",
                             flexDirection: "column",
                             alignItems: "center",
-                            gap: 3,
-                            padding: "8px 4px 6px",
+                            gap: 4,
+                            padding: isPoster ? "8px 3px 6px" : "8px 4px 6px",
                             minWidth: 0,
                             flex: 1,
                             borderRadius: 12,
-                            background: active ? `${item.color}0a` : "transparent",
-                            border: `1px solid ${active ? `${item.color}18` : "transparent"}`,
+                            background: isPoster
+                              ? (active ? "#111111" : "#faf9f5")
+                              : (active ? `${item.color}0a` : "transparent"),
+                            border: isPoster
+                              ? (active ? "2px solid #111111" : "1.5px solid #111111")
+                              : `1px solid ${active ? `${item.color}18` : "transparent"}`,
+                            boxShadow: isPoster
+                              ? (active ? "2px 2px 0px #111111" : "1px 1px 0px rgba(0,0,0,0.12)")
+                              : "none",
                             cursor: "pointer",
                             transition: "all 0.2s",
                             position: "relative",
@@ -729,15 +750,26 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              background: active ? `${item.color}18` : `${catColor}0a`,
+                              background: isPoster
+                                ? (active ? "#ffffff" : "#ffffff")
+                                : (active ? `${item.color}18` : `${catColor}0a`),
+                              border: isPoster ? "1.5px solid #111111" : "none",
+                              boxShadow: isPoster ? "1px 1px 0px #111111" : "none",
                             }}
                           >
-                            <Icon style={{ width: 14, height: 14, color: active ? item.color : catColor }} />
+                            <Icon style={{ width: 14, height: 14, color: isPoster ? "#111111" : (active ? item.color : catColor) }} />
                           </div>
-                          <span style={{ fontSize: 9, fontWeight: active ? 700 : 500, color: active ? item.color : catColor, textAlign: "center", lineHeight: 1.15 }}>
+                          <span style={{
+                            fontSize: 9.5,
+                            fontWeight: isPoster ? (active ? 800 : 700) : (active ? 700 : 500),
+                            color: isPoster ? (active ? "#ffffff" : "#111111") : (active ? item.color : catColor),
+                            textAlign: "center",
+                            lineHeight: 1.15,
+                            fontFamily: "'Space Grotesk', sans-serif",
+                          }}>
                             {item.label}
                           </span>
-                          {active && (
+                          {active && !isPoster && (
                             <div style={{ position: "absolute", top: 3, right: 3, width: 4, height: 4, borderRadius: "50%", background: item.color }} />
                           )}
                         </button>
@@ -767,13 +799,13 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
             className="relative flex items-center"
             style={{
               gap: 0,
-              background: "color-mix(in srgb, var(--elevated-bg, rgba(24,24,27,0.98)) 55%, transparent)",
-              backdropFilter: "blur(36px) saturate(200%)",
-              WebkitBackdropFilter: "blur(36px) saturate(200%)",
+              background: isPoster ? "#ffffff" : "color-mix(in srgb, var(--elevated-bg, rgba(24,24,27,0.98)) 55%, transparent)",
+              backdropFilter: isPoster ? "none" : "blur(36px) saturate(200%)",
+              WebkitBackdropFilter: isPoster ? "none" : "blur(36px) saturate(200%)",
               padding: 5,
               borderRadius: 28,
-              boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-              border: "1px solid var(--border-color, rgba(255,255,255,0.06))",
+              boxShadow: isPoster ? "4px 4px 0px #111111" : "0 8px 32px rgba(0,0,0,0.3)",
+              border: isPoster ? "2px solid #111111" : "1px solid var(--border-color, rgba(255,255,255,0.06))",
               width: "100%",
               maxWidth: 370,
               minWidth: 290,
@@ -783,17 +815,19 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
             }}
           >
             {/* Glass shine overlay */}
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                background: "linear-gradient(45deg, transparent, rgba(255,255,255,0.02), transparent)",
-                borderRadius: 25,
-                animation: "nav-shine 4s linear infinite",
-                opacity: 0.6,
-                pointerEvents: "none",
-              }}
-            />
+            {!isPoster && (
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background: "linear-gradient(45deg, transparent, rgba(255,255,255,0.02), transparent)",
+                  borderRadius: 25,
+                  animation: "nav-shine 4s linear infinite",
+                  opacity: 0.6,
+                  pointerEvents: "none",
+                }}
+              />
+            )}
             {/* Slider indicator */}
             <div
               style={{
@@ -802,10 +836,11 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
                 bottom: 5,
                 left: sliderPos.left || 5,
                 width: sliderPos.width || `calc(25% - 4px)`,
-                background: "var(--card-solid, #18181b)",
+                background: isPoster ? "#111111" : "var(--card-solid, #18181b)",
                 borderRadius: 24,
                 transition: "all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
+                boxShadow: isPoster ? "none" : "0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
+                border: isPoster ? "2px solid #111111" : "none",
                 zIndex: 0,
                 opacity: activeCategory ? 1 : 0,
               }}
@@ -823,7 +858,9 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
               const renderCategoryTab = (tab: { key: string; label: string }, idx: number) => {
                 const isActive = activeCategory === tab.key || openCategory === tab.key
                 const accent = catColors[tab.key] || "#34d399"
-                const tabColor = openCategory ? (isActive ? accent : `${accent}88`) : (isActive ? accent : "var(--text-muted, #a1a1aa)")
+                const tabColor = isPoster
+                  ? (isActive ? "#ffffff" : "#111111")
+                  : (openCategory ? (isActive ? accent : `${accent}88`) : (isActive ? accent : "var(--text-muted, #a1a1aa)"))
                 return (
                   <button
                     key={tab.key}
@@ -856,7 +893,7 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
                         width: "100%",
                         color: tabColor,
                         fontSize: 14,
-                        fontWeight: isActive ? 700 : 600,
+                        fontWeight: isPoster ? (isActive ? 800 : 700) : (isActive ? 700 : 600),
                         cursor: "pointer",
                         userSelect: "none",
                         borderRadius: 20,
@@ -874,7 +911,9 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
               const renderAiTab = (idx: number) => {
                 const isActive = activeCategory === "ai" || openCategory === "ai"
                 const accent = "#a78bfa"
-                const tabColor = openCategory ? (isActive ? accent : `${accent}88`) : (isActive ? accent : "var(--text-muted, #a1a1aa)")
+                const tabColor = isPoster
+                  ? (isActive ? "#ffffff" : "#111111")
+                  : (openCategory ? (isActive ? accent : `${accent}88`) : (isActive ? accent : "var(--text-muted, #a1a1aa)"))
                 return (
                   <button
                     key="ai"
@@ -907,7 +946,7 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
                         width: "100%",
                         color: tabColor,
                         fontSize: 14,
-                        fontWeight: isActive ? 700 : 600,
+                        fontWeight: isPoster ? (isActive ? 800 : 700) : (isActive ? 700 : 600),
                         cursor: "pointer",
                         userSelect: "none",
                         borderRadius: 20,
@@ -934,8 +973,13 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    background: activeTab === "dashboard" ? "rgba(244,114,182,0.12)" : "transparent",
-                    border: activeTab === "dashboard" ? "1px solid rgba(244,114,182,0.2)" : "1px solid rgba(255,255,255,0.06)",
+                    background: isPoster
+                      ? (activeTab === "dashboard" ? "#111111" : "#faf9f5")
+                      : (activeTab === "dashboard" ? "rgba(244,114,182,0.12)" : "transparent"),
+                    border: isPoster
+                      ? "2px solid #111111"
+                      : (activeTab === "dashboard" ? "1px solid rgba(244,114,182,0.2)" : "1px solid rgba(255,255,255,0.06)"),
+                    boxShadow: isPoster ? (activeTab === "dashboard" ? "1px 1px 0px #111111" : "none") : "none",
                     borderRadius: "50%",
                     cursor: "pointer",
                     touchAction: "manipulation",
@@ -944,7 +988,13 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
                     flexShrink: 0,
                   }}
                 >
-                  <Home style={{ width: 18, height: 18, color: activeTab === "dashboard" ? "#f472b6" : (openCategory ? "#f472b688" : "var(--text-muted, #a1a1aa)") }} />
+                  <Home style={{
+                    width: 18,
+                    height: 18,
+                    color: isPoster
+                      ? (activeTab === "dashboard" ? "#ffffff" : "#111111")
+                      : (activeTab === "dashboard" ? "#f472b6" : (openCategory ? "#f472b688" : "var(--text-muted, #a1a1aa)"))
+                  }} />
                 </button>
               )
 
@@ -1034,24 +1084,37 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
           >
             <motion.div initial={{ opacity: 0, y: 20, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.95 }}
               transition={{ duration: 0.2 }} onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-sm rounded-3xl border p-6 text-center relative"
-              style={{ background: "var(--card-bg, #18181b)", borderColor: "rgba(255,255,255,0.08)" }}
+              className={`w-full max-w-sm rounded-3xl p-6 text-center relative ${
+                theme.mode === "poster"
+                  ? "bg-white border-2 border-[#111111] shadow-[6px_6px_0px_#111111]"
+                  : "bg-zinc-900 border border-white/10 shadow-2xl"
+              }`}
             >
               <button onClick={() => setShowSharePopup(false)}
-                className="absolute top-3 right-3 w-7 h-7 rounded-xl flex items-center justify-center text-zinc-500 hover:text-zinc-300 transition-colors"
-                style={{ background: "rgba(255,255,255,0.05)" }}
+                className={`absolute top-3.5 right-3.5 w-7 h-7 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
+                  theme.mode === "poster"
+                    ? "bg-white border-2 border-[#111111] text-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-zinc-100"
+                    : "bg-white/10 text-zinc-300 hover:text-white"
+                }`}
+                aria-label="Close share popup"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                <X size={14} />
               </button>
 
-              <h3 className="text-base font-black text-zinc-100 mb-1">Share edutechsrm</h3>
-              <p className="text-[11px] text-zinc-500 mb-5">Scan or share with friends</p>
+              <h3 className={`text-base font-black mb-1 ${theme.mode === "poster" ? "text-[#111111]" : "text-zinc-100"}`}>
+                Share edutechsrm
+              </h3>
+              <p className={`text-[11px] mb-5 font-mono ${theme.mode === "poster" ? "text-[#111111]/70" : "text-zinc-500"}`}>
+                Scan or share with friends
+              </p>
 
-              <div className="flex justify-center">
-                <QrCode size={260} />
+              <div className={`flex justify-center p-3 rounded-2xl mb-5 ${
+                theme.mode === "poster" ? "bg-[#f7f5f0] border-2 border-[#111111] shadow-[3px_3px_0px_#111111]" : "bg-black/40 border border-white/5"
+              }`}>
+                <QrCode size={220} />
               </div>
 
-              <div className="mt-5 space-y-2">
+              <div className="space-y-2">
                 <button onClick={async () => {
                   const url = window.location.href
                   const title = "edutechsrm"
@@ -1062,8 +1125,11 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
                     try { await navigator.clipboard.writeText(url) } catch {}
                   }
                 }}
-                  className="w-full rounded-xl py-2.5 text-sm font-bold"
-                  style={{ background: "linear-gradient(135deg, #34d399, #10b981)", color: "#09090b" }}
+                  className={`w-full rounded-xl py-2.5 text-sm font-bold transition-all cursor-pointer ${
+                    theme.mode === "poster"
+                      ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] hover:bg-black"
+                      : "bg-gradient-to-r from-emerald-400 to-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/10"
+                  }`}
                 >
                   Share via apps
                 </button>
@@ -1073,17 +1139,16 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
                     const btn = e.currentTarget
                     const orig = btn.textContent
                     btn.textContent = "Copied!"
-                    btn.style.color = "#34d399"
-                    btn.style.borderColor = "rgba(52,211,153,0.3)"
                     setTimeout(() => {
                       btn.textContent = orig
-                      btn.style.color = "#a1a1aa"
-                      btn.style.borderColor = "rgba(255,255,255,0.1)"
                     }, 1500)
                   } catch {}
                 }}
-                  className="w-full rounded-xl py-2.5 text-sm font-bold border transition-colors"
-                  style={{ color: "#a1a1aa", borderColor: "rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.03)" }}
+                  className={`w-full rounded-xl py-2.5 text-sm font-bold border transition-all cursor-pointer ${
+                    theme.mode === "poster"
+                      ? "bg-white border-2 border-[#111111] text-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-zinc-100"
+                      : "text-zinc-300 border-white/10 bg-white/[0.03] hover:bg-white/[0.06]"
+                  }`}
                 >
                   Copy link
                 </button>

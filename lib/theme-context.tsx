@@ -82,28 +82,44 @@ interface ThemeContextType {
 function readTheme(): ThemeState {
   if (typeof window === "undefined") return DEFAULT_THEME
   try {
-    const raw = localStorage.getItem(THEME_KEY)
-    if (!raw) return DEFAULT_THEME
-    const parsed = JSON.parse(raw)
-    // Migrate legacy 'light' mode to 'poster'
-    if (parsed.mode === "light") {
-      parsed.mode = "poster"
-      if (!parsed.presetId || parsed.presetId === "default") {
-        parsed.presetId = "poster-cardstock"
+    const raw = localStorage.getItem(THEME_KEY) || localStorage.getItem("edutechsrm-theme")
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      // Migrate legacy 'light' mode to 'poster'
+      if (parsed.mode === "light") {
+        parsed.mode = "poster"
+        if (!parsed.presetId || parsed.presetId === "default") {
+          parsed.presetId = "poster-cardstock"
+        }
+      }
+      return {
+        ...DEFAULT_THEME,
+        ...parsed,
+        customColors: { ...DEFAULT_CUSTOM, ...(parsed.customColors || {}) },
       }
     }
-    return {
-      ...DEFAULT_THEME,
-      ...parsed,
-      customColors: { ...DEFAULT_CUSTOM, ...(parsed.customColors || {}) },
+    const landingMode = localStorage.getItem("edutechsrm-landing-mode") || localStorage.getItem("edutechsrm_landing_mode")
+    if (landingMode === "night" || landingMode === "dark") {
+      return {
+        ...DEFAULT_THEME,
+        mode: "dark",
+        presetId: "default",
+      }
     }
+    return DEFAULT_THEME
   } catch {
     return DEFAULT_THEME
   }
 }
 
 function writeTheme(theme: ThemeState) {
-  localStorage.setItem(THEME_KEY, JSON.stringify(theme))
+  const landingMode = theme.mode === "poster" ? "poster" : "night"
+  try {
+    localStorage.setItem(THEME_KEY, JSON.stringify(theme))
+    localStorage.setItem("edutechsrm-theme", JSON.stringify(theme))
+    localStorage.setItem("edutechsrm-landing-mode", landingMode)
+    localStorage.setItem("edutechsrm_landing_mode", landingMode)
+  } catch {}
   window.dispatchEvent(new Event(THEME_EVENT))
 }
 
@@ -123,41 +139,53 @@ function resolveBackgroundCss(theme: ThemeState): string {
 }
 
 function hexToRgb(hex: string) {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-  return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : null
+  const clean = hex.replace("#", "")
+  if (clean.length === 3) {
+    return {
+      r: Number.parseInt(clean[0] + clean[0], 16),
+      g: Number.parseInt(clean[1] + clean[1], 16),
+      b: Number.parseInt(clean[2] + clean[2], 16),
+    }
+  }
+  return {
+    r: Number.parseInt(clean.slice(0, 2), 16),
+    g: Number.parseInt(clean.slice(2, 4), 16),
+    b: Number.parseInt(clean.slice(4, 6), 16),
+  }
 }
 
 function isLightColor(hex: string) {
-  const rgb = hexToRgb(hex)
-  if (!rgb) return false
-  const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255
-  return luminance > 0.5
+  const { r, g, b } = hexToRgb(hex)
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+  return luminance > 0.6
 }
+
+const ALL_THEME_PROPERTIES = [
+  "--page-bg", "--card-bg", "--card-solid", "--elevated-bg", "--card-bg-hover",
+  "--text-primary", "--text-secondary", "--text-muted", "--text-subtle", "--text-faint",
+  "--accent", "--accent-bg", "--accent-border",
+  "--border-color", "--border-medium",
+  "--element-bg", "--element-bg-hover",
+  "--selection-bg", "--selection-color",
+  "--filter-group-bg", "--filter-group-border", "--filter-active-bg", "--filter-active-text", "--filter-inactive-text",
+  "--input-bg", "--input-text", "--input-border",
+  "--progress-track",
+  "--color-zinc-950", "--color-zinc-900", "--color-zinc-800", "--color-zinc-700",
+  "--color-zinc-600", "--color-zinc-500", "--color-zinc-400", "--color-zinc-300",
+  "--color-zinc-200", "--color-zinc-100", "--color-zinc-50",
+  "--color-background", "--color-foreground",
+  "--color-card", "--color-card-foreground",
+  "--color-popover", "--color-popover-foreground",
+  "--color-secondary", "--color-secondary-foreground",
+  "--color-muted-foreground", "--color-border", "--color-input",
+  "--color-sidebar", "--color-sidebar-foreground", "--color-sidebar-accent",
+  "--color-sidebar-accent-foreground", "--color-sidebar-border",
+]
 
 export function applyThemeGlobally(theme: ThemeState) {
   const html = document.documentElement
   const body = document.body
   if (!html || !body) return
-
-  const modeAttr = theme.mode === "custom" ? "custom" : theme.mode
-  html.setAttribute("data-theme", modeAttr)
-  body.setAttribute("data-theme", modeAttr)
-
-  if (theme.mode === "poster") {
-    html.setAttribute("data-landing-mode", "poster")
-    body.setAttribute("data-landing-mode", "poster")
-    try {
-      localStorage.setItem("edutechsrm-landing-mode", "poster")
-      localStorage.setItem("edutechsrm_landing_mode", "poster")
-    } catch {}
-  } else if (theme.mode === "dark" || theme.mode === "black") {
-    html.setAttribute("data-landing-mode", "night")
-    body.setAttribute("data-landing-mode", "night")
-    try {
-      localStorage.setItem("edutechsrm-landing-mode", "night")
-      localStorage.setItem("edutechsrm_landing_mode", "night")
-    } catch {}
-  }
 
   if (theme.mode === "custom") {
     const cc = theme.customColors
@@ -210,6 +238,10 @@ export function applyThemeGlobally(theme: ThemeState) {
   } else if (theme.mode === "poster") {
     html.removeAttribute("data-theme")
     html.setAttribute("data-theme", "poster")
+    body.removeAttribute("data-theme")
+    body.setAttribute("data-theme", "poster")
+    html.setAttribute("data-landing-mode", "poster")
+    body.setAttribute("data-landing-mode", "poster")
 
     const activePreset = PRESETS.find(p => p.id === theme.presetId)
     const pageBg = activePreset?.css || "#f7f5f0"
@@ -253,49 +285,19 @@ export function applyThemeGlobally(theme: ThemeState) {
     html.style.setProperty("--color-background", "#f7f5f0")
     html.style.setProperty("--color-foreground", "#111111")
   } else {
+    // Dark mode (or black)
     html.removeAttribute("data-theme")
     html.setAttribute("data-theme", theme.mode)
+    body.removeAttribute("data-theme")
+    body.setAttribute("data-theme", theme.mode)
+    html.setAttribute("data-landing-mode", "night")
+    body.setAttribute("data-landing-mode", "night")
+
     // Remove ALL custom properties that poster or custom modes may have set
-    html.style.removeProperty("--card-bg")
-    html.style.removeProperty("--card-solid")
-    html.style.removeProperty("--text-primary")
-    html.style.removeProperty("--accent")
-    html.style.removeProperty("--accent-bg")
-    html.style.removeProperty("--accent-border")
-    html.style.removeProperty("--page-bg")
-    html.style.removeProperty("--elevated-bg")
-    html.style.removeProperty("--text-secondary")
-    html.style.removeProperty("--text-muted")
-    html.style.removeProperty("--text-subtle")
-    html.style.removeProperty("--text-faint")
-    html.style.removeProperty("--border-color")
-    html.style.removeProperty("--border-medium")
-    html.style.removeProperty("--element-bg")
-    html.style.removeProperty("--element-bg-hover")
-    html.style.removeProperty("--card-bg-hover")
-    html.style.removeProperty("--selection-bg")
-    html.style.removeProperty("--selection-color")
-    html.style.removeProperty("--filter-group-bg")
-    html.style.removeProperty("--filter-active-bg")
-    html.style.removeProperty("--filter-active-text")
-    html.style.removeProperty("--filter-inactive-text")
-    html.style.removeProperty("--input-bg")
-    html.style.removeProperty("--progress-track")
-    html.style.removeProperty("--color-zinc-950")
-    html.style.removeProperty("--color-zinc-900")
-    html.style.removeProperty("--color-zinc-800")
-    html.style.removeProperty("--color-zinc-700")
-    html.style.removeProperty("--color-zinc-600")
-    html.style.removeProperty("--color-zinc-500")
-    html.style.removeProperty("--color-zinc-400")
-    html.style.removeProperty("--color-zinc-300")
-    html.style.removeProperty("--color-zinc-200")
-    html.style.removeProperty("--color-zinc-100")
-    html.style.removeProperty("--color-zinc-50")
-    html.style.removeProperty("--color-background")
-    html.style.removeProperty("--color-foreground")
-    html.style.removeProperty("--input-text")
-    html.style.removeProperty("--input-border")
+    for (const prop of ALL_THEME_PROPERTIES) {
+      html.style.removeProperty(prop)
+    }
+
     if (theme.presetId !== "default") {
       const preset = PRESETS.find(p => p.id === theme.presetId)
       if (preset) html.style.setProperty("--page-bg", preset.css)
@@ -309,15 +311,18 @@ export function applyThemeGlobally(theme: ThemeState) {
   } else if (theme.mode === "poster") {
     const preset = PRESETS.find(p => p.id === theme.presetId)
     body.style.background = preset?.css || "#f7f5f0"
+    body.style.backgroundColor = "#f7f5f0"
   } else if (theme.mode !== "custom" && theme.presetId !== "default") {
     const preset = PRESETS.find(p => p.id === theme.presetId)
     if (preset && (preset.css.includes("url(") || preset.css.includes("gradient"))) {
       body.style.background = preset.css
     } else {
       body.style.background = ""
+      body.style.backgroundColor = ""
     }
   } else {
     body.style.background = ""
+    body.style.backgroundColor = ""
   }
 }
 
@@ -325,6 +330,12 @@ const ThemeContext = createContext<ThemeContextType | null>(null)
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<ThemeState>(DEFAULT_THEME)
+
+  const sync = useCallback((next: ThemeState) => {
+    setTheme(next)
+    writeTheme(next)
+    applyThemeGlobally(next)
+  }, [])
 
   useEffect(() => {
     const saved = readTheme()
@@ -335,25 +346,45 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       setTheme(updated)
       applyThemeGlobally(updated)
     }
+    const onLandingModeChange = (e: Event) => {
+      const customEvent = e as CustomEvent<any>
+      const detail = customEvent.detail
+      const modeName = typeof detail === "string" ? detail : detail?.mode
+      if (modeName === "poster") {
+        setTheme(prev => {
+          if (prev.mode === "poster") return prev
+          const next: ThemeState = { ...prev, mode: "poster", presetId: "poster-cardstock", customImage: null }
+          writeTheme(next)
+          applyThemeGlobally(next)
+          return next
+        })
+      } else if (modeName === "night" || modeName === "dark") {
+        setTheme(prev => {
+          if (prev.mode === "dark") return prev
+          const next: ThemeState = { ...prev, mode: "dark", presetId: "default", customImage: null }
+          writeTheme(next)
+          applyThemeGlobally(next)
+          return next
+        })
+      }
+    }
     window.addEventListener("storage", handler)
     window.addEventListener(THEME_EVENT, handler)
+    window.addEventListener("landing-mode-change", onLandingModeChange)
     return () => {
       window.removeEventListener("storage", handler)
       window.removeEventListener(THEME_EVENT, handler)
+      window.removeEventListener("landing-mode-change", onLandingModeChange)
     }
-  }, [])
-
-  const sync = useCallback((next: ThemeState) => {
-    setTheme(next)
-    writeTheme(next)
-    applyThemeGlobally(next)
   }, [])
 
   const setMode = useCallback((mode: ThemeMode) => {
     const defaultPreset = mode === "poster" ? "poster-cardstock" : "default"
-    sync({ ...theme, mode, presetId: defaultPreset, customImage: null })
+    const landingMode = mode === "poster" ? "poster" : "night"
+    const next: ThemeState = { ...theme, mode, presetId: defaultPreset, customImage: null }
+    sync(next)
     if (typeof window !== "undefined") {
-      window.dispatchEvent(new CustomEvent("landing-mode-change", { detail: mode === "poster" ? "poster" : "night" }))
+      window.dispatchEvent(new CustomEvent("landing-mode-change", { detail: { mode: landingMode } }))
     }
   }, [theme, sync])
 
@@ -387,3 +418,43 @@ export function useTheme() {
   if (!ctx) throw new Error("useTheme must be used within ThemeProvider")
   return ctx
 }
+
+export function useOptionalTheme() {
+  return useContext(ThemeContext)
+}
+
+export function useIsPosterTheme(): boolean {
+  const ctx = useContext(ThemeContext)
+  const [isPoster, setIsPoster] = useState(false)
+
+  useEffect(() => {
+    const check = () => {
+      if (ctx?.theme?.mode === "poster") return true
+      if (typeof document !== "undefined") {
+        const dt = document.documentElement.getAttribute("data-theme")
+        const lm = document.documentElement.getAttribute("data-landing-mode")
+        if (dt === "poster" || lm === "poster") return true
+      }
+      try {
+        const raw = localStorage.getItem(THEME_KEY) || localStorage.getItem("edutechsrm_theme") || localStorage.getItem("edutechsrm-landing-mode")
+        if (raw && raw.includes("poster")) return true
+      } catch {}
+      return false
+    }
+
+    setIsPoster(check())
+    const handler = () => setIsPoster(check())
+    window.addEventListener("storage", handler)
+    window.addEventListener(THEME_EVENT, handler)
+    window.addEventListener("landing-mode-change", handler)
+    return () => {
+      window.removeEventListener("storage", handler)
+      window.removeEventListener(THEME_EVENT, handler)
+      window.removeEventListener("landing-mode-change", handler)
+    }
+  }, [ctx?.theme?.mode])
+
+  return isPoster
+}
+
+

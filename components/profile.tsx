@@ -17,12 +17,15 @@ import { createCustomClass, createOdMlEntry, createAssignment, getHourTimeRange,
 import { AIPromoBadge } from "@/components/ai-promo-badge"
 import { SupportModal } from "./support-modal"
 import { useSupport } from "@/lib/use-support"
+import { useIsPosterTheme } from "@/lib/theme-context"
 
 function formatLocalDateKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`
 }
 
 export function AboutSection() {
+  const isPoster = useIsPosterTheme()
+
   const auth = useAuth() as any
   const [isLoginOpen, setIsLoginOpen] = useState(false)
   const [classFormMessage, setClassFormMessage] = useState<{ tone: "error" | "success"; text: string } | null>(null)
@@ -498,15 +501,23 @@ export function AboutSection() {
     return (
       <div className="min-h-full pt-[3.75rem] pb-20 px-3 sm:px-4 lg:px-8 lg:pb-8 max-w-5xl mx-auto w-full flex items-center justify-center">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
-          <div className="w-16 h-16 mx-auto mb-6 rounded-2xl flex items-center justify-center bg-emerald-500/10 ring-1 ring-emerald-500/20">
-            <User className="w-7 h-7 text-emerald-400" />
+          <div className={`w-16 h-16 mx-auto mb-6 rounded-2xl flex items-center justify-center ${
+            isPoster
+              ? "bg-[#f7f5f0] border-2 border-[#111111] shadow-[3px_3px_0px_#111111] text-[#111111]"
+              : "bg-emerald-500/10 ring-1 ring-emerald-500/20 text-emerald-400"
+          }`}>
+            <User className="w-7 h-7" />
           </div>
-          <h2 className="text-3xl font-bold text-zinc-100 tracking-tight font-display mb-4">Your Profile</h2>
-          <p className="text-sm mb-8 max-w-xs mx-auto px-4 text-zinc-500">
+          <h2 className={`text-3xl font-bold tracking-tight font-display mb-4 ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>Your Profile</h2>
+          <p className={`text-sm mb-8 max-w-xs mx-auto px-4 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>
             Login to view your student profile and academic summary.
           </p>
           <motion.button whileTap={{ scale: 0.96 }} onClick={() => setIsLoginOpen(true)}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm bg-emerald-500 text-zinc-950 hover:bg-emerald-400 transition-all">
+            className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all cursor-pointer ${
+              isPoster
+                ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] hover:translate-x-[1px] hover:translate-y-[1px]"
+                : "bg-emerald-500 text-zinc-950 hover:bg-emerald-400"
+            }`}>
             <LogIn className="w-[18px] h-[18px]" /> Connect to SRM Academia
           </motion.button>
         </motion.div>
@@ -515,6 +526,7 @@ export function AboutSection() {
     )
   }
 
+
   return (
     <div className="min-h-full pt-[3.75rem] pb-20 px-3 sm:px-4 lg:px-8 lg:pb-8 max-w-5xl mx-auto w-full">
 
@@ -522,10 +534,10 @@ export function AboutSection() {
       <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
         className="flex justify-between items-start mb-8">
         <div>
-          <h2 className="text-zinc-500 font-bold text-[10px] uppercase tracking-widest mb-1">Account</h2>
-          <h1 className="text-3xl font-bold text-zinc-100 tracking-tight font-display">Profile</h1>
-          <p className="text-[11px] mt-1 text-zinc-500 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+          <h2 className={`font-bold text-[10px] uppercase tracking-widest mb-1 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>Account</h2>
+          <h1 className={`text-3xl font-bold tracking-tight font-display ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>Profile</h1>
+          <p className={`text-[11px] mt-1 flex items-center gap-1.5 ${isPoster ? "text-zinc-600 font-medium" : "text-zinc-500"}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${isPoster ? "bg-emerald-600" : "bg-emerald-400"}`} />
             Your academic summary and planner
           </p>
         </div>
@@ -536,41 +548,69 @@ export function AboutSection() {
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
         className="mb-8">
         <div className="flex items-center justify-between mb-3">
-          <p className="text-zinc-500 font-bold text-[10px] uppercase tracking-widest">Overview</p>
+          <p className={`font-bold text-[10px] uppercase tracking-widest ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>Overview</p>
           <div className="flex items-center gap-2">
             <motion.button whileTap={{ scale: 0.9 }} onClick={refreshData} disabled={isLoading}
-              className="flex items-center justify-center w-8 h-8 rounded-lg text-zinc-500 bg-zinc-900/60 ring-1 ring-white/5 hover:text-zinc-300 transition-all disabled:opacity-40">
+              className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all disabled:opacity-40 cursor-pointer ${
+                isPoster
+                  ? "bg-white border-2 border-[#111111] text-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-zinc-100"
+                  : "text-zinc-500 bg-zinc-900/60 ring-1 ring-white/5 hover:text-zinc-300"
+              }`}>
               <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
             </motion.button>
             <motion.a whileTap={{ scale: 0.9 }} href="https://academia.srmist.edu.in/" target="_blank" rel="noopener noreferrer"
-              className="flex items-center justify-center w-8 h-8 rounded-lg text-zinc-500 bg-zinc-900/60 ring-1 ring-white/5 hover:text-zinc-300 transition-all">
+              className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all cursor-pointer ${
+                isPoster
+                  ? "bg-white border-2 border-[#111111] text-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-zinc-100"
+                  : "text-zinc-500 bg-zinc-900/60 ring-1 ring-white/5 hover:text-zinc-300"
+              }`}>
               <ExternalLink className="w-3.5 h-3.5" />
             </motion.a>
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <div className="w-[60px] h-[60px] rounded-2xl flex items-center justify-center shrink-0 overflow-hidden bg-gradient-to-br from-emerald-400 to-emerald-500">
+          <div className={`w-[60px] h-[60px] rounded-2xl flex items-center justify-center shrink-0 overflow-hidden ${
+            isPoster
+              ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111]"
+              : "bg-gradient-to-br from-emerald-400 to-emerald-500"
+          }`}>
             {photoUrl && !photoError ? (
               <img src={photoUrl} alt={user?.name || "Profile"} className="w-full h-full object-cover" />
             ) : (
-              <User className="w-5 h-5 text-zinc-950" />
+              <User className={`w-6 h-6 ${isPoster ? "text-[#111111]" : "text-zinc-950"}`} />
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <h1 className="text-xl font-bold text-zinc-100 tracking-tight font-display break-words">{user?.name}</h1>
-            <p className="text-[11px] font-mono text-zinc-500">{user?.username}</p>
+            <h1 className={`text-xl font-bold tracking-tight font-display break-words ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>{user?.name}</h1>
+            <p className={`text-[11px] font-mono ${isPoster ? "text-zinc-700 font-bold" : "text-zinc-500"}`}>{user?.username}</p>
             <div className="flex flex-wrap items-center gap-1.5 mt-2">
-              <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20">
+              <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
+                isPoster
+                  ? "bg-[#f7f5f0] text-[#111111] border border-[#111111] shadow-[1px_1px_0px_#111111]"
+                  : "bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20"
+              }`}>
                 {user?.program}
               </span>
-              <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-zinc-800/60 text-zinc-300 ring-1 ring-white/5">
+              <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
+                isPoster
+                  ? "bg-[#f7f5f0] text-zinc-800 border border-[#111111]/40 shadow-[1px_1px_0px_#111111]"
+                  : "bg-zinc-800/60 text-zinc-300 ring-1 ring-white/5"
+              }`}>
                 Sem {user?.semester}
               </span>
-              <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-zinc-800/60 text-zinc-300 ring-1 ring-white/5">
+              <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
+                isPoster
+                  ? "bg-[#f7f5f0] text-zinc-800 border border-[#111111]/40 shadow-[1px_1px_0px_#111111]"
+                  : "bg-zinc-800/60 text-zinc-300 ring-1 ring-white/5"
+              }`}>
                 Batch {user?.batch}
               </span>
               {todayDO && (
-                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-400 ring-1 ring-cyan-500/20">
+                <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
+                  isPoster
+                    ? "bg-[#f7f5f0] text-cyan-800 border border-cyan-800/40 shadow-[1px_1px_0px_#111111]"
+                    : "bg-cyan-500/10 text-cyan-400 ring-1 ring-cyan-500/20"
+                }`}>
                   DO {todayDO} today
                 </span>
               )}
@@ -591,12 +631,16 @@ export function AboutSection() {
            <motion.div 
              key={i}
              onClick={() => setExpandedInfoCard(expandedInfoCard === i ? null : i)}
-             className="flex gap-2.5 rounded-xl px-3 py-3 bg-zinc-900/30 ring-1 ring-white/[0.04] cursor-pointer hover:ring-white/10 transition-all"
+             className={`flex gap-2.5 rounded-xl px-3 py-3 cursor-pointer transition-all ${
+               isPoster
+                 ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] hover:bg-zinc-50 text-[#111111]"
+                 : "bg-zinc-900/30 ring-1 ring-white/[0.04] hover:ring-white/10 text-zinc-200"
+             }`}
            >
-             <item.icon className="w-3.5 h-3.5 shrink-0 text-zinc-600 mt-0.5" />
+             <item.icon className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${isPoster ? "text-[#111111]" : "text-zinc-600"}`} />
              <div className="min-w-0">
-               <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest">{item.label}</p>
-               <p className={`text-sm font-semibold text-zinc-200 mt-0.5 ${expandedInfoCard === i ? "whitespace-normal break-words" : "truncate"}`}>
+               <p className={`text-[9px] font-bold uppercase tracking-widest ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>{item.label}</p>
+               <p className={`text-sm font-semibold mt-0.5 ${isPoster ? "text-[#111111] font-bold" : "text-zinc-200"} ${expandedInfoCard === i ? "whitespace-normal break-words" : "truncate"}`}>
                  {item.value || "—"}
                </p>
              </div>
@@ -607,31 +651,43 @@ export function AboutSection() {
       {/* ── Stats row ── */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}
         className="grid grid-cols-3 gap-2 mb-8">
-        <div className="rounded-2xl px-4 py-3.5 bg-zinc-900/40 ring-1 ring-white/5">
-          <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest">Attendance</p>
-          <p className={`text-xl font-bold font-display mt-1 ${avgAttendance >= 75 ? "text-emerald-400" : "text-rose-400"}`}>{avgAttendance}%</p>
-          <p className={`text-[10px] mt-0.5 font-medium ${avgAttendance >= 75 ? "text-emerald-400/70" : "text-rose-400/70"}`}>
+        <div className={`rounded-2xl px-4 py-3.5 ${
+          isPoster
+            ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] text-[#111111]"
+            : "bg-zinc-900/40 ring-1 ring-white/5"
+        }`}>
+          <p className={`text-[9px] font-bold uppercase tracking-widest ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>Attendance</p>
+          <p className={`text-xl font-bold font-display mt-1 ${avgAttendance >= 75 ? (isPoster ? "text-emerald-700" : "text-emerald-400") : "text-rose-500"}`}>{avgAttendance}%</p>
+          <p className={`text-[10px] mt-0.5 font-medium ${isPoster ? "text-zinc-600 font-mono" : (avgAttendance >= 75 ? "text-emerald-400/70" : "text-rose-400/70")}`}>
             {avgAttendance >= 75 ? `${safeSubjects.length} safe` : `${atRiskSubjects.length} at risk`}
           </p>
         </div>
-        <div className="rounded-2xl px-4 py-3.5 bg-zinc-900/40 ring-1 ring-white/5">
-          <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest">Marks</p>
+        <div className={`rounded-2xl px-4 py-3.5 ${
+          isPoster
+            ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] text-[#111111]"
+            : "bg-zinc-900/40 ring-1 ring-white/5"
+        }`}>
+          <p className={`text-[9px] font-bold uppercase tracking-widest ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>Marks</p>
           {totalMax > 0 ? (
             <>
-              <p className={`text-xl font-bold font-display mt-1 ${marksPercent >= 60 ? "text-emerald-400" : "text-amber-400"}`}>{marksPercent}%</p>
-              <p className="text-[10px] mt-0.5 text-zinc-500">{totalScored.toFixed(1)} / {totalMax}</p>
+              <p className={`text-xl font-bold font-display mt-1 ${marksPercent >= 60 ? (isPoster ? "text-emerald-700" : "text-emerald-400") : "text-amber-500"}`}>{marksPercent}%</p>
+              <p className={`text-[10px] mt-0.5 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>{totalScored.toFixed(1)} / {totalMax}</p>
             </>
           ) : (
             <>
-              <p className="text-xl font-bold font-display mt-1 text-zinc-500">—</p>
-              <p className="text-[10px] mt-0.5 text-zinc-500">No marks yet</p>
+              <p className={`text-xl font-bold font-display mt-1 ${isPoster ? "text-zinc-400" : "text-zinc-500"}`}>—</p>
+              <p className={`text-[10px] mt-0.5 ${isPoster ? "text-zinc-500" : "text-zinc-500"}`}>No marks yet</p>
             </>
           )}
         </div>
-        <div className="rounded-2xl px-4 py-3.5 bg-zinc-900/40 ring-1 ring-white/5">
-          <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest">Credits</p>
-          <p className="text-xl font-bold font-display mt-1 text-cyan-400">{totalCredits}</p>
-          <p className="text-[10px] mt-0.5 text-zinc-500">
+        <div className={`rounded-2xl px-4 py-3.5 ${
+          isPoster
+            ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] text-[#111111]"
+            : "bg-zinc-900/40 ring-1 ring-white/5"
+        }`}>
+          <p className={`text-[9px] font-bold uppercase tracking-widest ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>Credits</p>
+          <p className={`text-xl font-bold font-display mt-1 ${isPoster ? "text-sky-700" : "text-cyan-400"}`}>{totalCredits}</p>
+          <p className={`text-[10px] mt-0.5 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>
             {uniqueCourses.length > 0 ? `${uniqueCourses.length} courses` : "Credits Earned"}
           </p>
         </div>
@@ -640,13 +696,17 @@ export function AboutSection() {
       {/* ── At-risk subjects ── */}
       {atRiskSubjects.length > 0 && (
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-          className="rounded-2xl px-4 py-3.5 bg-rose-500/5 ring-1 ring-rose-500/10 mb-8">
-          <p className="text-rose-400 text-[9px] font-bold uppercase tracking-widest mb-2">Subjects below 75% attendance</p>
+          className={`rounded-2xl px-4 py-3.5 mb-8 ${
+            isPoster
+              ? "bg-[#fff1f2] border-2 border-[#111111] shadow-[3px_3px_0px_#111111]"
+              : "bg-rose-500/5 ring-1 ring-rose-500/10"
+          }`}>
+          <p className={`text-[9px] font-bold uppercase tracking-widest mb-2 ${isPoster ? "text-rose-800 font-mono" : "text-rose-400"}`}>Subjects below 75% attendance</p>
           <div className="space-y-1">
             {atRiskSubjects.map((s: any) => (
               <div key={s.code} className="flex items-center justify-between text-xs">
-                <span className="text-zinc-400">{s.code}</span>
-                <span className="font-bold text-rose-400">{s.percentage}%</span>
+                <span className={isPoster ? "text-[#111111] font-medium" : "text-zinc-400"}>{s.code}</span>
+                <span className="font-bold text-rose-500">{s.percentage}%</span>
               </div>
             ))}
           </div>
@@ -655,44 +715,60 @@ export function AboutSection() {
 
       {/* ── Support ── */}
       <motion.button onClick={handleSupportClick} whileTap={{ scale: 0.98 }}
-        className="w-full flex items-center gap-4 p-4 rounded-2xl mb-8 text-left"
-        style={{ background: "rgba(167,139,250,0.08)", border: "1px solid rgba(167,139,250,0.15)" }}
+        className={`w-full flex items-center gap-4 p-4 rounded-2xl mb-8 text-left transition-all cursor-pointer ${
+          isPoster
+            ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] hover:bg-zinc-50"
+            : ""
+        }`}
+        style={isPoster ? {} : { background: "rgba(167,139,250,0.08)", border: "1px solid rgba(167,139,250,0.15)" }}
       >
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(167,139,250,0.1)", border: "1px solid rgba(167,139,250,0.2)" }}>
-          <Heart className="w-4 h-4" style={{ color: "#a78bfa" }} />
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+          isPoster
+            ? "bg-[#f7f5f0] border-2 border-[#111111] shadow-[1px_1px_0px_#111111]"
+            : ""
+        }`} style={isPoster ? {} : { background: "rgba(167,139,250,0.1)", border: "1px solid rgba(167,139,250,0.2)" }}>
+          <Heart className="w-4 h-4" style={{ color: isPoster ? "#7c3aed" : "#a78bfa" }} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold" style={{ color: "#a78bfa" }}>Support edutechsrm</p>
-          <p className="text-[10px] mt-0.5 text-zinc-500">Help cover domain & Cloudflare costs</p>
+          <p className="text-sm font-bold" style={{ color: isPoster ? "#5b21b6" : "#a78bfa" }}>Support edutechsrm</p>
+          <p className={`text-[10px] mt-0.5 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>Help cover domain &amp; Cloudflare costs</p>
         </div>
       </motion.button>
 
       {/* ── Custom Planner ── */}
       <div id="custom-planner-section" className="flex items-center gap-3 mb-4">
-        <div className="flex-1 h-px bg-white/5" />
-        <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Custom Planner</span>
-        <div className="flex-1 h-px bg-white/5" />
+        <div className={`flex-1 h-px ${isPoster ? "bg-[#111111]/20" : "bg-white/5"}`} />
+        <span className={`text-[10px] font-bold uppercase tracking-widest ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>Custom Planner</span>
+        <div className={`flex-1 h-px ${isPoster ? "bg-[#111111]/20" : "bg-white/5"}`} />
       </div>
 
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}
-        className="group bg-zinc-900/40 ring-1 ring-white/5 rounded-2xl hover:ring-zinc-700 hover:bg-zinc-900/60 transition-all relative overflow-hidden mb-8">
+        className={`group rounded-2xl transition-all relative overflow-hidden mb-8 ${
+          isPoster
+            ? "bg-white border-2 border-[#111111] shadow-[4px_4px_0px_#111111] text-[#111111]"
+            : "bg-zinc-900/40 ring-1 ring-white/5 hover:ring-zinc-700 hover:bg-zinc-900/60"
+        }`}>
         <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/0 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
         <button
           onClick={() => setShowCustomForm(p => !p)}
-          className="w-full flex items-center justify-between gap-2 p-5 relative z-10"
+          className="w-full flex items-center justify-between gap-2 p-5 relative z-10 cursor-pointer"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-cyan-500/10 ring-1 ring-cyan-500/20">
-              <BookMarked className="w-4 h-4 text-cyan-400" />
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+              isPoster
+                ? "bg-[#f7f5f0] border-2 border-[#111111] shadow-[1.5px_1.5px_0px_#111111] text-[#111111]"
+                : "bg-cyan-500/10 ring-1 ring-cyan-500/20 text-cyan-400"
+            }`}>
+              <BookMarked className="w-4 h-4" />
             </div>
             <div className="text-left">
-              <p className="text-sm font-bold text-zinc-100">Add class</p>
-              <p className="text-xs text-zinc-500 mt-0.5 truncate">Extra classes show in Timetable and Calendar.</p>
+              <p className={`text-sm font-bold ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>Add class</p>
+              <p className={`text-xs mt-0.5 truncate ${isPoster ? "text-zinc-600 font-medium" : "text-zinc-500"}`}>Extra classes show in Timetable and Calendar.</p>
             </div>
           </div>
           <motion.div animate={{ rotate: showCustomForm ? 180 : 0 }} transition={{ duration: 0.2 }} className="self-stretch flex items-center">
-            <ChevronDown className="w-4 h-4 shrink-0 text-zinc-500" />
+            <ChevronDown className={`w-4 h-4 shrink-0 ${isPoster ? "text-[#111111]" : "text-zinc-500"}`} />
           </motion.div>
         </button>
 
@@ -705,25 +781,33 @@ export function AboutSection() {
               transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
               className="overflow-hidden"
             >
-              <div className="px-5 pb-5 border-t border-white/5 relative z-10">
+              <div className={`px-5 pb-5 border-t relative z-10 ${isPoster ? "border-[#111111]" : "border-white/5"}`}>
                 <div className="pt-4 grid grid-cols-2 gap-3">
                   <div className="col-span-2 grid grid-cols-2 gap-3">
                     <button
                       onClick={() => updateClassField("repeatMode", "single")}
-                      className={`rounded-xl px-3 py-3 text-xs font-bold transition-all ${
+                      className={`rounded-xl px-3 py-3 text-xs font-bold transition-all cursor-pointer ${
                         classForm.repeatMode === "single"
-                          ? "bg-emerald-500/10 ring-1 ring-emerald-500/30 text-emerald-400"
-                          : "bg-zinc-950 ring-1 ring-white/5 text-zinc-500 hover:text-zinc-300"
+                          ? isPoster
+                            ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] keep-white"
+                            : "bg-emerald-500/10 ring-1 ring-emerald-500/30 text-emerald-400"
+                          : isPoster
+                            ? "bg-[#f7f5f0] border-2 border-[#111111]/30 text-[#111111] hover:border-[#111111]"
+                            : "bg-zinc-950 ring-1 ring-white/5 text-zinc-500 hover:text-zinc-300"
                       }`}
                     >
                       Single date
                     </button>
                     <button
                       onClick={() => updateClassField("repeatMode", "day_order")}
-                      className={`rounded-xl px-3 py-3 text-xs font-bold transition-all ${
+                      className={`rounded-xl px-3 py-3 text-xs font-bold transition-all cursor-pointer ${
                         classForm.repeatMode === "day_order"
-                          ? "bg-emerald-500/10 ring-1 ring-emerald-500/30 text-emerald-400"
-                          : "bg-zinc-950 ring-1 ring-white/5 text-zinc-500 hover:text-zinc-300"
+                          ? isPoster
+                            ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] keep-white"
+                            : "bg-emerald-500/10 ring-1 ring-emerald-500/30 text-emerald-400"
+                          : isPoster
+                            ? "bg-[#f7f5f0] border-2 border-[#111111]/30 text-[#111111] hover:border-[#111111]"
+                            : "bg-zinc-950 ring-1 ring-white/5 text-zinc-500 hover:text-zinc-300"
                       }`}
                     >
                       Repeat by day order
@@ -731,15 +815,23 @@ export function AboutSection() {
                   </div>
                   {classForm.repeatMode === "single" ? (
                     <div className="col-span-2">
-                      <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-1.5">Date</p>
+                      <p className={`text-[10px] font-bold uppercase tracking-widest mb-1.5 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>Date</p>
                       <input type="date" value={classForm.date} onChange={(e) => updateClassField("date", e.target.value)}
-                        className="w-full bg-zinc-950 border border-white/5 rounded-xl px-4 py-3 text-sm text-zinc-300 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all font-medium shadow-inner" />
+                        className={`w-full rounded-xl px-4 py-3 text-sm focus:outline-none transition-all font-medium ${
+                          isPoster
+                            ? "bg-[#f7f5f0] border-2 border-[#111111] text-[#111111] focus:bg-white"
+                            : "bg-zinc-950 border border-white/5 text-zinc-300 focus:border-emerald-500/50 shadow-inner"
+                        }`} />
                     </div>
                   ) : (
                     <div className="col-span-2">
-                      <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-1.5">Day order</p>
+                      <p className={`text-[10px] font-bold uppercase tracking-widest mb-1.5 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>Day order</p>
                       <select value={classForm.dayOrder} onChange={(e) => updateClassField("dayOrder", Number(e.target.value))}
-                        className="w-full bg-zinc-950 border border-white/5 rounded-xl px-4 py-3 text-sm text-zinc-300 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all font-medium shadow-inner">
+                        className={`w-full rounded-xl px-4 py-3 text-sm focus:outline-none transition-all font-medium ${
+                          isPoster
+                            ? "bg-[#f7f5f0] border-2 border-[#111111] text-[#111111]"
+                            : "bg-zinc-950 border border-white/5 text-zinc-300 focus:border-emerald-500/50 shadow-inner"
+                        }`}>
                         {[1, 2, 3, 4, 5].map((dayOrder) => (
                           <option key={dayOrder} value={dayOrder}>Day Order {dayOrder}</option>
                         ))}
@@ -747,71 +839,87 @@ export function AboutSection() {
                     </div>
                   )}
                   <div className="col-span-2">
-                    <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-1.5">Class name <span className="text-emerald-400">*</span></p>
+                    <p className={`text-[10px] font-bold uppercase tracking-widest mb-1.5 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>Class name <span className="text-emerald-500">*</span></p>
                     <input value={classForm.name} onChange={(e) => updateClassField("name", e.target.value)}
                       placeholder="Revision class"
-                      className="w-full bg-zinc-950 border border-white/5 rounded-xl px-4 py-3 text-sm text-zinc-300 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all font-medium placeholder-zinc-700 shadow-inner" />
+                      className={`w-full rounded-xl px-4 py-3 text-sm focus:outline-none transition-all font-medium ${
+                        isPoster
+                          ? "bg-[#f7f5f0] border-2 border-[#111111] text-[#111111] placeholder-zinc-500 focus:bg-white"
+                          : "bg-zinc-950 border border-white/5 text-zinc-300 focus:border-emerald-500/50 placeholder-zinc-700 shadow-inner"
+                      }`} />
                   </div>
                   <div>
-                    <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-1.5">Start time <span className="text-emerald-400">*</span></p>
+                    <p className={`text-[10px] font-bold uppercase tracking-widest mb-1.5 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>Start time <span className="text-emerald-500">*</span></p>
                     <input type="time" value={classForm.startTime} onChange={(e) => updateClassField("startTime", e.target.value)}
-                      className="w-full bg-zinc-950 border border-white/5 rounded-xl px-4 py-3 text-sm text-zinc-300 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all font-medium shadow-inner" />
+                      className={`w-full rounded-xl px-4 py-3 text-sm focus:outline-none transition-all font-medium ${
+                        isPoster
+                          ? "bg-[#f7f5f0] border-2 border-[#111111] text-[#111111] focus:bg-white"
+                          : "bg-zinc-950 border border-white/5 text-zinc-300 focus:border-emerald-500/50 shadow-inner"
+                      }`} />
                   </div>
                   <div>
-                    <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-1.5">End time <span className="text-emerald-400">*</span></p>
+                    <p className={`text-[10px] font-bold uppercase tracking-widest mb-1.5 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>End time <span className="text-emerald-500">*</span></p>
                     <input type="time" value={classForm.endTime} onChange={(e) => updateClassField("endTime", e.target.value)}
-                      className="w-full bg-zinc-950 border border-white/5 rounded-xl px-4 py-3 text-sm text-zinc-300 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all font-medium shadow-inner" />
-                  </div>
-                  <div>
-                    <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-1.5">Room</p>
-                    <input value={classForm.room} onChange={(e) => updateClassField("room", e.target.value)}
-                      placeholder="Room / Lab"
-                      className="w-full bg-zinc-950 border border-white/5 rounded-xl px-4 py-3 text-sm text-zinc-300 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all font-medium placeholder-zinc-700 shadow-inner" />
-                  </div>
-                  <div>
-                    <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-1.5">Note</p>
-                    <input value={classForm.note} onChange={(e) => updateClassField("note", e.target.value)}
-                      placeholder="Optional note"
-                      className="w-full bg-zinc-950 border border-white/5 rounded-xl px-4 py-3 text-sm text-zinc-300 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all font-medium placeholder-zinc-700 shadow-inner" />
+                      className={`w-full rounded-xl px-4 py-3 text-sm focus:outline-none transition-all font-medium ${
+                        isPoster
+                          ? "bg-[#f7f5f0] border-2 border-[#111111] text-[#111111] focus:bg-white"
+                          : "bg-zinc-950 border border-white/5 text-zinc-300 focus:border-emerald-500/50 shadow-inner"
+                      }`} />
                   </div>
                 </div>
 
                 <button onClick={handleAddCustomClass}
-                  className="w-full bg-emerald-500 text-zinc-950 font-bold text-xs uppercase tracking-wider py-4 rounded-xl hover:bg-emerald-400 transition-all mt-4 flex items-center justify-center gap-2">
+                  className={`w-full font-bold text-xs uppercase tracking-wider py-4 rounded-xl transition-all mt-4 flex items-center justify-center gap-2 cursor-pointer ${
+                    isPoster
+                      ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-zinc-800 keep-white"
+                      : "bg-emerald-500 text-zinc-950 hover:bg-emerald-400"
+                  }`}>
                   <Plus className="w-4 h-4" />
                   Add class
                 </button>
                 {classFormMessage ? (
-                  <p className={`mt-2 text-[10px] font-bold uppercase tracking-widest ${classFormMessage.tone === "success" ? "text-emerald-400" : "text-rose-400"}`}>
+                  <p className={`mt-2 text-[10px] font-bold uppercase tracking-widest ${classFormMessage.tone === "success" ? (isPoster ? "text-emerald-700" : "text-emerald-400") : "text-rose-500"}`}>
                     {classFormMessage.text}
                   </p>
                 ) : null}
                 {overlapWarning ? (
-                  <p className="mt-2 text-[10px] font-bold uppercase tracking-widest text-amber-400">
+                  <p className={`mt-2 text-[10px] font-bold uppercase tracking-widest ${isPoster ? "text-amber-800" : "text-amber-400"}`}>
                     {overlapWarning}
                   </p>
                 ) : null}
 
                 <div className="mt-4 space-y-2">
                   {upcomingCustomClasses.length > 0 ? upcomingCustomClasses.map((item) => (
-                    <div key={item.id} className="flex items-start gap-3 rounded-xl px-4 py-3 bg-zinc-950/50 ring-1 ring-white/[0.04]">
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-cyan-500/10 ring-1 ring-cyan-500/20">
-                        <Clock3 className="w-4 h-4 text-cyan-400" />
+                    <div key={item.id} className={`flex items-start gap-3 rounded-xl px-4 py-3 ${
+                      isPoster
+                        ? "bg-[#f7f5f0] border-2 border-[#111111] shadow-[2px_2px_0px_#111111] text-[#111111]"
+                        : "bg-zinc-950/50 ring-1 ring-white/[0.04]"
+                    }`}>
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                        isPoster
+                          ? "bg-white border-2 border-[#111111] text-[#111111]"
+                          : "bg-cyan-500/10 ring-1 ring-cyan-500/20 text-cyan-400"
+                      }`}>
+                        <Clock3 className="w-4 h-4" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-zinc-200">{item.name}</p>
-                        <p className="text-xs text-zinc-500 mt-0.5">
+                        <p className={`text-sm font-semibold ${isPoster ? "text-[#111111] font-bold" : "text-zinc-200"}`}>{item.name}</p>
+                        <p className={`text-xs mt-0.5 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>
                           {item.code} · {item.repeatMode === "day_order" ? `DO ${item.dayOrder}` : new Date(`${item.date}T00:00:00`).toLocaleDateString("en-IN", { day: "numeric", month: "short" })} · {item.startTime} - {item.endTime}
                         </p>
-                        <p className="text-xs text-zinc-600 mt-0.5">{item.room ? `${item.room} · ` : ""}{item.faculty || item.type}</p>
+                        <p className={`text-xs mt-0.5 ${isPoster ? "text-zinc-600" : "text-zinc-600"}`}>{item.room ? `${item.room} · ` : ""}{item.faculty || item.type}</p>
                       </div>
                       <button onClick={() => removeCustomClass(item.id)}
-                        className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-rose-500/10 ring-1 ring-rose-500/20 text-rose-400 hover:bg-rose-500/20 transition-all">
+                        className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-all cursor-pointer ${
+                          isPoster
+                            ? "bg-white border-2 border-[#111111] text-rose-600 shadow-[1px_1px_0px_#111111] hover:bg-rose-50"
+                            : "bg-rose-500/10 ring-1 ring-rose-500/20 text-rose-400 hover:bg-rose-500/20"
+                        }`}>
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   )) : (
-                    <p className="text-xs text-zinc-600 text-center pt-1">No custom classes added yet.</p>
+                    <p className={`text-xs text-center pt-1 ${isPoster ? "text-zinc-500" : "text-zinc-600"}`}>No custom classes added yet.</p>
                   )}
                 </div>
               </div>
@@ -823,24 +931,32 @@ export function AboutSection() {
       {/* ── OD/ML Planner (under Custom Planner) ── */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.14 }}
         id="od-ml-planner-section"
-        className="group bg-zinc-900/40 ring-1 ring-white/5 rounded-2xl hover:ring-zinc-700 hover:bg-zinc-900/60 transition-all relative overflow-hidden mb-8">
+        className={`group rounded-2xl transition-all relative overflow-hidden mb-8 ${
+          isPoster
+            ? "bg-white border-2 border-[#111111] shadow-[4px_4px_0px_#111111] text-[#111111]"
+            : "bg-zinc-900/40 ring-1 ring-white/5 hover:ring-zinc-700 hover:bg-zinc-900/60"
+        }`}>
         <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/0 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
         <button
           onClick={() => setShowOdMlForm((p) => !p)}
-          className="w-full flex items-center justify-between gap-2 p-5 relative z-10"
+          className="w-full flex items-center justify-between gap-2 p-5 relative z-10 cursor-pointer"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-emerald-500/10 ring-1 ring-emerald-500/20">
-              <Calendar className="w-4 h-4 text-emerald-400" />
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+              isPoster
+                ? "bg-[#f7f5f0] border-2 border-[#111111] shadow-[1.5px_1.5px_0px_#111111] text-[#111111]"
+                : "bg-emerald-500/10 ring-1 ring-emerald-500/20 text-emerald-400"
+            }`}>
+              <Calendar className="w-4 h-4" />
             </div>
             <div className="text-left">
-              <p className="text-sm font-bold text-zinc-100">OD / ML planner</p>
-              <p className="text-xs text-zinc-500 mt-0.5 truncate">Set leave ranges for attendance adjustment.</p>
+              <p className={`text-sm font-bold ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>OD / ML planner</p>
+              <p className={`text-xs mt-0.5 truncate ${isPoster ? "text-zinc-600 font-medium" : "text-zinc-500"}`}>Set leave ranges for attendance adjustment.</p>
             </div>
           </div>
           <motion.div animate={{ rotate: showOdMlForm ? 180 : 0 }} transition={{ duration: 0.2 }} className="self-stretch flex items-center">
-            <ChevronDown className="w-4 h-4 shrink-0 text-zinc-500" />
+            <ChevronDown className={`w-4 h-4 shrink-0 ${isPoster ? "text-[#111111]" : "text-zinc-500"}`} />
           </motion.div>
         </button>
 
@@ -853,80 +969,116 @@ export function AboutSection() {
               transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
               className="overflow-hidden"
             >
-              <div className="px-5 pb-5 border-t border-white/5 relative z-10">
+              <div className={`px-5 pb-5 border-t relative z-10 ${isPoster ? "border-[#111111]" : "border-white/5"}`}>
                 <div className="pt-4 grid grid-cols-2 gap-3">
                   <div className="col-span-2 grid grid-cols-2 gap-3">
                     <button
                       onClick={() => { setOdMlMessage(null); setOdMlForm((p) => ({ ...p, type: "od" })) }}
-                      className={`rounded-xl px-3 py-3 text-xs font-bold transition-all ${
+                      className={`rounded-xl px-3 py-3 text-xs font-bold transition-all cursor-pointer ${
                         odMlForm.type === "od"
-                          ? "bg-emerald-500/10 ring-1 ring-emerald-500/30 text-emerald-400"
-                          : "bg-zinc-950 ring-1 ring-white/5 text-zinc-500 hover:text-zinc-300"
+                          ? isPoster
+                            ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] keep-white"
+                            : "bg-emerald-500/10 ring-1 ring-emerald-500/30 text-emerald-400"
+                          : isPoster
+                            ? "bg-[#f7f5f0] border-2 border-[#111111]/30 text-[#111111] hover:border-[#111111]"
+                            : "bg-zinc-950 ring-1 ring-white/5 text-zinc-500 hover:text-zinc-300"
                       }`}
                     >
                       OD
                     </button>
                     <button
                       onClick={() => { setOdMlMessage(null); setOdMlForm((p) => ({ ...p, type: "ml" })) }}
-                      className={`rounded-xl px-3 py-3 text-xs font-bold transition-all ${
+                      className={`rounded-xl px-3 py-3 text-xs font-bold transition-all cursor-pointer ${
                         odMlForm.type === "ml"
-                          ? "bg-emerald-500/10 ring-1 ring-emerald-500/30 text-emerald-400"
-                          : "bg-zinc-950 ring-1 ring-white/5 text-zinc-500 hover:text-zinc-300"
+                          ? isPoster
+                            ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] keep-white"
+                            : "bg-emerald-500/10 ring-1 ring-emerald-500/30 text-emerald-400"
+                          : isPoster
+                            ? "bg-[#f7f5f0] border-2 border-[#111111]/30 text-[#111111] hover:border-[#111111]"
+                            : "bg-zinc-950 ring-1 ring-white/5 text-zinc-500 hover:text-zinc-300"
                       }`}
                     >
                       ML
                     </button>
                   </div>
                   <div>
-                    <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-1.5">From</p>
+                    <p className={`text-[10px] font-bold uppercase tracking-widest mb-1.5 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>From</p>
                     <input type="date" value={odMlForm.startDate} onChange={(e) => { setOdMlMessage(null); setOdMlForm((p) => ({ ...p, startDate: e.target.value })) }}
-                      className="w-full bg-zinc-950 border border-white/5 rounded-xl px-4 py-3 text-sm text-zinc-300 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all font-medium shadow-inner" />
+                      className={`w-full rounded-xl px-4 py-3 text-sm focus:outline-none transition-all font-medium ${
+                        isPoster
+                          ? "bg-[#f7f5f0] border-2 border-[#111111] text-[#111111] focus:bg-white"
+                          : "bg-zinc-950 border border-white/5 text-zinc-300 focus:border-emerald-500/50 shadow-inner"
+                      }`} />
                   </div>
                   <div>
-                    <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-1.5">To</p>
+                    <p className={`text-[10px] font-bold uppercase tracking-widest mb-1.5 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>To</p>
                     <input type="date" value={odMlForm.endDate} onChange={(e) => { setOdMlMessage(null); setOdMlForm((p) => ({ ...p, endDate: e.target.value })) }}
-                      className="w-full bg-zinc-950 border border-white/5 rounded-xl px-4 py-3 text-sm text-zinc-300 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all font-medium shadow-inner" />
+                      className={`w-full rounded-xl px-4 py-3 text-sm focus:outline-none transition-all font-medium ${
+                        isPoster
+                          ? "bg-[#f7f5f0] border-2 border-[#111111] text-[#111111] focus:bg-white"
+                          : "bg-zinc-950 border border-white/5 text-zinc-300 focus:border-emerald-500/50 shadow-inner"
+                      }`} />
                   </div>
                   <div className="col-span-2">
-                    <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-1.5">Note</p>
+                    <p className={`text-[10px] font-bold uppercase tracking-widest mb-1.5 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>Note</p>
                     <input value={odMlForm.note} onChange={(e) => { setOdMlMessage(null); setOdMlForm((p) => ({ ...p, note: e.target.value })) }}
                       placeholder="Optional note"
-                      className="w-full bg-zinc-950 border border-white/5 rounded-xl px-4 py-3 text-sm text-zinc-300 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all font-medium placeholder-zinc-700 shadow-inner" />
+                      className={`w-full rounded-xl px-4 py-3 text-sm focus:outline-none transition-all font-medium ${
+                        isPoster
+                          ? "bg-[#f7f5f0] border-2 border-[#111111] text-[#111111] placeholder-zinc-500 focus:bg-white"
+                          : "bg-zinc-950 border border-white/5 text-zinc-300 focus:border-emerald-500/50 placeholder-zinc-700 shadow-inner"
+                      }`} />
                   </div>
                 </div>
 
                 <button onClick={handleAddOdMl}
-                  className="w-full bg-emerald-500 text-zinc-950 font-bold text-xs uppercase tracking-wider py-4 rounded-xl hover:bg-emerald-400 transition-all mt-4 flex items-center justify-center gap-2">
+                  className={`w-full font-bold text-xs uppercase tracking-wider py-4 rounded-xl transition-all mt-4 flex items-center justify-center gap-2 cursor-pointer ${
+                    isPoster
+                      ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-zinc-800 keep-white"
+                      : "bg-emerald-500 text-zinc-950 hover:bg-emerald-400"
+                  }`}>
                   <Plus className="w-4 h-4" />
                   Add {odMlForm.type.toUpperCase()} range
                 </button>
                 {odMlMessage ? (
-                  <p className={`mt-2 text-[10px] font-bold uppercase tracking-widest ${odMlMessage.tone === "success" ? "text-emerald-400" : "text-rose-400"}`}>
+                  <p className={`mt-2 text-[10px] font-bold uppercase tracking-widest ${odMlMessage.tone === "success" ? (isPoster ? "text-emerald-700" : "text-emerald-400") : "text-rose-500"}`}>
                     {odMlMessage.text}
                   </p>
                 ) : null}
 
-                <p className="mt-3 text-[10px] text-zinc-600">
+                <p className={`mt-3 text-[10px] ${isPoster ? "text-zinc-600" : "text-zinc-600"}`}>
                   OD applies to theory and lab-based theory only. Normal practical sessions are excluded.
                 </p>
 
                 <div className="mt-4 space-y-2">
                   {odMlEntries.length > 0 ? odMlEntries.map((item) => (
-                    <div key={item.id} className="flex items-start gap-3 rounded-xl px-4 py-3 bg-zinc-950/50 ring-1 ring-white/[0.04]">
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-emerald-500/10 ring-1 ring-emerald-500/20">
-                        <Calendar className="w-4 h-4 text-emerald-400" />
+                    <div key={item.id} className={`flex items-start gap-3 rounded-xl px-4 py-3 ${
+                      isPoster
+                        ? "bg-[#f7f5f0] border-2 border-[#111111] shadow-[2px_2px_0px_#111111] text-[#111111]"
+                        : "bg-zinc-950/50 ring-1 ring-white/[0.04]"
+                    }`}>
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                        isPoster
+                          ? "bg-white border-2 border-[#111111] text-[#111111]"
+                          : "bg-emerald-500/10 ring-1 ring-emerald-500/20 text-emerald-400"
+                      }`}>
+                        <Calendar className="w-4 h-4" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-zinc-200">{item.type.toUpperCase()} · {item.startDate} to {item.endDate}</p>
-                        <p className="text-xs text-zinc-500 mt-0.5">{item.note || "No note"}</p>
+                        <p className={`text-sm font-semibold ${isPoster ? "text-[#111111] font-bold" : "text-zinc-200"}`}>{item.type.toUpperCase()} · {item.startDate} to {item.endDate}</p>
+                        <p className={`text-xs mt-0.5 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>{item.note || "No note"}</p>
                       </div>
                       <button onClick={() => removeOdMlEntry(item.id)}
-                        className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-rose-500/10 ring-1 ring-rose-500/20 text-rose-400 hover:bg-rose-500/20 transition-all">
+                        className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-all cursor-pointer ${
+                          isPoster
+                            ? "bg-white border-2 border-[#111111] text-rose-600 shadow-[1px_1px_0px_#111111] hover:bg-rose-50"
+                            : "bg-rose-500/10 ring-1 ring-rose-500/20 text-rose-400 hover:bg-rose-500/20"
+                        }`}>
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   )) : (
-                    <p className="text-xs text-zinc-600 text-center pt-1">No OD/ML ranges added yet.</p>
+                    <p className={`text-xs text-center pt-1 ${isPoster ? "text-zinc-500" : "text-zinc-600"}`}>No OD/ML ranges added yet.</p>
                   )}
                 </div>
               </div>
@@ -937,24 +1089,32 @@ export function AboutSection() {
 
       {/* ── Assignments (under Custom Planner) ── */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16 }}
-        className="group bg-zinc-900/40 ring-1 ring-white/5 rounded-2xl hover:ring-zinc-700 hover:bg-zinc-900/60 transition-all relative overflow-hidden mb-8">
+        className={`group rounded-2xl transition-all relative overflow-hidden mb-8 ${
+          isPoster
+            ? "bg-white border-2 border-[#111111] shadow-[4px_4px_0px_#111111] text-[#111111]"
+            : "bg-zinc-900/40 ring-1 ring-white/5 hover:ring-zinc-700 hover:bg-zinc-900/60"
+        }`}>
         <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/0 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
         <button
           onClick={() => setShowAssignmentsForm(p => !p)}
-          className="w-full flex items-center justify-between gap-2 p-5 relative z-10"
+          className="w-full flex items-center justify-between gap-2 p-5 relative z-10 cursor-pointer"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-emerald-500/10 ring-1 ring-emerald-500/20">
-              <ClipboardCheck className="w-4 h-4 text-emerald-400" />
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+              isPoster
+                ? "bg-[#f7f5f0] border-2 border-[#111111] shadow-[1.5px_1.5px_0px_#111111] text-[#111111]"
+                : "bg-emerald-500/10 ring-1 ring-emerald-500/20 text-emerald-400"
+            }`}>
+              <ClipboardCheck className="w-4 h-4" />
             </div>
             <div className="text-left">
-              <p className="text-sm font-bold text-zinc-100">Assignments</p>
-              <p className="text-xs text-zinc-500 mt-0.5 truncate">{assignments?.length || 0} items · {pendingAssignments.length} pending</p>
+              <p className={`text-sm font-bold ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>Assignments</p>
+              <p className={`text-xs mt-0.5 truncate ${isPoster ? "text-zinc-600 font-medium" : "text-zinc-500"}`}>{assignments?.length || 0} items · {pendingAssignments.length} pending</p>
             </div>
           </div>
           <motion.div animate={{ rotate: showAssignmentsForm ? 180 : 0 }} transition={{ duration: 0.2 }} className="self-stretch flex items-center">
-            <ChevronDown className="w-4 h-4 shrink-0 text-zinc-500" />
+            <ChevronDown className={`w-4 h-4 shrink-0 ${isPoster ? "text-[#111111]" : "text-zinc-500"}`} />
           </motion.div>
         </button>
 
@@ -967,68 +1127,104 @@ export function AboutSection() {
               transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
               className="overflow-hidden"
             >
-              <div className="px-5 pb-5 border-t border-white/5 relative z-10">
+              <div className={`px-5 pb-5 border-t relative z-10 ${isPoster ? "border-[#111111]" : "border-white/5"}`}>
                 {/* Stat cards */}
                 <div className="grid grid-cols-3 gap-3 pt-4 mb-4">
                   {[
-                    { label: "Pending", value: pendingAssignments.length, cls: "text-zinc-200" },
-                    { label: "Due today", value: todayAssignments.length, cls: "text-cyan-400" },
-                    { label: "Overdue", value: overdueAssignments.length, cls: "text-rose-400" },
+                    { label: "Pending", value: pendingAssignments.length, cls: isPoster ? "text-[#111111]" : "text-zinc-200" },
+                    { label: "Due today", value: todayAssignments.length, cls: isPoster ? "text-cyan-700" : "text-cyan-400" },
+                    { label: "Overdue", value: overdueAssignments.length, cls: isPoster ? "text-rose-600" : "text-rose-400" },
                   ].map((item) => (
-                    <div key={item.label} className="bg-zinc-950/50 ring-1 ring-white/5 rounded-xl px-3 py-3 text-center">
+                    <div key={item.label} className={`rounded-xl px-3 py-3 text-center ${
+                      isPoster
+                        ? "bg-[#f7f5f0] border-2 border-[#111111] shadow-[2px_2px_0px_#111111]"
+                        : "bg-zinc-950/50 ring-1 ring-white/5"
+                    }`}>
                       <p className={`text-base font-black ${item.cls}`}>{item.value}</p>
-                      <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mt-0.5">{item.label}</p>
+                      <p className={`text-[9px] font-bold uppercase tracking-widest mt-0.5 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>{item.label}</p>
                     </div>
                   ))}
                 </div>
 
                 {/* Add assignment form */}
-                <div className="bg-zinc-950/30 ring-1 ring-white/5 rounded-2xl p-4 mb-4">
+                <div className={`rounded-2xl p-4 mb-4 ${
+                  isPoster
+                    ? "bg-[#f7f5f0] border-2 border-[#111111] shadow-[2px_2px_0px_#111111]"
+                    : "bg-zinc-950/30 ring-1 ring-white/5"
+                }`}>
                   <div className="flex items-center gap-2 mb-4">
-                    <Plus className="w-4 h-4 text-emerald-400" />
-                    <p className="text-xs font-semibold text-zinc-200">Add assignment</p>
+                    <Plus className={`w-4 h-4 ${isPoster ? "text-[#111111]" : "text-emerald-400"}`} />
+                    <p className={`text-xs font-semibold ${isPoster ? "text-[#111111] font-bold" : "text-zinc-200"}`}>Add assignment</p>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="col-span-2">
-                      <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">Title</p>
+                      <p className={`text-[9px] font-bold uppercase tracking-widest mb-1 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>Title</p>
                       <input value={assignForm.title} onChange={(e) => setAssignForm((p) => ({ ...p, title: e.target.value }))}
                         placeholder="DBMS assignment 2"
-                        className="w-full bg-zinc-950 border border-white/5 rounded-xl px-4 py-3 text-sm text-zinc-300 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all font-medium placeholder-zinc-700 shadow-inner" />
+                        className={`w-full rounded-xl px-4 py-3 text-sm focus:outline-none transition-all font-medium ${
+                          isPoster
+                            ? "bg-white border-2 border-[#111111] text-[#111111] placeholder-zinc-500"
+                            : "bg-zinc-950 border border-white/5 text-zinc-300 focus:border-emerald-500/50 placeholder-zinc-700 shadow-inner"
+                        }`} />
                     </div>
                     <div>
-                      <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">Course</p>
+                      <p className={`text-[9px] font-bold uppercase tracking-widest mb-1 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>Course</p>
                       <input value={assignForm.course} onChange={(e) => setAssignForm((p) => ({ ...p, course: e.target.value }))}
                         placeholder="21CSC201T"
-                        className="w-full bg-zinc-950 border border-white/5 rounded-xl px-4 py-3 text-sm text-zinc-300 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all font-medium placeholder-zinc-700 shadow-inner" />
+                        className={`w-full rounded-xl px-4 py-3 text-sm focus:outline-none transition-all font-medium ${
+                          isPoster
+                            ? "bg-white border-2 border-[#111111] text-[#111111] placeholder-zinc-500"
+                            : "bg-zinc-950 border border-white/5 text-zinc-300 focus:border-emerald-500/50 placeholder-zinc-700 shadow-inner"
+                        }`} />
                     </div>
                     <div>
-                      <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">Priority</p>
+                      <p className={`text-[9px] font-bold uppercase tracking-widest mb-1 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>Priority</p>
                       <select value={assignForm.priority} onChange={(e) => setAssignForm((p) => ({ ...p, priority: e.target.value as "low" | "medium" | "high" }))}
-                        className="w-full bg-zinc-950 border border-white/5 rounded-xl px-4 py-3 text-sm text-zinc-300 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all font-medium shadow-inner">
+                        className={`w-full rounded-xl px-4 py-3 text-sm focus:outline-none transition-all font-medium ${
+                          isPoster
+                            ? "bg-white border-2 border-[#111111] text-[#111111]"
+                            : "bg-zinc-950 border border-white/5 text-zinc-300 focus:border-emerald-500/50 shadow-inner"
+                        }`}>
                         <option value="high">High</option>
                         <option value="medium">Medium</option>
                         <option value="low">Low</option>
                       </select>
                     </div>
                     <div>
-                      <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">Due date</p>
+                      <p className={`text-[9px] font-bold uppercase tracking-widest mb-1 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>Due date</p>
                       <input type="date" value={assignForm.dueDate} onChange={(e) => setAssignForm((p) => ({ ...p, dueDate: e.target.value }))}
-                        className="w-full bg-zinc-950 border border-white/5 rounded-xl px-4 py-3 text-sm text-zinc-300 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all font-medium shadow-inner" />
+                        className={`w-full rounded-xl px-4 py-3 text-sm focus:outline-none transition-all font-medium ${
+                          isPoster
+                            ? "bg-white border-2 border-[#111111] text-[#111111]"
+                            : "bg-zinc-950 border border-white/5 text-zinc-300 focus:border-emerald-500/50 shadow-inner"
+                        }`} />
                     </div>
                     <div>
-                      <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">Time</p>
+                      <p className={`text-[9px] font-bold uppercase tracking-widest mb-1 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>Time</p>
                       <input type="time" value={assignForm.dueTime} onChange={(e) => setAssignForm((p) => ({ ...p, dueTime: e.target.value }))}
-                        className="w-full bg-zinc-950 border border-white/5 rounded-xl px-4 py-3 text-sm text-zinc-300 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all font-medium shadow-inner" />
+                        className={`w-full rounded-xl px-4 py-3 text-sm focus:outline-none transition-all font-medium ${
+                          isPoster
+                            ? "bg-white border-2 border-[#111111] text-[#111111]"
+                            : "bg-zinc-950 border border-white/5 text-zinc-300 focus:border-emerald-500/50 shadow-inner"
+                        }`} />
                     </div>
                     <div className="col-span-2">
-                      <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">Note</p>
+                      <p className={`text-[9px] font-bold uppercase tracking-widest mb-1 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>Note</p>
                       <input value={assignForm.note} onChange={(e) => setAssignForm((p) => ({ ...p, note: e.target.value }))}
                         placeholder="Optional note"
-                        className="w-full bg-zinc-950 border border-white/5 rounded-xl px-4 py-3 text-sm text-zinc-300 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all font-medium placeholder-zinc-700 shadow-inner" />
+                        className={`w-full rounded-xl px-4 py-3 text-sm focus:outline-none transition-all font-medium ${
+                          isPoster
+                            ? "bg-white border-2 border-[#111111] text-[#111111] placeholder-zinc-500"
+                            : "bg-zinc-950 border border-white/5 text-zinc-300 focus:border-emerald-500/50 placeholder-zinc-700 shadow-inner"
+                        }`} />
                     </div>
                   </div>
                   <button onClick={handleAddAssignment}
-                    className="w-full mt-3 rounded-xl px-4 py-3 flex items-center justify-center gap-2 text-xs font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all">
+                    className={`w-full mt-3 rounded-xl px-4 py-3 flex items-center justify-center gap-2 text-xs font-bold transition-all cursor-pointer ${
+                      isPoster
+                        ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-zinc-800 keep-white"
+                        : "text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20"
+                    }`}>
                     <Plus className="w-3.5 h-3.5" />
                     Add assignment
                   </button>
@@ -1037,26 +1233,30 @@ export function AboutSection() {
                 {/* Assignment board */}
                 <div>
                   <div className="flex items-center gap-2 mb-3">
-                    <ClipboardList className="w-4 h-4 text-emerald-400" />
-                    <p className="text-xs font-semibold text-zinc-200">Assignment board</p>
-                    <span className="text-[9px] text-zinc-500 font-bold ml-auto">{assignments?.length || 0} total</span>
+                    <ClipboardList className={`w-4 h-4 ${isPoster ? "text-[#111111]" : "text-emerald-400"}`} />
+                    <p className={`text-xs font-semibold ${isPoster ? "text-[#111111] font-bold" : "text-zinc-200"}`}>Assignment board</p>
+                    <span className={`text-[9px] font-bold ml-auto ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>{assignments?.length || 0} total</span>
                   </div>
 
                   <div className="space-y-4">
                     {(["todo", "in_progress", "done"] as const).map((status) => (
                       <div key={status}>
                         <div className="flex items-center justify-between mb-2">
-                          <p className={`text-[9px] font-bold uppercase tracking-widest ${statusLabelColor[status]}`}>
+                          <p className={`text-[9px] font-bold uppercase tracking-widest ${isPoster ? "text-[#111111] font-mono" : statusLabelColor[status]}`}>
                             {statusMeta[status].label}
                           </p>
-                          <span className="text-[9px] text-zinc-500 font-bold">{groupedAssignments[status].length}</span>
+                          <span className={`text-[9px] font-bold ${isPoster ? "text-zinc-600" : "text-zinc-500"}`}>{groupedAssignments[status].length}</span>
                         </div>
                         <div className="space-y-2">
                           {groupedAssignments[status].length > 0 ? groupedAssignments[status].map((item, idx) => {
                             const nextStatus = item.status === "todo" ? "in_progress" : item.status === "in_progress" ? "done" : "todo"
                             return (
                               <div key={item.id}
-                                className="group/item bg-zinc-950/30 ring-1 ring-white/5 rounded-xl p-4 hover:ring-zinc-700 transition-all relative overflow-hidden">
+                                className={`group/item rounded-xl p-4 transition-all relative overflow-hidden ${
+                                  isPoster
+                                    ? "bg-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] text-[#111111]"
+                                    : "bg-zinc-950/30 ring-1 ring-white/5 hover:ring-zinc-700"
+                                }`}>
                                 <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/0 to-emerald-500/5 opacity-0 group-hover/item:opacity-100 transition-opacity duration-500" />
                                 <div className="flex items-start gap-3 relative z-10">
                                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ring-1 ${priorityIconBg[item.priority]}`}>
@@ -1068,30 +1268,42 @@ export function AboutSection() {
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 flex-wrap">
-                                      <p className="text-xs font-semibold text-zinc-200">{item.title}</p>
+                                      <p className={`text-xs font-semibold ${isPoster ? "text-[#111111] font-bold" : "text-zinc-200"}`}>{item.title}</p>
                                       <span className={`text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-lg ring-1 ${priorityBadge[item.priority]}`}>
                                         {item.priority === "high" ? "High" : item.priority === "medium" ? "Med" : "Low"}
                                       </span>
                                       {item.course ? (
-                                        <span className="text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-lg ring-1 text-emerald-400 bg-emerald-500/10 border-emerald-500/20">
+                                        <span className={`text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-lg ring-1 ${
+                                          isPoster
+                                            ? "bg-[#f7f5f0] border border-[#111111] text-[#111111]"
+                                            : "text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
+                                        }`}>
                                           {item.course}
                                         </span>
                                       ) : null}
                                     </div>
-                                    <p className="text-[10px] text-zinc-500 mt-1">
+                                    <p className={`text-[10px] mt-1 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>
                                       Due {new Date(`${item.dueDate}T00:00:00`).toLocaleDateString("en-IN", { day: "numeric", month: "short", weekday: "short" })}
                                       {item.dueTime ? ` · ${item.dueTime}` : ""}
                                     </p>
                                     {item.note ? (
-                                      <p className="text-[10px] text-zinc-500 mt-0.5">{item.note}</p>
+                                      <p className={`text-[10px] mt-0.5 ${isPoster ? "text-zinc-600" : "text-zinc-500"}`}>{item.note}</p>
                                     ) : null}
                                     <div className="flex items-center gap-2 mt-2">
                                       <button onClick={() => updateAssignment(item.id, { status: nextStatus })}
-                                        className={`text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-lg ring-1 transition-all hover:opacity-80 ${statusBadge[nextStatus]}`}>
+                                        className={`text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-lg ring-1 transition-all hover:opacity-80 cursor-pointer ${
+                                          isPoster
+                                            ? "bg-[#f7f5f0] border border-[#111111] text-[#111111] shadow-[1px_1px_0px_#111111]"
+                                            : statusBadge[nextStatus]
+                                        }`}>
                                         Move to {statusMeta[nextStatus].label}
                                       </button>
                                       <button onClick={() => removeAssignment(item.id)}
-                                        className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 text-rose-400 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition-all">
+                                        className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 transition-all cursor-pointer ${
+                                          isPoster
+                                            ? "bg-white border border-[#111111] text-rose-600 shadow-[1px_1px_0px_#111111] hover:bg-rose-50"
+                                            : "text-rose-400 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20"
+                                        }`}>
                                         <Trash2 className="w-3 h-3" />
                                       </button>
                                     </div>
@@ -1100,7 +1312,11 @@ export function AboutSection() {
                               </div>
                             )
                           }) : (
-                            <p className="text-[10px] text-zinc-600 text-center py-3 bg-zinc-950/20 ring-1 ring-white/5 rounded-xl">
+                            <p className={`text-[10px] text-center py-3 rounded-xl ${
+                              isPoster
+                                ? "text-zinc-600 bg-white border border-[#111111]/20"
+                                : "text-zinc-600 bg-zinc-950/20 ring-1 ring-white/5"
+                            }`}>
                               Nothing in {statusMeta[status].label.toLowerCase()} right now.
                             </p>
                           )}
@@ -1117,7 +1333,11 @@ export function AboutSection() {
 
       {/* ── Logout ── */}
       <motion.button whileTap={{ scale: 0.98 }} onClick={() => setShowSignOutModal(true)}
-        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold bg-rose-500/10 ring-1 ring-rose-500/20 text-rose-400 hover:bg-rose-500/20 transition-all">
+        className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+          isPoster
+            ? "bg-[#fee2e2] text-[#991b1b] border-2 border-[#111111] shadow-[3px_3px_0px_#111111] hover:bg-[#fecdd3] font-bold"
+            : "bg-rose-500/10 ring-1 ring-rose-500/20 text-rose-400 hover:bg-rose-500/20"
+        }`}>
         <LogIn className="w-3.5 h-3.5 rotate-180" />
         Logout
       </motion.button>

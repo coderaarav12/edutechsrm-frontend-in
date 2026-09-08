@@ -64,7 +64,7 @@ function SkeletonCard() {
   )
 }
 
-function FacultyCard({ f }: { f: Faculty }) {
+function FacultyCard({ f, isPoster }: { f: Faculty; isPoster?: boolean }) {
   const [copiedType, setCopiedType] = useState<"email" | "phone" | null>(null)
   const [imgError, setImgError] = useState(false)
 
@@ -97,12 +97,20 @@ function FacultyCard({ f }: { f: Faculty }) {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.97 }}
       transition={{ duration: 0.2 }}
-      className="group relative rounded-2xl border border-white/5 p-4 bg-zinc-900/50 hover:bg-zinc-900/80 hover:border-emerald-500/30 transition-all flex flex-col justify-between shadow-md hover:shadow-xl hover:shadow-black/40"
+      className={`group relative rounded-2xl p-4 transition-all flex flex-col justify-between ${
+        isPoster
+          ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] hover:shadow-[5px_5px_0px_#111111] text-[#111111]"
+          : "border border-white/5 bg-zinc-900/50 hover:bg-zinc-900/80 hover:border-emerald-500/30 shadow-md hover:shadow-xl hover:shadow-black/40"
+      }`}
     >
       <div>
         {/* Header: Photo & Name */}
         <div className="flex items-start gap-3.5">
-          <div className="relative w-12 h-12 rounded-xl bg-zinc-800/90 border border-white/10 flex items-center justify-center shrink-0 overflow-hidden text-xs font-black text-emerald-400 shadow-md">
+          <div className={`relative w-12 h-12 rounded-xl flex items-center justify-center shrink-0 overflow-hidden text-xs font-black shadow-md ${
+            isPoster
+              ? "bg-[#eae7e0] border-2 border-[#111111] text-[#111111]"
+              : "bg-zinc-800/90 border border-white/10 text-emerald-400"
+          }`}>
             {proxiedImageUrl ? (
               <img
                 src={proxiedImageUrl}
@@ -118,7 +126,9 @@ function FacultyCard({ f }: { f: Faculty }) {
 
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-1">
-              <h3 className="text-sm font-bold text-zinc-100 truncate group-hover:text-emerald-300 transition-colors" title={f.name}>
+              <h3 className={`text-sm font-bold truncate transition-colors ${
+                isPoster ? "text-[#111111] group-hover:text-emerald-700" : "text-zinc-100 group-hover:text-emerald-300"
+              }`} title={f.name}>
                 {f.name}
               </h3>
               {f.profileUrl && (
@@ -126,7 +136,9 @@ function FacultyCard({ f }: { f: Faculty }) {
                   href={f.profileUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-zinc-500 hover:text-emerald-400 p-0.5 rounded transition-colors shrink-0"
+                  className={`p-0.5 rounded transition-colors shrink-0 ${
+                    isPoster ? "text-[#111111]/60 hover:text-emerald-700" : "text-zinc-500 hover:text-emerald-400"
+                  }`}
                   title="Official SRMIST Profile"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
@@ -134,16 +146,22 @@ function FacultyCard({ f }: { f: Faculty }) {
               )}
             </div>
 
-            <p className="text-[11px] text-emerald-400/90 font-medium truncate" title={f.designation}>
+            <p className={`text-[11px] font-medium truncate ${
+              isPoster ? "text-emerald-700 font-semibold" : "text-emerald-400/90"
+            }`} title={f.designation}>
               {f.designation}
             </p>
 
             <div className="mt-1 flex items-center gap-1.5 flex-wrap">
-              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-zinc-800 text-zinc-300 border border-white/5">
+              <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+                isPoster
+                  ? "bg-[#eae7e0] text-[#111111] border border-[#111111]/30 font-bold"
+                  : "bg-zinc-800 text-zinc-300 border border-white/5"
+              }`}>
                 {f.department}
               </span>
               {f.facultyId && f.facultyId !== "Not Assigned" && !f.facultyId.startsWith("FAC") && (
-                <span className="text-[10px] text-zinc-500 font-mono">
+                <span className={`text-[10px] font-mono ${isPoster ? "text-[#111111]/60 font-semibold" : "text-zinc-500"}`}>
                   #{f.facultyId}
                 </span>
               )}
@@ -152,21 +170,25 @@ function FacultyCard({ f }: { f: Faculty }) {
         </div>
 
         {/* Cabin / Staff Room Highlight */}
-        <div className="mt-3 bg-emerald-500/5 border border-emerald-500/15 rounded-xl px-2.5 py-1.5 flex items-center gap-2">
-          <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+        <div className={`mt-3 rounded-xl px-2.5 py-1.5 flex items-center gap-2 ${
+          isPoster
+            ? "bg-emerald-50 border border-emerald-400/40 text-emerald-950 font-bold"
+            : "bg-emerald-500/5 border border-emerald-500/15 text-emerald-300 font-semibold"
+        }`}>
+          <MapPin className={`w-3.5 h-3.5 shrink-0 ${isPoster ? "text-emerald-700" : "text-emerald-400"}`} />
           <div className="min-w-0 flex-1">
-            <span className="text-[11px] font-semibold text-emerald-300 truncate block" title={f.staffRoom}>
+            <span className={`text-[11px] truncate block ${isPoster ? "text-emerald-950 font-bold" : "text-emerald-300"}`} title={f.staffRoom}>
               {f.staffRoom || "Faculty Cabin"}
             </span>
           </div>
         </div>
 
         {/* Details: Specialization & Full Dept */}
-        <div className="mt-2.5 space-y-1.5 text-[11px] text-zinc-400">
+        <div className={`mt-2.5 space-y-1.5 text-[11px] ${isPoster ? "text-[#333333]" : "text-zinc-400"}`}>
           {f.fullDepartment && f.fullDepartment !== f.department && (
             <div className="flex items-center gap-1.5">
-              <Building2 className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
-              <span className="text-zinc-400 truncate text-[10.5px]" title={f.fullDepartment}>
+              <Building2 className={`w-3.5 h-3.5 shrink-0 ${isPoster ? "text-[#111111]/60" : "text-zinc-500"}`} />
+              <span className={`truncate text-[10.5px] ${isPoster ? "text-[#333333] font-medium" : "text-zinc-400"}`} title={f.fullDepartment}>
                 {f.fullDepartment}
               </span>
             </div>
@@ -174,8 +196,8 @@ function FacultyCard({ f }: { f: Faculty }) {
 
           {f.specialization && (
             <div className="flex items-start gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400/80 shrink-0 mt-0.5" />
-              <span className="text-zinc-400 line-clamp-2 text-[10.5px]" title={f.specialization}>
+              <Sparkles className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${isPoster ? "text-amber-600" : "text-amber-400/80"}`} />
+              <span className={`line-clamp-2 text-[10.5px] ${isPoster ? "text-[#333333]" : "text-zinc-400"}`} title={f.specialization}>
                 {f.specialization}
               </span>
             </div>
@@ -183,8 +205,8 @@ function FacultyCard({ f }: { f: Faculty }) {
 
           {f.experience && (
             <div className="flex items-center gap-1.5">
-              <GraduationCap className="w-3.5 h-3.5 text-sky-400/80 shrink-0" />
-              <span className="text-zinc-400 truncate text-[10.5px]" title={f.experience}>
+              <GraduationCap className={`w-3.5 h-3.5 shrink-0 ${isPoster ? "text-sky-700" : "text-sky-400/80"}`} />
+              <span className={`truncate text-[10.5px] ${isPoster ? "text-[#333333]" : "text-zinc-400"}`} title={f.experience}>
                 {f.experience}
               </span>
             </div>
@@ -193,41 +215,51 @@ function FacultyCard({ f }: { f: Faculty }) {
       </div>
 
       {/* Footer Contact Actions */}
-      <div className="mt-3.5 pt-2.5 border-t border-white/5 flex items-center justify-between gap-2">
+      <div className={`mt-3.5 pt-2.5 border-t flex items-center justify-between gap-2 ${
+        isPoster ? "border-[#111111]/15" : "border-white/5"
+      }`}>
         {f.email ? (
           <div className="flex items-center gap-1.5 min-w-0 flex-1">
             <a
               href={`mailto:${f.email}`}
-              className="flex items-center gap-1.5 text-[11px] text-zinc-300 hover:text-emerald-400 transition-colors truncate"
+              className={`flex items-center gap-1.5 text-[11px] transition-colors truncate ${
+                isPoster ? "text-[#111111] hover:text-emerald-700 font-medium" : "text-zinc-300 hover:text-emerald-400"
+              }`}
               title={`Email: ${f.email}`}
             >
-              <Mail className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <Mail className={`w-3.5 h-3.5 shrink-0 ${isPoster ? "text-emerald-700" : "text-emerald-400"}`} />
               <span className="truncate font-mono text-[10.5px]">{f.email}</span>
             </a>
             <button
               onClick={() => copyToClipboard(f.email!, "email")}
-              className="text-zinc-500 hover:text-zinc-200 transition-colors p-1 rounded hover:bg-white/5 shrink-0"
+              className={`transition-colors p-1 rounded shrink-0 ${
+                isPoster ? "text-[#111111]/60 hover:text-[#111111] hover:bg-black/5" : "text-zinc-500 hover:text-zinc-200 hover:bg-white/5"
+              }`}
               title="Copy Email"
             >
               {copiedType === "email" ? (
-                <Check className="w-3 h-3 text-emerald-400" />
+                <Check className={`w-3 h-3 ${isPoster ? "text-emerald-700" : "text-emerald-400"}`} />
               ) : (
                 <Copy className="w-3 h-3" />
               )}
             </button>
           </div>
         ) : (
-          <span className="text-[10px] text-zinc-600 italic">No email</span>
+          <span className={`text-[10px] italic ${isPoster ? "text-[#111111]/40" : "text-zinc-600"}`}>No email</span>
         )}
 
         {f.phone && (
           <div className="flex items-center gap-1 shrink-0">
             <a
               href={`tel:${f.phone}`}
-              className="flex items-center gap-1 text-[10.5px] font-mono text-zinc-400 hover:text-emerald-400 px-1.5 py-0.5 rounded bg-zinc-800/80 border border-white/5 transition-colors"
+              className={`flex items-center gap-1 text-[10.5px] font-mono px-1.5 py-0.5 rounded transition-colors ${
+                isPoster
+                  ? "bg-[#eae7e0] text-[#111111] border border-[#111111]/30 hover:border-[#111111] font-bold"
+                  : "bg-zinc-800/80 text-zinc-400 hover:text-emerald-400 border border-white/5"
+              }`}
               title={`Call: ${f.phone}`}
             >
-              <Phone className="w-3 h-3 text-emerald-400" />
+              <Phone className={`w-3 h-3 ${isPoster ? "text-emerald-700" : "text-emerald-400"}`} />
               <span>Call</span>
             </a>
           </div>
@@ -237,18 +269,51 @@ function FacultyCard({ f }: { f: Faculty }) {
   )
 }
 
-export function FinderSection() {
+interface FinderSectionProps {
+  standalone?: boolean
+  initialQuery?: string
+  initialDepartment?: string
+}
+
+export function FinderSection({
+  standalone = false,
+  initialQuery = "",
+  initialDepartment = "All",
+}: FinderSectionProps = {}) {
   const { token } = useAuth()
   const [faculty, setFaculty] = useState<Faculty[]>([])
   const [allDepartments, setAllDepartments] = useState<string[]>([])
   const [totalCount, setTotalCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [search, setSearch] = useState("")
+  const [search, setSearch] = useState(initialQuery)
   const [showSuggestions, setShowSuggestions] = useState(false)
-  const [department, setDepartment] = useState("All")
+  const [department, setDepartment] = useState(initialDepartment)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+
+  const [isPoster, setIsPoster] = useState(false)
+  useEffect(() => {
+    const check = () => {
+      if (typeof document !== "undefined") {
+        const m =
+          document.documentElement.getAttribute("data-landing-mode") ||
+          document.documentElement.getAttribute("data-theme") ||
+          localStorage.getItem("edutechsrm-landing-mode") ||
+          localStorage.getItem("edutechsrm_landing_mode")
+        setIsPoster(m === "poster")
+      }
+    }
+    check()
+    window.addEventListener("landing-mode-change", check)
+    window.addEventListener("storage", check)
+    window.addEventListener("edutechsrm_theme_event", check)
+    return () => {
+      window.removeEventListener("landing-mode-change", check)
+      window.removeEventListener("storage", check)
+      window.removeEventListener("edutechsrm_theme_event", check)
+    }
+  }, [])
 
   const isMobile = useSyncExternalStore(
     useCallback((cb: () => void) => {
@@ -293,7 +358,7 @@ export function FinderSection() {
     }
   }, [token, pageSize])
 
-  useEffect(() => { fetchData("All", "", 1) }, [fetchData])
+  useEffect(() => { fetchData(department, search, 1) }, [fetchData])
 
   useEffect(() => {
     const timer = setTimeout(() => fetchData(department, search, page), search ? 300 : 0)
@@ -334,18 +399,26 @@ export function FinderSection() {
   }, [department])
 
   return (
-    <div className="min-h-full pt-[3.75rem] pb-20 px-3 sm:px-4 lg:px-8 lg:pb-8 w-full max-w-7xl mx-auto">
+    <div className={`min-h-full ${standalone ? "pt-24 sm:pt-28 lg:pt-32" : "pt-[3.75rem]"} pb-20 px-3 sm:px-4 lg:px-8 lg:pb-8 w-full max-w-7xl mx-auto`}>
       {/* Header Banner */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6">
         <div>
-          <p className="text-zinc-500 font-bold text-[10px] uppercase tracking-widest mb-1">Campus Directory</p>
-          <h1 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight font-display flex items-center gap-2.5">
+          <p className={`font-bold text-[10px] uppercase tracking-widest mb-1 ${isPoster ? "text-[#111111]/70" : "text-zinc-500"}`}>
+            Campus Directory
+          </p>
+          <h1 className={`text-2xl sm:text-3xl font-bold tracking-tight font-display flex items-center gap-2.5 ${
+            isPoster ? "text-[#111111]" : "text-zinc-100"
+          }`}>
             Faculty Finder
-            <span className="text-xs px-2.5 py-0.5 rounded-full font-sans font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <span className={`text-xs px-2.5 py-0.5 rounded-full font-sans font-semibold ${
+              isPoster
+                ? "bg-[#111111] text-white"
+                : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+            }`}>
               {totalCount > 0 ? `${totalCount.toLocaleString()} Faculty` : "SRMIST KTR"}
             </span>
           </h1>
-          <p className="text-xs mt-1 text-zinc-400">
+          <p className={`text-xs mt-1 ${isPoster ? "text-[#444444]" : "text-zinc-400"}`}>
             Quickly locate staff rooms, faculty cabins, official emails, and research areas.
           </p>
         </div>
@@ -353,7 +426,7 @@ export function FinderSection() {
 
       {/* Search Input */}
       <div className="relative mb-5">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+        <Search className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${isPoster ? "text-[#111111]" : "text-zinc-500"}`} />
         <input
           type="text"
           placeholder="Search by teacher name, faculty ID, staff room, email, or department..."
@@ -361,12 +434,18 @@ export function FinderSection() {
           onChange={(e) => { setSearch(e.target.value); setShowSuggestions(true); setPage(1) }}
           onFocus={() => setShowSuggestions(true)}
           onBlur={() => setTimeout(() => setShowSuggestions(false), 250)}
-          className="w-full pl-10 pr-10 py-3 bg-zinc-900/60 border border-white/5 rounded-xl text-zinc-100 text-sm placeholder-zinc-500 focus:outline-none focus:border-emerald-500/40 transition-colors shadow-inner"
+          className={`w-full pl-10 pr-10 py-3 rounded-xl text-sm transition-colors ${
+            isPoster
+              ? "bg-white border-2 border-[#111111] text-[#111111] placeholder-[#71717a] shadow-[3px_3px_0px_#111111] focus:outline-none focus:border-[#111111]"
+              : "bg-zinc-900/60 border border-white/5 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-emerald-500/40 shadow-inner"
+          }`}
         />
         {search && (
           <button
             onClick={() => { setSearch(""); setShowSuggestions(false) }}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors p-1"
+            className={`absolute right-3.5 top-1/2 -translate-y-1/2 transition-colors p-1 ${
+              isPoster ? "text-[#111111] hover:text-red-600" : "text-zinc-500 hover:text-zinc-300"
+            }`}
           >
             <X className="w-4 h-4" />
           </button>
@@ -379,19 +458,27 @@ export function FinderSection() {
               initial={{ opacity: 0, y: -4 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
-              className="absolute top-full left-0 right-0 mt-1.5 z-20 rounded-xl border border-white/10 bg-zinc-900/95 backdrop-blur-xl overflow-hidden shadow-2xl"
+              className={`absolute top-full left-0 right-0 mt-1.5 z-20 rounded-xl overflow-hidden shadow-2xl ${
+                isPoster
+                  ? "bg-white border-2 border-[#111111] shadow-[4px_4px_0px_#111111]"
+                  : "border border-white/10 bg-zinc-900/95 backdrop-blur-xl"
+              }`}
             >
               {suggestions.map(f => (
                 <button
                   key={f.id}
                   onMouseDown={() => { setSearch(f.name); setShowSuggestions(false) }}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-white/5 transition-colors border-b border-white/5 last:border-0"
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors border-b last:border-0 ${
+                    isPoster
+                      ? "hover:bg-[#eae7e0] border-[#111111]/15 text-[#111111]"
+                      : "hover:bg-white/5 border-white/5 text-zinc-100"
+                  }`}
                 >
-                  <IdCard className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <IdCard className={`w-4 h-4 shrink-0 ${isPoster ? "text-emerald-700" : "text-emerald-400"}`} />
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-zinc-100 truncate">{f.name}</p>
-                    <p className="text-[11px] text-zinc-400 truncate">
-                      {f.designation} • <span className="text-emerald-400">{f.department}</span>{f.staffRoom ? ` • ${f.staffRoom}` : ""}
+                    <p className={`text-sm font-medium truncate ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>{f.name}</p>
+                    <p className={`text-[11px] truncate ${isPoster ? "text-[#555555]" : "text-zinc-400"}`}>
+                      {f.designation} • <span className={isPoster ? "text-emerald-700 font-bold" : "text-emerald-400"}>{f.department}</span>{f.staffRoom ? ` • ${f.staffRoom}` : ""}
                     </p>
                   </div>
                 </button>
@@ -410,8 +497,12 @@ export function FinderSection() {
               onClick={() => { setDepartment(tab.id); setSearch(""); setPage(1) }}
               className={`whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-semibold shrink-0 transition-all ${
                 department === tab.id
-                  ? "bg-emerald-500 text-black shadow-lg shadow-emerald-500/25 font-bold scale-[1.02]"
-                  : "bg-zinc-900/70 text-zinc-400 border border-white/5 hover:text-zinc-200 hover:bg-zinc-800"
+                  ? isPoster
+                    ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] font-extrabold scale-[1.02]"
+                    : "bg-emerald-500 text-black shadow-lg shadow-emerald-500/25 font-bold scale-[1.02]"
+                  : isPoster
+                    ? "bg-white text-[#111111] border-2 border-[#111111] hover:bg-[#eae7e0] shadow-[2px_2px_0px_#111111]"
+                    : "bg-zinc-900/70 text-zinc-400 border border-white/5 hover:text-zinc-200 hover:bg-zinc-800"
               }`}
             >
               {tab.label}
@@ -432,20 +523,26 @@ export function FinderSection() {
                 }}
                 className={`appearance-none whitespace-nowrap px-3.5 py-2 pr-7 rounded-xl text-xs font-semibold cursor-pointer focus:outline-none transition-all ${
                   isCustomDepartment
-                    ? "bg-emerald-500 text-black font-bold shadow-lg shadow-emerald-500/25"
-                    : "bg-zinc-900/70 text-zinc-400 border border-white/5 hover:text-zinc-200 hover:bg-zinc-800"
+                    ? isPoster
+                      ? "bg-[#111111] text-white font-extrabold border-2 border-[#111111] shadow-[2px_2px_0px_#111111]"
+                      : "bg-emerald-500 text-black font-bold shadow-lg shadow-emerald-500/25"
+                    : isPoster
+                      ? "bg-white text-[#111111] border-2 border-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-[#eae7e0]"
+                      : "bg-zinc-900/70 text-zinc-400 border border-white/5 hover:text-zinc-200 hover:bg-zinc-800"
                 }`}
               >
-                <option value="" disabled className="bg-zinc-900 text-zinc-400">
+                <option value="" disabled className={isPoster ? "bg-white text-zinc-500" : "bg-zinc-900 text-zinc-400"}>
                   More Departments ({allDepartments.length})...
                 </option>
                 {allDepartments.map((dept) => (
-                  <option key={dept} value={dept} className="bg-zinc-900 text-zinc-200">
+                  <option key={dept} value={dept} className={isPoster ? "bg-white text-black" : "bg-zinc-900 text-zinc-200"}>
                     {dept}
                   </option>
                 ))}
               </select>
-              <ChevronDown className={`w-3.5 h-3.5 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none ${isCustomDepartment ? "text-black" : "text-zinc-500"}`} />
+              <ChevronDown className={`w-3.5 h-3.5 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none ${
+                isCustomDepartment ? (isPoster ? "text-white" : "text-black") : (isPoster ? "text-[#111111]" : "text-zinc-500")
+              }`} />
             </div>
           )}
         </div>
@@ -459,23 +556,31 @@ export function FinderSection() {
       ) : error ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <AlertCircle className="w-10 h-10 text-red-400 mb-4" />
-          <h3 className="text-lg font-bold text-zinc-100 mb-1">Failed to Load Data</h3>
-          <p className="text-sm text-zinc-500 mb-6 max-w-xs">{error}</p>
+          <h3 className={`text-lg font-bold mb-1 ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>Failed to Load Data</h3>
+          <p className={`text-sm mb-6 max-w-xs ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>{error}</p>
           <button
             onClick={() => fetchData(department, search, page)}
-            className="px-5 py-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl text-xs font-bold hover:bg-emerald-500/20 transition-colors"
+            className={`px-5 py-2 rounded-xl text-xs font-bold transition-colors ${
+              isPoster
+                ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111]"
+                : "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20"
+            }`}
           >
             Try Again
           </button>
         </div>
       ) : faculty.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <Users className="w-10 h-10 text-zinc-600 mb-4" />
-          <h3 className="text-lg font-bold text-zinc-100 mb-1">No faculty found</h3>
-          <p className="text-sm text-zinc-500 mb-6">Try adjusting your search terms or selecting another department.</p>
+          <Users className={`w-10 h-10 mb-4 ${isPoster ? "text-[#111111]/40" : "text-zinc-600"}`} />
+          <h3 className={`text-lg font-bold mb-1 ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>No faculty found</h3>
+          <p className={`text-sm mb-6 ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>Try adjusting your search terms or selecting another department.</p>
           <button
             onClick={() => { setSearch(""); setDepartment("All"); setPage(1) }}
-            className="px-5 py-2 bg-zinc-800 border border-white/5 text-zinc-300 rounded-xl text-xs font-bold hover:bg-zinc-700 transition-colors"
+            className={`px-5 py-2 rounded-xl text-xs font-bold transition-colors ${
+              isPoster
+                ? "bg-white text-[#111111] border-2 border-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-[#eae7e0]"
+                : "bg-zinc-800 border border-white/5 text-zinc-300 hover:bg-zinc-700"
+            }`}
           >
             Reset Filters
           </button>
@@ -485,7 +590,7 @@ export function FinderSection() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
             <AnimatePresence mode="popLayout">
               {faculty.map((f) => (
-                <FacultyCard key={f.id} f={f} />
+                <FacultyCard key={f.id} f={f} isPoster={isPoster} />
               ))}
             </AnimatePresence>
           </div>
@@ -497,20 +602,28 @@ export function FinderSection() {
                 whileTap={{ scale: 0.9 }}
                 onClick={() => goToPage(page - 1)}
                 disabled={page === 1}
-                className="w-8 h-8 rounded-lg flex items-center justify-center bg-zinc-900/60 border border-white/5 disabled:opacity-30 disabled:cursor-not-allowed hover:border-emerald-500/30 transition-colors"
+                className={`w-8 h-8 rounded-lg flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed transition-colors ${
+                  isPoster
+                    ? "bg-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] text-[#111111]"
+                    : "bg-zinc-900/60 border border-white/5 hover:border-emerald-500/30"
+                }`}
               >
-                <ChevronLeft className="w-4 h-4 text-zinc-400" />
+                <ChevronLeft className={`w-4 h-4 ${isPoster ? "text-[#111111]" : "text-zinc-400"}`} />
               </motion.button>
               
               {pageNumbers[0] > 1 && (
                 <>
                   <button
                     onClick={() => goToPage(1)}
-                    className="w-8 h-8 rounded-lg text-xs font-bold bg-zinc-900/60 border border-white/5 text-zinc-400 hover:border-emerald-500/30"
+                    className={`w-8 h-8 rounded-lg text-xs font-bold ${
+                      isPoster
+                        ? "bg-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] text-[#111111]"
+                        : "bg-zinc-900/60 border border-white/5 text-zinc-400 hover:border-emerald-500/30"
+                    }`}
                   >
                     1
                   </button>
-                  {pageNumbers[0] > 2 && <span className="text-zinc-600 px-0.5 text-xs">...</span>}
+                  {pageNumbers[0] > 2 && <span className={`px-0.5 text-xs ${isPoster ? "text-[#111111]/40" : "text-zinc-600"}`}>...</span>}
                 </>
               )}
 
@@ -520,8 +633,12 @@ export function FinderSection() {
                   onClick={() => goToPage(p)}
                   className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
                     page === p
-                      ? "bg-emerald-500 text-black shadow-md shadow-emerald-500/20 font-extrabold"
-                      : "bg-zinc-900/60 border border-white/5 text-zinc-400 hover:border-emerald-500/30"
+                      ? isPoster
+                        ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] font-extrabold"
+                        : "bg-emerald-500 text-black shadow-md shadow-emerald-500/20 font-extrabold"
+                      : isPoster
+                        ? "bg-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] text-[#111111] hover:bg-[#eae7e0]"
+                        : "bg-zinc-900/60 border border-white/5 text-zinc-400 hover:border-emerald-500/30"
                   }`}
                 >
                   {p}
@@ -530,10 +647,14 @@ export function FinderSection() {
 
               {pageNumbers[pageNumbers.length - 1] < totalPages && (
                 <>
-                  {pageNumbers[pageNumbers.length - 1] < totalPages - 1 && <span className="text-zinc-600 px-0.5 text-xs">...</span>}
+                  {pageNumbers[pageNumbers.length - 1] < totalPages - 1 && <span className={`px-0.5 text-xs ${isPoster ? "text-[#111111]/40" : "text-zinc-600"}`}>...</span>}
                   <button
                     onClick={() => goToPage(totalPages)}
-                    className="w-8 h-8 rounded-lg text-xs font-bold bg-zinc-900/60 border border-white/5 text-zinc-400 hover:border-emerald-500/30"
+                    className={`w-8 h-8 rounded-lg text-xs font-bold ${
+                      isPoster
+                        ? "bg-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] text-[#111111]"
+                        : "bg-zinc-900/60 border border-white/5 text-zinc-400 hover:border-emerald-500/30"
+                    }`}
                   >
                     {totalPages}
                   </button>
@@ -544,9 +665,13 @@ export function FinderSection() {
                 whileTap={{ scale: 0.9 }}
                 onClick={() => goToPage(page + 1)}
                 disabled={page === totalPages}
-                className="w-8 h-8 rounded-lg flex items-center justify-center bg-zinc-900/60 border border-white/5 disabled:opacity-30 disabled:cursor-not-allowed hover:border-emerald-500/30 transition-colors"
+                className={`w-8 h-8 rounded-lg flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed transition-colors ${
+                  isPoster
+                    ? "bg-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] text-[#111111]"
+                    : "bg-zinc-900/60 border border-white/5 hover:border-emerald-500/30"
+                }`}
               >
-                <ChevronRight className="w-4 h-4 text-zinc-400" />
+                <ChevronRight className={`w-4 h-4 ${isPoster ? "text-[#111111]" : "text-zinc-400"}`} />
               </motion.button>
             </div>
           )}

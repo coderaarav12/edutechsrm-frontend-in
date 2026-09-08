@@ -16,9 +16,12 @@ import {
   Share2,
   Smartphone,
   Sparkles,
+  Users,
   X,
 } from "lucide-react"
 import { QrCode } from "./qr-code"
+import { performThemeTransition } from "@/lib/theme-transition"
+import { applyThemeGlobally } from "@/lib/theme-context"
 
 export type LandingMode = "night" | "poster"
 
@@ -26,18 +29,12 @@ interface HeaderProps {
   onLoginClick?: () => void
   solid?: boolean
   mode?: LandingMode | "paper" | "blueprint"
-  onModeChange?: (mode: LandingMode) => void
+  onModeChange?: (mode: LandingMode, coords?: { x: number; y: number }) => void
 }
 
 export function Header({ onLoginClick, solid, mode, onModeChange }: HeaderProps = {}) {
   const [internalMode, setInternalMode] = useState<LandingMode>(() => {
-    if (typeof window !== "undefined") {
-      const domMode = document.documentElement.getAttribute("data-landing-mode") as LandingMode
-      if (domMode === "poster" || domMode === "night") return domMode
-      const saved = localStorage.getItem("edutechsrm-landing-mode") as LandingMode
-      if (saved === "poster" || saved === "night") return saved
-    }
-    return mode === "poster" ? "poster" : "night"
+    return mode === "night" ? "night" : "poster"
   })
 
   useEffect(() => {
@@ -47,39 +44,125 @@ export function Header({ onLoginClick, solid, mode, onModeChange }: HeaderProps 
   }, [mode])
 
   useEffect(() => {
-    const handleSync = (e: Event) => {
-      const customEvent = e as CustomEvent<LandingMode>
-      if (customEvent.detail) {
-        setInternalMode(customEvent.detail)
-      } else if (typeof document !== "undefined") {
-        const domMode = document.documentElement.getAttribute("data-landing-mode") as LandingMode
-        if (domMode) setInternalMode(domMode)
+    const syncFromDOM = () => {
+      if (typeof document === "undefined") return
+      const domLanding = document.documentElement.getAttribute("data-landing-mode")
+      if (domLanding === "poster" || domLanding === "night") {
+        setInternalMode(domLanding)
+        return
+      }
+      const domTheme = document.documentElement.getAttribute("data-theme")
+      if (domTheme === "poster") {
+        setInternalMode("poster")
+        return
+      }
+      if (domTheme === "dark") {
+        setInternalMode("night")
+        return
+      }
+      const saved = localStorage.getItem("edutechsrm-landing-mode") || localStorage.getItem("edutechsrm_landing_mode")
+      if (saved === "poster" || saved === "night") {
+        setInternalMode(saved as LandingMode)
+      } else {
+        setInternalMode("poster")
       }
     }
+
+    syncFromDOM()
+
+    const handleSync = (e: Event) => {
+      const customEvent = e as CustomEvent<any>
+      const detail = customEvent?.detail
+      let nextMode: LandingMode | null = null
+
+      if (typeof detail === "string") {
+        if (detail === "poster" || detail === "night") nextMode = detail
+      } else if (detail && typeof detail === "object") {
+        if (detail.mode === "poster" || detail.mode === "night") {
+          nextMode = detail.mode
+        }
+      }
+
+      if (nextMode) {
+        setInternalMode(nextMode)
+      } else {
+        syncFromDOM()
+      }
+    }
+
     window.addEventListener("landing-mode-change", handleSync)
     window.addEventListener("storage", handleSync)
+    window.addEventListener("edutechsrm_theme_event", handleSync)
     return () => {
       window.removeEventListener("landing-mode-change", handleSync)
       window.removeEventListener("storage", handleSync)
+      window.removeEventListener("edutechsrm_theme_event", handleSync)
     }
   }, [])
 
   const currentMode: LandingMode =
-    onModeChange && (mode === "poster" || mode === "night")
+    (mode === "poster" || mode === "night")
       ? (mode as LandingMode)
       : internalMode
 
   const isPoster = currentMode === "poster"
 
-  const handleModeSwitch = (newMode: LandingMode) => {
-    setInternalMode(newMode)
-    if (typeof document !== "undefined") {
-      document.documentElement.setAttribute("data-landing-mode", newMode)
-      localStorage.setItem("edutechsrm-landing-mode", newMode)
-      localStorage.setItem("edutechsrm_landing_mode", newMode)
-      window.dispatchEvent(new CustomEvent("landing-mode-change", { detail: newMode }))
+  const handleModeSwitch = (newMode: LandingMode, e?: React.MouseEvent | React.TouchEvent) => {
+    let coords: { x: number; y: number } | undefined
+    if (e && 'currentTarget' in e && e.currentTarget) {
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+      coords = {
+        x: Math.round(rect.left + rect.width / 2),
+        y: Math.round(rect.top + rect.height / 2),
+      }
+    } else if (e && 'clientX' in e && typeof (e as React.MouseEvent).clientX === "number" && typeof (e as React.MouseEvent).clientY === "number") {
+      coords = {
+        x: Math.round((e as React.MouseEvent).clientX),
+        y: Math.round((e as React.MouseEvent).clientY),
+      }
     }
-    if (onModeChange) onModeChange(newMode)
+
+    if (onModeChange) {
+      onModeChange(newMode, coords)
+      return
+    }
+
+    setInternalMode(newMode)
+    const validMode = newMode === "poster" ? "poster" : "night"
+    const themeName = validMode === "poster" ? "poster" : "dark"
+
+    const applyTheme = () => {
+      if (typeof document !== "undefined") {
+        document.documentElement.setAttribute("data-landing-mode", validMode)
+        document.documentElement.setAttribute("data-theme", themeName)
+        document.body.setAttribute("data-landing-mode", validMode)
+        document.body.setAttribute("data-theme", themeName)
+        document.body.style.backgroundColor = validMode === "poster" ? "#f7f5f0" : "#06080d"
+        localStorage.setItem("edutechsrm-landing-mode", validMode)
+        localStorage.setItem("edutechsrm_landing_mode", validMode)
+        const themeObj: any = {
+          mode: themeName,
+          presetId: validMode === "poster" ? "poster-cardstock" : "default",
+          customImage: null,
+          customColors: { pageBg: "#09090b", cardBg: "#18181b", textPrimary: "#f4f4f5", accent: "#34d399" },
+        }
+        localStorage.setItem("edutechsrm_theme", JSON.stringify(themeObj))
+        localStorage.setItem("edutechsrm-theme", JSON.stringify(themeObj))
+        try {
+          applyThemeGlobally(themeObj)
+        } catch { /* noop */ }
+        window.dispatchEvent(new CustomEvent("landing-mode-change", {
+          detail: { mode: validMode, ...(coords || {}) }
+        }))
+        window.dispatchEvent(new Event("edutechsrm_theme_event"))
+      }
+    }
+
+    performThemeTransition({
+      nextMode: validMode,
+      coords,
+      applyTheme,
+    })
   }
 
   const { isAuthenticated } = useAuth()
@@ -129,36 +212,69 @@ export function Header({ onLoginClick, solid, mode, onModeChange }: HeaderProps 
   const navLinks = [
     { href: "/home", label: "Home", icon: Home },
     { href: "/explore", label: "Explore Map", icon: MapPin },
+    { href: "/faculty", label: "Faculty", icon: Users },
     { href: "/download", label: "Download", icon: Smartphone },
     { href: "/contact", label: "Developer", icon: Mail },
   ]
 
   return (
     <>
+      <style>{`
+        [data-theme="poster"] .header-brand-wordmark,
+        [data-landing-mode="poster"] .header-brand-wordmark {
+          color: #111111 !important;
+        }
+        [data-theme="poster"] .header-nav-island,
+        [data-landing-mode="poster"] .header-nav-island {
+          background-color: #ffffff !important;
+          border: 2px solid #111111 !important;
+          box-shadow: 3px 3px 0px #111111 !important;
+        }
+        [data-theme="poster"] .header-mode-toggle,
+        [data-landing-mode="poster"] .header-mode-toggle {
+          background-color: #ffffff !important;
+          border: 2px solid #111111 !important;
+          box-shadow: 2px 2px 0px #111111 !important;
+        }
+        [data-theme="poster"] .header-login-cta,
+        [data-landing-mode="poster"] .header-login-cta {
+          background: #111111 !important;
+          color: #ffffff !important;
+          border: 2px solid #111111 !important;
+          box-shadow: 2px 2px 0px #111111 !important;
+        }
+        [data-theme="poster"] .header-hamburger-btn,
+        [data-landing-mode="poster"] .header-hamburger-btn {
+          background-color: #ffffff !important;
+          border: 2px solid #111111 !important;
+          color: #111111 !important;
+          box-shadow: 2px 2px 0px #111111 !important;
+        }
+      `}</style>
       <header
         ref={headerRef}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isPoster
             ? elevated
-              ? "bg-[#f7f5f0]/95 backdrop-blur-xl border-b-2 border-[#111111] shadow-[0_4px_20px_rgba(0,0,0,0.06)] py-3 px-4 sm:px-8 lg:px-12"
-              : "bg-[#f7f5f0]/80 backdrop-blur-md border-b border-[#111111]/10 py-4 px-4 sm:px-8 lg:px-12"
+              ? "bg-[#f7f5f0]/95 backdrop-blur-xl border-b-2 border-[#111111] shadow-[0_4px_20px_rgba(0,0,0,0.06)] py-2.5 sm:py-3 px-3 sm:px-8 lg:px-12"
+              : "bg-[#f7f5f0]/80 backdrop-blur-md border-b border-[#111111]/10 py-3 sm:py-4 px-3 sm:px-8 lg:px-12"
             : elevated
-              ? "bg-[#06080d]/90 backdrop-blur-2xl border-b border-white/[0.08] shadow-[0_12px_32px_rgba(0,0,0,0.4)] py-3 px-4 sm:px-8 lg:px-12"
-              : "bg-transparent py-4 px-4 sm:px-8 lg:px-12"
+              ? "bg-[#06080d]/90 backdrop-blur-2xl border-b border-white/[0.08] shadow-[0_12px_32px_rgba(0,0,0,0.4)] py-2.5 sm:py-3 px-3 sm:px-8 lg:px-12"
+              : "bg-transparent py-3 sm:py-4 px-3 sm:px-8 lg:px-12"
         }`}
         role="navigation"
         aria-label="Main navigation"
       >
-        <div className="w-full flex items-center justify-between gap-4">
+        <div className="w-full relative flex items-center justify-between gap-2 sm:gap-4">
           {/* ── Brand Wordmark (Left) ── */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0 z-10">
             <Link
               href="/"
               className="flex items-center gap-2 group no-underline"
               aria-label="edutechsrm home"
             >
               <span
-                className={`text-[18px] sm:text-[19px] font-black tracking-tight font-display transition-colors ${
+                className={`header-brand-wordmark text-[17px] sm:text-[19px] font-black tracking-tight font-display transition-colors ${
                   isPoster ? "text-[#111111]" : "text-white"
                 }`}
               >
@@ -169,7 +285,7 @@ export function Header({ onLoginClick, solid, mode, onModeChange }: HeaderProps 
 
           {/* ── Central Navigation Island (Center) ── */}
           <nav
-            className={`hidden lg:flex items-center gap-1 px-3 py-1.5 rounded-full transition-all duration-300 ${
+            className={`header-nav-island hidden lg:flex lg:absolute lg:left-1/2 lg:-translate-x-1/2 items-center gap-0.5 xl:gap-1 px-2.5 xl:px-3 py-1.5 rounded-full transition-all duration-300 z-10 ${
               isPoster
                 ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111]"
                 : "bg-white/[0.04] backdrop-blur-2xl border border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
@@ -183,7 +299,7 @@ export function Header({ onLoginClick, solid, mode, onModeChange }: HeaderProps 
                   key={link.href}
                   href={link.href}
                   style={{ color: isActive && isPoster ? "#ffffff" : undefined }}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all no-underline ${
+                  className={`px-2.5 xl:px-3.5 py-1.5 rounded-full text-xs font-bold transition-all no-underline shrink-0 ${
                     isActive
                       ? isPoster
                         ? "bg-[#111111] text-white keep-white shadow-sm"
@@ -200,7 +316,7 @@ export function Header({ onLoginClick, solid, mode, onModeChange }: HeaderProps 
           </nav>
 
           {/* ── Right Actions & Utilities (Right) ── */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 z-10">
             {/* Social Icons (Discreet & Polished) */}
             <div className="hidden xl:flex items-center gap-1 mr-1">
               <a
@@ -276,7 +392,7 @@ export function Header({ onLoginClick, solid, mode, onModeChange }: HeaderProps 
 
             {/* Segmented Mode Switcher (Dark / Poster) */}
             <div
-              className={`inline-flex items-center p-1 rounded-xl transition-all ${
+              className={`header-mode-toggle inline-flex items-center p-0.5 sm:p-1 rounded-lg sm:rounded-xl transition-all shrink-0 ${
                 isPoster
                   ? "bg-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111]"
                   : "bg-white/[0.05] border border-white/10"
@@ -284,8 +400,8 @@ export function Header({ onLoginClick, solid, mode, onModeChange }: HeaderProps 
             >
               <button
                 type="button"
-                onClick={() => handleModeSwitch("night")}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                onClick={(e) => handleModeSwitch("night", e)}
+                className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-md sm:rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   currentMode === "night"
                     ? isPoster
                       ? "bg-[#111111]/10 text-[#111111]"
@@ -301,9 +417,9 @@ export function Header({ onLoginClick, solid, mode, onModeChange }: HeaderProps 
               </button>
               <button
                 type="button"
-                onClick={() => handleModeSwitch("poster")}
+                onClick={(e) => handleModeSwitch("poster", e)}
                 style={{ color: currentMode === "poster" && isPoster ? "#ffffff" : undefined }}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-md sm:rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   currentMode === "poster"
                     ? isPoster
                       ? "bg-[#111111] text-white keep-white shadow-sm"
@@ -324,21 +440,22 @@ export function Header({ onLoginClick, solid, mode, onModeChange }: HeaderProps 
               whileTap={{ scale: 0.96 }}
               onClick={handleLoginClick}
               style={{ color: isPoster ? "#ffffff" : undefined }}
-              className={`hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black tracking-wide uppercase transition-all cursor-pointer keep-white ${
+              className={`header-login-cta inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-black tracking-wide uppercase transition-all cursor-pointer keep-white shrink-0 ${
                 isPoster
-                  ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] hover:bg-zinc-800 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
-                  : "bg-gradient-to-r from-emerald-400 to-teal-400 text-zinc-950 shadow-[0_0_20px_rgba(52,211,153,0.3)] hover:brightness-110"
+                  ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] sm:shadow-[3px_3px_0px_#111111] hover:bg-zinc-800 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+                  : "bg-gradient-to-r from-emerald-400 to-teal-400 text-zinc-950 shadow-[0_0_15px_rgba(52,211,153,0.3)] hover:brightness-110 active:scale-95"
               }`}
             >
               {isAuthenticated ? (
                 <>
-                  <LayoutDashboard size={13} />
-                  <span>Dashboard</span>
+                  <LayoutDashboard size={12} className="sm:w-3.5 sm:h-3.5" />
+                  <span className="hidden sm:inline">Dashboard</span>
+                  <span className="sm:hidden">App</span>
                 </>
               ) : (
                 <>
                   <span>Login</span>
-                  <ArrowRight size={13} />
+                  <ArrowRight size={12} className="sm:w-3.5 sm:h-3.5" />
                 </>
               )}
             </motion.button>
@@ -347,13 +464,13 @@ export function Header({ onLoginClick, solid, mode, onModeChange }: HeaderProps 
             <button
               onClick={() => setMenuOpen(true)}
               aria-label="Open menu"
-              className={`lg:hidden w-9 h-9 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
+              className={`header-hamburger-btn lg:hidden w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center transition-all cursor-pointer shrink-0 ${
                 isPoster
                   ? "bg-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] text-[#111111]"
                   : "bg-white/[0.06] border border-white/10 text-white hover:bg-white/10"
               }`}
             >
-              <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+              <svg width="16" height="16" className="sm:w-[18px] sm:h-[18px]" viewBox="0 0 20 20" fill="none">
                 <rect x="2" y="5" width="16" height="2" rx="1" fill="currentColor" />
                 <rect x="2" y="9" width="16" height="2" rx="1" fill="currentColor" />
                 <rect x="2" y="13" width="16" height="2" rx="1" fill="currentColor" />
@@ -436,7 +553,7 @@ export function Header({ onLoginClick, solid, mode, onModeChange }: HeaderProps 
               >
                 <button
                   type="button"
-                  onClick={() => handleModeSwitch("night")}
+                  onClick={(e) => handleModeSwitch("night", e)}
                   style={{ color: currentMode === "night" && !isPoster ? "#ffffff" : undefined }}
                   className={`flex-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all ${
                     currentMode === "night"
@@ -453,7 +570,7 @@ export function Header({ onLoginClick, solid, mode, onModeChange }: HeaderProps 
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleModeSwitch("poster")}
+                  onClick={(e) => handleModeSwitch("poster", e)}
                   style={{ color: currentMode === "poster" && isPoster ? "#ffffff" : undefined }}
                   className={`flex-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
                     currentMode === "poster"
@@ -625,7 +742,7 @@ export function Header({ onLoginClick, solid, mode, onModeChange }: HeaderProps 
                 onClick={() => setShowSharePopup(false)}
                 className={`absolute top-4 right-4 w-7 h-7 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
                   isPoster
-                    ? "bg-white border-1.5 border-[#111111] text-[#111111]"
+                    ? "bg-white border-2 border-[#111111] text-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-zinc-100"
                     : "bg-white/10 text-zinc-300 hover:text-white"
                 }`}
                 aria-label="Close share popup"
@@ -650,7 +767,7 @@ export function Header({ onLoginClick, solid, mode, onModeChange }: HeaderProps 
 
               <div
                 className={`flex justify-center p-3 rounded-2xl mb-5 ${
-                  isPoster ? "bg-white border-2 border-[#111111]" : "bg-black/40 border border-white/5"
+                  isPoster ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111]" : "bg-black/40 border border-white/5"
                 }`}
               >
                 <QrCode size={220} />
@@ -672,13 +789,20 @@ export function Header({ onLoginClick, solid, mode, onModeChange }: HeaderProps 
                       } catch {}
                     }
                   }}
-                  className={`w-full py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+                  data-theme-keep="white"
+                  style={{
+                    color: isPoster ? "#ffffff" : undefined,
+                    backgroundColor: isPoster ? "#111111" : undefined,
+                  }}
+                  className={`w-full py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer keep-white ${
                     isPoster
-                      ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111]"
+                      ? "border-2 border-[#111111] shadow-[3px_3px_0px_#111111] hover:bg-zinc-800 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
                       : "bg-emerald-500 text-zinc-950 font-black shadow-md hover:bg-emerald-400"
                   }`}
                 >
-                  Share via apps
+                  <span className="keep-white" style={{ color: isPoster ? "#ffffff" : undefined }}>
+                    Share via apps
+                  </span>
                 </button>
                 <button
                   onClick={async (e) => {
@@ -692,9 +816,13 @@ export function Header({ onLoginClick, solid, mode, onModeChange }: HeaderProps 
                       }, 1500)
                     } catch {}
                   }}
+                  style={{
+                    color: isPoster ? "#111111" : undefined,
+                    backgroundColor: isPoster ? "#ffffff" : undefined,
+                  }}
                   className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     isPoster
-                      ? "bg-white text-[#111111] border-2 border-[#111111]"
+                      ? "border-2 border-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-zinc-50 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
                       : "bg-white/5 border border-white/10 text-zinc-300 hover:text-white"
                   }`}
                 >

@@ -5,6 +5,7 @@ import { useState } from "react"
 import { Eye, EyeOff, Loader2, Lock, Mail, X, AlertCircle, ExternalLink, Shield } from "lucide-react"
 import { loginToSRM } from "@/lib/srm-api"
 import { useAuth } from "@/lib/auth-context"
+import { useTheme } from "@/lib/theme-context"
 import { TurnstileWidget } from "@/components/turnstile-widget"
 
 interface LoginModalProps {
@@ -13,6 +14,8 @@ interface LoginModalProps {
 }
 
 export function LoginModal({ isOpen, onClose }: LoginModalProps) {
+  const { theme } = useTheme()
+  const isPoster = theme?.mode === "poster" || (theme as any) === "poster" || (typeof document !== "undefined" && (document.documentElement.getAttribute("data-theme") === "poster" || document.documentElement.getAttribute("data-landing-mode") === "poster"))
   const [email,          setEmail]          = useState("")
   const [password,       setPassword]       = useState("")
   const [captchaAnswer,  setCaptchaAnswer]  = useState("")
@@ -273,10 +276,188 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           .lm-input { padding-top: 10px; padding-bottom: 10px; }
           .lm-btn { padding: 11px 12px; }
         }
+
+        /* Poster Mode Overrides */
+        [data-theme="poster"] .lm-overlay,
+        [data-landing-mode="poster"] .lm-overlay,
+        .lm-poster .lm-overlay {
+          background: rgba(0, 0, 0, 0.45) !important;
+          backdrop-filter: blur(10px) !important;
+          -webkit-backdrop-filter: blur(10px) !important;
+        }
+        [data-theme="poster"] .lm-card,
+        [data-landing-mode="poster"] .lm-card,
+        .lm-poster .lm-card {
+          background: #ffffff !important;
+          border: 2.5px solid #111111 !important;
+          border-radius: 24px !important;
+          box-shadow: 6px 6px 0px #111111 !important;
+          color: #111111 !important;
+        }
+        [data-theme="poster"] .lm-card::before,
+        [data-landing-mode="poster"] .lm-card::before,
+        .lm-poster .lm-card::before {
+          display: none !important;
+        }
+        [data-theme="poster"] .lm-top-badge,
+        [data-landing-mode="poster"] .lm-top-badge,
+        .lm-poster .lm-top-badge {
+          background: #f7f5f0 !important;
+          border: 1.5px solid #111111 !important;
+          color: #111111 !important;
+          box-shadow: 2px 2px 0px #111111 !important;
+        }
+        [data-theme="poster"] .lm-top-badge span,
+        [data-landing-mode="poster"] .lm-top-badge span,
+        .lm-poster .lm-top-badge span {
+          background: #111111 !important;
+        }
+        [data-theme="poster"] .lm-orb-shell,
+        [data-landing-mode="poster"] .lm-orb-shell,
+        .lm-poster .lm-orb-shell {
+          background: #f7f5f0 !important;
+          border: 2px solid #111111 !important;
+          box-shadow: 3px 3px 0px #111111 !important;
+          transform: none !important;
+        }
+        [data-theme="poster"] .lm-orb-core,
+        [data-landing-mode="poster"] .lm-orb-core,
+        .lm-poster .lm-orb-core {
+          background: #111111 !important;
+          border: none !important;
+          box-shadow: none !important;
+        }
+        [data-theme="poster"] .lm-heading,
+        [data-landing-mode="poster"] .lm-heading,
+        .lm-poster .lm-heading {
+          color: #111111 !important;
+        }
+        [data-theme="poster"] .lm-subtext,
+        [data-landing-mode="poster"] .lm-subtext,
+        .lm-poster .lm-subtext {
+          color: #555555 !important;
+        }
+        [data-theme="poster"] .lm-secure,
+        [data-landing-mode="poster"] .lm-secure,
+        .lm-poster .lm-secure {
+          background: #f7f5f0 !important;
+          border: 2px solid #111111 !important;
+        }
+        [data-theme="poster"] .lm-secure p:first-child,
+        [data-landing-mode="poster"] .lm-secure p:first-child,
+        .lm-poster .lm-secure p:first-child {
+          color: #111111 !important;
+        }
+        [data-theme="poster"] .lm-secure p:last-child,
+        [data-landing-mode="poster"] .lm-secure p:last-child,
+        .lm-poster .lm-secure p:last-child {
+          color: #666666 !important;
+        }
+        [data-theme="poster"] .lm-label,
+        [data-landing-mode="poster"] .lm-label,
+        .lm-poster .lm-label {
+          color: #111111 !important;
+          font-weight: 800 !important;
+        }
+        [data-theme="poster"] .lm-input,
+        [data-landing-mode="poster"] .lm-input,
+        .lm-poster .lm-input {
+          background: #ffffff !important;
+          border: 2px solid #111111 !important;
+          color: #111111 !important;
+          border-radius: 12px !important;
+          box-shadow: 2px 2px 0px #111111 !important;
+        }
+        [data-theme="poster"] .lm-input:focus,
+        [data-landing-mode="poster"] .lm-input:focus,
+        .lm-poster .lm-input:focus {
+          border-color: #111111 !important;
+          box-shadow: 3px 3px 0px #111111 !important;
+        }
+        [data-theme="poster"] .lm-input::placeholder,
+        [data-landing-mode="poster"] .lm-input::placeholder,
+        .lm-poster .lm-input::placeholder {
+          color: #888888 !important;
+        }
+        [data-theme="poster"] .lm-input-icon,
+        [data-landing-mode="poster"] .lm-input-icon,
+        .lm-poster .lm-input-icon {
+          color: #555555 !important;
+        }
+        [data-theme="poster"] .lm-eye,
+        [data-landing-mode="poster"] .lm-eye,
+        .lm-poster .lm-eye {
+          color: #555555 !important;
+        }
+        [data-theme="poster"] .lm-eye:hover,
+        [data-landing-mode="poster"] .lm-eye:hover,
+        .lm-poster .lm-eye:hover {
+          color: #111111 !important;
+        }
+        [data-theme="poster"] .lm-btn,
+        [data-landing-mode="poster"] .lm-btn,
+        .lm-poster .lm-btn {
+          background: #111111 !important;
+          color: #ffffff !important;
+          border: 2px solid #111111 !important;
+          border-radius: 12px !important;
+          box-shadow: 3px 3px 0px #111111 !important;
+        }
+        [data-theme="poster"] .lm-btn:hover:not(:disabled),
+        [data-landing-mode="poster"] .lm-btn:hover:not(:disabled),
+        .lm-poster .lm-btn:hover:not(:disabled) {
+          opacity: 0.9 !important;
+          transform: translate(-1px, -1px);
+          box-shadow: 4px 4px 0px #111111 !important;
+        }
+        [data-theme="poster"] .lm-btn:active:not(:disabled),
+        [data-landing-mode="poster"] .lm-btn:active:not(:disabled),
+        .lm-poster .lm-btn:active:not(:disabled) {
+          transform: translate(1px, 1px);
+          box-shadow: 1px 1px 0px #111111 !important;
+        }
+        [data-theme="poster"] .lm-btn-ghost,
+        [data-landing-mode="poster"] .lm-btn-ghost,
+        .lm-poster .lm-btn-ghost {
+          background: #f7f5f0 !important;
+          color: #111111 !important;
+          border: 2px solid #111111 !important;
+          border-radius: 12px !important;
+          box-shadow: 2px 2px 0px #111111 !important;
+        }
+        [data-theme="poster"] .lm-close,
+        [data-landing-mode="poster"] .lm-close,
+        .lm-poster .lm-close {
+          background: #f7f5f0 !important;
+          border: 2px solid #111111 !important;
+          color: #111111 !important;
+          box-shadow: 2px 2px 0px #111111 !important;
+        }
+        [data-theme="poster"] .lm-close:hover,
+        [data-landing-mode="poster"] .lm-close:hover,
+        .lm-poster .lm-close:hover {
+          background: #eae6dd !important;
+          color: #111111 !important;
+        }
+        [data-theme="poster"] .lm-footer,
+        [data-landing-mode="poster"] .lm-footer,
+        .lm-poster .lm-footer {
+          border-top: 1.5px solid #111111 !important;
+        }
+        [data-theme="poster"] .lm-footer p,
+        [data-landing-mode="poster"] .lm-footer p,
+        .lm-poster .lm-footer p {
+          color: #666666 !important;
+        }
+        [data-theme="poster"] .lm-footer a,
+        [data-landing-mode="poster"] .lm-footer a,
+        .lm-poster .lm-footer a {
+          color: #111111 !important;
+        }
       `}</style>
 
       {/* Overlay */}
-      <div className="lm-overlay" onClick={onClose}>
+      <div className={`lm-overlay ${isPoster ? "lm-poster" : ""}`} onClick={onClose}>
         <div className="lm-card" onClick={e => e.stopPropagation()}>
 
           {/* Close */}
@@ -287,18 +468,18 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           {/* Header */}
           <div style={{ textAlign: "center", marginBottom: 14 }}>
             <div className="lm-top-badge">
-              <span style={{ width: 6, height: 6, borderRadius: 999, background: "#34d399" }} />
+              <span style={{ width: 6, height: 6, borderRadius: 999, background: isPoster ? "#111111" : "#34d399" }} />
               Secure SRM Login
             </div>
             <div className="lm-orb-shell" aria-hidden="true">
               <span className="lm-orb-core">
-                <Lock size={22} color="#04120f" />
+                <Lock size={22} color={isPoster ? "#ffffff" : "#04120f"} />
               </span>
             </div>
-            <h2 style={{ fontSize: 18, fontWeight: 900, color: "#f4f4f5", margin: 0, letterSpacing: "-0.03em", fontFamily: "'Space Grotesk', sans-serif" }}>
+            <h2 className="lm-heading" style={{ fontSize: 18, fontWeight: 900, color: isPoster ? "#111111" : "#f4f4f5", margin: 0, letterSpacing: "-0.03em", fontFamily: "'Space Grotesk', sans-serif" }}>
               {showCaptchaStep ? "Verify Human" : "Connect edutechsrm"}
             </h2>
-              <p style={{ fontSize: 12, color: "rgba(161,161,170,0.88)", marginTop: 5, lineHeight: 1.5 }}>
+            <p className="lm-subtext" style={{ fontSize: 12, color: isPoster ? "#555555" : "rgba(161,161,170,0.88)", marginTop: 5, lineHeight: 1.5 }}>
               {showCaptchaStep ? "SRM Academia needs one quick CAPTCHA check before we continue." : "Use your SRM Academia credentials and we’ll pull your live dashboard data."}
             </p>
           </div>
@@ -307,10 +488,10 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
             <>
               {/* Secure badge */}
               <div className="lm-secure">
-                  <Shield size={15} color="#34d399" style={{ marginTop: 1, flexShrink: 0 }} />
+                  <Shield size={15} color={isPoster ? "#111111" : "#34d399"} style={{ marginTop: 1, flexShrink: 0 }} />
                   <div>
-                    <p style={{ fontSize: 12, fontWeight: 700, color: "#34d399", margin: "0 0 2px" }}>Secure Connection</p>
-                  <p style={{ fontSize: 11.5, color: "rgba(255,255,255,0.35)", margin: 0, lineHeight: 1.5 }}>
+                    <p style={{ fontSize: 12, fontWeight: 700, color: isPoster ? "#111111" : "#34d399", margin: "0 0 2px" }}>Secure Connection</p>
+                  <p style={{ fontSize: 11.5, color: isPoster ? "#666666" : "rgba(255,255,255,0.35)", margin: 0, lineHeight: 1.5 }}>
                     Connects directly to SRM Academia. We never store your password.
                   </p>
                 </div>
@@ -439,12 +620,12 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           )}
 
           {/* Footer */}
-          <div style={{ marginTop: 22, paddingTop: 16, borderTop: "1px solid rgba(255,255,255,0.07)", textAlign: "center" }}>
-            <p style={{ fontSize: 11, color: "rgba(148,163,184,0.7)", margin: "0 0 10px", lineHeight: 1.6 }}>
+          <div className="lm-footer" style={{ marginTop: 22, paddingTop: 16, borderTop: isPoster ? "1.5px solid #111111" : "1px solid rgba(255,255,255,0.07)", textAlign: "center" }}>
+            <p style={{ fontSize: 11, color: isPoster ? "#666666" : "rgba(148,163,184,0.7)", margin: "0 0 10px", lineHeight: 1.6 }}>
               Your credentials go only to SRM for authentication. edutechsrm never stores your password.
             </p>
             <a href="https://academia.srmist.edu.in/" target="_blank" rel="noopener noreferrer"
-              style={{ fontSize: 12, color: "#34d399", display: "inline-flex", alignItems: "center", gap: 4, textDecoration: "none", fontWeight: 700 }}>
+              style={{ fontSize: 12, color: isPoster ? "#111111" : "#34d399", display: "inline-flex", alignItems: "center", gap: 4, textDecoration: isPoster ? "underline" : "none", fontWeight: 700 }}>
               <ExternalLink size={11} /> SRM Portal
             </a>
           </div>

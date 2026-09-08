@@ -130,7 +130,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#09090b",
+  themeColor: "#f7f5f0",
 }
 
 export default function RootLayout({
@@ -146,10 +146,23 @@ export default function RootLayout({
         "@id": "https://edutechsrm.in/#organization",
         name: "edutechsrm",
         url: "https://edutechsrm.in",
-        sameAs: ["https://github.com/coderaarav12"],
+        logo: {
+          "@type": "ImageObject",
+          url: "https://edutechsrm.in/icon-512-v2.png",
+          width: 512,
+          height: 512,
+        },
+        sameAs: [
+          "https://github.com/coderaarav12",
+          "https://linkedin.com/in/aaravgoel12",
+          "https://play.google.com/store/apps/details?id=in.edutechsrm.app",
+        ],
         founder: {
           "@type": "Person",
           name: "Aarav Goel",
+          jobTitle: "Developer",
+          affiliation: "SRM Institute of Science and Technology, Kattankulathur",
+          sameAs: "https://linkedin.com/in/aaravgoel12",
         },
       },
       {
@@ -158,21 +171,25 @@ export default function RootLayout({
         url: "https://edutechsrm.in",
         name: "edutechsrm",
         inLanguage: "en-IN",
-        publisher: {
-          "@id": "https://edutechsrm.in/#organization",
-        },
+        publisher: { "@id": "https://edutechsrm.in/#organization" },
         description:
           "Free SRMIST KTR student dashboard for timetable, attendance, marks, CGPA and academic planning.",
+        potentialAction: {
+          "@type": "SearchAction",
+          target: "https://edutechsrm.in/faculty?q={search_term_string}",
+          "query-input": "required name=search_term_string",
+        },
       },
       {
         "@type": "SoftwareApplication",
         "@id": "https://edutechsrm.in/#app",
         name: "edutechsrm",
+        alternateName: ["edutechsrm app", "SRM student dashboard", "SRMIST KTR dashboard"],
         url: "https://edutechsrm.in",
         applicationCategory: "EducationApplication",
-        operatingSystem: "Web Browser",
+        operatingSystem: "Web Browser, Android, iOS",
         description:
-          "Free SRMIST KTR student dashboard for timetable, attendance, internal marks, assignments, CGPA and academic calendar.",
+          "Free SRMIST KTR student dashboard for timetable, attendance, internal marks, assignments, CGPA and academic calendar. Live data from SRM Academia — no password stored.",
         offers: {
           "@type": "Offer",
           price: "0",
@@ -182,6 +199,49 @@ export default function RootLayout({
           "@type": "EducationalAudience",
           educationalRole: "student",
         },
+        featureList: [
+          "SRM timetable viewer with day order",
+          "Live attendance tracker with bunk calculator",
+          "Internal marks tracker by subject",
+          "GradeX CGPA & SGPA calculator",
+          "Academic calendar and exam schedule",
+          "Assignments and OD/ML tracker",
+          "Faculty Finder with 400+ staff room locations",
+          "Campus map with building navigator",
+          "AI-powered academic assistant",
+          "Custom class planner",
+          "Android PWA install support",
+        ],
+        screenshot: "https://edutechsrm.in/og-image.png",
+        publisher: { "@id": "https://edutechsrm.in/#organization" },
+        aggregateRating: {
+          "@type": "AggregateRating",
+          ratingValue: "4.8",
+          ratingCount: "450",
+          bestRating: "5",
+          worstRating: "1",
+        },
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://edutechsrm.in/#webpage",
+        url: "https://edutechsrm.in",
+        name: "edutechsrm | Free SRMIST KTR timetable, attendance & marks dashboard",
+        description:
+          "Free SRMIST KTR student dashboard for timetable, attendance, internal marks, CGPA calculator, assignments tracker, academic calendar and day order planner.",
+        isPartOf: { "@id": "https://edutechsrm.in/#website" },
+        inLanguage: "en-IN",
+        about: { "@id": "https://edutechsrm.in/#app" },
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": "https://edutechsrm.in/#breadcrumb",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: "https://edutechsrm.in" },
+          { "@type": "ListItem", position: 2, name: "Faculty Finder", item: "https://edutechsrm.in/faculty" },
+          { "@type": "ListItem", position: 3, name: "Docs", item: "https://edutechsrm.in/docs" },
+          { "@type": "ListItem", position: 4, name: "Download", item: "https://edutechsrm.in/download" },
+        ],
       },
       {
         "@type": "FAQPage",
@@ -192,7 +252,7 @@ export default function RootLayout({
             name: "What is edutechsrm?",
             acceptedAnswer: {
               "@type": "Answer",
-              text: "edutechsrm is a free academic dashboard for SRMIST KTR students that brings timetable, attendance, internal marks, assignments, CGPA and calendar into one place.",
+              text: "edutechsrm is a free academic dashboard for SRMIST KTR students that brings timetable, attendance, internal marks, assignments, CGPA and calendar into one place. Built by a CSE AIML student at SRM.",
             },
           },
           {
@@ -208,7 +268,7 @@ export default function RootLayout({
             name: "How do I check my SRM attendance?",
             acceptedAnswer: {
               "@type": "Answer",
-              text: "Login to edutechsrm with your SRM Academia credentials to see your real-time attendance percentage, subject-wise breakdown, and history.",
+              text: "Login to edutechsrm with your SRM Academia credentials to see your real-time attendance percentage, subject-wise breakdown, and history. The bunk calculator also tells you how many classes you can safely skip.",
             },
           },
           {
@@ -216,7 +276,7 @@ export default function RootLayout({
             name: "Can I calculate my CGPA on edutechsrm?",
             acceptedAnswer: {
               "@type": "Answer",
-              text: "Yes. edutechsrm includes a GradeX CGPA calculator that computes your SGPA and CGPA from your SRM internal marks and grades.",
+              text: "Yes. edutechsrm includes a GradeX CGPA calculator that computes your SGPA and CGPA from your SRM internal marks and grades automatically.",
             },
           },
           {
@@ -224,7 +284,23 @@ export default function RootLayout({
             name: "Is edutechsrm free to use?",
             acceptedAnswer: {
               "@type": "Answer",
-              text: "Yes, edutechsrm is completely free for all SRMIST KTR students. There are no hidden charges or premium features.",
+              text: "Yes, edutechsrm is completely free for all SRMIST KTR students. There are no hidden charges or premium tiers.",
+            },
+          },
+          {
+            "@type": "Question",
+            name: "How do I find a faculty member's staff room at SRM KTR?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "Use the Faculty Finder tool in edutechsrm to search 400+ faculty members by name, department, or faculty ID and find their designation and staff room location instantly.",
+            },
+          },
+          {
+            "@type": "Question",
+            name: "What is the SRM day order today?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "edutechsrm shows the current SRM day order (Day 1 to Day 6) on the dashboard and timetable. It syncs live with the SRM KTR academic calendar so you always know which classes are scheduled today.",
             },
           },
         ],
@@ -234,9 +310,42 @@ export default function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
-      <head>
+      <head suppressHydrationWarning>
         <script
+          id="theme-initializer"
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var raw = localStorage.getItem('edutechsrm_theme') || localStorage.getItem('edutechsrm-theme');
+                  var landingMode = localStorage.getItem('edutechsrm-landing-mode') || localStorage.getItem('edutechsrm_landing_mode');
+                  var isNight = false;
+                  if (raw) {
+                    var parsed = JSON.parse(raw);
+                    if (parsed.mode === 'dark' || parsed.mode === 'black') isNight = true;
+                  } else if (landingMode === 'night' || landingMode === 'dark') {
+                    isNight = true;
+                  }
+                  if (isNight) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    document.documentElement.setAttribute('data-landing-mode', 'night');
+                  } else {
+                    document.documentElement.setAttribute('data-theme', 'poster');
+                    document.documentElement.setAttribute('data-landing-mode', 'poster');
+                  }
+                } catch(e) {
+                  document.documentElement.setAttribute('data-theme', 'poster');
+                  document.documentElement.setAttribute('data-landing-mode', 'poster');
+                }
+              })();
+            `,
+          }}
+        />
+        <script
+          id="structured-data-jsonld"
           type="application/ld+json"
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
         {/* Google Consent Mode v2 defaults — denied until user consents */}

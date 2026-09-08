@@ -38,7 +38,7 @@ function GreenMeshDownloadIcon({ className = "h-5 w-5" }: { className?: string }
 interface FloatingAppActionProps {
   onLogin?: () => void
   mode?: "night" | "poster" | string
-  onModeChange?: (mode: "night" | "poster") => void
+  onModeChange?: (mode: "night" | "poster", coords?: { x: number; y: number }) => void
 }
 
 export function FloatingAppAction({ onLogin, mode = "night", onModeChange }: FloatingAppActionProps = {}) {
@@ -160,7 +160,13 @@ export function FloatingAppAction({ onLogin, mode = "night", onModeChange }: Flo
       <div className="flex items-center gap-2">
         {onModeChange && (
           <motion.button
-            onClick={() => onModeChange(isPoster ? "night" : "poster")}
+            onClick={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect()
+              onModeChange(isPoster ? "night" : "poster", {
+                x: Math.round(rect.left + rect.width / 2),
+                y: Math.round(rect.top + rect.height / 2),
+              })
+            }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             aria-label={isPoster ? "Switch to Dark Mode" : "Switch to Poster Mode"}

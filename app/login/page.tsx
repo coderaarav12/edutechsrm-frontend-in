@@ -25,12 +25,12 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
-  const [mode, setMode] = useState<"night" | "poster">("night")
+  const [mode, setMode] = useState<"night" | "poster">("poster")
 
   useEffect(() => {
     try {
       const saved = (localStorage.getItem("edutechsrm-landing-mode") || localStorage.getItem("edutechsrm_landing_mode")) as string
-      const initialMode = saved === "poster" ? "poster" : "night"
+      const initialMode = saved === "night" ? "night" : "poster"
       setMode(initialMode)
       if (typeof document !== "undefined") {
         document.documentElement.setAttribute("data-landing-mode", initialMode)
@@ -39,11 +39,15 @@ export default function LoginPage() {
     } catch { /* noop */ }
 
     const onModeChange = (e: Event) => {
-      const m = (e as CustomEvent).detail
+      const detail = (e as CustomEvent).detail
+      const m = typeof detail === "string" ? detail : detail?.mode
       if (m === "poster" || m === "night") {
         setMode(m)
         if (typeof document !== "undefined") {
           document.documentElement.setAttribute("data-landing-mode", m)
+          document.documentElement.setAttribute("data-theme", m === "poster" ? "poster" : "dark")
+          document.body.setAttribute("data-landing-mode", m)
+          document.body.setAttribute("data-theme", m === "poster" ? "poster" : "dark")
           document.body.style.backgroundColor = m === "poster" ? "#f7f5f0" : "#070a0e"
         }
       }
@@ -56,12 +60,15 @@ export default function LoginPage() {
     setMode(nextMode)
     if (typeof document !== "undefined") {
       document.documentElement.setAttribute("data-landing-mode", nextMode)
+      document.documentElement.setAttribute("data-theme", nextMode === "poster" ? "poster" : "dark")
+      document.body.setAttribute("data-landing-mode", nextMode)
+      document.body.setAttribute("data-theme", nextMode === "poster" ? "poster" : "dark")
       document.body.style.backgroundColor = nextMode === "poster" ? "#f7f5f0" : "#070a0e"
     }
     try {
       localStorage.setItem("edutechsrm_landing_mode", nextMode)
       localStorage.setItem("edutechsrm-landing-mode", nextMode)
-      window.dispatchEvent(new CustomEvent("landing-mode-change", { detail: nextMode }))
+      window.dispatchEvent(new CustomEvent("landing-mode-change", { detail: { mode: nextMode } }))
     } catch { /* noop */ }
   }
 
@@ -271,8 +278,8 @@ export default function LoginPage() {
                 onClick={() => handleModeChange("night")}
                 className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all"
                 style={{
-                  background: mode === "night" ? "rgba(255,255,255,0.14)" : "transparent",
-                  color: mode === "night" ? "#ffffff" : "#444444",
+                  background: mode === "night" ? (mode === "poster" ? "#f7f5f0" : "rgba(255,255,255,0.14)") : "transparent",
+                  color: mode === "night" ? (mode === "poster" ? "#111111" : "#ffffff") : (mode === "poster" ? "#71717a" : "rgba(255,255,255,0.5)"),
                 }}
               >
                 <Moon className="h-3 w-3" />

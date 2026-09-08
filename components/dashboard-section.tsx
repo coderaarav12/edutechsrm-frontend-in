@@ -19,16 +19,20 @@ import {
   IdCard,
   Map as MapIcon,
   Megaphone,
+  Moon,
   Palette,
   Pencil,
   Sparkles,
+  Sun,
+  SunMedium,
+  Sunset,
   TrendingUp,
   ChevronRight,
   User,
-  GraduationCap,
 } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 import { useStudentPortal } from "@/lib/student-portal-context"
+import { useTheme, useIsPosterTheme } from "@/lib/theme-context"
 import { expandCustomClassesByDate, useCustomPlanner } from "@/lib/custom-planner"
 import { InstallPrompt } from "@/components/install-prompt"
 import { AiQuickInput } from "@/components/ai-quick-input"
@@ -145,7 +149,9 @@ let _splashShown = false
 export function DashboardSection({ onNavigate }: DashboardSectionProps) {
   const auth = useAuth() as any
   const { user, attendance, marks, timetable, calendar, dateToDoMap, isLoading, refreshData, lastSyncTime, courses, token } = auth
-  const { portalData, isPortalConnected, isSessionExpired, openGradesModal, openPortalLogin } = useStudentPortal()
+  const { portalData } = useStudentPortal()
+  const { theme } = useTheme()
+  const isPoster = useIsPosterTheme()
   const { customClasses, assignments, updateAssignment } = useCustomPlanner()
   const [now, setNow] = useState(() => new Date())
   const [showSplash, setShowSplash] = useState(() => {
@@ -292,35 +298,84 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
   const overallTotal = attendanceWithData.reduce((sum: number, item: any) => sum + (item.total || 0), 0)
   const averageAttendance = overallTotal > 0 ? Math.round((overallAttended / overallTotal) * 100) : 0
   const mergedMarks = useMemo(() => {
-    const marksGrouped = new Map<string, any[]>()
-    effectiveMarks.forEach((m: any) => {
-      const list = marksGrouped.get(m.code) || []
+    // 1. Primary Academia marks map
+    const marksByCode = new Map<string, any[]>()
+    ;(marks as any[] || []).forEach((m: any) => {
+      if (!m?.code) return
+      const list = marksByCode.get(m.code) || []
       list.push(m)
-      marksGrouped.set(m.code, list)
+      marksByCode.set(m.code, list)
     })
-    return codes.map(code => {
-      const courseEntries = (courses as any[]).filter((c: any) => c.code === code)
+
+    // 2. Student Portal Scraper internal marks map
+    const portalInternalByCode = new Map<string, any[]>()
+    if (Array.isArray(portalData?.internalMarks)) {
+      portalData.internalMarks.forEach((item: any) => {
+        if (!item?.code) return
+        const list = portalInternalByCode.get(item.code) || []
+        list.push(item)
+        portalInternalByCode.set(item.code, list)
+      })
+    }
+
+    // 3. Combined unique course codes
+    const allCodes = [
+      ...new Set([
+        ...(courses as any[] || []).map((c: any) => c.code),
+        ...Array.from(marksByCode.keys()),
+        ...Array.from(portalInternalByCode.keys()),
+        ...(portalData?.attendance || []).map((a: any) => a.code),
+        ...(portalData?.unifiedSubjects || []).map((u: any) => u.code),
+      ]),
+    ].filter(Boolean)
+
+    return allCodes.map((code) => {
+      const courseEntries = (courses as any[] || []).filter((c: any) => c.code === code)
       const names = [...new Set(courseEntries.map((c: any) => c.name?.trim()).filter(Boolean))]
-      const mEntries = marksGrouped.get(code) || []
-      const name = names[0] || mEntries[0]?.name || code
-      if (mEntries && mEntries.length > 0) {
-        const total = mEntries.reduce((s: number, m: any) => s + (m.total ?? 0), 0)
-        const maxTotal = mEntries.reduce((s: number, m: any) => s + (m.maxTotal ?? 0), 0)
+      const marksEntries = marksByCode.get(code) || []
+      const portalEntries = portalInternalByCode.get(code) || []
+      const unified = (portalData?.unifiedSubjects || []).find((u: any) => u.code === code)
+      const name =
+        names[0] ||
+        unified?.name ||
+        portalEntries[0]?.name ||
+        marksEntries[0]?.name ||
+        code
+
+      // Case A: Primary Academia marks exist
+      if (marksEntries.length > 0) {
+        const total = marksEntries.reduce((s: number, m: any) => s + (parseFloat(m.total) || 0), 0)
+        const maxTotal = marksEntries.reduce((s: number, m: any) => s + (parseFloat(m.maxTotal) || 0), 0)
         return { code, name, total, maxTotal }
       }
+
+      // Case B: Portal internal marks exist
+      if (portalEntries.length > 0) {
+        const tests = portalEntries.map((p: any) => {
+          const scoredNum = typeof p.markObtained === "number" ? p.markObtained : parseFloat(String(p.rawMarkText || "0"))
+          const validNum = !isNaN(scoredNum) ? scoredNum : 0
+          const maxNum = typeof p.maxMark === "number" && p.maxMark > 0 ? p.maxMark : 50
+          return { scored: validNum, max: maxNum }
+        })
+        const total = tests.reduce((s: number, t: any) => s + t.scored, 0)
+        const maxTotal = tests.reduce((s: number, t: any) => s + t.max, 0)
+        return { code, name, total, maxTotal }
+      }
+
       return { code, name, total: 0, maxTotal: 0 }
     })
-  }, [codes, courses, effectiveMarks])
+  }, [courses, marks, portalData?.internalMarks, portalData?.attendance, portalData?.unifiedSubjects])
+
+  const totalMarks = mergedMarks.reduce((sum: number, item: any) => sum + (item.total || 0), 0)
+  const maxMarks = mergedMarks.reduce((sum: number, item: any) => sum + (item.maxTotal || 0), 0)
+  const marksPercent = maxMarks > 0 ? Math.round((totalMarks / maxMarks) * 100) : 0
   const lowMarks = mergedMarks
     .map((item: any) => ({
       ...item,
-      percentage: item.maxTotal > 0 ? Math.round(((item.total ?? 0) / item.maxTotal) * 100) : 0,
+      percentage: item.maxTotal > 0 ? Math.round(((item.total || 0) / item.maxTotal) * 100) : 0,
     }))
     .filter((item: any) => item.maxTotal > 0 && item.percentage < 60)
     .sort((a: any, b: any) => a.percentage - b.percentage)
-  const totalMarks = mergedMarks.reduce((sum: number, item: any) => sum + (item.total ?? 0), 0)
-  const maxMarks = mergedMarks.reduce((sum: number, item: any) => sum + (item.maxTotal ?? 0), 0)
-  const marksPercent = maxMarks > 0 ? Math.round((totalMarks / maxMarks) * 100) : 0
 
   const mergedClasses = [
     ...timetable,
@@ -383,14 +438,42 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
       ? `Day Order: ${todayDayOrder}`
       : null
 
-  const greeting = (() => {
+  const timeDetails = useMemo(() => {
     const hour = now.getHours()
-    if (hour < 12) return "Good morning"
-    if (hour < 17) return "Good afternoon"
-    if (hour < 21) return "Good evening"
-    return "Good night"
-  })()
-  const firstName = user?.name ? user.name.split(" ")[0] : "Student"
+    if (hour >= 5 && hour < 12) {
+      return {
+        greeting: "Good morning",
+        kicker: "MORNING BRIEFING",
+        icon: Sun,
+        color: "#f59e0b",
+      }
+    }
+    if (hour >= 12 && hour < 17) {
+      return {
+        greeting: "Good afternoon",
+        kicker: "MIDDAY SESSION",
+        icon: SunMedium,
+        color: "#0284c7",
+      }
+    }
+    if (hour >= 17 && hour < 21) {
+      return {
+        greeting: "Good evening",
+        kicker: "TWILIGHT BRIEFING",
+        icon: Sunset,
+        color: "#ea580c",
+      }
+    }
+    return {
+      greeting: "Good night",
+      kicker: "STARRY NIGHTFALL",
+      icon: Moon,
+      color: "#9333ea",
+    }
+  }, [now])
+
+  const greeting = timeDetails.greeting
+  const fullName = user?.name ? user.name.trim() : "Student"
 
   const timeParts = new Intl.DateTimeFormat("en-IN", {
     hour: "numeric", minute: "2-digit", second: "2-digit", hour12: true,
@@ -478,36 +561,73 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
     <div ref={containerRef} className="min-h-full pt-[3.75rem] pb-20 px-3 sm:px-4 lg:px-8 lg:pb-8 w-full">
       {showSplash && (
         <div
-          className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-zinc-950/98"
+          className={`fixed inset-0 z-[60] flex flex-col items-center justify-center p-4 transition-colors ${
+            isPoster ? "bg-[#f7f5f0]/98 text-[#111111]" : "bg-zinc-950/98 text-zinc-100"
+          }`}
           style={{ willChange: "opacity" }}
           ref={splashRef}
         >
-          <div className="flex flex-col items-center justify-center gap-1 text-center">
-            <span
+          <div className="flex flex-col items-center justify-center gap-3 text-center max-w-2xl w-full px-4">
+            {/* Professional Art Kicker Badge */}
+            <div
               ref={greetingLineRef}
-              className="text-3xl sm:text-4xl font-black tracking-tight text-zinc-100"
+              className="flex flex-col items-center gap-2"
               style={{ willChange: "transform, opacity" }}
             >
-              {greeting}
-            </span>
-            <span
+              <div
+                className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold tracking-widest uppercase border ${
+                  isPoster
+                    ? "bg-white border-2 border-[#111111] text-[#111111] shadow-[2px_2px_0px_#111111]"
+                    : "bg-white/5 border-white/10 text-zinc-300 backdrop-blur-md"
+                }`}
+              >
+                <timeDetails.icon className="w-4 h-4 animate-pulse" style={{ color: timeDetails.color }} />
+                <span>{timeDetails.kicker}</span>
+              </div>
+              <h1 className={`text-4xl sm:text-5xl font-display font-black tracking-tight ${
+                isPoster ? "text-[#111111]" : "text-zinc-100"
+              }`}>
+                {timeDetails.greeting}
+              </h1>
+            </div>
+
+            {/* Full Name with graceful multi-line wrapping */}
+            <div
               ref={nameLineRef}
-              className="font-black tracking-tight text-emerald-400"
-              style={{
-                willChange: "transform, opacity",
-                fontSize: firstName.length > 8 ? "clamp(1.5rem, 5vw, 2.5rem)" : firstName.length > 5 ? "clamp(1.75rem, 5.5vw, 2.75rem)" : "clamp(2rem, 6vw, 3.25rem)",
-              }}
+              className="w-full flex justify-center px-2"
+              style={{ willChange: "transform, opacity" }}
             >
-              {firstName}
-            </span>
+              <span
+                className={`font-display font-black tracking-tight text-center break-words whitespace-normal leading-[1.12] max-w-xl ${
+                  isPoster
+                    ? "text-[#111111]"
+                    : "text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400"
+                }`}
+                style={{
+                  fontSize: fullName.length > 25
+                    ? "clamp(1.5rem, 5vw, 2.25rem)"
+                    : fullName.length > 15
+                    ? "clamp(1.85rem, 6vw, 2.85rem)"
+                    : "clamp(2.25rem, 7vw, 3.5rem)",
+                }}
+              >
+                {fullName}
+              </span>
+            </div>
           </div>
 
           <div
             ref={shimmerRef}
-            className="mt-6 px-5 py-2.5 rounded-2xl border border-emerald-500/20 bg-emerald-500/10"
+            className={`mt-6 px-5 py-2.5 rounded-2xl border ${
+              isPoster
+                ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] text-[#111111]"
+                : "border-emerald-500/20 bg-emerald-500/10 text-zinc-400"
+            }`}
             style={{ willChange: "transform, opacity" }}
           >
-            <p className="text-base font-bold tracking-wide text-zinc-400">
+            <p className={`text-sm sm:text-base font-bold tracking-wide ${
+              isPoster ? "text-[#111111]" : "text-zinc-300"
+            }`}>
               {briefingText}
             </p>
           </div>
@@ -518,76 +638,153 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
       <div className="flex flex-col gap-8">
         <div ref={headerRef} className="hidden" />
 
-        <div className="border-b border-white/[0.04] pb-4">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-            <div className="relative text-center md:text-left w-full md:w-auto">
-            <div className="absolute top-0 right-0 flex items-center gap-1.5 lg:hidden">
-              <button
-                onClick={() => {
-                  try { localStorage.setItem("edutechsrm_open_theme", "1") } catch {}
-                  onNavigate("settings")
-                }}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl ring-1 ring-white/10 text-zinc-500 hover:text-zinc-300 hover:bg-white/5 transition-all text-[10px] font-semibold"
-              >
-                <Palette className="w-3 h-3" />
-                Themes
-              </button>
+        <div className={`border-b pb-4 ${isPoster ? "border-[#111111]/15" : "border-white/[0.04]"}`}>
+          {/* Professional greeting banner & full student name */}
+          <div className="mt-1 mb-4 flex items-center justify-center md:justify-start gap-2.5 flex-wrap">
+            <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold tracking-wider uppercase border ${
+              isPoster
+                ? "bg-white border-2 border-[#111111] text-[#111111] shadow-[2px_2px_0px_#111111]"
+                : "bg-zinc-900/90 border border-white/10 text-zinc-200 shadow-sm backdrop-blur-md"
+            }`}>
+              <timeDetails.icon className="w-3.5 h-3.5 shrink-0" style={{ color: timeDetails.color }} />
+              <span>{timeDetails.greeting}</span>
             </div>
-              <h1 className="font-display text-[5.5rem] sm:text-8xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-zinc-500 md:mt-0">
+            <h2 className={`text-base sm:text-xl font-display font-black tracking-tight break-words whitespace-normal leading-tight max-w-full md:max-w-2xl text-center md:text-left ${
+              isPoster ? "text-[#111111]" : "text-zinc-100"
+            }`}>
+              {fullName}
+            </h2>
+          </div>
+
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+            <div className="dashboard-clock relative text-center md:text-left w-full md:w-auto">
+              <div className="absolute top-0 right-0 flex items-center gap-1.5 lg:hidden">
+                <button
+                  onClick={() => {
+                    try { localStorage.setItem("edutechsrm_open_theme", "1") } catch {}
+                    onNavigate("settings")
+                  }}
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all text-[10px] font-semibold ${
+                    isPoster
+                      ? "border-2 border-[#111111] bg-white text-[#111111] shadow-[2px_2px_0px_#111111]"
+                      : "ring-1 ring-white/10 text-zinc-500 hover:text-zinc-300 hover:bg-white/5"
+                  }`}
+                >
+                  <Palette className="w-3 h-3" />
+                  Themes
+                </button>
+              </div>
+              <h1
+                className={`text-[5.5rem] sm:text-8xl font-bold tracking-tight md:mt-0 tabular-nums select-none ${
+                  isPoster
+                    ? "text-[#111111]"
+                    : "text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-100 to-zinc-400"
+                }`}
+                style={{
+                  fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                  letterSpacing: "-0.035em",
+                  lineHeight: 0.95,
+                }}
+              >
                 {currentTime}
-                <span className="text-zinc-600 text-4xl ml-4 font-sans tracking-[0.04em]">: {seconds}</span>
-                <span className="text-zinc-600 text-lg ml-3 font-sans font-semibold tracking-[0.08em]">{dayPeriod}</span>
+                <span
+                  className={`text-3xl sm:text-4xl ml-3 sm:ml-4 font-semibold tabular-nums ${
+                    isPoster ? "text-zinc-500" : "text-zinc-500"
+                  }`}
+                  style={{ letterSpacing: "-0.02em" }}
+                >
+                  : {seconds}
+                </span>
+                <span
+                  className={`text-base sm:text-lg ml-2.5 sm:ml-3 font-bold tracking-wider uppercase ${
+                    isPoster ? "text-zinc-600" : "text-zinc-400"
+                  }`}
+                >
+                  {dayPeriod}
+                </span>
               </h1>
-              <p className="text-zinc-500 text-xs font-semibold uppercase tracking-[0.15em] mt-1 md:mt-3">
-                {now.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-              </p>
+              <div className="mt-1 md:mt-3 flex flex-wrap items-center justify-center md:justify-start gap-2">
+                <p className={`text-xs font-semibold uppercase tracking-[0.15em] ${isPoster ? "text-zinc-700 font-mono font-bold" : "text-zinc-500"}`}>
+                  {now.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                </p>
+                {isPoster && (
+                  <span className="inline-flex items-center gap-1 rounded-md border border-[#111111] bg-emerald-400/15 px-2 py-0.5 font-mono text-[9px] font-bold text-emerald-800 uppercase tracking-widest">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                    LIVE SYNC
+                  </span>
+                )}
+              </div>
             </div>
 
             <div ref={statsRef} className="flex gap-4 self-center md:self-auto md:justify-end">
             <button
               onClick={() => onNavigate("attendance")}
-              className="bg-zinc-900/60 ring-1 ring-white/5 rounded-2xl px-5 py-3.5 min-w-[170px] relative overflow-hidden group text-center transition-all active:scale-[0.97] hover:bg-zinc-900/80 cursor-pointer"
+              className={`dashboard-stat-card rounded-2xl px-5 py-3.5 min-w-[170px] relative overflow-hidden group text-center transition-all active:scale-[0.97] cursor-pointer ${
+                isPoster
+                  ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] hover:bg-zinc-50"
+                  : "bg-zinc-900/60 ring-1 ring-white/5 hover:bg-zinc-900/80"
+              }`}
             >
-              <div className="text-zinc-500 text-[10px] font-bold mb-1.5 uppercase tracking-[0.15em] flex items-center justify-center gap-2">
-                <span className={averageAttendance >= 75 ? "text-emerald-500/50" : "text-rose-500/50"}>✦</span>
+              <div className={`text-[10px] font-bold mb-1.5 uppercase tracking-[0.15em] flex items-center justify-center gap-2 ${
+                isPoster ? "text-zinc-600" : "text-zinc-500"
+              }`}>
+                <span className={averageAttendance >= 75 ? (isPoster ? "text-emerald-700" : "text-emerald-500/50") : (isPoster ? "text-rose-700" : "text-rose-500/50")}>✦</span>
                 Attendance
               </div>
-              <div className="text-3xl font-display font-bold tracking-tighter text-zinc-100 flex items-baseline justify-center gap-1">
+              <div className={`text-3xl font-display font-black tracking-tighter flex items-baseline justify-center gap-1 ${
+                isPoster ? "text-[#111111]" : "text-zinc-100"
+              }`}>
                 {overallTotal > 0 ? (
                   <>
-                    <StatNumber value={averageAttendance} color={averageAttendance >= 75 ? "#34d399" : "#f43f5e"} />
-                    <span className="text-lg text-emerald-500">%</span>
+                    <StatNumber value={averageAttendance} color={averageAttendance >= 75 ? (isPoster ? "#047857" : "#34d399") : (isPoster ? "#b91c1c" : "#f43f5e")} />
+                    <span className={`text-lg ${isPoster ? "text-emerald-700 font-bold" : "text-emerald-500"}`}>%</span>
                   </>
                 ) : (
                   <span className="text-2xl text-zinc-500">-</span>
                 )}
               </div>
-              {riskyAttendance.length > 0 && (
-                <p className="text-[10px] mt-1.5 font-semibold text-rose-400">{riskyAttendance.length} at risk</p>
-              )}
+              {overallTotal > 0 ? (
+                <p className={`text-[11px] mt-1 font-mono font-bold ${isPoster ? "text-zinc-600" : "text-zinc-400"}`}>
+                  {overallAttended} / {overallTotal} attended
+                </p>
+              ) : riskyAttendance.length > 0 ? (
+                <p className={`text-[10px] mt-1.5 font-semibold ${isPoster ? "text-rose-700 font-bold" : "text-rose-400"}`}>{riskyAttendance.length} at risk</p>
+              ) : null}
             </button>
 
             <button
               onClick={() => onNavigate("marks")}
-              className="bg-zinc-900/60 ring-1 ring-white/5 rounded-2xl px-5 py-3.5 min-w-[170px] relative overflow-hidden group text-center transition-all active:scale-[0.97] hover:bg-zinc-900/80 cursor-pointer"
+              className={`dashboard-stat-card rounded-2xl px-5 py-3.5 min-w-[170px] relative overflow-hidden group text-center transition-all active:scale-[0.97] cursor-pointer ${
+                isPoster
+                  ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] hover:bg-zinc-50"
+                  : "bg-zinc-900/60 ring-1 ring-white/5 hover:bg-zinc-900/80"
+              }`}
             >
-              <div className="text-zinc-500 text-[10px] font-bold mb-1.5 uppercase tracking-[0.15em] flex items-center justify-center gap-2">
-                <span className={marksPercent >= 60 ? "text-emerald-500/50" : marksPercent >= 40 ? "text-amber-500/50" : "text-rose-500/50"}>✦</span>
+              <div className={`text-[10px] font-bold mb-1.5 uppercase tracking-[0.15em] flex items-center justify-center gap-2 ${
+                isPoster ? "text-zinc-600" : "text-zinc-500"
+              }`}>
+                <span className={marksPercent >= 60 ? (isPoster ? "text-emerald-700" : "text-emerald-500/50") : marksPercent >= 40 ? (isPoster ? "text-amber-700" : "text-amber-500/50") : (isPoster ? "text-rose-700" : "text-rose-500/50")}>✦</span>
                 Marks
               </div>
-              <div className="text-3xl font-display font-bold tracking-tighter text-zinc-100 flex items-baseline justify-center gap-1">
+              <div className={`text-3xl font-display font-black tracking-tighter flex items-baseline justify-center gap-1 ${
+                isPoster ? "text-[#111111]" : "text-zinc-100"
+              }`}>
                 {maxMarks > 0 ? (
                   <>
-                    <StatNumber value={marksPercent} color={marksPercent >= 60 ? "#34d399" : marksPercent >= 40 ? "#fbbf24" : "#f43f5e"} />
-                    <span className="text-lg text-emerald-500">%</span>
+                    <StatNumber value={marksPercent} color={marksPercent >= 60 ? (isPoster ? "#047857" : "#34d399") : marksPercent >= 40 ? (isPoster ? "#b45309" : "#fbbf24") : (isPoster ? "#b91c1c" : "#f43f5e")} />
+                    <span className={`text-lg ${isPoster ? "text-emerald-700 font-bold" : "text-emerald-500"}`}>%</span>
                   </>
                 ) : (
                   <span className="text-2xl text-zinc-500">-</span>
                 )}
               </div>
-              {lowMarks.length > 0 && (
-                <p className="text-[10px] mt-1.5 font-semibold text-rose-400">{lowMarks.length} below 60%</p>
-              )}
+              {maxMarks > 0 ? (
+                <p className={`text-[11px] mt-1 font-mono font-bold ${isPoster ? "text-zinc-700" : "text-zinc-400"}`}>
+                  {totalMarks.toFixed(1)} / {maxMarks}
+                </p>
+              ) : lowMarks.length > 0 ? (
+                <p className={`text-[10px] mt-1.5 font-semibold ${isPoster ? "text-rose-700 font-bold" : "text-rose-400"}`}>{lowMarks.length} below 60%</p>
+              ) : null}
             </button>
             </div>
           </div>
@@ -605,84 +802,7 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
         </div>
 
         <div className="-mt-6 space-y-3">
-          {/* Student Portal Card */}
-          {isSessionExpired ? (
-            <button
-              onClick={openPortalLogin}
-              className="w-full group rounded-2xl border overflow-hidden transition-all duration-200 active:scale-[0.98] text-left"
-              style={{
-                background: "var(--card-bg, rgba(24,24,27,0.7))",
-                borderColor: "rgba(251,191,36,0.25)",
-                WebkitTapHighlightColor: "transparent",
-              }}
-            >
-              <div className="flex items-center gap-2.5 px-4 py-3">
-                <div className="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center bg-amber-500/15 text-amber-400">
-                  <AlertTriangle className="w-3.5 h-3.5" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold leading-snug text-zinc-100">Portal Session Expired</p>
-                  <p className="text-[11px] truncate text-amber-400/80">
-                    Tap to relogin and refresh attendance & marks
-                  </p>
-                </div>
-                <ChevronRight className="w-3.5 h-3.5 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5 text-amber-400" />
-              </div>
-            </button>
-          ) : isPortalConnected ? (
-            <button
-              onClick={openGradesModal}
-              className="w-full group rounded-2xl border overflow-hidden transition-all duration-200 active:scale-[0.98] text-left"
-              style={{
-                background: "var(--card-bg, rgba(24,24,27,0.7))",
-                borderColor: "rgba(56,189,248,0.18)",
-                WebkitTapHighlightColor: "transparent",
-              }}
-            >
-              <div className="flex items-center gap-2.5 px-4 py-3">
-                <div className="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(56,189,248,0.12)" }}>
-                  <GraduationCap className="w-3.5 h-3.5" style={{ color: "#38bdf8" }} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold leading-snug" style={{ color: "var(--text-primary, #f4f4f5)" }}>Semester Grades & GPA</p>
-                    {portalData?.marks?.cgpa ? (
-                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20">
-                        CGPA {portalData.marks.cgpa.toFixed(2)}
-                      </span>
-                    ) : null}
-                  </div>
-                  <p className="text-[11px] truncate" style={{ color: "var(--text-faint, #52525b)" }}>
-                    {portalData?.marks?.semesters?.length || 0} Semesters Synced · Tap to view breakdown
-                  </p>
-                </div>
-                <ChevronRight className="w-3.5 h-3.5 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" style={{ color: "var(--text-faint, #52525b)" }} />
-              </div>
-            </button>
-          ) : (
-            <button
-              onClick={openPortalLogin}
-              className="w-full group rounded-2xl border overflow-hidden transition-all duration-200 active:scale-[0.98] text-left"
-              style={{
-                background: "var(--card-bg, rgba(24,24,27,0.7))",
-                borderColor: "rgba(52,211,153,0.2)",
-                WebkitTapHighlightColor: "transparent",
-              }}
-            >
-              <div className="flex items-center gap-2.5 px-4 py-3">
-                <div className="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center bg-emerald-500/10 text-emerald-400">
-                  <GraduationCap className="w-3.5 h-3.5" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold leading-snug text-zinc-100">Login to Student Portal</p>
-                  <p className="text-[11px] truncate text-zinc-500">
-                    Access multi-semester grades, CGPA, and portal attendance
-                  </p>
-                </div>
-                <ChevronRight className="w-3.5 h-3.5 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5 text-emerald-400" />
-              </div>
-            </button>
-          )}
+
 
           <button
             onClick={() => onNavigate("map")}

@@ -2,7 +2,21 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import gsap from "gsap"
-import { LocateFixed, MapPin, Navigation, Search, X } from "lucide-react"
+import {
+  ArrowUpRight,
+  Building2,
+  Compass,
+  ExternalLink,
+  GraduationCap,
+  LocateFixed,
+  MapPin,
+  Navigation,
+  Radio,
+  Search,
+  Sparkles,
+  Users,
+  X,
+} from "lucide-react"
 import { BUILDINGS, CATEGORY_META } from "@/lib/campus-data"
 
 /* Shared stylized KTR geometry — mirrors the real /explore map
@@ -204,6 +218,8 @@ export function CampusIntro({ onDone }: { onDone: () => void }) {
 
 /* ─────────────── Campus Explore showcase (landing section) ─────────────── */
 
+type BuildingCategory = "academic" | "hostel" | "food" | "sports" | "facilities" | "transport" | "medical" | string
+
 interface CampusHub {
   id: number
   key: string
@@ -310,12 +326,255 @@ const CAMPUS_HUBS: CampusHub[] = [
   },
 ]
 
-export function CampusShowcase() {
+interface LiveFaculty {
+  id: number
+  name: string
+  role: string
+  dept: string
+  cabin: string
+  block: string
+  floor: string
+  status: "In Cabin" | "Available" | "Office Hours"
+  statusColor: string
+  photo: string
+}
+
+function FacultyPhoto({ name, photo, isPoster }: { name: string; photo?: string; isPoster?: boolean }) {
+  const [error, setError] = useState(false)
+  const initials = useMemo(() => {
+    const clean = name.replace(/^(Dr\.|Dr|Prof\.|Prof|Mr\.|Mr|Mrs\.|Mrs|Ms\.|Ms)\s*/i, "").trim()
+    const parts = clean.split(" ").filter(Boolean)
+    if (parts.length >= 2) return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
+    return clean.slice(0, 2).toUpperCase() || "SR"
+  }, [name])
+
+  const proxied = photo && !error ? `/api/finder/image?url=${encodeURIComponent(photo)}` : null
+
+  return (
+    <div
+      className={`w-9 h-9 rounded-xl overflow-hidden border flex items-center justify-center text-[10px] font-black shrink-0 ${
+        isPoster
+          ? "border-2 border-[#111111] bg-[#f0eee6] text-[#111111] shadow-[1px_1px_0px_#111111]"
+          : "border border-white/15 bg-white/10 text-emerald-300"
+      }`}
+    >
+      {proxied ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={proxied}
+          alt={name}
+          className="w-full h-full object-cover object-top"
+          onError={() => setError(true)}
+          loading="lazy"
+        />
+      ) : (
+        <span className="tracking-wider">{initials}</span>
+      )}
+    </div>
+  )
+}
+
+const LIVE_FACULTY_FEED: LiveFaculty[] = [
+  {
+    id: 102688,
+    name: "Dr. Lakshmi M",
+    role: "Professor & Head",
+    dept: "Networking & Comms",
+    cabin: "TP 411",
+    block: "Tech Park",
+    floor: "4th Floor",
+    status: "In Cabin",
+    statusColor: "#34d399",
+    photo: "https://www.srmist.edu.in/wp-content/uploads/2024/04/DSC_4325.jpg",
+  },
+  {
+    id: 100158,
+    name: "Dr. Malathy C",
+    role: "Professor",
+    dept: "Networking & Comms",
+    cabin: "TP 1310",
+    block: "Tech Park",
+    floor: "13th Floor",
+    status: "Available",
+    statusColor: "#38bdf8",
+    photo: "https://www.srmist.edu.in/wp-content/uploads/2024/04/DSC_4309.jpg",
+  },
+  {
+    id: 102223,
+    name: "Dr. Supraja P",
+    role: "Associate Professor",
+    dept: "Computing",
+    cabin: "UB 402",
+    block: "University Bldg",
+    floor: "4th Floor",
+    status: "In Cabin",
+    statusColor: "#34d399",
+    photo: "https://www.srmist.edu.in/wp-content/uploads/2024/04/Supraja-600x600-1.jpg",
+  },
+  {
+    id: 100631,
+    name: "Dr. Mukesh Krishnan",
+    role: "Professor",
+    dept: "Networking & Comms",
+    cabin: "TP 309",
+    block: "Tech Park",
+    floor: "3rd Floor",
+    status: "Office Hours",
+    statusColor: "#fbbf24",
+    photo: "https://www.srmist.edu.in/wp-content/uploads/2024/04/DSC_3768.jpg",
+  },
+  {
+    id: 102693,
+    name: "Dr. Krishnaraj N",
+    role: "Professor",
+    dept: "AI & Data Science",
+    cabin: "TP 403A",
+    block: "Tech Park",
+    floor: "4th Floor",
+    status: "In Cabin",
+    statusColor: "#34d399",
+    photo: "https://www.srmist.edu.in/wp-content/uploads/2024/04/DSC_3751.jpg",
+  },
+  {
+    id: 100160,
+    name: "Dr. Annapurani K",
+    role: "Professor",
+    dept: "Computer Science",
+    cabin: "TP2 - FR310",
+    block: "Tech Park 2",
+    floor: "3rd Floor",
+    status: "Available",
+    statusColor: "#38bdf8",
+    photo: "https://www.srmist.edu.in/wp-content/uploads/2024/04/DSC_3760.jpg",
+  },
+  {
+    id: 102462,
+    name: "Dr. Vinoth Kumar C N S",
+    role: "Professor",
+    dept: "Cyber Security",
+    cabin: "TP 512",
+    block: "Tech Park",
+    floor: "5th Floor",
+    status: "In Cabin",
+    statusColor: "#34d399",
+    photo: "https://www.srmist.edu.in/wp-content/uploads/2026/04/004a3f4a-72ff-4b17-8bc3-0dc8dde3efb6-1.jpg",
+  },
+  {
+    id: 102068,
+    name: "Dr. Anand L",
+    role: "Associate Professor",
+    dept: "IoT & Cloud",
+    cabin: "TP 211",
+    block: "Tech Park",
+    floor: "2nd Floor",
+    status: "Office Hours",
+    statusColor: "#fbbf24",
+    photo: "https://www.srmist.edu.in/wp-content/uploads/2024/04/DSC_3815.jpg",
+  },
+]
+
+export function CampusShowcase({ isPoster: propIsPoster }: { isPoster?: boolean } = {}) {
+  const [internalPoster, setInternalPoster] = useState(false)
+  useEffect(() => {
+    const check = () => {
+      if (typeof document !== "undefined") {
+        const mode = document.documentElement.getAttribute("data-landing-mode")
+        setInternalPoster(mode === "poster")
+      }
+    }
+    check()
+    window.addEventListener("landing-mode-change", check)
+    return () => window.removeEventListener("landing-mode-change", check)
+  }, [])
+  const isPoster = propIsPoster ?? internalPoster
+
+  // Card 1: Map State
   const [query, setQuery] = useState("")
   const [open, setOpen] = useState(false)
   const [activeIdx, setActiveIdx] = useState(0)
   const [activeHub, setActiveHub] = useState<CampusHub>(CAMPUS_HUBS[0])
   const [mapType, setMapType] = useState<"roadmap" | "satellite">("roadmap")
+
+  // Card 2: Faculty Radar & Live Feed State
+  const [facultyFilter, setFacultyFilter] = useState<"ALL" | "TP" | "UB" | "CSE">("ALL")
+  const [facultyQuery, setFacultyQuery] = useState("")
+  const [feedOffset, setFeedOffset] = useState(0)
+  const [isPaused, setIsPaused] = useState(false)
+  const [apiResults, setApiResults] = useState<Array<{id: number | string; name: string; dept: string; cabin: string; block: string; floor: string; status: string; statusColor: string; photo: string}>>([])
+  const [isSearching, setIsSearching] = useState(false)
+
+  // Debounced API search for full faculty database
+  useEffect(() => {
+    if (!facultyQuery.trim() || facultyQuery.trim().length < 2) {
+      setApiResults([])
+      setIsSearching(false)
+      return
+    }
+    setIsSearching(true)
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/finder?q=${encodeURIComponent(facultyQuery.trim())}&limit=6`)
+        if (res.ok) {
+          const data = (await res.json()) as { faculty?: Array<{ id?: string; facultyId?: string; name?: string; department?: string; staffRoom?: string; designation?: string; college?: string }> }
+          const mapped = (data.faculty || []).map((r: { id?: string; facultyId?: string; name?: string; department?: string; staffRoom?: string; designation?: string; college?: string }) => ({
+            id: r.facultyId || r.id || Math.random(),
+            name: r.name || "Unknown",
+            dept: r.department || "",
+            cabin: r.staffRoom || "—",
+            block: "",
+            floor: "",
+            status: "Faculty",
+            statusColor: "#34d399",
+            photo: "",
+          }))
+          setApiResults(mapped)
+        }
+      } catch { /* ignore */ }
+      setIsSearching(false)
+    }, 350)
+    return () => clearTimeout(timer)
+  }, [facultyQuery])
+
+  // Auto-cycle faculty feed
+  useEffect(() => {
+    if (isPaused) return
+    const timer = setInterval(() => {
+      setFeedOffset((prev) => (prev + 1) % LIVE_FACULTY_FEED.length)
+    }, 3800)
+    return () => clearInterval(timer)
+  }, [isPaused])
+
+  const filteredFaculty = useMemo(() => {
+    let list = LIVE_FACULTY_FEED
+    if (facultyFilter === "TP") list = list.filter((f) => f.block.includes("Tech Park"))
+    else if (facultyFilter === "UB") list = list.filter((f) => f.block.includes("University"))
+    else if (facultyFilter === "CSE") list = list.filter((f) => f.dept.includes("Cyber") || f.dept.includes("AI") || f.dept.includes("Computer"))
+
+    if (facultyQuery.trim()) {
+      const q = facultyQuery.toLowerCase()
+      list = list.filter(
+        (f) =>
+          f.name.toLowerCase().includes(q) ||
+          f.cabin.toLowerCase().includes(q) ||
+          f.dept.toLowerCase().includes(q) ||
+          f.block.toLowerCase().includes(q),
+      )
+    }
+    return list
+  }, [facultyFilter, facultyQuery])
+
+  // Get items for faculty feed / search results
+  const visibleFaculty = useMemo(() => {
+    if (facultyQuery.trim().length >= 1) {
+      if (apiResults.length > 0) return apiResults.slice(0, 4)
+      return filteredFaculty.slice(0, 4)
+    }
+    if (filteredFaculty.length <= 2) return filteredFaculty
+    return [
+      filteredFaculty[feedOffset % filteredFaculty.length],
+      filteredFaculty[(feedOffset + 1) % filteredFaculty.length],
+    ]
+  }, [filteredFaculty, feedOffset, facultyQuery, apiResults])
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -359,253 +618,642 @@ export function CampusShowcase() {
     setOpen(false)
   }
 
+  const handleFacultySearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (facultyQuery.trim()) {
+      window.location.href = `/faculty?q=${encodeURIComponent(facultyQuery.trim())}`
+    } else {
+      window.location.href = "/faculty"
+    }
+  }
+
   return (
-    <section id="campus" data-od-id="campus-showcase" className="mx-auto w-full max-w-[1280px] px-5 py-20 sm:px-8 lg:py-28 scroll-mt-24">
-      {/* Container with sleek architectural borders and deep backdrop blur */}
-      <div className="gs-reveal relative grid items-center gap-10 lg:gap-14 overflow-hidden rounded-[36px] border border-white/[0.08] bg-[#070b12]/90 p-6 sm:p-10 lg:p-12 lg:grid-cols-[1.12fr_.88fr] backdrop-blur-3xl shadow-[0_30px_100px_-20px_rgba(0,0,0,0.85)]">
-        
-        {/* Ambient atmospheric lighting */}
-        <div className="pointer-events-none absolute -top-32 right-12 h-96 w-96 rounded-full blur-[130px]" style={{ background: "radial-gradient(closest-side, rgba(52,211,153,.15), transparent)" }} aria-hidden="true" />
-        <div className="pointer-events-none absolute -bottom-32 left-12 h-80 w-80 rounded-full blur-[120px]" style={{ background: "radial-gradient(closest-side, rgba(56,189,248,.12), transparent)" }} aria-hidden="true" />
+    <section id="campus" data-od-id="campus-showcase" className="mx-auto w-full max-w-[1280px] px-4 py-16 sm:px-8 lg:py-24 scroll-mt-24">
+      <style>{`
+        @keyframes beaconBlink {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.25; transform: scale(0.8); }
+        }
+        @keyframes beaconRing {
+          0% { r: 3.5; opacity: 0.85; stroke-width: 1.5; }
+          70% { r: 10; opacity: 0; stroke-width: 0.5; }
+          100% { r: 10; opacity: 0; stroke-width: 0; }
+        }
+        .beacon-dot-1 {
+          animation: beaconBlink 1.8s ease-in-out infinite;
+          transform-origin: center;
+        }
+        .beacon-dot-2 {
+          animation: beaconBlink 2.2s ease-in-out infinite 0.5s;
+          transform-origin: center;
+        }
+        .beacon-dot-3 {
+          animation: beaconBlink 2.0s ease-in-out infinite 1.0s;
+          transform-origin: center;
+        }
+        .beacon-dot-4 {
+          animation: beaconBlink 2.4s ease-in-out infinite 1.4s;
+          transform-origin: center;
+        }
+        .beacon-ring-1 {
+          animation: beaconRing 2.4s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+        }
+        .beacon-ring-2 {
+          animation: beaconRing 2.6s cubic-bezier(0, 0.2, 0.8, 1) infinite 0.6s;
+        }
+        .beacon-ring-3 {
+          animation: beaconRing 2.4s cubic-bezier(0, 0.2, 0.8, 1) infinite 1.2s;
+        }
+        .beacon-ring-4 {
+          animation: beaconRing 2.8s cubic-bezier(0, 0.2, 0.8, 1) infinite 1.6s;
+        }
+      `}</style>
 
-        {/* ── Left Side: Interactive Real Campus Cartography Cockpit ── */}
-        <div className="relative flex flex-col overflow-hidden rounded-[28px] border border-white/[0.10] bg-[#05080e] shadow-2xl campus-cockpit">
-          
-          {/* Top telemetry bar */}
-          <div className="flex items-center justify-between border-b border-white/[0.07] bg-white/[0.02] px-4 py-3 sm:px-5 cockpit-topbar">
-            <div className="flex items-center gap-2.5">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
-              </span>
-              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-300">
-                SRMIST KTR · LIVE MAP
-              </span>
-            </div>
+      {/* ── Section Header ── */}
+      <div className="gs-reveal mb-8 sm:mb-12 text-center max-w-2xl mx-auto">
+        <div
+          className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-[11px] font-mono uppercase tracking-[0.2em] mb-3 transition-colors ${
+            isPoster
+              ? "border-2 border-[#111111] bg-white text-[#111111] shadow-[2px_2px_0px_#111111]"
+              : "border border-emerald-400/30 bg-emerald-400/10 text-emerald-300 backdrop-blur-md"
+          }`}
+        >
+          <span className={`h-2 w-2 rounded-full animate-ping ${isPoster ? "bg-[#111111]" : "bg-emerald-400"}`} />
+          <span>003 // Campus Cartography &amp; Faculty Radar</span>
+        </div>
+        <h2 className={`font-display text-2xl sm:text-4xl lg:text-[2.8rem] font-black tracking-tight leading-[1.1] ${isPoster ? "text-[#111111]" : "text-white"}`}>
+          Instant Campus Map.{" "}
+          <span className={isPoster ? "font-serif italic font-normal" : "font-serif italic font-normal text-emerald-300"}>
+            Live Faculty Cabins.
+          </span>
+        </h2>
+      </div>
 
-            <div className="flex items-center gap-3">
-              <span className="hidden font-mono text-[10px] text-zinc-400 sm:inline">
-                {activeHub.coords}
-              </span>
-              <div className="cockpit-map-toggle flex rounded-full border border-white/10 bg-black/50 p-0.5">
-                <button
-                  onClick={() => setMapType("roadmap")}
-                  className={`rounded-full px-2.5 py-1 text-[10px] font-mono transition ${
-                    mapType === "roadmap"
-                      ? "active bg-emerald-400/20 text-emerald-300 font-bold"
-                      : "text-zinc-400 hover:text-white"
-                  }`}
-                >
-                  Map
-                </button>
-                <button
-                  onClick={() => setMapType("satellite")}
-                  className={`rounded-full px-2.5 py-1 text-[10px] font-mono transition ${
-                    mapType === "satellite"
-                      ? "active bg-emerald-400/20 text-emerald-300 font-bold"
-                      : "text-zinc-400 hover:text-white"
-                  }`}
-                >
-                  Satellite
-                </button>
+      {/* ── 2 Segregated Balanced Cards Grid with Generous Breathing Room ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-stretch max-w-6xl mx-auto">
+
+        {/* ════════════════ CARD 1: Campus Cartography (Map Cockpit) ════════════════ */}
+        <div
+          className={`relative flex flex-col justify-between overflow-hidden rounded-2xl transition-all duration-300 ${
+            isPoster
+              ? "bg-white border-2 border-[#111111] shadow-[4px_4px_0px_#111111] text-[#111111]"
+              : "bg-[#090d15] border border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.5)] text-white"
+          }`}
+        >
+          {/* Top Content Area */}
+          <div className="flex flex-col">
+            {/* Top Telemetry Bar */}
+            <div
+              className={`flex items-center justify-between border-b px-4 py-3 sm:px-5 ${
+                isPoster ? "border-[#111111] bg-[#f7f5f0]" : "border-white/[0.08] bg-white/[0.02]"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isPoster ? "bg-[#111111]" : "bg-emerald-400"}`} />
+                  <span className={`relative inline-flex rounded-full h-2 w-2 ${isPoster ? "bg-[#111111]" : "bg-emerald-400"}`} />
+                </span>
+                <span className={`font-mono text-[10px] font-black uppercase tracking-[0.18em] ${isPoster ? "text-[#111111]" : "text-emerald-400"}`}>
+                  CAMPUS RADAR // KTR
+                </span>
               </div>
-            </div>
-          </div>
 
-          {/* Search bar inside cockpit */}
-          <div className="relative border-b border-white/[0.06] bg-black/40 px-4 py-2.5 sm:px-5 cockpit-searchbar">
-            <div className="relative flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 transition focus-within:border-emerald-400/50">
-              <Search className="h-4 w-4 shrink-0 text-zinc-400" />
-              <input
-                value={query}
-                onChange={(e) => { setQuery(e.target.value); setOpen(true) }}
-                onFocus={() => setOpen(true)}
-                onBlur={() => window.setTimeout(() => setOpen(false), 200)}
-                onKeyDown={(e) => {
-                  if (e.key === "ArrowDown" && results.length > 0) { e.preventDefault(); setActiveIdx((i) => (i + 1) % results.length) }
-                  else if (e.key === "ArrowUp" && results.length > 0) { e.preventDefault(); setActiveIdx((i) => (i - 1 + results.length) % results.length) }
-                  else if (e.key === "Enter") {
-                    const pick = results[activeIdx] ?? results[0]
-                    if (pick) selectBuilding(pick)
-                  }
-                  else if (e.key === "Escape") setOpen(false)
-                }}
-                placeholder="Search 100+ blocks, faculty cabins, labs & food stalls…"
-                aria-label="Search campus buildings"
-                className="w-full bg-transparent text-xs text-zinc-100 placeholder-zinc-500 outline-none font-sans"
-              />
-              <span className="rounded bg-white/10 px-1.5 py-0.5 text-[9px] font-mono text-zinc-400 hidden sm:inline">
-                ESC
-              </span>
-            </div>
-
-            {/* Instant auto-suggest dropdown */}
-            {open && results.length > 0 && (
-              <div className="absolute left-4 right-4 top-[56px] z-30 overflow-hidden rounded-2xl border border-white/15 bg-[#090d16]/98 shadow-[0_20px_50px_rgba(0,0,0,0.8)] backdrop-blur-2xl">
-                {results.map((b, i) => (
+              <div className="flex items-center gap-2">
+                <span className={`font-mono text-[9px] ${isPoster ? "text-zinc-600 font-bold" : "text-zinc-400"}`}>
+                  {activeHub.coords}
+                </span>
+                <div
+                  className={`flex rounded-full p-0.5 ${
+                    isPoster ? "border border-[#111111] bg-white" : "border border-white/10 bg-black/50"
+                  }`}
+                >
                   <button
-                    key={b.id}
-                    onMouseDown={(e) => { e.preventDefault(); selectBuilding(b) }}
-                    onMouseEnter={() => setActiveIdx(i)}
-                    className={`flex w-full items-center gap-3 px-4 py-3 text-left transition ${i === activeIdx ? "bg-white/[0.08]" : "hover:bg-white/[0.04]"}`}
+                    onClick={() => setMapType("roadmap")}
+                    className={`rounded-full px-2 py-0.5 text-[9px] font-mono transition cursor-pointer ${
+                      mapType === "roadmap"
+                        ? isPoster
+                          ? "bg-[#111111] text-white font-bold keep-white"
+                          : "bg-emerald-400/20 text-emerald-300 font-bold"
+                        : isPoster
+                          ? "text-zinc-500 hover:text-black"
+                          : "text-zinc-400 hover:text-white"
+                    }`}
                   >
-                    <span className="shrink-0 text-lg">{b.icon}</span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-xs font-bold text-zinc-100">{b.name}</span>
-                      <span className="block truncate text-[11px] text-zinc-400">{b.shortDesc}</span>
-                    </span>
-                    <span className="shrink-0 text-[10px] font-mono font-bold uppercase tracking-wider" style={{ color: CATEGORY_META[b.category].color }}>
-                      {CATEGORY_META[b.category].label}
-                    </span>
+                    Map
                   </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Real Google Maps Screen Area */}
-          <div className="relative h-[360px] sm:h-[420px] w-full overflow-hidden bg-[#0a0f16]">
-            <iframe
-              key={`${activeHub.lat}-${activeHub.lng}-${mapType}`}
-              title={`Live Campus Map - ${activeHub.name}`}
-              src={`https://www.google.com/maps?q=${activeHub.lat},${activeHub.lng}&z=17&t=${mapType === "satellite" ? "k" : "m"}&output=embed`}
-              className="absolute inset-0 h-full w-full border-0"
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
-
-            {/* Real GPS Coordinates Pill at top-left of map */}
-            <div className="pointer-events-none absolute top-3 left-3 z-10 flex items-center gap-2 rounded-full border border-black/40 bg-black/80 px-3 py-1 text-[10px] font-mono text-emerald-300 backdrop-blur-md shadow-lg">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
-              <span>LIVE GPS // {activeHub.coords}</span>
-            </div>
-
-            {/* Floating Real Hub Info Card (Bottom Overlay) */}
-            <div className="absolute inset-x-2.5 bottom-2.5 sm:inset-x-4 sm:bottom-4 z-20 flex items-center justify-between gap-2 sm:gap-3 rounded-2xl border border-white/15 bg-[#080d16]/95 p-2.5 sm:p-3.5 shadow-2xl backdrop-blur-xl campus-infocard">
-              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.05] text-lg sm:text-xl">
-                  {activeHub.icon}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5">
-                    <h4 className="truncate font-display text-xs sm:text-sm font-bold text-white campus-hub-title">
-                      {activeHub.name.replace(" (TP1 & TP2)", "")}
-                      {activeHub.name.includes(" (TP1 & TP2)") && (
-                        <span className="hidden sm:inline"> (TP1 &amp; TP2)</span>
-                      )}
-                    </h4>
-                    <span className="hidden sm:inline-block rounded-full bg-emerald-400/15 border border-emerald-400/30 px-2 py-0.5 text-[9px] font-mono font-bold text-emerald-300 shrink-0">
-                      {activeHub.badge}
-                    </span>
-                  </div>
-                  <p className="truncate font-mono text-[9px] sm:text-[10px] text-zinc-300 mt-0.5 campus-hub-meta">
-                    <span className="sm:hidden text-emerald-400 font-bold">{activeHub.badge} · </span>
-                    {activeHub.distance} · {activeHub.floors}
-                  </p>
+                  <button
+                    onClick={() => setMapType("satellite")}
+                    className={`rounded-full px-2 py-0.5 text-[9px] font-mono transition cursor-pointer ${
+                      mapType === "satellite"
+                        ? isPoster
+                          ? "bg-[#111111] text-white font-bold keep-white"
+                          : "bg-emerald-400/20 text-emerald-300 font-bold"
+                        : isPoster
+                          ? "text-zinc-500 hover:text-black"
+                          : "text-zinc-400 hover:text-white"
+                    }`}
+                  >
+                    Sat
+                  </button>
                 </div>
               </div>
-
-              <button
-                onClick={() => goBuilding(activeHub.id, "")}
-                className="shrink-0 inline-flex items-center gap-1 rounded-full bg-emerald-400 px-3 py-1.5 sm:px-3.5 sm:py-1.5 text-[10px] sm:text-[11px] font-bold text-black transition hover:bg-emerald-300 shadow-md active:scale-95"
-              >
-                <span>Explore</span>
-                <Navigation className="h-3 w-3" />
-              </button>
             </div>
-          </div>
 
-          {/* Interactive Landmark Hub Switcher strip */}
-          <div className="cockpit-hubs-bar flex items-center gap-2 overflow-x-auto border-t border-white/[0.06] bg-black/50 p-2.5 scrollbar-none sm:px-4">
-            <span className="font-mono text-[9px] uppercase tracking-wider text-zinc-500 shrink-0 pl-1">
-              KEY HUBS:
-            </span>
-            {CAMPUS_HUBS.map((hub) => (
-              <button
-                key={hub.key}
-                onClick={() => setActiveHub(hub)}
-                className={`cockpit-hub-btn shrink-0 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-mono transition ${
-                  activeHub.key === hub.key
-                    ? "active-hub bg-white/15 border border-white/20 text-white font-bold"
-                    : "bg-white/[0.03] border border-white/[0.06] text-zinc-400 hover:text-zinc-200"
+            {/* Integrated Search */}
+            <div
+              className={`relative border-b px-3.5 py-2 sm:px-4 ${
+                isPoster ? "border-[#111111] bg-[#ffffff]" : "border-white/[0.06] bg-black/40"
+              }`}
+            >
+              <div
+                className={`relative flex items-center gap-2 rounded-lg px-2.5 py-1.5 transition ${
+                  isPoster ? "border border-[#111111] bg-[#f7f5f0]" : "border border-white/10 bg-white/[0.03] focus-within:border-emerald-400/40"
                 }`}
               >
-                <span>{hub.icon}</span>
-                <span>{hub.name.split(" ")[0]}</span>
+                <Search className={`h-3.5 w-3.5 shrink-0 ${isPoster ? "text-zinc-600" : "text-zinc-400"}`} />
+                <input
+                  value={query}
+                  onChange={(e) => { setQuery(e.target.value); setOpen(true) }}
+                  onFocus={() => setOpen(true)}
+                  onBlur={() => window.setTimeout(() => setOpen(false), 200)}
+                  onKeyDown={(e) => {
+                    if (e.key === "ArrowDown" && results.length > 0) { e.preventDefault(); setActiveIdx((i) => (i + 1) % results.length) }
+                    else if (e.key === "ArrowUp" && results.length > 0) { e.preventDefault(); setActiveIdx((i) => (i - 1 + results.length) % results.length) }
+                    else if (e.key === "Enter") {
+                      const pick = results[activeIdx] ?? results[0]
+                      if (pick) selectBuilding(pick)
+                    }
+                    else if (e.key === "Escape") setOpen(false)
+                  }}
+                  placeholder="Search 100+ blocks, labs & food stalls…"
+                  aria-label="Search campus buildings"
+                  className={`w-full bg-transparent text-xs outline-none font-sans ${
+                    isPoster ? "text-[#111111] placeholder-zinc-500" : "text-zinc-100 placeholder-zinc-500"
+                  }`}
+                />
+                {query && (
+                  <button onClick={() => { setQuery(""); setOpen(false) }} className="text-zinc-400 hover:text-zinc-200">
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
+              </div>
+
+              {/* Autocomplete Dropdown */}
+              {open && results.length > 0 && (
+                <div
+                  className={`absolute left-3.5 right-3.5 top-[44px] z-30 overflow-hidden rounded-xl border shadow-xl ${
+                    isPoster ? "bg-white border-2 border-[#111111] text-[#111111]" : "bg-[#090d16] border-white/15 text-zinc-100 backdrop-blur-2xl"
+                  }`}
+                >
+                  {results.map((b, i) => (
+                    <button
+                      key={b.id}
+                      onMouseDown={(e) => { e.preventDefault(); selectBuilding(b) }}
+                      onMouseEnter={() => setActiveIdx(i)}
+                      className={`flex w-full items-center gap-2.5 px-3 py-1.5 text-left transition cursor-pointer ${
+                        i === activeIdx ? (isPoster ? "bg-black/5 font-bold" : "bg-white/[0.08]") : ""
+                      }`}
+                    >
+                      <span className="text-sm">{b.icon}</span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-xs font-bold">{b.name}</span>
+                        <span className={`block truncate text-[10px] ${isPoster ? "text-zinc-600" : "text-zinc-400"}`}>{b.shortDesc}</span>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Embedded Google Map Viewport */}
+            <div className="relative h-[180px] w-full overflow-hidden bg-[#0a0f16]">
+              <iframe
+                key={`${activeHub.lat}-${activeHub.lng}-${mapType}`}
+                title={`Live Campus Map - ${activeHub.name}`}
+                src={`https://www.google.com/maps?q=${activeHub.lat},${activeHub.lng}&z=17&t=${mapType === "satellite" ? "k" : "m"}&output=embed`}
+                className="absolute inset-0 h-full w-full border-0"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+
+              {/* Floating Active Hub Card Overlay */}
+              <div
+                className={`absolute inset-x-2.5 bottom-2 z-20 flex items-center justify-between gap-2 rounded-xl p-2 shadow-lg transition-all ${
+                  isPoster
+                    ? "bg-white/95 border-1.5 border-[#111111] text-[#111111] shadow-[2px_2px_0px_#111111]"
+                    : "bg-[#080d16]/90 border border-white/15 text-white backdrop-blur-md"
+                }`}
+              >
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <div
+                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-sm ${
+                      isPoster ? "bg-[#f7f5f0] border border-[#111111]" : "bg-white/[0.08] border border-white/10"
+                    }`}
+                  >
+                    {activeHub.icon}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <h4 className="truncate font-display text-[11px] font-bold">
+                        {activeHub.name.replace(" (TP1 & TP2)", "")}
+                      </h4>
+                      <span
+                        className={`rounded px-1 py-0.2 text-[8px] font-mono font-bold shrink-0 ${
+                          isPoster ? "bg-[#111111] text-white keep-white" : "bg-emerald-400/20 text-emerald-300"
+                        }`}
+                      >
+                        {activeHub.badge}
+                      </span>
+                    </div>
+                    <p className={`truncate font-mono text-[9px] ${isPoster ? "text-zinc-600 font-bold" : "text-zinc-400"}`}>
+                      {activeHub.distance} · {activeHub.floors}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => goBuilding(activeHub.id, "")}
+                  className={`shrink-0 inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[10px] font-bold transition cursor-pointer ${
+                    isPoster
+                      ? "bg-[#111111] text-white border border-[#111111] hover:bg-zinc-800 keep-white shadow-xs"
+                      : "bg-emerald-400/20 text-emerald-300 border border-emerald-400/40 hover:bg-emerald-400/30"
+                  }`}
+                >
+                  <span>Explore</span>
+                  <Navigation className="h-2.5 w-2.5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Hub Selector Strip */}
+            <div
+              className={`flex items-center gap-1.5 overflow-x-auto border-t p-2 sm:p-2.5 scrollbar-none sm:px-4 ${
+                isPoster ? "border-[#111111] bg-[#f7f5f0]" : "border-white/[0.06] bg-black/40"
+              }`}
+            >
+              <span className={`font-mono text-[9px] uppercase tracking-wider shrink-0 pl-1 ${isPoster ? "text-zinc-600 font-bold" : "text-zinc-500"}`}>
+                HUBS:
+              </span>
+              {CAMPUS_HUBS.map((hub) => (
+                <button
+                  key={hub.key}
+                  onClick={() => setActiveHub(hub)}
+                  className={`shrink-0 inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[10px] font-mono transition cursor-pointer ${
+                    activeHub.key === hub.key
+                      ? isPoster
+                        ? "bg-[#111111] text-white font-bold border-2 border-[#111111] keep-white shadow-[1px_1px_0px_#111111]"
+                        : "bg-emerald-400/20 border border-emerald-400/40 text-emerald-300 font-bold"
+                      : isPoster
+                        ? "bg-white border-2 border-[#111111]/30 text-[#111111] hover:border-[#111111]"
+                        : "bg-white/[0.03] border border-white/[0.06] text-zinc-400 hover:text-zinc-200"
+                  }`}
+                >
+                  <span>{hub.icon}</span>
+                  <span>{hub.name.split(" ")[0]}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Action Bar */}
+          <div className={`p-3 sm:p-4 border-t ${isPoster ? "border-[#111111] bg-[#faf8f5]" : "border-white/[0.08] bg-white/[0.01]"}`}>
+            <div className="flex items-center gap-2.5">
+              <button
+                onClick={() => { window.location.href = "/explore" }}
+                className={`flex-1 inline-flex items-center justify-center gap-2 rounded-xl py-2.5 px-3 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                  isPoster
+                    ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-zinc-800 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none keep-white"
+                    : "bg-zinc-900/90 hover:bg-zinc-800 text-emerald-400 border border-emerald-500/35 hover:border-emerald-400/60 shadow-sm"
+                }`}
+              >
+                <span>Launch Campus Radar</span>
+                <Navigation className="h-3.5 w-3.5" />
               </button>
-            ))}
+              <button
+                onClick={() => { window.location.href = "/explore?cat=academic" }}
+                className={`inline-flex items-center justify-center gap-1 rounded-xl px-3.5 py-2.5 text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                  isPoster
+                    ? "border-2 border-[#111111] bg-white text-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-zinc-100"
+                    : "border border-white/12 bg-white/[0.04] text-zinc-300 hover:bg-white/[0.08]"
+                }`}
+              >
+                <span>Blocks</span>
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* ── Right Side: Confident Editorial Typography ── */}
-        <div className="flex flex-col justify-center text-center lg:text-left">
-          <div className="mx-auto inline-flex w-fit items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-400/10 px-3.5 py-1 text-[11px] font-mono uppercase tracking-[0.2em] text-emerald-300 lg:mx-0">
-            <MapPin className="h-3 w-3 text-emerald-400 animate-pulse" />
-            <span>003 // Campus Cartography</span>
-          </div>
 
-          <h2 className="font-display mt-5 text-3xl font-black tracking-tight text-white sm:text-5xl lg:text-[3.2rem] leading-[1.0] text-balance">
-            Where is the class?
-            <br />
-            <span className="font-serif italic font-normal text-emerald-300">
-              Find the room before the professor does.
-            </span>
-          </h2>
-
-          <div className="mt-3">
-            <span className="font-hand text-2xl sm:text-3xl text-amber-300/90 select-none">
-              ↳ &ldquo;TP elevators broken again. Take the stairs to 4th floor.&rdquo;
-            </span>
-          </div>
-
-          <p className="mx-auto mt-4 max-w-lg text-sm sm:text-base leading-relaxed text-zinc-300 font-sans lg:mx-0">
-            Every block, lab, food stall, and faculty cabin on one living map. Built specifically for SRMIST KTR&apos;s sprawling 250-acre campus with walk estimates and floor directories.
-          </p>
-
-          {/* 4-Metric Architectural Telemetry */}
-          <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-lg mx-auto lg:mx-0 text-left">
-            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-3">
-              <span className="block font-display text-xl font-bold text-white">100+</span>
-              <span className="block font-mono text-[10px] text-zinc-400 uppercase tracking-wider mt-0.5">Verified Hubs</span>
-            </div>
-            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-3">
-              <span className="block font-display text-xl font-bold text-emerald-300">15</span>
-              <span className="block font-mono text-[10px] text-zinc-400 uppercase tracking-wider mt-0.5">TP & UB Floors</span>
-            </div>
-            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-3">
-              <span className="block font-display text-xl font-bold text-amber-300">20+</span>
-              <span className="block font-mono text-[10px] text-zinc-400 uppercase tracking-wider mt-0.5">Java Food Stalls</span>
-            </div>
-            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-3">
-              <span className="block font-display text-xl font-bold text-cyan-300">0s</span>
-              <span className="block font-mono text-[10px] text-zinc-400 uppercase tracking-wider mt-0.5">Login Required</span>
-            </div>
-          </div>
-
-          {/* Call to action */}
-          <div className="mt-8 flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
-            <button
-              onClick={() => { window.location.href = "/explore" }}
-              className="btn-shine w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-full bg-gradient-to-r from-emerald-300 to-teal-300 px-8 py-4 text-xs font-mono font-bold uppercase tracking-wider text-zinc-950 shadow-[0_12px_30px_rgba(52,211,153,.25)] transition hover:brightness-110 active:scale-[0.98]"
+        {/* ════════════════ CARD 2: Faculty Cabin Radar & Live Directory ════════════════ */}
+        <div
+          className={`relative flex flex-col justify-between overflow-hidden rounded-2xl transition-all duration-300 ${
+            isPoster
+              ? "bg-white border-2 border-[#111111] shadow-[4px_4px_0px_#111111] text-[#111111]"
+              : "bg-[#090d15] border border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.5)] text-white"
+          }`}
+        >
+          {/* Top Content Area */}
+          <div className="flex flex-col">
+            {/* Top Telemetry Bar */}
+            <div
+              className={`flex items-center justify-between border-b px-3.5 py-2.5 sm:px-4 ${
+                isPoster ? "border-[#111111] bg-[#f7f5f0]" : "border-white/[0.08] bg-white/[0.02]"
+              }`}
             >
-              <Navigation className="h-4 w-4" />
-              <span>Launch Campus Radar</span>
-            </button>
-            <button
-              onClick={() => { window.location.href = "/explore?cat=academic" }}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-6 py-3.5 text-xs font-mono font-semibold text-zinc-300 backdrop-blur-md transition hover:bg-white/[0.08] hover:text-white active:scale-[0.98]"
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isPoster ? "bg-[#111111]" : "bg-sky-400"}`} />
+                  <span className={`relative inline-flex rounded-full h-2 w-2 ${isPoster ? "bg-[#111111]" : "bg-sky-400"}`} />
+                </span>
+                <span className={`font-mono text-[10px] font-black uppercase tracking-[0.18em] ${isPoster ? "text-[#111111]" : "text-sky-400"}`}>
+                  CABIN RADAR // FACULTY
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span
+                  className={`rounded-full px-2 py-0.5 text-[9px] font-mono font-bold ${
+                    isPoster
+                      ? "bg-sky-100 text-sky-950 border border-sky-900/30"
+                      : "bg-sky-400/15 border border-sky-400/30 text-sky-300"
+                  }`}
+                >
+                  ● 2,400+ VERIFIED
+                </span>
+              </div>
+            </div>
+
+            {/* Integrated Search Bar */}
+            <div
+              className={`relative border-b px-3.5 py-2 sm:px-4 ${
+                isPoster ? "border-[#111111] bg-[#ffffff]" : "border-white/[0.06] bg-black/40"
+              }`}
             >
-              <span>Explore Blocks</span>
-            </button>
+              <form onSubmit={handleFacultySearch}>
+                <div
+                  className={`relative flex items-center gap-2 rounded-lg px-2.5 py-1.5 transition ${
+                    isPoster ? "border border-[#111111] bg-[#f7f5f0]" : "border border-white/10 bg-white/[0.03] focus-within:border-sky-400/40"
+                  }`}
+                >
+                  <Search className={`h-3.5 w-3.5 shrink-0 ${isPoster ? "text-zinc-600" : "text-zinc-400"}`} />
+                  <input
+                    value={facultyQuery}
+                    onChange={(e) => setFacultyQuery(e.target.value)}
+                    placeholder="Search 2,400+ faculty by name, cabin (e.g. TP411), dept…"
+                    aria-label="Search faculty by name or cabin"
+                    className={`w-full bg-transparent text-xs outline-none font-sans ${
+                      isPoster ? "text-[#111111] placeholder-zinc-500" : "text-zinc-100 placeholder-zinc-500"
+                    }`}
+                  />
+                  {facultyQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setFacultyQuery("")}
+                      className="text-zinc-400 hover:text-zinc-200 cursor-pointer"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  )}
+                  <button
+                    type="submit"
+                    className={`text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded cursor-pointer shrink-0 ${
+                      isPoster ? "bg-[#111111] text-white keep-white" : "bg-sky-500/20 text-sky-300 border border-sky-500/30 hover:bg-sky-500/30"
+                    }`}
+                  >
+                    Find
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Center Viewport */}
+            <div className="relative min-h-[215px] w-full overflow-hidden flex flex-col justify-between">
+              {facultyQuery.trim().length >= 1 ? (
+                /* Search Results View */
+                <div className="h-full overflow-y-auto p-3 space-y-2 scrollbar-none">
+                  {isSearching ? (
+                    <div className="h-full flex flex-col items-center justify-center gap-2 text-center py-8">
+                      <span className="h-4 w-4 rounded-full border-2 border-sky-400 border-t-transparent animate-spin" />
+                      <span className="text-[11px] font-mono text-zinc-400">Scanning 2,400+ SRM faculty database...</span>
+                    </div>
+                  ) : visibleFaculty.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center text-center py-8">
+                      <p className={`text-xs font-bold ${isPoster ? "text-[#111111]" : "text-zinc-300"}`}>
+                        No faculty found for &ldquo;{facultyQuery}&rdquo;
+                      </p>
+                      <p className="text-[10px] font-mono text-zinc-500 mt-1">
+                        Press Enter or Find to search entire directory
+                      </p>
+                    </div>
+                  ) : (
+                    visibleFaculty.map((prof) => (
+                      <div
+                        key={prof.id}
+                        onClick={() => { window.location.href = `/faculty?q=${encodeURIComponent(prof.name)}` }}
+                        className={`group flex items-center justify-between gap-3 px-3 py-2 rounded-xl border transition-all cursor-pointer ${
+                          isPoster
+                            ? "bg-[#f7f5f0] border-2 border-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-white hover:shadow-[3px_3px_0px_#111111]"
+                            : "bg-white/[0.03] border-white/[0.08] hover:bg-white/[0.07] hover:border-sky-400/30"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                          <FacultyPhoto name={prof.name} photo={prof.photo} isPoster={isPoster} />
+                          <div className="min-w-0 flex-1">
+                            <h4 className={`text-xs font-bold truncate group-hover:text-sky-500 transition-colors ${isPoster ? "text-[#111111]" : "text-white"}`}>
+                              {prof.name}
+                            </h4>
+                            <p className="text-[9.5px] font-mono truncate text-zinc-500">{prof.dept}</p>
+                          </div>
+                        </div>
+                        <span
+                          className={`shrink-0 inline-flex items-center gap-1 font-mono font-bold text-[9px] px-2 py-1 rounded-lg ${
+                            isPoster
+                              ? "bg-[#111111] text-white keep-white"
+                              : "bg-sky-400/15 text-sky-300 border border-sky-400/25"
+                          }`}
+                        >
+                          <Building2 className="h-2.5 w-2.5" />
+                          {prof.cabin}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              ) : (
+                /* Idle Radar Art & Live Feed View */
+                <div className="flex flex-col justify-between">
+                  {/* Top Radar Art Canvas (~88px) */}
+                  <div
+                    className={`relative w-full h-[88px] overflow-hidden flex items-center justify-center border-b ${
+                      isPoster ? "border-[#111111] bg-[#faf8f5]" : "border-white/[0.06] bg-[#05080e]"
+                    }`}
+                  >
+                    <svg className="absolute inset-0 w-full h-full" viewBox="0 0 360 88">
+                      {/* Concentric rings */}
+                      <circle cx="180" cy="44" r="18" fill="none" stroke={isPoster ? "#111111" : "rgba(255,255,255,0.12)"} strokeWidth={isPoster ? "1.5" : "1"} strokeDasharray="2 2" />
+                      <circle cx="180" cy="44" r="36" fill="none" stroke={isPoster ? "#111111" : "rgba(255,255,255,0.14)"} strokeWidth={isPoster ? "1.5" : "1"} />
+                      <circle cx="180" cy="44" r="58" fill="none" stroke={isPoster ? "#111111" : "rgba(255,255,255,0.08)"} strokeWidth="1" strokeDasharray="3 3" />
+                      <circle cx="180" cy="44" r="82" fill="none" stroke={isPoster ? "#111111" : "rgba(255,255,255,0.05)"} strokeWidth="0.8" />
+
+                      {/* Crosshairs */}
+                      <line x1="180" y1="2" x2="180" y2="86" stroke={isPoster ? "#111111" : "rgba(255,255,255,0.08)"} strokeWidth="1" />
+                      <line x1="10" y1="44" x2="350" y2="44" stroke={isPoster ? "#111111" : "rgba(255,255,255,0.08)"} strokeWidth="1" />
+
+                      {/* Tech Park Beacon Node */}
+                      <g transform="translate(230, 26)" className="cursor-pointer" onClick={() => setFacultyFilter("TP")}>
+                        <circle r="3.5" fill="none" stroke={isPoster ? "#111111" : "#34d399"} className="beacon-ring-1" />
+                        <circle r="4" fill={isPoster ? "#111111" : "#34d399"} className="beacon-dot-1" />
+                        <circle r="2" fill={isPoster ? "#ffffff" : "#10b981"} />
+                        <text x="8" y="3" fontSize="8" fontFamily="monospace" fontWeight="bold" fill={isPoster ? "#111111" : "#34d399"}>TP // 45 CABINS</text>
+                      </g>
+
+                      {/* UB Beacon Node */}
+                      <g transform="translate(125, 32)" className="cursor-pointer" onClick={() => setFacultyFilter("UB")}>
+                        <circle r="3.5" fill="none" stroke={isPoster ? "#111111" : "#38bdf8"} className="beacon-ring-2" />
+                        <circle r="4" fill={isPoster ? "#111111" : "#38bdf8"} className="beacon-dot-2" />
+                        <circle r="2" fill={isPoster ? "#ffffff" : "#0284c7"} />
+                        <text x="-72" y="3" fontSize="8" fontFamily="monospace" fontWeight="bold" fill={isPoster ? "#111111" : "#38bdf8"}>UB // 38 CABINS</text>
+                      </g>
+
+                      {/* BioTech Beacon Node */}
+                      <g transform="translate(135, 64)">
+                        <circle r="3" fill="none" stroke={isPoster ? "#111111" : "#fbbf24"} className="beacon-ring-3" />
+                        <circle r="3.5" fill={isPoster ? "#111111" : "#fbbf24"} className="beacon-dot-3" />
+                        <circle r="1.8" fill={isPoster ? "#ffffff" : "#f59e0b"} />
+                        <text x="-67" y="3" fontSize="7.5" fontFamily="monospace" fontWeight="bold" fill={isPoster ? "#111111" : "#fbbf24"}>BIO // 18 CABINS</text>
+                      </g>
+
+                      {/* Arch Beacon Node */}
+                      <g transform="translate(240, 66)">
+                        <circle r="3" fill="none" stroke={isPoster ? "#111111" : "#a855f7"} className="beacon-ring-4" />
+                        <circle r="3.5" fill={isPoster ? "#111111" : "#a855f7"} className="beacon-dot-4" />
+                        <circle r="1.8" fill={isPoster ? "#ffffff" : "#9333ea"} />
+                        <text x="8" y="3" fontSize="7.5" fontFamily="monospace" fontWeight="bold" fill={isPoster ? "#111111" : "#c084fc"}>ARCH // 12 CABINS</text>
+                      </g>
+                    </svg>
+
+                    <div className="absolute bottom-1 left-3 z-10">
+                      <span className={`text-[8px] font-mono uppercase tracking-wider ${isPoster ? "text-[#111111] font-bold" : "text-zinc-400"}`}>
+                        LIVE RADAR // CABIN PINGS
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Bottom Live Feed */}
+                  <div
+                    className="p-3 sm:p-3.5 space-y-2"
+                    onMouseEnter={() => setIsPaused(true)}
+                    onMouseLeave={() => setIsPaused(false)}
+                  >
+                    {visibleFaculty.slice(0, 2).map((prof) => (
+                      <div
+                        key={prof.id}
+                        onClick={() => { window.location.href = `/faculty?q=${encodeURIComponent(prof.name)}` }}
+                        className={`group flex items-center justify-between gap-3 px-3 py-2 rounded-xl border transition-all cursor-pointer ${
+                          isPoster
+                            ? "bg-[#f7f5f0] border-2 border-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-white hover:shadow-[3px_3px_0px_#111111]"
+                            : "bg-white/[0.03] border-white/[0.08] hover:bg-white/[0.07] hover:border-sky-400/30"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                          <div className="relative shrink-0">
+                            <FacultyPhoto name={prof.name} photo={prof.photo} isPoster={isPoster} />
+                            <span
+                              className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border border-[#070b12]"
+                              style={{ backgroundColor: prof.statusColor }}
+                            />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <h4 className={`text-xs font-bold truncate group-hover:text-sky-500 transition-colors ${isPoster ? "text-[#111111]" : "text-white"}`}>
+                              {prof.name}
+                            </h4>
+                            <p className="text-[9.5px] font-mono truncate text-zinc-500">{prof.dept}</p>
+                          </div>
+                        </div>
+                        <span
+                          className={`shrink-0 inline-flex items-center gap-1 font-mono font-bold text-[9px] px-2 py-1 rounded-lg ${
+                            isPoster
+                              ? "bg-[#111111] text-white keep-white"
+                              : "bg-sky-400/15 text-sky-300 border border-sky-400/25"
+                          }`}
+                        >
+                          <Building2 className="h-2.5 w-2.5" />
+                          {prof.cabin}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Block Filter Strip */}
+            <div
+              className={`flex items-center gap-1.5 overflow-x-auto border-t p-2 sm:p-2.5 scrollbar-none sm:px-4 ${
+                isPoster ? "border-[#111111] bg-[#f7f5f0]" : "border-white/[0.06] bg-black/40"
+              }`}
+            >
+              <span className={`font-mono text-[9px] uppercase tracking-wider shrink-0 pl-1 ${isPoster ? "text-zinc-600 font-bold" : "text-zinc-500"}`}>
+                FILTER:
+              </span>
+              {(["ALL", "TP", "UB", "CSE"] as const).map((filterKey) => {
+                const label = filterKey === "ALL" ? "All Cabins" : filterKey === "TP" ? "Tech Park" : filterKey === "UB" ? "Univ Bldg" : "Computing & AI"
+                const isActive = facultyFilter === filterKey
+                return (
+                  <button
+                    key={filterKey}
+                    onClick={() => { setFacultyFilter(filterKey); setFacultyQuery("") }}
+                    className={`shrink-0 inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[10px] font-mono transition cursor-pointer ${
+                      isActive
+                        ? isPoster
+                          ? "bg-[#111111] text-white font-bold border-2 border-[#111111] keep-white shadow-[1px_1px_0px_#111111]"
+                          : "bg-sky-400/20 border border-sky-400/40 text-sky-300 font-bold"
+                        : isPoster
+                          ? "bg-white border-2 border-[#111111]/30 text-[#111111] hover:border-[#111111]"
+                          : "bg-white/[0.03] border border-white/[0.06] text-zinc-400 hover:text-zinc-200"
+                    }`}
+                  >
+                    <span>{label}</span>
+                  </button>
+                )
+              })}
+            </div>
           </div>
 
-          <p className="mt-3 text-[11px] font-mono text-zinc-500 text-center lg:text-left">
-            Accessible to all students, faculty, parents, and campus visitors with zero authentication.
-          </p>
+          {/* Action Bar */}
+          <div className={`p-3 sm:p-4 border-t ${isPoster ? "border-[#111111] bg-[#faf8f5]" : "border-white/[0.08] bg-white/[0.01]"}`}>
+            <div className="flex items-center gap-2.5">
+              <button
+                onClick={() => { window.location.href = "/faculty" }}
+                className={`flex-1 inline-flex items-center justify-center gap-2 rounded-xl py-2.5 px-3 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                  isPoster
+                    ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-zinc-800 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none keep-white"
+                    : "bg-zinc-900/90 hover:bg-zinc-800 text-sky-400 border border-sky-500/35 hover:border-sky-400/60 shadow-sm"
+                }`}
+              >
+                <Users className="h-3.5 w-3.5" />
+                <span>Open Faculty Finder</span>
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onClick={() => { window.location.href = "/faculty" }}
+                className={`inline-flex items-center justify-center gap-1 rounded-xl px-3.5 py-2.5 text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                  isPoster
+                    ? "border-2 border-[#111111] bg-white text-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-zinc-100"
+                    : "border border-white/12 bg-white/[0.04] text-zinc-300 hover:bg-white/[0.08]"
+                }`}
+              >
+                <span>Directory</span>
+                <ExternalLink className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
         </div>
 
       </div>
     </section>
   )
 }
+
 

@@ -6,6 +6,7 @@ import {
   Calculator, Binary, Hexagon, Activity, Copy, Zap,
   ArrowLeft, ChevronRight, Delete, Percent, Ruler,
 } from "lucide-react"
+import { useTheme } from "@/lib/theme-context"
 
 const MONO: React.CSSProperties = { fontFamily: "'JetBrains Mono', monospace" }
 
@@ -1141,19 +1142,113 @@ const TOOLS = [
 type ToolKey = typeof TOOLS[number]["key"]
 
 export function CalculatorSection() {
+  const { theme } = useTheme()
+  const isPoster = theme?.mode === "poster" || (theme as any) === "poster" || (typeof document !== "undefined" && (document.documentElement.getAttribute("data-theme") === "poster" || document.documentElement.getAttribute("data-landing-mode") === "poster"))
   const [activeTool, setActiveTool] = useState<ToolKey | null>(null)
   const activeInfo = TOOLS.find((t) => t.key === activeTool)
 
   return (
-    <div className="min-h-full pt-[3.75rem] pb-20 px-3 sm:px-4 lg:px-8 lg:pb-8 w-full">
+    <div className={`min-h-full pt-[3.75rem] pb-20 px-3 sm:px-4 lg:px-8 lg:pb-8 w-full calculator-section-root ${isPoster ? "calculator-poster-mode" : ""}`}>
+      <style>{`
+        [data-theme="poster"] .calculator-section-root .bg-zinc-900\\/40,
+        [data-theme="poster"] .calculator-section-root .bg-zinc-900\\/60,
+        [data-theme="poster"] .calculator-section-root .bg-zinc-900\\/30,
+        .calculator-poster-mode .bg-zinc-900\\/40,
+        .calculator-poster-mode .bg-zinc-900\\/60,
+        .calculator-poster-mode .bg-zinc-900\\/30 {
+          background-color: #ffffff !important;
+          border: 2px solid #111111 !important;
+          box-shadow: 3px 3px 0px #111111 !important;
+          --tw-ring-color: transparent !important;
+          color: #111111 !important;
+        }
+
+        [data-theme="poster"] .calculator-section-root .bg-zinc-950\\/60,
+        [data-theme="poster"] .calculator-section-root .bg-zinc-950\\/80,
+        [data-theme="poster"] .calculator-section-root .bg-zinc-950\\/50,
+        [data-theme="poster"] .calculator-section-root .bg-zinc-950\\/40,
+        [data-theme="poster"] .calculator-section-root .bg-zinc-950\\/30,
+        [data-theme="poster"] .calculator-section-root .bg-zinc-950\\/20,
+        [data-theme="poster"] .calculator-section-root .bg-zinc-950,
+        [data-theme="poster"] .calculator-section-root .bg-zinc-900,
+        .calculator-poster-mode .bg-zinc-950\\/60,
+        .calculator-poster-mode .bg-zinc-950\\/80,
+        .calculator-poster-mode .bg-zinc-950\\/50,
+        .calculator-poster-mode .bg-zinc-950\\/40,
+        .calculator-poster-mode .bg-zinc-950\\/30,
+        .calculator-poster-mode .bg-zinc-950\\/20,
+        .calculator-poster-mode .bg-zinc-950,
+        .calculator-poster-mode .bg-zinc-900 {
+          background-color: #f7f5f0 !important;
+          border: 1.5px solid #111111 !important;
+          --tw-ring-color: transparent !important;
+          color: #111111 !important;
+        }
+
+        [data-theme="poster"] .calculator-section-root input:not([type="range"]),
+        [data-theme="poster"] .calculator-section-root select,
+        .calculator-poster-mode input:not([type="range"]),
+        .calculator-poster-mode select {
+          background-color: #f7f5f0 !important;
+          border: 2px solid #111111 !important;
+          color: #111111 !important;
+        }
+
+        [data-theme="poster"] .calculator-section-root input::placeholder,
+        .calculator-poster-mode input::placeholder {
+          color: #71717a !important;
+        }
+
+        [data-theme="poster"] .calculator-section-root .text-zinc-100,
+        [data-theme="poster"] .calculator-section-root .text-zinc-200,
+        [data-theme="poster"] .calculator-section-root .text-zinc-300,
+        .calculator-poster-mode .text-zinc-100,
+        .calculator-poster-mode .text-zinc-200,
+        .calculator-poster-mode .text-zinc-300 {
+          color: #111111 !important;
+        }
+
+        [data-theme="poster"] .calculator-section-root .text-zinc-400,
+        [data-theme="poster"] .calculator-section-root .text-zinc-500,
+        [data-theme="poster"] .calculator-section-root .text-zinc-600,
+        .calculator-poster-mode .text-zinc-400,
+        .calculator-poster-mode .text-zinc-500,
+        .calculator-poster-mode .text-zinc-600 {
+          color: #444444 !important;
+        }
+
+        [data-theme="poster"] .calculator-section-root h1,
+        [data-theme="poster"] .calculator-section-root h2,
+        [data-theme="poster"] .calculator-section-root h3,
+        .calculator-poster-mode h1,
+        .calculator-poster-mode h2,
+        .calculator-poster-mode h3 {
+          color: #111111 !important;
+        }
+
+        [data-theme="poster"] .calculator-section-root .bg-emerald-500\\/15,
+        [data-theme="poster"] .calculator-section-root .bg-emerald-500\\/20,
+        .calculator-poster-mode .bg-emerald-500\\/15,
+        .calculator-poster-mode .bg-emerald-500\\/20 {
+          background-color: #111111 !important;
+          color: #ffffff !important;
+          border: 1.5px solid #111111 !important;
+          box-shadow: 2px 2px 0px #111111 !important;
+        }
+
+        [data-theme="poster"] .calculator-section-root table tr,
+        .calculator-poster-mode table tr {
+          border-color: #111111 !important;
+        }
+      `}</style>
       <AnimatePresence mode="wait">
         {!activeTool ? (
           <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <div className="flex justify-between items-start mb-8">
               <div>
-                <p className="text-zinc-500 font-bold text-[10px] uppercase tracking-widest mb-1">Study Tools</p>
-                <h1 className="text-3xl font-bold text-zinc-100 tracking-tight">Calculator Plus</h1>
-                <p className="text-xs mt-1 text-zinc-500">Select a tool below to enhance your study session</p>
+                <p className={`font-bold text-[10px] uppercase tracking-widest mb-1 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>Study Tools</p>
+                <h1 className={`text-3xl font-bold tracking-tight ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>Calculator Plus</h1>
+                <p className={`text-xs mt-1 ${isPoster ? "text-zinc-600 font-medium" : "text-zinc-500"}`}>Select a tool below to enhance your study session</p>
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -1163,19 +1258,25 @@ export function CalculatorSection() {
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => setActiveTool(tool.key)}
-                  className="text-left bg-zinc-900/40 ring-1 ring-white/5 rounded-2xl p-5 hover:ring-zinc-700 hover:bg-zinc-900/60 transition-all group relative overflow-hidden">
+                  className={`text-left rounded-2xl p-5 transition-all group relative overflow-hidden cursor-pointer ${
+                    isPoster
+                      ? "bg-white border-2 border-[#111111] shadow-[4px_4px_0px_#111111] hover:-translate-y-0.5 text-[#111111]"
+                      : "bg-zinc-900/40 ring-1 ring-white/5 hover:ring-zinc-700 hover:bg-zinc-900/60"
+                  }`}>
                   <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <div className="absolute top-0 left-0 right-0 h-[2px] rounded-t-2xl opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: tool.color }} />
                   <div className="flex items-center gap-3.5 relative z-10">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ring-1 ring-white/5 group-hover:ring-white/10 transition-all"
-                      style={{ background: `${tool.color}10` }}>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all ${
+                      isPoster ? "border border-[#111111] shadow-[1px_1px_0px_#111111]" : "ring-1 ring-white/5 group-hover:ring-white/10"
+                    }`}
+                      style={{ background: isPoster ? "#f7f5f0" : `${tool.color}10` }}>
                       <tool.icon className="w-[18px] h-[18px]" style={{ color: tool.color }} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-bold text-zinc-100 group-hover:text-white transition-colors">{tool.title}</p>
-                      <p className="text-[11px] text-zinc-500 mt-0.5">{tool.desc}</p>
+                      <p className={`text-[13px] font-bold transition-colors ${isPoster ? "text-[#111111] group-hover:text-black" : "text-zinc-100 group-hover:text-white"}`}>{tool.title}</p>
+                      <p className={`text-[11px] mt-0.5 ${isPoster ? "text-zinc-600" : "text-zinc-500"}`}>{tool.desc}</p>
                     </div>
-                    <ChevronRight size={14} className="text-zinc-700 group-hover:text-zinc-400 transition-colors shrink-0" />
+                    <ChevronRight size={14} className={`transition-colors shrink-0 ${isPoster ? "text-zinc-700 group-hover:text-black" : "text-zinc-700 group-hover:text-zinc-400"}`} />
                   </div>
                 </motion.button>
               ))}
@@ -1187,11 +1288,13 @@ export function CalculatorSection() {
             <div className="flex justify-between items-start mb-8">
               <div>
                 <motion.button whileTap={{ scale: 0.97 }} onClick={() => setActiveTool(null)}
-                  className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-300 transition-colors mb-1">
+                  className={`flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest transition-colors mb-1 cursor-pointer ${
+                    isPoster ? "text-zinc-700 hover:text-black font-mono" : "text-zinc-500 hover:text-zinc-300"
+                  }`}>
                   <ArrowLeft size={10} />Calculator Plus
                 </motion.button>
-                <h1 className="text-3xl font-bold text-zinc-100 tracking-tight">{activeInfo?.title}</h1>
-                <p className="text-xs mt-1 text-zinc-500">{activeInfo?.desc}</p>
+                <h1 className={`text-3xl font-bold tracking-tight ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>{activeInfo?.title}</h1>
+                <p className={`text-xs mt-1 ${isPoster ? "text-zinc-600 font-medium" : "text-zinc-500"}`}>{activeInfo?.desc}</p>
               </div>
             </div>
             {activeTool === "converter" && <NumberConverter />}

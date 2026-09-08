@@ -87,7 +87,66 @@
   --progress-track: #000000;
 }
 
-[data-theme="poster"], [data-landing-mode="poster"] {
+:root, [data-theme="dark"], [data-landing-mode="night"] {
+  --page-bg: #09090b;
+  --card-bg: rgba(24, 24, 27, 0.6);
+  --card-bg-hover: rgba(24, 24, 27, 0.8);
+  --card-solid: #18181b;
+  --elevated-bg: rgba(24, 24, 27, 0.98);
+  --element-bg: rgba(255, 255, 255, 0.03);
+  --element-bg-hover: rgba(255, 255, 255, 0.06);
+  --text-primary: #f4f4f5;
+  --text-secondary: #d4d4d8;
+  --text-muted: #a1a1aa;
+  --text-subtle: #71717a;
+  --text-faint: #52525b;
+  --border-color: rgba(255, 255, 255, 0.05);
+  --border-medium: rgba(255, 255, 255, 0.1);
+  --selection-bg: rgba(52, 211, 153, 0.2);
+  --selection-color: #34d399;
+  --filter-group-bg: #18181b;
+  --filter-group-border: rgba(255, 255, 255, 0.06);
+  --filter-active-bg: #27272a;
+  --filter-active-text: #f4f4f5;
+  --filter-inactive-text: #71717a;
+  --input-bg: rgba(24, 24, 27, 0.8);
+  --input-text: #f4f4f5;
+  --input-border: rgba(255, 255, 255, 0.08);
+  --progress-track: #18181b;
+
+  --color-zinc-950: #09090b;
+  --color-zinc-900: #18181b;
+  --color-zinc-800: #27272a;
+  --color-zinc-700: #3f3f46;
+  --color-zinc-600: #52525b;
+  --color-zinc-500: #71717a;
+  --color-zinc-400: #a1a1aa;
+  --color-zinc-300: #d4d4d8;
+  --color-zinc-200: #e4e4e7;
+  --color-zinc-100: #f4f4f5;
+  --color-zinc-50: #fafafa;
+  --color-background: #09090b;
+  --color-foreground: #f4f4f5;
+  --color-card: rgba(24, 24, 27, 0.6);
+  --color-card-foreground: #f4f4f5;
+  --color-popover: rgba(24, 24, 27, 0.95);
+  --color-popover-foreground: #f4f4f5;
+  --color-secondary: rgba(24, 24, 27, 0.8);
+  --color-secondary-foreground: #d4d4d8;
+  --color-muted-foreground: #a1a1aa;
+  --color-border: rgba(255, 255, 255, 0.05);
+  --color-input: #09090b;
+  --color-sidebar: #09090b;
+  --color-sidebar-foreground: #f4f4f5;
+  --color-sidebar-accent: rgba(24, 24, 27, 0.6);
+  --color-sidebar-accent-foreground: #f4f4f5;
+  --color-sidebar-border: rgba(255, 255, 255, 0.04);
+}
+
+html[data-theme="poster"]:not([data-landing-mode="night"]):not([data-theme="dark"]),
+html[data-landing-mode="poster"]:not([data-landing-mode="night"]):not([data-theme="dark"]),
+body[data-theme="poster"]:not([data-landing-mode="night"]):not([data-theme="dark"]),
+body[data-landing-mode="poster"]:not([data-landing-mode="night"]):not([data-theme="dark"]) {
   --page-bg: #f7f5f0;
   --card-bg: #ffffff;
   --card-bg-hover: #fcfbfa;
@@ -123,9 +182,9 @@
   --color-zinc-500: #52525b;
   --color-zinc-400: #3f3f46;
   --color-zinc-300: #27272a;
-  --color-zinc-200: #18181b;
-  --color-zinc-100: #111111;
-  --color-zinc-50: #000000;
+  --color-zinc-200: #e8e4da;
+  --color-zinc-100: #f4f1ea;
+  --color-zinc-50: #faf8f5;
   --color-background: #f7f5f0;
   --color-foreground: #111111;
   --color-card: #ffffff;
@@ -144,10 +203,105 @@
   --color-sidebar-border: rgba(17, 17, 17, 0.12);
 }
 
-[data-theme="poster"] .surface-card,
-[data-theme="poster"] .tactile-card {
-  box-shadow: 4px 4px 0px #111111 !important;
-  border-color: #111111 !important;
+/* ── Swiss Brutalist / Poster Mode App Styling ── */
+[data-theme="poster"],
+[data-landing-mode="poster"] {
+  /* Surface cards across all app pages */
+  .surface-card,
+  .tactile-card,
+  .rounded-2xl[class*="bg-zinc-900"],
+  .rounded-2xl[class*="bg-zinc-950"],
+  .rounded-3xl[class*="bg-zinc-900"],
+  .rounded-3xl[class*="bg-zinc-950"] {
+    background-color: #ffffff !important;
+    border: 2px solid #111111 !important;
+    box-shadow: 3px 3px 0px #111111 !important;
+    color: #111111 !important;
+  }
+
+  /* Ring resets - replace white glows with clean borders */
+  [class*="ring-white/"] {
+    --tw-ring-color: transparent !important;
+  }
+
+  /* Sub-dividers and faint borders */
+  [class*="border-white/"] {
+    border-color: rgba(17, 17, 17, 0.12) !important;
+  }
+
+  /* Dark text hierarchy for high-contrast readability */
+  .text-zinc-100:not(.keep-white),
+  .text-zinc-50:not(.keep-white) {
+    color: #111111 !important;
+  }
+  .text-zinc-200:not(.keep-white),
+  .text-zinc-300:not(.keep-white) {
+    color: #1f2937 !important;
+  }
+  .text-zinc-400:not(.keep-white) {
+    color: #4b5563 !important;
+  }
+  .text-zinc-500:not(.keep-white) {
+    color: #6b7280 !important;
+  }
+
+  /* Interactive inputs and search fields */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]):not([type="button"]),
+  input[type="text"],
+  input[type="search"],
+  input[type="password"],
+  input[type="email"] {
+    background-color: #ffffff !important;
+    border: 2px solid #111111 !important;
+    color: #111111 !important;
+    box-shadow: 2px 2px 0px #111111 !important;
+    &::placeholder {
+      color: #6b7280 !important;
+    }
+    &:focus {
+      border-color: #111111 !important;
+      outline: none !important;
+    }
+  }
+
+  /* Select dropdowns */
+  select {
+    background-color: #ffffff !important;
+    border: 2px solid #111111 !important;
+    color: #111111 !important;
+    box-shadow: 2px 2px 0px #111111 !important;
+  }
+
+  /* Filter pill bars (like "Without OD/ML" / "With OD/ML") */
+  .bg-zinc-900\/80,
+  .bg-zinc-900\/70 {
+    background-color: #ffffff !important;
+    border: 2px solid #111111 !important;
+    box-shadow: 2px 2px 0px #111111 !important;
+  }
+
+  /* Progress track bars */
+  .bg-zinc-950 {
+    background-color: #e5e2da !important;
+  }
+
+  /* Refresh buttons & icon square buttons */
+  button[class*="bg-zinc-900"]:not(.keep-dark) {
+    background-color: #ffffff !important;
+    border: 1.5px solid #111111 !important;
+    color: #111111 !important;
+    box-shadow: 2px 2px 0px #111111 !important;
+  }
+
+  /* Dialog and modal containers - only Radix/Shadcn dialogs, NOT our custom ModeSelectionModal */
+  [role="dialog"]:not([data-mode-modal]) > div,
+  [data-slot="dialog-content"] > div {
+    background-color: #ffffff !important;
+    border: 2.5px solid #111111 !important;
+    box-shadow: 6px 6px 0px #111111 !important;
+    color: #111111 !important;
+  }
+
 }
 
 @layer base {
@@ -217,6 +371,52 @@
 
   ::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.2);
+  }
+}
+
+/* ── GPU acceleration hints for GSAP-animated elements ── */
+/* Promote scroll-animated elements to compositor layers ahead of time */
+.hero-chip-attendance,
+.hero-chip-timetable,
+.hero-chip-caution,
+.hero-chip-campus,
+.hero-chip-bunk,
+.hero-chip-mobile,
+.hero-chip-laptop,
+.hero-headline-wrap,
+.hero-welcome-block,
+.hero-orb,
+.hero-orb-top,
+.story-act-1,
+.story-act-2,
+.story-act-3,
+.story-act-4,
+.story-act-5,
+.mem-card-1,
+.mem-card-2,
+.mem-card-3,
+.mem-card-4,
+.mem-card-5,
+.mem-card-6,
+.synth-card-1,
+.synth-card-2,
+.synth-card-3,
+.synth-card-4,
+.synth-core,
+.gs-reveal {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+/* On mobile specifically, disable heavy backdrop-blur on hero badges (not the header) */
+@media (max-width: 767px) {
+  #top .backdrop-blur-md {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  #top .backdrop-blur-xl {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 }
 
@@ -503,7 +703,6 @@
   .landing-root {
     background-color: var(--lm-bg, #06080d);
     color: var(--lm-text-primary, #f4f4f5);
-    transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s ease;
   }
 
   [data-landing-mode="poster"] .android-frame,
@@ -560,3 +759,58 @@
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.035'/%3E%3C/svg%3E");
   }
 }
+
+/* ── Hardware-Accelerated View Transitions for Theme Toggle ── */
+::view-transition-old(root) {
+  animation: none !important;
+  z-index: 1 !important;
+}
+
+::view-transition-new(root) {
+  animation: themeCircleReveal 0.55s cubic-bezier(0.22, 1, 0.36, 1) !important;
+  z-index: 9999 !important;
+}
+
+@keyframes themeCircleReveal {
+  from {
+    clip-path: circle(0% at var(--theme-x, 50%) var(--theme-y, 50%));
+  }
+  to {
+    clip-path: circle(150% at var(--theme-x, 50%) var(--theme-y, 50%));
+  }
+}
+
+/* ── Poster Theme Global Modal, Popover & Dialog Synchronization ── */
+[data-theme="poster"] [data-slot="dialog-overlay"],
+[data-landing-mode="poster"] [data-slot="dialog-overlay"],
+[data-theme="poster"] [data-slot="alert-dialog-overlay"],
+[data-landing-mode="poster"] [data-slot="alert-dialog-overlay"] {
+  background: rgba(0, 0, 0, 0.45) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+[data-theme="poster"] [data-slot="dialog-content"],
+[data-landing-mode="poster"] [data-slot="dialog-content"],
+[data-theme="poster"] [data-slot="alert-dialog-content"],
+[data-landing-mode="poster"] [data-slot="alert-dialog-content"],
+[data-theme="poster"] [data-slot="popover-content"],
+[data-landing-mode="poster"] [data-slot="popover-content"],
+[data-theme="poster"] [data-slot="drawer-content"],
+[data-landing-mode="poster"] [data-slot="drawer-content"] {
+  background-color: #ffffff !important;
+  color: #111111 !important;
+  border: 2.5px solid #111111 !important;
+  box-shadow: 6px 6px 0px #111111 !important;
+  border-radius: 20px !important;
+}
+
+[data-theme="poster"] [data-slot="dialog-content"] input:not([type="checkbox"]):not([type="radio"]),
+[data-landing-mode="poster"] [data-slot="dialog-content"] input:not([type="checkbox"]):not([type="radio"]),
+[data-theme="poster"] [role="dialog"] input:not([type="checkbox"]):not([type="radio"]) {
+  background-color: #ffffff !important;
+  color: #111111 !important;
+  border: 2px solid #111111 !important;
+  box-shadow: 2px 2px 0px #111111 !important;
+}
+

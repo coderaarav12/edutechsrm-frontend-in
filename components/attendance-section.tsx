@@ -18,6 +18,7 @@ import {
 import { AIPromoBadge } from "@/components/ai-promo-badge"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/lib/auth-context"
+import { useTheme, useIsPosterTheme } from "@/lib/theme-context"
 import { useStudentPortal } from "@/lib/student-portal-context"
 import { LoginModal } from "./login-modal"
 import { useCustomPlanner } from "@/lib/custom-planner"
@@ -47,6 +48,7 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
   const [expandedCode, setExpandedCode] = useState<string | null>(null)
   const [attendanceMode, setAttendanceMode] = useState<"base" | "with_od_ml">("base")
   const [isDesktop, setIsDesktop] = useState(false)
+  const isPoster = useIsPosterTheme()
 
   useEffect(() => {
     const check = () => setIsDesktop(window.innerWidth >= 1024)
@@ -355,13 +357,13 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
       {/* ── Header ── */}
       <div className="flex justify-between items-start mb-6">
         <div>
-          <p className="text-zinc-500 font-bold text-[10px] uppercase tracking-widest mb-1">
+          <p className={`font-bold text-[10px] uppercase tracking-widest mb-1 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>
             Attendance Radar
           </p>
-          <h1 className="text-3xl font-bold text-zinc-100 tracking-tight font-display">
+          <h1 className={`text-3xl font-bold tracking-tight font-display ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>
             Attendance
           </h1>
-          <p className="text-[11px] text-zinc-500 mt-0.5">
+          <p className={`text-[11px] mt-0.5 ${isPoster ? "text-zinc-600 font-medium" : "text-zinc-500"}`}>
             {user?.specialization || user?.program} · Sem {user?.semester} ·{" "}
             {attendanceWithData.length} tracked
             {attendancePending.length > 0 ? ` · ${attendancePending.length} pending` : ""}
@@ -374,7 +376,11 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
               whileTap={{ scale: 0.95 }}
               onClick={openPortalLogin}
               disabled={isLoading || isSyncing}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/25 transition-all shadow-sm disabled:opacity-50"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all disabled:opacity-50 ${
+                isPoster
+                  ? "bg-white text-[#111111] border-2 border-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-zinc-50"
+                  : "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/25 shadow-sm"
+              }`}
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? "animate-spin" : ""}`} />
               <span className="hidden sm:inline">Resync Portal</span>
@@ -385,7 +391,11 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
             whileTap={{ scale: 0.9 }}
             onClick={refreshAttendance}
             disabled={isLoading}
-            className="flex items-center justify-center w-8 h-8 rounded-lg text-zinc-500 bg-zinc-900/60 ring-1 ring-white/5 hover:text-zinc-300 transition-all disabled:opacity-40"
+            className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all disabled:opacity-40 ${
+              isPoster
+                ? "bg-white text-[#111111] border-2 border-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-zinc-50"
+                : "text-zinc-500 bg-zinc-900/60 ring-1 ring-white/5 hover:text-zinc-300"
+            }`}
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
           </motion.button>
@@ -397,15 +407,25 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
         <motion.div
           initial={{ opacity: 0, y: -4 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-6 p-3.5 sm:p-4 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-between gap-3 text-xs"
+          className={`mb-6 p-3.5 sm:p-4 rounded-2xl flex items-center justify-between gap-3 text-xs ${
+            isPoster
+              ? "bg-[#fef3c7] border-2 border-[#111111] shadow-[3px_3px_0px_#111111] text-[#111111]"
+              : "bg-amber-500/10 border border-amber-500/25 text-amber-300"
+          }`}
         >
-          <div className="flex items-center gap-2.5 text-amber-300 min-w-0">
-            <AlertTriangle className="w-4 h-4 shrink-0 text-amber-400" />
-            <span className="truncate">Student Portal session expired — Relogin required to refresh live data</span>
+          <div className="flex items-center gap-2.5 min-w-0">
+            <AlertTriangle className={`w-4 h-4 shrink-0 ${isPoster ? "text-[#b45309]" : "text-amber-400"}`} />
+            <span className={`truncate font-semibold ${isPoster ? "text-[#111111]" : "text-amber-300"}`}>
+              Student Portal session expired — Relogin required to refresh live data
+            </span>
           </div>
           <button
             onClick={openPortalLogin}
-            className="px-3.5 py-1.5 rounded-xl font-bold bg-amber-400 hover:bg-amber-300 text-zinc-950 transition-all shrink-0 text-xs shadow-sm whitespace-nowrap"
+            className={`px-3.5 py-1.5 rounded-xl font-bold transition-all shrink-0 text-xs whitespace-nowrap ${
+              isPoster
+                ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] keep-white hover:bg-zinc-800"
+                : "bg-amber-400 hover:bg-amber-300 text-zinc-950 shadow-sm"
+            }`}
           >
             Relogin Now
           </button>
@@ -417,16 +437,26 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
         <motion.div
           initial={{ opacity: 0, y: -4 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-6 p-3 sm:p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/25 flex items-center justify-between gap-3 text-xs"
+          className={`mb-6 p-3 sm:p-4 rounded-2xl flex items-center justify-between gap-3 text-xs ${
+            isPoster
+              ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] text-[#111111]"
+              : "bg-cyan-500/10 border border-cyan-500/25 text-cyan-300"
+          }`}
         >
-          <div className="flex items-center gap-2.5 text-cyan-300">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-            <span>Student Portal Scraper Mode Active — Live data from sp.srmist.edu.in</span>
+          <div className="flex items-center gap-2.5">
+            <span className={`w-2.5 h-2.5 rounded-full ${isPoster ? "bg-[#111111]" : "bg-cyan-400 animate-pulse"}`} />
+            <span className={isPoster ? "font-bold text-[#111111] tracking-tight" : "text-cyan-300"}>
+              Student Portal Scraper Mode Active — Live data from sp.srmist.edu.in
+            </span>
           </div>
           {(!portalData?.attendance || portalData.attendance.length === 0) && (
             <button
               onClick={openPortalLogin}
-              className="px-3 py-1 rounded-lg font-bold bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-200 border border-cyan-500/30 transition-all shrink-0"
+              className={`px-3 py-1 rounded-lg font-bold transition-all shrink-0 ${
+                isPoster
+                  ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] keep-white hover:bg-zinc-800"
+                  : "bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-200 border border-cyan-500/30"
+              }`}
             >
               Sync Portal
             </button>
@@ -439,13 +469,25 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.03 }}
-        className="flex bg-zinc-900/80 rounded-xl p-[3px] ring-1 ring-white/[0.04] mb-6"
+        className={`flex rounded-xl p-[3px] mb-6 ${
+          isPoster
+            ? "bg-[#e8e6dc] border-2 border-[#111111] shadow-[3px_3px_0px_#111111]"
+            : "bg-zinc-900/80 ring-1 ring-white/[0.04]"
+        }`}
       >
         <button
           onClick={() => setAttendanceMode("base")}
-          className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all relative"
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all relative cursor-pointer ${
+            attendanceMode === "base"
+              ? isPoster
+                ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] keep-white font-black"
+                : "text-emerald-300"
+              : isPoster
+                ? "text-zinc-700 hover:text-[#111111]"
+                : "text-zinc-500"
+          }`}
         >
-          {attendanceMode === "base" && (
+          {attendanceMode === "base" && !isPoster && (
             <div
               className="absolute inset-0 rounded-lg"
               style={{
@@ -455,24 +497,34 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
             />
           )}
           <Award
-            size={12}
+            size={13}
             className={`relative z-10 ${
-              attendanceMode === "base" ? "text-emerald-400" : "text-zinc-600"
+              attendanceMode === "base"
+                ? isPoster
+                  ? "text-white"
+                  : "text-emerald-400"
+                : isPoster
+                  ? "text-zinc-600"
+                  : "text-zinc-600"
             }`}
           />
-          <span
-            className={`relative z-10 ${
-              attendanceMode === "base" ? "text-emerald-300" : "text-zinc-500"
-            }`}
-          >
+          <span className="relative z-10 uppercase tracking-wider text-[11px]">
             Without OD/ML
           </span>
         </button>
         <button
           onClick={() => setAttendanceMode("with_od_ml")}
-          className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all relative"
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all relative cursor-pointer ${
+            attendanceMode === "with_od_ml"
+              ? isPoster
+                ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] keep-white font-black"
+                : "text-emerald-300"
+              : isPoster
+                ? "text-zinc-700 hover:text-[#111111]"
+                : "text-zinc-500"
+          }`}
         >
-          {attendanceMode === "with_od_ml" && (
+          {attendanceMode === "with_od_ml" && !isPoster && (
             <div
               className="absolute inset-0 rounded-lg"
               style={{
@@ -482,16 +534,18 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
             />
           )}
           <Target
-            size={12}
+            size={13}
             className={`relative z-10 ${
-              attendanceMode === "with_od_ml" ? "text-emerald-400" : "text-zinc-600"
+              attendanceMode === "with_od_ml"
+                ? isPoster
+                  ? "text-white"
+                  : "text-emerald-400"
+                : isPoster
+                  ? "text-zinc-600"
+                  : "text-zinc-600"
             }`}
           />
-          <span
-            className={`relative z-10 ${
-              attendanceMode === "with_od_ml" ? "text-emerald-300" : "text-zinc-500"
-            }`}
-          >
+          <span className="relative z-10 uppercase tracking-wider text-[11px]">
             With OD/ML
           </span>
         </button>
@@ -509,24 +563,40 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
               window.history.replaceState(null, "", "#od-ml-planner")
               onNavigate?.("about")
             }}
-            className="group relative w-full overflow-hidden rounded-2xl border border-emerald-500/20 bg-zinc-900/70 px-5 py-4 transition-all hover:border-emerald-400/35"
+            className={`group relative w-full overflow-hidden rounded-2xl px-5 py-4 transition-all text-left ${
+              isPoster
+                ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] hover:bg-zinc-50"
+                : "border border-emerald-500/20 bg-zinc-900/70 hover:border-emerald-400/35"
+            }`}
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-emerald-400/5 to-transparent opacity-80 transition-opacity group-hover:opacity-100" />
+            {!isPoster && (
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-emerald-400/5 to-transparent opacity-80 transition-opacity group-hover:opacity-100" />
+            )}
             <div className="relative flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-emerald-500/15 ring-1 ring-emerald-500/25 shrink-0">
-                  <Target className="w-4 h-4 text-emerald-400" />
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+                  isPoster
+                    ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[1px_1px_0px_#111111]"
+                    : "bg-emerald-500/15 ring-1 ring-emerald-500/25 text-emerald-400"
+                }`}>
+                  <Target className="w-4 h-4" />
                 </div>
                 <div className="text-left min-w-0">
-                  <p className="text-[11px] font-black uppercase tracking-widest text-emerald-300">
+                  <p className={`text-[11px] font-black uppercase tracking-widest ${
+                    isPoster ? "text-[#111111]" : "text-emerald-300"
+                  }`}>
                     OD / ML Planner
                   </p>
-                  <p className="text-[10px] text-zinc-500 truncate">
+                  <p className={`text-[10px] truncate ${
+                    isPoster ? "text-zinc-600 font-medium" : "text-zinc-500"
+                  }`}>
                     Open and edit attendance leave ranges
                   </p>
                 </div>
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400/90 group-hover:text-emerald-300 shrink-0">
+              <span className={`text-[10px] font-bold uppercase tracking-wider shrink-0 ${
+                isPoster ? "text-[#111111] underline underline-offset-2" : "text-emerald-400/90 group-hover:text-emerald-300"
+              }`}>
                 Edit
               </span>
             </div>
@@ -539,13 +609,17 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.05 }}
-        className="bg-zinc-900/60 ring-1 ring-white/5 rounded-2xl p-5 sm:p-6 mb-8"
+        className={`rounded-2xl p-5 sm:p-6 mb-8 ${
+          isPoster
+            ? "bg-white border-2 border-[#111111] shadow-[4px_4px_0px_#111111]"
+            : "bg-zinc-900/60 ring-1 ring-white/5"
+        }`}
       >
         <div className="flex flex-col sm:flex-row items-center gap-6">
           {/* Donut */}
           <div className="relative w-24 h-24 shrink-0">
             <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 112 112">
-              <circle cx="56" cy="56" r="46" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8" />
+              <circle cx="56" cy="56" r="46" fill="none" stroke={isPoster ? "#e5e5df" : "rgba(255,255,255,0.06)"} strokeWidth="8" />
               <motion.circle
                 cx="56"
                 cy="56"
@@ -554,11 +628,9 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
                 strokeWidth="8"
                 strokeLinecap="round"
                 stroke={
-                  overallStatus === "emerald"
-                    ? "#34d399"
-                    : overallStatus === "amber"
-                    ? "#fbbf24"
-                    : "#f87171"
+                  isPoster
+                    ? (overallStatus === "emerald" ? "#15803d" : overallStatus === "amber" ? "#b45309" : "#dc2626")
+                    : (overallStatus === "emerald" ? "#34d399" : overallStatus === "amber" ? "#fbbf24" : "#f87171")
                 }
                 strokeDasharray="289"
                 initial={{ strokeDashoffset: 289 }}
@@ -568,11 +640,13 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
             </svg>
             <span
               className={`absolute inset-0 flex items-center justify-center font-display font-bold text-xl ${
-                overallStatus === "emerald"
-                  ? "text-emerald-400"
-                  : overallStatus === "amber"
-                  ? "text-amber-400"
-                  : "text-red-400"
+                isPoster
+                  ? "text-[#111111]"
+                  : (overallStatus === "emerald"
+                    ? "text-emerald-400"
+                    : overallStatus === "amber"
+                    ? "text-amber-400"
+                    : "text-red-400")
               }`}
             >
               {overallPercentage}%
@@ -582,42 +656,46 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
           {/* Stats */}
           <div className="flex-1 min-w-0 w-full">
             <div className="flex items-start sm:items-center justify-between gap-2 mb-1">
-              <h3 className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">
+              <h3 className={`text-[10px] font-bold uppercase tracking-widest ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>
                 Overall Attendance
               </h3>
               <span
                 className={`text-[10px] font-bold shrink-0 ${
-                  overallPercentage >= 75 ? "text-emerald-400" : "text-amber-400"
+                  isPoster
+                    ? (overallPercentage >= 75 ? "text-emerald-700 font-black" : "text-amber-700 font-black")
+                    : (overallPercentage >= 75 ? "text-emerald-400" : "text-amber-400")
                 }`}
               >
                 {overallPercentage >= 75 ? "On Track" : "Needs Attention"}
               </span>
             </div>
-            <p className="text-xs text-zinc-500 mb-3">
-              <span className="text-zinc-200 font-semibold">{overallAttended}</span> / {overallTotal} classes
+            <p className={`text-xs mb-3 ${isPoster ? "text-zinc-600" : "text-zinc-500"}`}>
+              <span className={`font-semibold ${isPoster ? "text-[#111111]" : "text-zinc-200"}`}>{overallAttended}</span> / {overallTotal} classes
             </p>
-            <div className="w-full h-1.5 bg-zinc-950 rounded-full overflow-hidden ring-1 ring-white/5">
+            <div className={`w-full h-2 rounded-full overflow-hidden ${isPoster ? "bg-zinc-200 border border-[#111111]" : "bg-zinc-950 ring-1 ring-white/5"}`}>
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${overallPercentage}%` }}
                 transition={{ duration: 1.1, ease: "easeOut" }}
                 className={`h-full rounded-full ${
-                  overallStatus === "emerald"
-                    ? "bg-gradient-to-r from-emerald-500 to-emerald-400"
-                    : overallStatus === "amber"
-                    ? "bg-gradient-to-r from-amber-500 to-amber-400"
-                    : "bg-gradient-to-r from-red-500 to-red-400"
+                  isPoster
+                    ? (overallStatus === "emerald" ? "bg-emerald-600" : overallStatus === "amber" ? "bg-amber-500" : "bg-red-600")
+                    : (overallStatus === "emerald"
+                      ? "bg-gradient-to-r from-emerald-500 to-emerald-400"
+                      : overallStatus === "amber"
+                      ? "bg-gradient-to-r from-amber-500 to-amber-400"
+                      : "bg-gradient-to-r from-red-500 to-red-400")
                 }`}
               />
             </div>
             <div className="flex gap-4 mt-3">
               <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-emerald-400" />
-                <span className="text-[10px] text-zinc-500">{safeCount} safe</span>
+                <div className={`w-2 h-2 rounded-full ${isPoster ? "bg-emerald-600" : "bg-emerald-400"}`} />
+                <span className={`text-[10px] font-bold ${isPoster ? "text-zinc-700" : "text-zinc-500"}`}>{safeCount} safe</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-red-400" />
-                <span className="text-[10px] text-zinc-500">{atRiskSubjects.length} at risk</span>
+                <div className={`w-2 h-2 rounded-full ${isPoster ? "bg-red-600" : "bg-red-400"}`} />
+                <span className={`text-[10px] font-bold ${isPoster ? "text-zinc-700" : "text-zinc-500"}`}>{atRiskSubjects.length} at risk</span>
               </div>
             </div>
           </div>
@@ -629,17 +707,25 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.1 }}
-        className="flex bg-zinc-900 rounded-xl p-1 border border-white/5 mb-6 w-fit"
+        className={`flex rounded-xl p-1 mb-6 w-fit ${
+          isPoster
+            ? "bg-[#e8e6dc] border-2 border-[#111111] shadow-[2px_2px_0px_#111111]"
+            : "bg-zinc-900 border border-white/5"
+        }`}
       >
         {(["all", "safe", "risk"] as const).map((f) => (
           <motion.button
             key={f}
             whileTap={{ scale: 0.95 }}
             onClick={() => setFilter(f)}
-            className={`px-4 sm:px-5 py-2 text-xs font-bold rounded-lg transition-all ${
+            className={`px-4 sm:px-5 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
               filter === f
-                ? "bg-zinc-800 text-zinc-100 shadow-md border border-white/5"
-                : "font-medium text-zinc-500 hover:text-zinc-300"
+                ? isPoster
+                  ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] keep-white font-black"
+                  : "bg-zinc-800 text-zinc-100 shadow-md border border-white/5"
+                : isPoster
+                  ? "text-zinc-700 hover:text-[#111111]"
+                  : "font-medium text-zinc-500 hover:text-zinc-300"
             }`}
           >
             {f === "all"
@@ -681,7 +767,11 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.04 }}
-              className="bg-zinc-900/60 ring-1 ring-white/5 rounded-2xl overflow-hidden hover:ring-white/10 transition-all flex flex-col justify-between"
+              className={`rounded-2xl overflow-hidden transition-all flex flex-col justify-between ${
+                isPoster
+                  ? "bg-white border-2 border-[#111111] shadow-[4px_4px_0px_#111111] hover:shadow-[6px_6px_0px_#111111]"
+                  : "bg-zinc-900/60 ring-1 ring-white/5 hover:ring-white/10"
+              }`}
             >
               {/* Header on mobile tap or desktop view */}
               <div
@@ -690,47 +780,69 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <span className="text-zinc-500 font-mono text-[10px] uppercase font-bold tracking-[0.1em] block">
+                    <span className={`font-mono text-[10px] uppercase font-bold tracking-[0.1em] block ${
+                      isPoster ? "text-zinc-600" : "text-zinc-500"
+                    }`}>
                       {record.code}
                     </span>
-                    <h4 className="font-bold text-zinc-100 text-sm tracking-tight truncate mt-0.5">
+                    <h4 className={`font-bold text-sm tracking-tight truncate mt-0.5 ${
+                      isPoster ? "text-[#111111]" : "text-zinc-100"
+                    }`}>
                       {record.name}
                     </h4>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className={`font-display font-bold text-xl tracking-tighter ${cfg.text}`}>
+                    <span className={`font-display font-bold text-xl tracking-tighter ${
+                      isPoster
+                        ? (status === "safe" ? "text-emerald-700 font-black" : status === "warning" ? "text-amber-700 font-black" : "text-red-600 font-black")
+                        : cfg.text
+                    }`}>
                       {statusPct}%
                     </span>
                     <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                      <ChevronDown className="w-3.5 h-3.5 text-zinc-500 lg:hidden" />
+                      <ChevronDown className={`w-3.5 h-3.5 ${isPoster ? "text-zinc-700" : "text-zinc-500"} lg:hidden`} />
                     </motion.div>
                   </div>
                 </div>
 
-                <div className="w-full h-1 bg-zinc-950 rounded-full overflow-hidden ring-1 ring-white/5 mt-3">
+                <div className={`w-full h-1.5 rounded-full overflow-hidden mt-3 ${
+                  isPoster ? "bg-zinc-100 border border-[#111111]/30" : "bg-zinc-950 ring-1 ring-white/5"
+                }`}>
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${statusPct}%` }}
                     transition={{ duration: 0.8, delay: idx * 0.05, ease: "easeOut" }}
                     className="h-full rounded-full"
-                    style={{ background: cfg.color }}
+                    style={{ background: isPoster ? (status === "safe" ? "#15803d" : status === "warning" ? "#b45309" : "#dc2626") : cfg.color }}
                   />
                 </div>
 
                 <div className="flex items-center gap-2 mt-3 flex-wrap">
                   <span
-                    className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ${cfg.bg} ${cfg.text} ring-1 ${cfg.ring}`}
+                    className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ${
+                      isPoster
+                        ? "bg-[#f4f4f0] text-[#111111] border border-[#111111] shadow-[1px_1px_0px_#111111]"
+                        : `${cfg.bg} ${cfg.text} ring-1 ${cfg.ring}`
+                    }`}
                   >
                     {cfg.label}
                   </span>
                   {status === "safe" && skippable > 0 && (
-                    <span className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md bg-emerald-500/8 text-emerald-400 ring-1 ring-emerald-500/20">
+                    <span className={`flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ${
+                      isPoster
+                        ? "bg-[#dcfce7] text-emerald-900 border border-[#111111] shadow-[1px_1px_0px_#111111]"
+                        : "bg-emerald-500/8 text-emerald-400 ring-1 ring-emerald-500/20"
+                    }`}>
                       <TrendingUp className="w-2.5 h-2.5" />
                       Skip {skippable}
                     </span>
                   )}
                   {status !== "safe" && needed > 0 && (
-                    <span className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md bg-red-500/8 text-red-400 ring-1 ring-red-500/20">
+                    <span className={`flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ${
+                      isPoster
+                        ? "bg-[#fee2e2] text-red-900 border border-[#111111] shadow-[1px_1px_0px_#111111]"
+                        : "bg-red-500/8 text-red-400 ring-1 ring-red-500/20"
+                    }`}>
                       <TrendingDown className="w-2.5 h-2.5" />
                       Need {needed}
                     </span>
@@ -739,8 +851,12 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
                     recChips.map((c: any) => (
                       <span
                         key={`rec-${c.ri}`}
-                        className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ring-1 ring-white/10"
-                        style={{ background: `${c.rColor}12`, color: c.rColor }}
+                        className={`flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ${
+                          isPoster
+                            ? "bg-[#f4f4f0] text-[#111111] border border-[#111111]/30 shadow-[1px_1px_0px_#111111]"
+                            : "ring-1 ring-white/10"
+                        }`}
+                        style={isPoster ? {} : { background: `${c.rColor}12`, color: c.rColor }}
                       >
                         {c.rLabel}: {c.rText}
                       </span>
@@ -750,7 +866,7 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
 
               {/* Expanded content */}
               <div className={`${isDesktop ? "block" : isExpanded ? "block" : "hidden"}`}>
-                <div className="border-t border-white/5 mx-0" />
+                <div className={`mx-0 ${isPoster ? "border-t border-[#111111]/15" : "border-t border-white/5"}`} />
                 <div className="px-4 pb-4 pt-3 space-y-2">
                   <div className="grid grid-cols-3 gap-2">
                     {[
@@ -758,11 +874,22 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
                       { label: "Total", value: record.total },
                       { label: "Category", value: record.category || "Theory" },
                     ].map((s, i) => (
-                      <div key={i} className="rounded-lg px-3 py-2 bg-zinc-900/50 ring-1 ring-white/5">
-                        <p className="text-zinc-500 text-[9px] uppercase font-bold tracking-[0.1em]">
+                      <div
+                        key={i}
+                        className={`rounded-lg px-3 py-2 ${
+                          isPoster
+                            ? "bg-[#f9f8f5] border border-[#111111]/20 shadow-[1px_1px_0px_#111111]"
+                            : "bg-zinc-900/50 ring-1 ring-white/5"
+                        }`}
+                      >
+                        <p className={`text-[9px] uppercase font-bold tracking-[0.1em] ${
+                          isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"
+                        }`}>
                           {s.label}
                         </p>
-                        <p className="text-xs font-bold text-zinc-200 mt-0.5 break-words leading-snug">
+                        <p className={`text-xs font-bold mt-0.5 break-words leading-snug ${
+                          isPoster ? "text-[#111111]" : "text-zinc-200"
+                        }`}>
                           {s.value}
                         </p>
                       </div>
@@ -771,25 +898,35 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
 
                   {record.records && record.records.length > 1 && (
                     <div className="space-y-1.5">
-                      <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-[0.1em]">
+                      <p className={`text-[9px] font-bold uppercase tracking-[0.1em] ${
+                        isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"
+                      }`}>
                         Breakdown
                       </p>
                       {record.records.map((rr: any, ri: number) => {
                         const rp = rr.total > 0 ? Math.round((rr.attended / rr.total) * 100) : 0
-                        const rc = rp >= 75 ? "#34d399" : rp >= 65 ? "#fbbf24" : "#f87171"
+                        const rc = rp >= 75 ? "#15803d" : rp >= 65 ? "#b45309" : "#dc2626"
                         return (
                           <div
                             key={ri}
-                            className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-zinc-900/50 ring-1 ring-white/[0.04]"
+                            className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg ${
+                              isPoster
+                                ? "bg-[#f9f8f5] border border-[#111111]/20 shadow-[1px_1px_0px_#111111]"
+                                : "bg-zinc-900/50 ring-1 ring-white/[0.04]"
+                            }`}
                           >
-                            <div className="w-0.5 h-4 rounded-full shrink-0" style={{ background: rc }} />
-                            <span className="text-[11px] font-semibold text-zinc-300 flex-1 min-w-0 truncate">
+                            <div className="w-1 h-4 rounded-full shrink-0" style={{ background: rc }} />
+                            <span className={`text-[11px] font-semibold flex-1 min-w-0 truncate ${
+                              isPoster ? "text-[#111111]" : "text-zinc-300"
+                            }`}>
                               {rr.category || catFromSlot(rr.slot) || "?"}
                             </span>
                             <span className="text-[11px] font-bold tabular-nums" style={{ color: rc }}>
                               {rp}%
                             </span>
-                            <span className="text-[10px] text-zinc-500 font-mono tabular-nums">
+                            <span className={`text-[10px] font-mono tabular-nums ${
+                              isPoster ? "text-zinc-600 font-bold" : "text-zinc-500"
+                            }`}>
                               {rr.attended}/{rr.total}
                             </span>
                           </div>
@@ -799,7 +936,11 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
                   )}
 
                   {status === "safe" && skippable > 0 && (
-                    <div className="flex items-center gap-2 rounded-lg px-3 py-2 text-[10px] bg-emerald-500/5 ring-1 ring-emerald-500/20 text-emerald-400">
+                    <div className={`flex items-center gap-2 rounded-lg px-3 py-2 text-[10px] ${
+                      isPoster
+                        ? "bg-[#dcfce7] border border-emerald-600 text-emerald-950 font-bold shadow-[1px_1px_0px_#111111]"
+                        : "bg-emerald-500/5 ring-1 ring-emerald-500/20 text-emerald-400"
+                    }`}>
                       <TrendingUp className="w-3 h-3 shrink-0" />
                       <span>
                         Skip <strong>{skippable}</strong> more and stay safe
@@ -807,13 +948,21 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
                     </div>
                   )}
                   {status === "safe" && skippable === 0 && (
-                    <div className="flex items-center gap-2 rounded-lg px-3 py-2 text-[10px] bg-amber-500/5 ring-1 ring-amber-500/20 text-amber-400">
+                    <div className={`flex items-center gap-2 rounded-lg px-3 py-2 text-[10px] ${
+                      isPoster
+                        ? "bg-[#fef3c7] border border-amber-600 text-amber-950 font-bold shadow-[1px_1px_0px_#111111]"
+                        : "bg-amber-500/5 ring-1 ring-amber-500/20 text-amber-400"
+                    }`}>
                       <AlertTriangle className="w-3 h-3 shrink-0" />
                       <span>Borderline — don&apos;t miss any more classes</span>
                     </div>
                   )}
                   {status !== "safe" && needed > 0 && (
-                    <div className="flex items-center gap-2 rounded-lg px-3 py-2 text-[10px] bg-red-500/5 ring-1 ring-red-500/20 text-red-400">
+                    <div className={`flex items-center gap-2 rounded-lg px-3 py-2 text-[10px] ${
+                      isPoster
+                        ? "bg-[#fee2e2] border border-red-600 text-red-950 font-bold shadow-[1px_1px_0px_#111111]"
+                        : "bg-red-500/5 ring-1 ring-red-500/20 text-red-400"
+                    }`}>
                       <TrendingDown className="w-3 h-3 shrink-0" />
                       <span>
                         Attend <strong>{needed}</strong> more to reach 75%
@@ -831,11 +980,13 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
       {attendancePending.length > 0 && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-8">
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-2 h-2 rounded-full bg-zinc-600" />
-            <h3 className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">
+            <div className={`w-2 h-2 rounded-full ${isPoster ? "bg-zinc-700" : "bg-zinc-600"}`} />
+            <h3 className={`text-[10px] font-bold uppercase tracking-widest ${
+              isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"
+            }`}>
               Attendance data pending
             </h3>
-            <span className="text-zinc-600 text-[10px]">({attendancePending.length})</span>
+            <span className={`text-[10px] ${isPoster ? "text-zinc-600" : "text-zinc-600"}`}>({attendancePending.length})</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {attendancePending.map((record, idx) => (
@@ -844,20 +995,28 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.04 }}
-                className="bg-zinc-900/20 ring-1 ring-white/[0.04] rounded-xl p-4 opacity-60"
+                className={`rounded-xl p-4 opacity-75 ${
+                  isPoster
+                    ? "bg-white border-2 border-dashed border-[#111111]/40 shadow-[2px_2px_0px_#111111]"
+                    : "bg-zinc-900/20 ring-1 ring-white/[0.04]"
+                }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-1 h-9 rounded-full shrink-0 bg-zinc-700" />
+                  <div className={`w-1 h-9 rounded-full shrink-0 ${isPoster ? "bg-[#111111]" : "bg-zinc-700"}`} />
                   <div className="flex-1 min-w-0">
-                    <span className="text-zinc-600 text-[10px] uppercase font-bold tracking-[0.1em] block">
+                    <span className={`text-[10px] uppercase font-bold tracking-[0.1em] block ${
+                      isPoster ? "text-zinc-600 font-mono" : "text-zinc-600"
+                    }`}>
                       {record.code}
                     </span>
-                    <h4 className="font-semibold text-zinc-500 text-sm tracking-tight truncate">
+                    <h4 className={`font-bold text-sm tracking-tight truncate ${
+                      isPoster ? "text-[#111111]" : "text-zinc-500"
+                    }`}>
                       {record.name}
                     </h4>
                   </div>
                 </div>
-                <p className="text-zinc-600 text-[10px] mt-3">Awaiting attendance data from SRM</p>
+                <p className={`text-[10px] mt-3 font-medium ${isPoster ? "text-zinc-600" : "text-zinc-600"}`}>Awaiting attendance data from SRM</p>
               </motion.div>
             ))}
           </div>
