@@ -6,6 +6,7 @@ import { Bot, SendHorizontal, Square, Sun, Trash2, Sunrise, BarChart3, CalendarD
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { useAuth } from "@/lib/auth-context"
+import { useIsPosterTheme } from "@/lib/theme-context"
 import { NOTES_DATA } from "@/lib/notes-data"
 import { takePendingQuery } from "@/lib/ai-shared"
 
@@ -255,31 +256,37 @@ function buildContext(user: any, timetable: any[], attendance: any[], marks: any
   return sections.join("\n\n")
 }
 
-function AssistantMessage({ content, msgIndex, hintText, onNavigate, speakingIndex, speakMessage }: {
-  content: string; msgIndex: number; hintText?: string; onNavigate?: (tab: TabType) => void; speakingIndex: number | null; speakMessage: (text: string, index: number) => void
+function AssistantMessage({ content, msgIndex, hintText, onNavigate, speakingIndex, speakMessage, isPoster }: {
+  content: string; msgIndex: number; hintText?: string; onNavigate?: (tab: TabType) => void; speakingIndex: number | null; speakMessage: (text: string, index: number) => void; isPoster?: boolean
 }) {
   const redirects = getRedirects(`${content}\n${hintText || ""}`)
   const isSpeaking = speakingIndex === msgIndex
   return (
     <>
       <div className="flex items-start gap-2">
-        <div className="flex-1 min-w-0">
-          <MarkdownContent content={content} />
+        <div className={`flex-1 min-w-0 ${isPoster ? "text-[#111111]" : ""}`}>
+          <MarkdownContent content={content} isPoster={isPoster} />
         </div>
         <button
           onClick={() => speakMessage(content, msgIndex)}
-          className={`shrink-0 mt-1 w-7 h-7 rounded-lg flex items-center justify-center transition-all ${
-            isSpeaking ? "bg-emerald-500/20 text-emerald-400" : "bg-zinc-800/50 text-zinc-600 hover:text-zinc-300 hover:bg-zinc-700/50"
+          className={`shrink-0 mt-1 w-7 h-7 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
+            isSpeaking
+              ? (isPoster ? "bg-emerald-500 text-white border-2 border-[#111111]" : "bg-emerald-500/20 text-emerald-400")
+              : (isPoster ? "bg-white border-2 border-[#111111] text-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-zinc-100" : "bg-zinc-800/50 text-zinc-600 hover:text-zinc-300 hover:bg-zinc-700/50")
           }`}
         >
           {isSpeaking ? <StopCircle className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
         </button>
       </div>
       {redirects.length > 0 && (
-        <div className="mt-2.5 pt-2 border-t border-zinc-800/60 flex flex-wrap gap-1.5">
+        <div className={`mt-2.5 pt-2 border-t flex flex-wrap gap-1.5 ${isPoster ? "border-[#111111]/20" : "border-zinc-800/60"}`}>
           {redirects.map((r) => (
             <button key={r.tab} onClick={() => onNavigate?.(r.tab)}
-              className="text-[10px] px-2 py-1 rounded-full bg-zinc-800/80 ring-1 ring-white/5 hover:ring-violet-500/30 hover:bg-zinc-700/80 text-zinc-400 hover:text-zinc-200 transition-all"
+              className={`text-[10px] px-2.5 py-1 rounded-full font-bold transition-all cursor-pointer ${
+                isPoster
+                  ? "bg-white border border-[#111111] text-[#111111] shadow-[1.5px_1.5px_0px_#111111] hover:bg-zinc-100"
+                  : "bg-zinc-800/80 ring-1 ring-white/5 hover:ring-violet-500/30 hover:bg-zinc-700/80 text-zinc-400 hover:text-zinc-200"
+              }`}
             >
               {r.label}
             </button>
@@ -290,51 +297,57 @@ function AssistantMessage({ content, msgIndex, hintText, onNavigate, speakingInd
   )
 }
 
-function MessageBody({ msg, msgIndex, hintText, onNavigate, speakingIndex, speakMessage }: {
-  msg: Message; msgIndex: number; hintText?: string; onNavigate?: (tab: TabType) => void; speakingIndex: number | null; speakMessage: (text: string, index: number) => void
+function MessageBody({ msg, msgIndex, hintText, onNavigate, speakingIndex, speakMessage, isPoster }: {
+  msg: Message; msgIndex: number; hintText?: string; onNavigate?: (tab: TabType) => void; speakingIndex: number | null; speakMessage: (text: string, index: number) => void; isPoster?: boolean
 }) {
   if (msg.role === "assistant") {
     if (!msg.content) {
       return (
         <span className="inline-flex items-center gap-1 h-5">
-          <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 animate-bounce" style={{ animationDelay: "0ms" }} />
-          <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 animate-bounce" style={{ animationDelay: "120ms" }} />
-          <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 animate-bounce" style={{ animationDelay: "240ms" }} />
+          <span className={`w-1.5 h-1.5 rounded-full ${isPoster ? "bg-[#111111]" : "bg-zinc-500"} animate-bounce`} style={{ animationDelay: "0ms" }} />
+          <span className={`w-1.5 h-1.5 rounded-full ${isPoster ? "bg-[#111111]" : "bg-zinc-500"} animate-bounce`} style={{ animationDelay: "120ms" }} />
+          <span className={`w-1.5 h-1.5 rounded-full ${isPoster ? "bg-[#111111]" : "bg-zinc-500"} animate-bounce`} style={{ animationDelay: "240ms" }} />
         </span>
       )
     }
-    return <AssistantMessage content={msg.content} msgIndex={msgIndex} hintText={hintText} onNavigate={onNavigate} speakingIndex={speakingIndex} speakMessage={speakMessage} />
+    return <AssistantMessage content={msg.content} msgIndex={msgIndex} hintText={hintText} onNavigate={onNavigate} speakingIndex={speakingIndex} speakMessage={speakMessage} isPoster={isPoster} />
   }
   return <>{msg.content}</>
 }
 
-function MarkdownContent({ content }: { content: string }) {
+function MarkdownContent({ content, isPoster }: { content: string; isPoster?: boolean }) {
   return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       components={{
+        p({ children }) {
+          return <p className={`my-1 leading-relaxed ${isPoster ? "text-[#111111] font-medium" : "text-zinc-300"}`}>{children}</p>
+        },
         code({ className, children, ...props }) {
           const isInline = !className
           if (isInline) {
-            return <code className="px-1 py-0.5 rounded bg-zinc-800 text-zinc-200 text-xs" {...props}>{children}</code>
+            return <code className={`px-1 py-0.5 rounded text-xs ${isPoster ? "bg-zinc-200 text-[#111111] font-mono font-bold" : "bg-zinc-800 text-zinc-200"}`} {...props}>{children}</code>
           }
           return (
-            <pre className="overflow-x-auto rounded-lg bg-zinc-900 p-3 my-2 text-xs leading-relaxed">
+            <pre className={`overflow-x-auto rounded-lg p-3 my-2 text-xs leading-relaxed ${isPoster ? "bg-white border-2 border-[#111111] text-[#111111]" : "bg-zinc-900"}`}>
               <code className={className} {...props}>{children}</code>
             </pre>
           )
         },
         a({ href, children }) {
-          return <a href={href} target="_blank" rel="noopener noreferrer" className="text-violet-400 underline underline-offset-2">{children}</a>
+          return <a href={href} target="_blank" rel="noopener noreferrer" className={isPoster ? "text-violet-700 underline font-bold" : "text-violet-400 underline underline-offset-2"}>{children}</a>
         },
         ul({ children }) {
-          return <ul className="list-disc list-inside space-y-1 my-1">{children}</ul>
+          return <ul className={`list-disc list-inside space-y-1 my-1 ${isPoster ? "text-[#111111]" : ""}`}>{children}</ul>
         },
         ol({ children }) {
-          return <ol className="list-decimal list-inside space-y-1 my-1">{children}</ol>
+          return <ol className={`list-decimal list-inside space-y-1 my-1 ${isPoster ? "text-[#111111]" : ""}`}>{children}</ol>
+        },
+        li({ children }) {
+          return <li className={isPoster ? "text-[#111111]" : ""}>{children}</li>
         },
         strong({ children }) {
-          return <strong className="font-semibold text-zinc-100">{children}</strong>
+          return <strong className={`font-semibold ${isPoster ? "text-[#111111] font-bold" : "text-zinc-100"}`}>{children}</strong>
         },
       }}
     >
@@ -346,6 +359,7 @@ function MarkdownContent({ content }: { content: string }) {
 type TabType = "dashboard" | "timetable" | "attendance" | "courses" | "marks" | "calendar" | "gradex" | "about" | "planner" | "notes" | "updates" | "feedback" | "settings" | "ai" | "map"
 
 export function AiSection({ onNavigate, minimised, isActive }: { onNavigate?: (tab: TabType) => void; minimised?: boolean; isActive?: boolean }) {
+  const isPoster = useIsPosterTheme()
   const { user, timetable, attendance, marks, calendar, timetableMetadata, isBackgroundSyncing, refreshData, courses, dateToDoMap } = useAuth() as any
   const STORAGE_KEY = "ai_chat_messages"
   const LIMIT_KEY = "ai_daily_limit"
@@ -823,20 +837,28 @@ For bunking: show ONLY subjects at risk (below 75% or would drop below). Format:
             <div
               className={`w-7 h-7 mt-0.5 rounded-xl flex items-center justify-center shrink-0 ${
                 msg.role === "assistant"
-                  ? "bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 ring-1 ring-violet-500/20"
-                  : "bg-zinc-800 ring-1 ring-white/10"
+                  ? isPoster
+                    ? "bg-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111]"
+                    : "bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 ring-1 ring-violet-500/20"
+                  : isPoster
+                    ? "bg-[#111111] text-white border-2 border-[#111111]"
+                    : "bg-zinc-800 ring-1 ring-white/10"
               }`}
             >
-              {msg.role === "assistant" ? <Bot className="w-3.5 h-3.5 text-violet-400" /> : <Sun className="w-3.5 h-3.5 text-zinc-400" />}
+              {msg.role === "assistant" ? <Bot className={`w-3.5 h-3.5 ${isPoster ? "text-[#111111]" : "text-violet-400"}`} /> : <Sun className={`w-3.5 h-3.5 ${isPoster ? "text-white" : "text-zinc-400"}`} />}
             </div>
             <div
               className={`px-4 py-2.5 text-sm leading-relaxed ${
                 msg.role === "user"
-                    ? "bg-violet-500/10 text-zinc-200 rounded-2xl rounded-tr-md max-w-[82%] md:max-w-[68%] lg:max-w-[55%]"
+                  ? isPoster
+                    ? "bg-[#111111] text-white font-medium border-2 border-[#111111] shadow-[3px_3px_0px_#8b7355] rounded-2xl rounded-tr-md max-w-[82%] md:max-w-[68%] lg:max-w-[55%]"
+                    : "bg-violet-500/10 text-zinc-200 rounded-2xl rounded-tr-md max-w-[82%] md:max-w-[68%] lg:max-w-[55%]"
+                  : isPoster
+                    ? "text-[#111111] font-medium max-w-[90%] md:max-w-[75%] lg:max-w-[65%] prose prose-neutral prose-sm max-w-none"
                     : "text-zinc-300 max-w-[90%] md:max-w-[75%] lg:max-w-[65%] prose prose-invert prose-sm max-w-none"
               }`}
             >
-              <MessageBody msg={msg} msgIndex={i} hintText={hintText} onNavigate={onNavigate} speakingIndex={speakingIndex} speakMessage={speakMessage} />
+              <MessageBody msg={msg} msgIndex={i} hintText={hintText} onNavigate={onNavigate} speakingIndex={speakingIndex} speakMessage={speakMessage} isPoster={isPoster} />
             </div>
           </motion.div>
           )
@@ -851,13 +873,15 @@ For bunking: show ONLY subjects at risk (below 75% or would drop below). Format:
       <div className="min-h-full pt-[3.75rem] px-3 sm:px-4 lg:px-8 pb-28 lg:pb-8 w-full flex flex-col relative">
       <div className="flex justify-between items-start mb-8">
         <div>
-          <p className="text-zinc-500 font-bold text-[10px] uppercase tracking-widest mb-1">AI Assistant</p>
-          <h1 className="text-3xl font-bold text-zinc-100 tracking-tight font-display">AI Chat</h1>
+          <p className={`${isPoster ? "text-zinc-600 font-bold" : "text-zinc-500 font-bold"} text-[10px] uppercase tracking-widest mb-1`}>AI Assistant</p>
+          <h1 className={`text-3xl font-bold tracking-tight font-display ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>AI Chat</h1>
         </div>
         <div className="flex items-start gap-2">
           <div className="relative">
             <button onClick={() => setShowVoicePicker((v) => !v)}
-              className="flex items-center gap-1.5 text-[11px] text-zinc-600 hover:text-zinc-400 transition-colors px-2 py-1 rounded-lg hover:bg-zinc-900/60"
+              className={`flex items-center gap-1.5 text-[11px] transition-all px-2.5 py-1.5 rounded-lg cursor-pointer ${
+                isPoster ? "border border-[#111111] bg-white text-[#111111] shadow-[1px_1px_0px_#111111]" : "text-zinc-600 hover:text-zinc-400 hover:bg-zinc-900/60"
+              }`}
             >
               <Volume2 className="w-3 h-3" />
               <span>{tonePresets.find((t) => t.id === toneId)?.label || "Normal"}</span>
@@ -865,10 +889,16 @@ For bunking: show ONLY subjects at risk (below 75% or would drop below). Format:
             {showVoicePicker && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowVoicePicker(false)} />
-                <div className="absolute right-0 top-full mt-1 z-50 w-48 rounded-xl bg-zinc-900 border border-white/10 shadow-2xl backdrop-blur-xl p-1">
+                <div className={`absolute right-0 top-full mt-1 z-50 w-48 rounded-xl p-1 shadow-2xl backdrop-blur-xl ${
+                  isPoster ? "bg-white border-2 border-[#111111]" : "bg-zinc-900 border border-white/10"
+                }`}>
                   {tonePresets.map((t) => (
                     <button key={t.id} onClick={() => { setToneId(t.id); try { localStorage.setItem(TONE_KEY, t.id) } catch {}; setShowVoicePicker(false) }}
-                      className={`w-full text-left px-3 py-1.5 rounded-lg text-xs transition-colors ${t.id === toneId ? "bg-violet-500/15 text-violet-300" : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60"}`}
+                      className={`w-full text-left px-3 py-1.5 rounded-lg text-xs transition-colors cursor-pointer ${
+                        t.id === toneId
+                          ? (isPoster ? "bg-[#111111] text-white font-bold" : "bg-violet-500/15 text-violet-300")
+                          : (isPoster ? "text-[#111111] hover:bg-zinc-100" : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60")
+                      }`}
                     >
                       {t.label}
                     </button>
@@ -879,7 +909,9 @@ For bunking: show ONLY subjects at risk (below 75% or would drop below). Format:
           </div>
           {messages.length > 0 && (
             <button onClick={clearChat}
-              className="flex items-center gap-1.5 text-[11px] text-zinc-600 hover:text-zinc-400 transition-colors px-2 py-1 rounded-lg hover:bg-zinc-900/60"
+              className={`flex items-center gap-1.5 text-[11px] transition-all px-2.5 py-1.5 rounded-lg cursor-pointer ${
+                isPoster ? "border border-[#111111] bg-white text-rose-600 shadow-[1px_1px_0px_#111111] hover:bg-rose-50" : "text-zinc-600 hover:text-zinc-400 hover:bg-zinc-900/60"
+              }`}
             >
               <Trash2 className="w-3 h-3" /> Clear
             </button>
@@ -889,12 +921,14 @@ For bunking: show ONLY subjects at risk (below 75% or would drop below). Format:
 
       {messages.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center gap-6 md:gap-8 px-4 pb-4">
-          <div className="w-14 h-14 md:w-20 md:h-20 rounded-2xl flex items-center justify-center bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 ring-1 ring-violet-500/20 lg:w-24 lg:h-24 lg:rounded-3xl">
-            <Bot className="w-7 h-7 md:w-9 md:h-9 lg:w-11 lg:h-11 text-violet-400" />
+          <div className={`w-14 h-14 md:w-20 md:h-20 rounded-2xl flex items-center justify-center ${
+            isPoster ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111]" : "bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 ring-1 ring-violet-500/20"
+          } lg:w-24 lg:h-24 lg:rounded-3xl`}>
+            <Bot className={`w-7 h-7 md:w-9 md:h-9 lg:w-11 lg:h-11 ${isPoster ? "text-[#111111]" : "text-violet-400"}`} />
           </div>
           <div className="text-center max-w-sm md:max-w-md lg:max-w-lg">
-            <h2 className="text-lg md:text-2xl font-bold text-zinc-100 mb-1.5">Hi, I'm your AI assistant</h2>
-            <p className="text-xs md:text-sm lg:text-base text-zinc-500 leading-relaxed">Ask me anything about your timetable, attendance, marks, or get study tips and academic help.</p>
+            <h2 className={`text-lg md:text-2xl font-bold mb-1.5 ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>Hi, I'm your AI assistant</h2>
+            <p className={`text-xs md:text-sm lg:text-base leading-relaxed ${isPoster ? "text-zinc-600 font-medium" : "text-zinc-500"}`}>Ask me anything about your timetable, attendance, marks, or get study tips and academic help.</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3 w-full max-w-lg lg:max-w-2xl">
             {suggestions.map((s) => (
@@ -902,12 +936,18 @@ For bunking: show ONLY subjects at risk (below 75% or would drop below). Format:
                 key={s.label}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => { setInput(s.label); inputRef.current?.focus() }}
-                className="flex items-center gap-2.5 px-3.5 py-2.5 md:px-5 md:py-3.5 rounded-xl bg-zinc-900/60 ring-1 ring-white/5 hover:ring-violet-500/30 hover:bg-zinc-900/80 transition-all text-left"
+                className={`flex items-center gap-2.5 px-3.5 py-2.5 md:px-5 md:py-3.5 rounded-xl transition-all text-left cursor-pointer ${
+                  isPoster
+                    ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] hover:bg-zinc-50"
+                    : "bg-zinc-900/60 ring-1 ring-white/5 hover:ring-violet-500/30 hover:bg-zinc-900/80"
+                }`}
               >
-                <div className="w-7 h-7 md:w-9 md:h-9 rounded-lg flex items-center justify-center bg-violet-500/10 shrink-0">
-                  <s.icon className="w-3.5 h-3.5 md:w-5 md:h-5 text-violet-400" />
+                <div className={`w-7 h-7 md:w-9 md:h-9 rounded-lg flex items-center justify-center shrink-0 ${
+                  isPoster ? "bg-[#111111] text-white" : "bg-violet-500/10 text-violet-400"
+                }`}>
+                  <s.icon className="w-3.5 h-3.5 md:w-5 md:h-5" />
                 </div>
-                <span className="text-[11px] md:text-sm font-medium text-zinc-300">{s.label}</span>
+                <span className={`text-[11px] md:text-sm font-medium ${isPoster ? "text-[#111111] font-bold" : "text-zinc-300"}`}>{s.label}</span>
               </motion.button>
             ))}
           </div>
@@ -917,18 +957,24 @@ For bunking: show ONLY subjects at risk (below 75% or would drop below). Format:
       {/* Desktop: normal-flow input */}
       <div className="hidden lg:block max-w-2xl mx-auto w-full pb-3 md:pb-4 pt-2">
         <div className="flex justify-center mb-2">
-          <div className="px-2.5 py-0.5 rounded-full bg-zinc-900/80 ring-1 ring-white/5">
+          <div className={`px-3 py-1 rounded-full ${
+            isPoster ? "bg-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111]" : "bg-zinc-900/80 ring-1 ring-white/5"
+          }`}>
             {dailyCount >= DAILY_LIMIT ? (
-              <p className="text-[10px] text-amber-500 whitespace-nowrap">Daily limit reached. Try again tomorrow.</p>
+              <p className={`text-[10px] whitespace-nowrap font-bold ${isPoster ? "text-red-600" : "text-amber-500"}`}>Daily limit reached. Try again tomorrow.</p>
             ) : (
-              <p className="text-[10px] text-zinc-500 whitespace-nowrap">{DAILY_LIMIT - dailyCount} of {DAILY_LIMIT} messages remaining today</p>
+              <p className={`text-[10px] whitespace-nowrap font-mono font-bold ${isPoster ? "text-[#111111]" : "text-zinc-500"}`}>{DAILY_LIMIT - dailyCount} of {DAILY_LIMIT} messages remaining today</p>
             )}
           </div>
         </div>
         {voiceStatus && (
           <div className="text-xs text-red-400/70 text-center py-1">{voiceStatus}</div>
         )}
-        <div className="flex items-center gap-2 p-1.5 md:p-2 rounded-2xl bg-zinc-900/80 ring-1 ring-white/5 focus-within:ring-violet-500/30 transition-all">
+        <div className={`flex items-center gap-2 p-1.5 md:p-2 rounded-2xl transition-all ${
+          isPoster
+            ? "bg-white border-2 border-[#111111] shadow-[4px_4px_0px_#111111]"
+            : "bg-zinc-900/80 ring-1 ring-white/5 focus-within:ring-violet-500/30"
+        }`}>
           <div className="flex-1 relative">
             <textarea
               ref={inputRef}
@@ -938,7 +984,9 @@ For bunking: show ONLY subjects at risk (below 75% or would drop below). Format:
               placeholder={isSyncReady ? "Ask me anything..." : "Syncing your data..."}
               rows={1}
               disabled={!isSyncReady}
-              className="w-full bg-transparent text-sm text-zinc-200 placeholder-zinc-600 resize-none outline-none px-3 py-2 max-h-32 leading-relaxed [scrollbar-width:none] disabled:opacity-40"
+              className={`w-full bg-transparent text-sm resize-none outline-none px-3 py-2 max-h-32 leading-relaxed [scrollbar-width:none] disabled:opacity-40 ${
+                isPoster ? "text-[#111111] font-medium placeholder-zinc-500" : "text-zinc-200 placeholder-zinc-600"
+              }`}
               style={{ visibility: isListening ? "hidden" : "visible" }}
             />
             {isListening && (
@@ -953,11 +1001,32 @@ For bunking: show ONLY subjects at risk (below 75% or would drop below). Format:
             </div>
           )}
           {isSyncReady && (
-            <>{voiceSupported && <motion.button whileTap={{ scale: 0.9 }} onClick={toggleMic} disabled={isStreaming || dailyCount >= DAILY_LIMIT} className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all shrink-0 ${isListening ? "bg-red-500/20 text-red-400" : "bg-zinc-800/50 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-700/50"}`}>{isListening ? <StopCircle className="w-4 h-4" /> : <Mic className="w-4 h-4" />}</motion.button>}
+            <>{voiceSupported && (
+              <motion.button whileTap={{ scale: 0.9 }} onClick={toggleMic} disabled={isStreaming || dailyCount >= DAILY_LIMIT}
+                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all shrink-0 cursor-pointer ${
+                  isListening
+                    ? "bg-red-500 text-white"
+                    : isPoster
+                      ? "bg-zinc-100 hover:bg-zinc-200 text-[#111111] border border-[#111111]"
+                      : "bg-zinc-800/50 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-700/50"
+                }`}>
+                {isListening ? <StopCircle className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+              </motion.button>
+            )}
             {isStreaming ? (
-              <motion.button whileTap={{ scale: 0.9 }} onClick={handleStop} className="w-9 h-9 rounded-xl flex items-center justify-center bg-red-500/15 text-red-400 hover:bg-red-500/25 transition-all shrink-0"><Square className="w-4 h-4" /></motion.button>
+              <motion.button whileTap={{ scale: 0.9 }} onClick={handleStop}
+                className="w-9 h-9 rounded-xl flex items-center justify-center bg-red-500 text-white hover:bg-red-600 transition-all shrink-0 cursor-pointer">
+                <Square className="w-4 h-4" />
+              </motion.button>
             ) : (
-              <motion.button whileTap={{ scale: 0.9 }} onClick={handleSend} disabled={!input.trim() || dailyCount >= DAILY_LIMIT} className="w-9 h-9 rounded-xl flex items-center justify-center bg-violet-500/10 text-violet-400 hover:bg-violet-500/20 transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0"><SendHorizontal className="w-4 h-4" /></motion.button>
+              <motion.button whileTap={{ scale: 0.9 }} onClick={handleSend} disabled={!input.trim() || dailyCount >= DAILY_LIMIT}
+                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all shrink-0 cursor-pointer ${
+                  isPoster
+                    ? "bg-[#111111] text-white hover:bg-zinc-800 disabled:opacity-30 disabled:bg-zinc-300 disabled:text-zinc-500"
+                    : "bg-violet-500/10 text-violet-400 hover:bg-violet-500/20 disabled:opacity-30"
+                }`}>
+                <SendHorizontal className="w-4 h-4" />
+              </motion.button>
             )}</>
           )}
         </div>
@@ -973,20 +1042,26 @@ For bunking: show ONLY subjects at risk (below 75% or would drop below). Format:
         transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}>
         <div className="max-w-2xl mx-auto w-full px-3 md:px-6 pointer-events-auto pb-4">
           <div className="flex justify-center mb-1.5">
-            <div className="px-2.5 py-0.5 rounded-full bg-zinc-900/80 ring-1 ring-white/5">
+            <div className={`px-3 py-1 rounded-full ${
+              isPoster ? "bg-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111]" : "bg-zinc-900/80 ring-1 ring-white/5"
+            }`}>
               {dailyCount >= DAILY_LIMIT ? (
-                <p className="text-[10px] text-amber-500 whitespace-nowrap">Daily limit reached. Try again tomorrow.</p>
+                <p className={`text-[10px] whitespace-nowrap font-bold ${isPoster ? "text-red-600" : "text-amber-500"}`}>Daily limit reached. Try again tomorrow.</p>
               ) : (
-                <p className="text-[10px] text-zinc-500 whitespace-nowrap">{DAILY_LIMIT - dailyCount} of {DAILY_LIMIT} messages remaining today</p>
+                <p className={`text-[10px] whitespace-nowrap font-mono font-bold ${isPoster ? "text-[#111111]" : "text-zinc-500"}`}>{DAILY_LIMIT - dailyCount} of {DAILY_LIMIT} messages remaining today</p>
               )}
+            </div>
           </div>
-        </div>
-        {voiceStatus && (
-          <div className="text-xs text-red-400/70 text-center py-1">{voiceStatus}</div>
-        )}
-        <div className="flex items-center gap-2 p-1.5 md:p-2 rounded-2xl bg-zinc-900/90 ring-1 ring-white/10 focus-within:ring-violet-500/30 transition-all backdrop-blur-xl shadow-2xl">
-          <div className="flex-1 relative">
-            <textarea
+          {voiceStatus && (
+            <div className="text-xs text-red-400/70 text-center py-1">{voiceStatus}</div>
+          )}
+          <div className={`flex items-center gap-2 p-1.5 md:p-2 rounded-2xl transition-all ${
+            isPoster
+              ? "bg-white border-2 border-[#111111] shadow-[4px_4px_0px_#111111]"
+              : "bg-zinc-900/90 ring-1 ring-white/10 focus-within:ring-violet-500/30 backdrop-blur-xl shadow-2xl"
+          }`}>
+            <div className="flex-1 relative">
+              <textarea
                 ref={inputRef}
                 value={input}
                 onChange={(e) => { setInput(e.target.value); autoResize() }}
@@ -994,7 +1069,9 @@ For bunking: show ONLY subjects at risk (below 75% or would drop below). Format:
                 placeholder={isSyncReady ? "Ask me anything..." : "Syncing your data..."}
                 rows={1}
                 disabled={!isSyncReady}
-                className="w-full bg-transparent text-sm text-zinc-200 placeholder-zinc-600 resize-none outline-none px-3 py-2 max-h-32 leading-relaxed [scrollbar-width:none] disabled:opacity-40"
+                className={`w-full bg-transparent text-sm resize-none outline-none px-3 py-2 max-h-32 leading-relaxed [scrollbar-width:none] disabled:opacity-40 ${
+                  isPoster ? "text-[#111111] font-medium placeholder-zinc-500" : "text-zinc-200 placeholder-zinc-600"
+                }`}
                 style={{ visibility: isListening ? "hidden" : "visible" }}
               />
               {isListening && (
@@ -1009,12 +1086,33 @@ For bunking: show ONLY subjects at risk (below 75% or would drop below). Format:
               </div>
             )}
             {isSyncReady && (
-              <>{voiceSupported && <motion.button whileTap={{ scale: 0.9 }} onClick={toggleMic} disabled={isStreaming || dailyCount >= DAILY_LIMIT} className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all shrink-0 ${isListening ? "bg-red-500/20 text-red-400" : "bg-zinc-800/50 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-700/50"}`}>{isListening ? <StopCircle className="w-4 h-4" /> : <Mic className="w-4 h-4" />}</motion.button>}
+              <>{voiceSupported && (
+                <motion.button whileTap={{ scale: 0.9 }} onClick={toggleMic} disabled={isStreaming || dailyCount >= DAILY_LIMIT}
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all shrink-0 cursor-pointer ${
+                    isListening
+                      ? "bg-red-500 text-white"
+                      : isPoster
+                        ? "bg-zinc-100 hover:bg-zinc-200 text-[#111111] border border-[#111111]"
+                        : "bg-zinc-800/50 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-700/50"
+                  }`}>
+                  {isListening ? <StopCircle className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                </motion.button>
+              )}
               {isStreaming ? (
-              <motion.button whileTap={{ scale: 0.9 }} onClick={handleStop} className="w-9 h-9 rounded-xl flex items-center justify-center bg-red-500/15 text-red-400 hover:bg-red-500/25 transition-all shrink-0"><Square className="w-4 h-4" /></motion.button>
-            ) : (
-              <motion.button whileTap={{ scale: 0.9 }} onClick={handleSend} disabled={!input.trim() || dailyCount >= DAILY_LIMIT} className="w-9 h-9 rounded-xl flex items-center justify-center bg-violet-500/10 text-violet-400 hover:bg-violet-500/20 transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0"><SendHorizontal className="w-4 h-4" /></motion.button>
-            )}</>
+                <motion.button whileTap={{ scale: 0.9 }} onClick={handleStop}
+                  className="w-9 h-9 rounded-xl flex items-center justify-center bg-red-500 text-white hover:bg-red-600 transition-all shrink-0 cursor-pointer">
+                  <Square className="w-4 h-4" />
+                </motion.button>
+              ) : (
+                <motion.button whileTap={{ scale: 0.9 }} onClick={handleSend} disabled={!input.trim() || dailyCount >= DAILY_LIMIT}
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all shrink-0 cursor-pointer ${
+                    isPoster
+                      ? "bg-[#111111] text-white hover:bg-zinc-800 disabled:opacity-30 disabled:bg-zinc-300 disabled:text-zinc-500"
+                      : "bg-violet-500/10 text-violet-400 hover:bg-violet-500/20 disabled:opacity-30"
+                  }`}>
+                  <SendHorizontal className="w-4 h-4" />
+                </motion.button>
+              )}</>
             )}
           </div>
         </div>

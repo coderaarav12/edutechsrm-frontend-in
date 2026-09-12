@@ -8,6 +8,7 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/lib/auth-context"
+import { useIsPosterTheme } from "@/lib/theme-context"
 import { LoginModal } from "./login-modal"
 import { AIPromoBadge } from "@/components/ai-promo-badge"
 
@@ -50,6 +51,7 @@ function getTypeIcon(type: string) {
 }
 
 export function CoursesSection() {
+  const isPoster = useIsPosterTheme()
   const { isAuthenticated, courses, timetable, isLoading, refreshData, user } = useAuth()
   const [isLoginOpen, setIsLoginOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
@@ -149,16 +151,20 @@ export function CoursesSection() {
       <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
         className="flex justify-between items-start mb-8">
         <div>
-          <h2 className="text-zinc-500 font-bold text-[10px] uppercase tracking-widest mb-1">Course Hub</h2>
-          <h1 className="text-3xl font-bold text-zinc-100 tracking-tight font-display">Courses</h1>
-          <p className="text-zinc-500 text-xs mt-1">
+          <h2 className={`font-bold text-[10px] uppercase tracking-widest mb-1 ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>Course Hub</h2>
+          <h1 className={`text-3xl font-bold tracking-tight font-display ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>Courses</h1>
+          <p className={`text-xs mt-1 ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>
             {user?.specialization || user?.program} · Sem {user?.semester} · {uniqueCourses.length} subjects
           </p>
         </div>
         <div className="flex items-center gap-2">
           <AIPromoBadge page="courses" />
           <motion.button whileTap={{ scale: 0.9 }} onClick={refreshData} disabled={isLoading}
-            className="flex items-center justify-center w-8 h-8 rounded-lg text-zinc-500 bg-zinc-900/60 ring-1 ring-white/5 hover:text-zinc-300 transition-all disabled:opacity-40">
+            className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all disabled:opacity-40 ${
+              isPoster
+                ? "bg-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] text-[#111111] hover:bg-[#f7f5f0]"
+                : "text-zinc-500 bg-zinc-900/60 ring-1 ring-white/5 hover:text-zinc-300"
+            }`}>
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
           </motion.button>
         </div>
@@ -166,31 +172,39 @@ export function CoursesSection() {
 
       {/* Hero stats */}
       <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
-        className="bg-zinc-900/60 ring-1 ring-white/5 rounded-2xl p-6 mb-8">
+        className={`rounded-2xl p-6 mb-8 transition-all ${
+          isPoster
+            ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111]"
+            : "bg-zinc-900/60 ring-1 ring-white/5"
+        }`}>
         <div className="grid grid-cols-3 gap-6">
           {[
-            { label: "Courses", value: uniqueCourses.length, color: "text-emerald-400" },
-            { label: "Credits", value: totalCredits, color: "text-amber-400" },
-            { label: "Theory", value: theoryCount, color: "text-emerald-400" },
+            { label: "Courses", value: uniqueCourses.length, color: isPoster ? "text-[#111111]" : "text-emerald-400" },
+            { label: "Credits", value: totalCredits, color: isPoster ? "text-[#111111]" : "text-amber-400" },
+            { label: "Theory", value: theoryCount, color: isPoster ? "text-[#111111]" : "text-emerald-400" },
           ].map(s => (
             <div key={s.label}>
               <p className={`font-display font-bold text-2xl tracking-tighter ${s.color}`}>{s.value}</p>
-              <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mt-1">{s.label}</p>
+              <p className={`text-[10px] font-bold uppercase tracking-widest mt-1 ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>{s.label}</p>
             </div>
           ))}
         </div>
         <div className="mt-4">
-          <div className="w-full h-1 bg-zinc-950 rounded-full overflow-hidden ring-1 ring-white/5">
+          <div className={`w-full h-1.5 rounded-full overflow-hidden ${
+            isPoster ? "bg-[#f7f5f0] border border-[#111111]" : "bg-zinc-950 ring-1 ring-white/5"
+          }`}>
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${uniqueCourses.length > 0 ? (theoryCount / uniqueCourses.length) * 100 : 0}%` }}
               transition={{ duration: 1, ease: "easeOut" }}
-              className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-sky-400"
+              className={`h-full rounded-full ${
+                isPoster ? "bg-[#111111]" : "bg-gradient-to-r from-emerald-400 to-sky-400"
+              }`}
             />
           </div>
           <div className="flex justify-between mt-1.5">
-            <span className="text-emerald-400 text-[10px]">Theory {theoryCount}</span>
-            <span className="text-sky-400 text-[10px]">Lab {labCount}</span>
+            <span className={`text-[10px] font-bold ${isPoster ? "text-[#111111]" : "text-emerald-400"}`}>Theory {theoryCount}</span>
+            <span className={`text-[10px] font-bold ${isPoster ? "text-[#111111]" : "text-sky-400"}`}>Lab {labCount}</span>
           </div>
         </div>
       </motion.div>
@@ -199,28 +213,40 @@ export function CoursesSection() {
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}
         className="space-y-3 mb-6">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
+          <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 ${isPoster ? "text-[#111111]" : "text-zinc-500"}`} />
           <input
             placeholder="Search courses, faculty..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full bg-zinc-950 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-zinc-300 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all placeholder-zinc-700 pl-9"
+            className={`w-full rounded-xl px-4 py-2.5 text-sm transition-all pl-9 ${
+              isPoster
+                ? "bg-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] text-[#111111] placeholder-[#777777] focus:outline-none"
+                : "bg-zinc-950 border border-white/5 text-zinc-300 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 placeholder-zinc-700"
+            }`}
           />
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex bg-zinc-900 rounded-xl p-1 border border-white/5">
+          <div className={`flex rounded-xl p-1 ${
+            isPoster
+              ? "bg-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111]"
+              : "bg-zinc-900 border border-white/5"
+          }`}>
             {(["all", "Theory", "Lab"] as const).map(f => (
               <button key={f} onClick={() => setTypeFilter(f)}
                 className={`px-4 py-1.5 text-xs font-bold transition-all rounded-lg ${
                   typeFilter === f
-                    ? "bg-zinc-800 text-zinc-100 shadow-md border border-white/5"
-                    : "text-zinc-500 hover:text-zinc-300"
+                    ? isPoster
+                      ? "bg-[#111111] text-white shadow-sm border border-[#111111]"
+                      : "bg-zinc-800 text-zinc-100 shadow-md border border-white/5"
+                    : isPoster
+                      ? "text-[#555555] hover:text-[#111111]"
+                      : "text-zinc-500 hover:text-zinc-300"
                 }`}>
                 {f === "all" ? "All" : f === "Theory" ? "Theory" : "Labs"}
               </button>
             ))}
           </div>
-          <span className="ml-auto text-zinc-600 text-[10px] font-bold uppercase tracking-widest">
+          <span className={`ml-auto text-[10px] font-bold uppercase tracking-widest ${isPoster ? "text-[#555555]" : "text-zinc-600"}`}>
             {filteredCourses.length}/{uniqueCourses.length}
           </span>
         </div>
@@ -243,8 +269,10 @@ export function CoursesSection() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.04 }}
-              className={`group bg-zinc-900/30 ring-1 rounded-xl transition-all relative overflow-hidden ${
-                isOpen ? ts.ring : "ring-white/5"
+              className={`group rounded-xl transition-all relative overflow-hidden ${
+                isPoster
+                  ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] text-[#111111]"
+                  : `bg-zinc-900/30 ring-1 ${isOpen ? ts.ring : "ring-white/5"}`
               } ${isDesktop ? "" : "cursor-pointer"}`}
             >
               {/* Mobile: accordion header */}
@@ -253,17 +281,25 @@ export function CoursesSection() {
                   className="w-full text-left p-4 lg:hidden">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
-                      <span className="text-zinc-500 text-[10px] uppercase font-bold tracking-[0.1em] block mb-0.5">{course.code}</span>
-                      <h4 className={`font-semibold text-zinc-200 text-sm tracking-tight ${!isOpen ? "truncate" : ""}`}>{course.name}</h4>
+                      <span className={`text-[10px] uppercase font-bold tracking-[0.1em] block mb-0.5 ${
+                        isPoster ? "text-[#555555]" : "text-zinc-500"
+                      }`}>{course.code}</span>
+                      <h4 className={`font-semibold text-sm tracking-tight ${!isOpen ? "truncate" : ""} ${
+                        isPoster ? "text-[#111111]" : "text-zinc-200"
+                      }`}>{course.name}</h4>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ring-1 inline-flex items-center ${ts.badge}`}>
+                      <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md inline-flex items-center ${
+                        isPoster
+                          ? "bg-[#f7f5f0] text-[#111111] border border-[#111111]"
+                          : `ring-1 ${ts.badge}`
+                      }`}>
                         {getTypeIcon(course.type)}
                         <span className="ml-1">{course.type}</span>
                       </span>
-                      <span className="font-display font-bold text-base text-zinc-100">{course.credits}<span className="text-[10px] text-zinc-600 ml-0.5">cr</span></span>
+                      <span className={`font-display font-bold text-base ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>{course.credits}<span className={`text-[10px] ml-0.5 ${isPoster ? "text-[#555555]" : "text-zinc-600"}`}>cr</span></span>
                       <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                        <ChevronDown className="w-3.5 h-3.5 text-zinc-500" />
+                        <ChevronDown className={`w-3.5 h-3.5 ${isPoster ? "text-[#111111]" : "text-zinc-500"}`} />
                       </motion.div>
                     </div>
                   </div>
@@ -275,15 +311,21 @@ export function CoursesSection() {
                 <div className="p-4">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
-                      <span className="text-zinc-500 text-[10px] uppercase font-bold tracking-[0.1em] block mb-0.5">{course.code}</span>
-                      <h4 className="font-semibold text-zinc-200 text-sm tracking-tight">{course.name}</h4>
+                      <span className={`text-[10px] uppercase font-bold tracking-[0.1em] block mb-0.5 ${
+                        isPoster ? "text-[#555555]" : "text-zinc-500"
+                      }`}>{course.code}</span>
+                      <h4 className={`font-semibold text-sm tracking-tight ${isPoster ? "text-[#111111]" : "text-zinc-200"}`}>{course.name}</h4>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ring-1 inline-flex items-center ${ts.badge}`}>
+                      <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md inline-flex items-center ${
+                        isPoster
+                          ? "bg-[#f7f5f0] text-[#111111] border border-[#111111]"
+                          : `ring-1 ${ts.badge}`
+                      }`}>
                         {getTypeIcon(course.type)}
                         <span className="ml-1">{course.type}</span>
                       </span>
-                      <span className="font-display font-bold text-base text-zinc-100">{course.credits}<span className="text-[10px] text-zinc-600 ml-0.5">cr</span></span>
+                      <span className={`font-display font-bold text-base ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>{course.credits}<span className={`text-[10px] ml-0.5 ${isPoster ? "text-[#555555]" : "text-zinc-600"}`}>cr</span></span>
                     </div>
                   </div>
                 </div>
@@ -291,34 +333,50 @@ export function CoursesSection() {
 
               {/* Expanded content: always visible on desktop, accordion on mobile */}
               <div className={`${isDesktop ? "block" : isOpen ? "block" : "hidden"}`}>
-                <div className="border-t border-white/5 mx-0" />
+                <div className={`mx-0 border-t ${isPoster ? "border-[#111111]/15" : "border-white/5"}`} />
                 <div className="px-4 pb-4 pt-3">
                   <div className="grid grid-cols-3 gap-2">
-                    <div className="rounded-lg px-3 py-2 bg-zinc-900/50 ring-1 ring-white/5">
-                      <Award className="w-3 h-3 text-emerald-400 mb-1" />
-                      <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest">Credits</p>
-                      <p className="text-xs font-bold text-zinc-100 mt-0.5">{course.credits}</p>
+                    <div className={`rounded-lg px-3 py-2 ${
+                      isPoster
+                        ? "bg-[#f7f5f0] border border-[#111111] shadow-[1.5px_1.5px_0px_#111111]"
+                        : "bg-zinc-900/50 ring-1 ring-white/5"
+                    }`}>
+                      <Award className={`w-3 h-3 mb-1 ${isPoster ? "text-[#111111]" : "text-emerald-400"}`} />
+                      <p className={`text-[9px] font-bold uppercase tracking-widest ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>Credits</p>
+                      <p className={`text-xs font-bold mt-0.5 ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>{course.credits}</p>
                     </div>
-                    <div className="rounded-lg px-3 py-2 bg-zinc-900/50 ring-1 ring-white/5">
-                      <Clock className="w-3 h-3 text-emerald-400 mb-1" />
-                      <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest">Slot</p>
-                      <p className="text-xs font-bold text-zinc-100 mt-0.5">{course.slot || "TBA"}</p>
+                    <div className={`rounded-lg px-3 py-2 ${
+                      isPoster
+                        ? "bg-[#f7f5f0] border border-[#111111] shadow-[1.5px_1.5px_0px_#111111]"
+                        : "bg-zinc-900/50 ring-1 ring-white/5"
+                    }`}>
+                      <Clock className={`w-3 h-3 mb-1 ${isPoster ? "text-[#111111]" : "text-emerald-400"}`} />
+                      <p className={`text-[9px] font-bold uppercase tracking-widest ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>Slot</p>
+                      <p className={`text-xs font-bold mt-0.5 ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>{course.slot || "TBA"}</p>
                     </div>
-                    <div className="rounded-lg px-3 py-2 bg-zinc-900/50 ring-1 ring-white/5">
-                      <MapPin className="w-3 h-3 text-emerald-400 mb-1" />
+                    <div className={`rounded-lg px-3 py-2 ${
+                      isPoster
+                        ? "bg-[#f7f5f0] border border-[#111111] shadow-[1.5px_1.5px_0px_#111111]"
+                        : "bg-zinc-900/50 ring-1 ring-white/5"
+                    }`}>
+                      <MapPin className={`w-3 h-3 mb-1 ${isPoster ? "text-[#111111]" : "text-emerald-400"}`} />
                       <div>
-                        <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest">Room</p>
+                        <p className={`text-[9px] font-bold uppercase tracking-widest ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>Room</p>
                         {roomList.map((r, i) => (
-                          <p key={i} className="text-xs font-bold text-zinc-100 mt-0.5">{r}</p>
+                          <p key={i} className={`text-xs font-bold mt-0.5 ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>{r}</p>
                         ))}
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 rounded-lg px-3 py-2 bg-zinc-900/50 ring-1 ring-white/5 mt-2">
-                    <User className="w-3 h-3 text-emerald-400 shrink-0" />
+                  <div className={`flex items-center gap-2 rounded-lg px-3 py-2 mt-2 ${
+                    isPoster
+                      ? "bg-[#f7f5f0] border border-[#111111] shadow-[1.5px_1.5px_0px_#111111]"
+                      : "bg-zinc-900/50 ring-1 ring-white/5"
+                  }`}>
+                    <User className={`w-3 h-3 shrink-0 ${isPoster ? "text-[#111111]" : "text-emerald-400"}`} />
                     <div>
-                      <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest">Faculty</p>
-                      <p className="text-[10px] font-semibold text-zinc-100 truncate">{facultyClean}</p>
+                      <p className={`text-[9px] font-bold uppercase tracking-widest ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>Faculty</p>
+                      <p className={`text-[10px] font-semibold truncate ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>{facultyClean}</p>
                     </div>
                   </div>
                 </div>
@@ -330,7 +388,7 @@ export function CoursesSection() {
 
       {filteredCourses.length === 0 && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
-          <p className="text-zinc-500 text-sm">No courses matching your search</p>
+          <p className={`text-sm ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>No courses matching your search</p>
         </motion.div>
       )}
     </div>

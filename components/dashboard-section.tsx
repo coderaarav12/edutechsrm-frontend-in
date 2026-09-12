@@ -791,11 +791,19 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
 
           {stripLabel && (
             <div className="flex justify-center w-full mt-8 mb-3">
-              <div className="flex items-center gap-2 rounded-xl bg-zinc-900/60 ring-1 ring-white/5 px-3 py-1.5">
-                <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0 ring-1 ring-white/5 bg-zinc-800/50">
-                  <CalendarDays className="w-3 h-3 text-violet-400" />
+              <div className={`flex items-center gap-2 rounded-xl px-3 py-1.5 transition-all ${
+                isPoster
+                  ? "bg-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111]"
+                  : "bg-zinc-900/60 ring-1 ring-white/5"
+              }`}>
+                <div className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${
+                  isPoster
+                    ? "bg-[#f7f5f0] border border-[#111111]"
+                    : "ring-1 ring-white/5 bg-zinc-800/50"
+                }`}>
+                  <CalendarDays className={`w-3 h-3 ${isPoster ? "text-[#111111]" : "text-violet-400"}`} />
                 </div>
-                <span className="text-[11px] font-semibold text-zinc-300">{stripLabel}</span>
+                <span className={`text-[11px] font-semibold ${isPoster ? "text-[#111111]" : "text-zinc-300"}`}>{stripLabel}</span>
               </div>
             </div>
           )}
@@ -806,22 +814,29 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
 
           <button
             onClick={() => onNavigate("map")}
-            className="w-full group rounded-2xl border overflow-hidden transition-all duration-200 active:scale-[0.98]"
+            className={`w-full group rounded-2xl border overflow-hidden transition-all duration-200 active:scale-[0.98] ${
+              isPoster
+                ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111]"
+                : ""
+            }`}
             style={{
-              background: "var(--card-bg, rgba(24,24,27,0.7))",
-              borderColor: "rgba(56,189,248,0.18)",
+              background: isPoster ? "#ffffff" : "var(--card-bg, rgba(24,24,27,0.7))",
+              borderColor: isPoster ? "#111111" : "rgba(56,189,248,0.18)",
               WebkitTapHighlightColor: "transparent",
             }}
           >
             <div className="flex items-center gap-2.5 px-4 py-3">
-              <div className="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(56,189,248,0.12)" }}>
-                <MapIcon className="w-3.5 h-3.5" style={{ color: "#38bdf8" }} />
+              <div className="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center" style={{
+                background: isPoster ? "#f7f5f0" : "rgba(56,189,248,0.12)",
+                border: isPoster ? "1px solid #111111" : "none",
+              }}>
+                <MapIcon className="w-3.5 h-3.5" style={{ color: isPoster ? "#111111" : "#38bdf8" }} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold leading-snug" style={{ color: "var(--text-primary, #f4f4f5)" }}>Explore Campus</p>
-                <p className="text-[11px] truncate" style={{ color: "var(--text-faint, #52525b)" }}>Blocks, hostels, food & more around SRM</p>
+                <p className="text-sm font-semibold leading-snug" style={{ color: isPoster ? "#111111" : "var(--text-primary, #f4f4f5)" }}>Explore Campus</p>
+                <p className="text-[11px] truncate" style={{ color: isPoster ? "#555555" : "var(--text-faint, #52525b)" }}>Blocks, hostels, food & more around SRM</p>
               </div>
-              <ChevronRight className="w-3.5 h-3.5 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" style={{ color: "var(--text-faint, #52525b)" }} />
+              <ChevronRight className="w-3.5 h-3.5 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" style={{ color: isPoster ? "#111111" : "var(--text-faint, #52525b)" }} />
             </div>
           </button>
           <AiQuickInput onNavigate={onNavigate} />

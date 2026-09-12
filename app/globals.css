@@ -198,6 +198,8 @@ body:not([data-admin])[data-landing-mode="poster"] {
   /* Surface cards across all app pages */
   .surface-card,
   .tactile-card,
+  .rounded-xl[class*="bg-zinc-900"],
+  .rounded-xl[class*="bg-zinc-950"],
   .rounded-2xl[class*="bg-zinc-900"],
   .rounded-2xl[class*="bg-zinc-950"],
   .rounded-3xl[class*="bg-zinc-900"],
@@ -222,6 +224,16 @@ body:not([data-admin])[data-landing-mode="poster"] {
     .text-zinc-500:not(.keep-white) {
       color: #6b7280 !important;
     }
+  }
+
+  /* Inner metric sub-boxes and detail cards */
+  .rounded-lg[class*="bg-zinc-900"],
+  .rounded-lg[class*="bg-zinc-950"],
+  .rounded-xl[class*="bg-zinc-950"] {
+    background-color: #f7f5f0 !important;
+    border: 1.5px solid #111111 !important;
+    box-shadow: 1.5px 1.5px 0px #111111 !important;
+    color: #111111 !important;
   }
 
   /* Ring resets - replace white glows with clean borders */
@@ -261,12 +273,33 @@ body:not([data-admin])[data-landing-mode="poster"] {
     box-shadow: 2px 2px 0px #111111 !important;
   }
 
-  /* Filter pill bars (like "Without OD/ML" / "With OD/ML") */
+  /* Filter pill bars and segmented controls (like "Without OD/ML" / "With OD/ML") */
   .bg-zinc-900\/80,
-  .bg-zinc-900\/70 {
+  .bg-zinc-900\/70,
+  .rounded-xl[class*="bg-zinc-900"]:has(button),
+  .rounded-2xl[class*="bg-zinc-900"]:has(button),
+  .rounded-lg[class*="bg-zinc-900"]:has(button) {
     background-color: #ffffff !important;
     border: 2px solid #111111 !important;
     box-shadow: 2px 2px 0px #111111 !important;
+  }
+
+  /* Filter buttons active vs inactive */
+  .rounded-xl:has(button) button.bg-zinc-800,
+  .rounded-2xl:has(button) button.bg-zinc-800,
+  button[class*="bg-zinc-800"]:not(.keep-dark) {
+    background-color: #111111 !important;
+    color: #ffffff !important;
+    border: 1px solid #111111 !important;
+  }
+
+  .rounded-xl:has(button) button.text-zinc-500,
+  .rounded-2xl:has(button) button.text-zinc-500 {
+    color: #555555 !important;
+  }
+  .rounded-xl:has(button) button.text-zinc-500:hover,
+  .rounded-2xl:has(button) button.text-zinc-500:hover {
+    color: #111111 !important;
   }
 
   /* Progress track bars */

@@ -689,7 +689,7 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
 
                 {/* Animated grid */}
                 <AnimatePresence mode="wait">
-                    <motion.div
+                  <motion.div
                     key={openCategory}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -697,10 +697,11 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
                     transition={{ duration: 0.15 }}
                     style={{
                       display: "grid",
-                      gridTemplateColumns: `repeat(4, 1fr)`,
+                      gridTemplateColumns: `repeat(4, minmax(0, 1fr))`,
                       gap: 6,
-                      justifyItems: "center",
+                      alignItems: "stretch",
                       paddingBottom: 4,
+                      width: "100%",
                     }}
                   >
                     {(openCategory === "ai"
@@ -721,10 +722,12 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
                             display: "flex",
                             flexDirection: "column",
                             alignItems: "center",
+                            justifyContent: "center",
                             gap: 4,
-                            padding: isPoster ? "8px 3px 6px" : "8px 4px 6px",
-                            minWidth: 0,
-                            flex: 1,
+                            padding: isPoster ? "8px 4px 6px" : "8px 4px 6px",
+                            width: "100%",
+                            height: 72,
+                            boxSizing: "border-box",
                             borderRadius: 12,
                             background: isPoster
                               ? (active ? "#111111" : "#faf9f5")
@@ -750,6 +753,7 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
+                              flexShrink: 0,
                               background: isPoster
                                 ? (active ? "#ffffff" : "#ffffff")
                                 : (active ? `${item.color}18` : `${catColor}0a`),
@@ -760,12 +764,19 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
                             <Icon style={{ width: 14, height: 14, color: isPoster ? "#111111" : (active ? item.color : catColor) }} />
                           </div>
                           <span style={{
+                            width: "100%",
+                            height: 22,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
                             fontSize: 9.5,
                             fontWeight: isPoster ? (active ? 800 : 700) : (active ? 700 : 500),
                             color: isPoster ? (active ? "#ffffff" : "#111111") : (active ? item.color : catColor),
                             textAlign: "center",
-                            lineHeight: 1.15,
+                            lineHeight: 1.1,
                             fontFamily: "'Space Grotesk', sans-serif",
+                            overflow: "hidden",
+                            wordBreak: "break-word",
                           }}>
                             {item.label}
                           </span>

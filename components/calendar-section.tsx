@@ -8,6 +8,7 @@ import {
   ClipboardCheck, CheckCircle2, Clock3, Plus, Trash2,
 } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
+import { useIsPosterTheme } from "@/lib/theme-context"
 import { LoginModal } from "./login-modal"
 import { AIPromoBadge } from "@/components/ai-promo-badge"
 import { expandCustomClassesByDate, useCustomPlanner } from "@/lib/custom-planner"
@@ -42,6 +43,7 @@ function getClassTypeColor(type: string): string {
 }
 
 export function CalendarSection({ onNavigate }: { onNavigate: (tab: string) => void }) {
+  const isPoster = useIsPosterTheme()
   const { isAuthenticated, calendar, dateToDoMap, timetable, isLoading, refreshData } = useAuth()
   const { customClasses, assignments, updateAssignment, removeAssignment } = useCustomPlanner()
   const [isLoginOpen, setIsLoginOpen] = useState(false)
@@ -156,17 +158,21 @@ export function CalendarSection({ onNavigate }: { onNavigate: (tab: string) => v
         <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
           className="flex justify-between items-start mb-8 lg:col-span-2">
           <div>
-            <h2 className="text-zinc-500 font-bold text-[10px] uppercase tracking-widest mb-1">Calendar Flow</h2>
-            <h1 className="text-3xl font-bold text-zinc-100 tracking-tight font-display">Calendar</h1>
-            <p className="text-[11px] mt-1 text-zinc-500 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            <h2 className={`font-bold text-[10px] uppercase tracking-widest mb-1 ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>Calendar Flow</h2>
+            <h1 className={`text-3xl font-bold tracking-tight font-display ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>Calendar</h1>
+            <p className={`text-[11px] mt-1 flex items-center gap-1.5 ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${isPoster ? "bg-[#111111]" : "bg-emerald-400"}`} />
               {(calendar as any[]).length + customClasses.length} calendar items
             </p>
           </div>
           <div className="flex items-center gap-2">
             <AIPromoBadge page="calendar" />
             <motion.button whileTap={{ scale: 0.9 }} onClick={refreshData} disabled={isLoading}
-              className="flex items-center justify-center w-8 h-8 rounded-lg text-zinc-500 bg-zinc-900/60 ring-1 ring-white/5 hover:text-zinc-300 transition-all disabled:opacity-40">
+              className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all disabled:opacity-40 ${
+                isPoster
+                  ? "bg-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] text-[#111111] hover:bg-[#f7f5f0]"
+                  : "text-zinc-500 bg-zinc-900/60 ring-1 ring-white/5 hover:text-zinc-300"
+              }`}>
               <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
             </motion.button>
           </div>
@@ -175,19 +181,31 @@ export function CalendarSection({ onNavigate }: { onNavigate: (tab: string) => v
         {/* Today hero */}
         <div className="space-y-6">
         <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
-          className="bg-zinc-900/60 ring-1 ring-white/5 rounded-2xl p-5 mb-6">
+          className={`rounded-2xl p-5 mb-6 transition-all ${
+            isPoster
+              ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111]"
+              : "bg-zinc-900/60 ring-1 ring-white/5"
+          }`}>
           <div className="flex items-center gap-4">
-            <div className="shrink-0 text-center rounded-xl px-3 py-2 bg-emerald-500/10 ring-1 ring-emerald-500/20">
-              <p className="text-2xl font-black leading-none text-emerald-400">{todayDate.getDate()}</p>
-              <p className="text-[9px] mt-0.5 uppercase tracking-wider font-semibold text-zinc-400">
+            <div className={`shrink-0 text-center rounded-xl px-3 py-2 ${
+              isPoster
+                ? "bg-[#f7f5f0] border border-[#111111] shadow-[1.5px_1.5px_0px_#111111]"
+                : "bg-emerald-500/10 ring-1 ring-emerald-500/20"
+            }`}>
+              <p className={`text-2xl font-black leading-none ${isPoster ? "text-[#111111]" : "text-emerald-400"}`}>{todayDate.getDate()}</p>
+              <p className={`text-[9px] mt-0.5 uppercase tracking-wider font-semibold ${isPoster ? "text-[#555555]" : "text-zinc-400"}`}>
                 {MONTHS[todayDate.getMonth()].slice(0,3)}
               </p>
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <p className="text-base font-bold text-zinc-100">{DAYS_FULL[todayDate.getDay()]}</p>
+                <p className={`text-base font-bold ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>{DAYS_FULL[todayDate.getDay()]}</p>
                 {todayHoliday && !todayDayOrder && (
-                  <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-lg ring-1 text-emerald-400 bg-emerald-500/10 ring-emerald-500/20">
+                  <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-lg ${
+                    isPoster
+                      ? "text-[#111111] bg-[#f7f5f0] border border-[#111111]"
+                      : "ring-1 text-emerald-400 bg-emerald-500/10 ring-emerald-500/20"
+                  }`}>
                     Holiday
                   </span>
                 )}
@@ -195,11 +213,15 @@ export function CalendarSection({ onNavigate }: { onNavigate: (tab: string) => v
               <div className="flex items-center gap-2 flex-wrap">
                 {todayDayOrder ? (
                   <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md"
-                    style={{ background: `${getDoColor(todayDayOrder)}12`, color: getDoColor(todayDayOrder) }}>
+                    style={{
+                      background: isPoster ? "#f7f5f0" : `${getDoColor(todayDayOrder)}12`,
+                      color: isPoster ? "#111111" : getDoColor(todayDayOrder),
+                      border: isPoster ? "1px solid #111111" : "none",
+                    }}>
                     <Hash className="w-2 h-2" />DO {todayDayOrder}
                   </span>
                 ) : (
-                  <p className="text-[11px] text-zinc-500">
+                  <p className={`text-[11px] ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>
                     {todayHoliday ? (todayHoliday.title as string).replace(/ - Holiday$/i,"").trim() : "No classes today"}
                   </p>
                 )}
@@ -210,15 +232,23 @@ export function CalendarSection({ onNavigate }: { onNavigate: (tab: string) => v
 
         {/* Filter tabs */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.08 }}
-          className="flex justify-center bg-zinc-900 rounded-xl p-1 border border-white/5 mb-6 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
+          className={`flex justify-center rounded-xl p-1 mb-6 overflow-x-auto ${
+            isPoster
+              ? "bg-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111]"
+              : "bg-zinc-900 border border-white/5"
+          }`} style={{ scrollbarWidth: "none" }}>
           {(["all","holiday","exam","event","deadline"] as const).map(f => {
             const active = filter === f
             return (
               <motion.button key={f} whileTap={{ scale: 0.93 }} onClick={() => setFilter(f)}
                 className={`px-4 py-2 text-xs font-bold whitespace-nowrap shrink-0 transition-all rounded-lg ${
                   active
-                    ? "bg-zinc-800 text-zinc-100 shadow-md border border-white/5"
-                    : "text-zinc-500 hover:text-zinc-300"
+                    ? isPoster
+                      ? "bg-[#111111] text-white shadow-sm border border-[#111111]"
+                      : "bg-zinc-800 text-zinc-100 shadow-md border border-white/5"
+                    : isPoster
+                      ? "text-[#555555] hover:text-[#111111]"
+                      : "text-zinc-500 hover:text-zinc-300"
                 }`}>
                 {f === "all" ? "All" : f.charAt(0).toUpperCase() + f.slice(1)}
               </motion.button>
@@ -228,39 +258,59 @@ export function CalendarSection({ onNavigate }: { onNavigate: (tab: string) => v
 
         {/* Calendar grid */}
         <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-          className="bg-zinc-900/40 ring-1 ring-white/5 rounded-2xl p-5 mb-6">
+          className={`rounded-2xl p-5 mb-6 transition-all ${
+            isPoster
+              ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111]"
+              : "bg-zinc-900/40 ring-1 ring-white/5"
+          }`}>
 
           <div className="flex items-center justify-between mb-4">
             <motion.button whileTap={{ scale: 0.9 }}
               onClick={() => setCurrentDate(new Date(currentYear, currentMonth - 1, 1))}
-              className="w-7 h-7 flex items-center justify-center rounded-lg text-zinc-500 bg-white/5 ring-1 ring-white/10 hover:bg-white/10 transition-all">
+              className={`w-7 h-7 flex items-center justify-center rounded-lg transition-all ${
+                isPoster
+                  ? "text-[#111111] bg-[#f7f5f0] border border-[#111111] hover:bg-[#e5e2da]"
+                  : "text-zinc-500 bg-white/5 ring-1 ring-white/10 hover:bg-white/10"
+              }`}>
               <ChevronLeft className="w-3.5 h-3.5" />
             </motion.button>
             <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold text-zinc-100">
+              <h2 className={`text-sm font-bold ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>
                 {MONTHS[currentMonth]} {currentYear}
               </h2>
               <motion.button whileTap={{ scale: 0.92 }}
                 onClick={() => { setCurrentDate(new Date()); setSelectedDay(new Date().getDate()) }}
                 className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl transition-all ${
                   selectedIsToday
-                    ? "text-zinc-600 bg-white/5 ring-1 ring-white/10 cursor-default"
-                    : "text-emerald-400 bg-emerald-500/10 ring-1 ring-emerald-500/25"
+                    ? isPoster
+                      ? "text-[#555555] bg-[#f7f5f0] border border-[#111111] cursor-default"
+                      : "text-zinc-600 bg-white/5 ring-1 ring-white/10 cursor-default"
+                    : isPoster
+                      ? "text-[#111111] bg-[#f7f5f0] border border-[#111111] shadow-[1px_1px_0px_#111111]"
+                      : "text-emerald-400 bg-emerald-500/10 ring-1 ring-emerald-500/25"
                 }`}>
-                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${selectedIsToday ? "bg-zinc-600" : "bg-emerald-400 animate-pulse"}`} />
+                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${selectedIsToday ? (isPoster ? "bg-[#777777]" : "bg-zinc-600") : (isPoster ? "bg-[#111111] animate-pulse" : "bg-emerald-400 animate-pulse")}`} />
                 Today
               </motion.button>
             </div>
             <motion.button whileTap={{ scale: 0.9 }}
               onClick={() => setCurrentDate(new Date(currentYear, currentMonth + 1, 1))}
-              className="w-7 h-7 flex items-center justify-center rounded-lg text-zinc-500 bg-white/5 ring-1 ring-white/10 hover:bg-white/10 transition-all">
+              className={`w-7 h-7 flex items-center justify-center rounded-lg transition-all ${
+                isPoster
+                  ? "text-[#111111] bg-[#f7f5f0] border border-[#111111] hover:bg-[#e5e2da]"
+                  : "text-zinc-500 bg-white/5 ring-1 ring-white/10 hover:bg-white/10"
+              }`}>
               <ChevronRight className="w-3.5 h-3.5" />
             </motion.button>
           </div>
 
           <div className="grid grid-cols-7 mb-1">
             {DAYS_SHORT.map((d, i) => (
-              <div key={i} className={`text-center py-1.5 text-[11px] font-bold ${i === 0 || i === 6 ? "text-zinc-700" : "text-zinc-600"}`}>
+              <div key={i} className={`text-center py-1.5 text-[11px] font-bold ${
+                isPoster
+                  ? "text-[#555555]"
+                  : (i === 0 || i === 6 ? "text-zinc-700" : "text-zinc-600")
+              }`}>
                 {d}
               </div>
             ))}
@@ -285,23 +335,41 @@ export function CalendarSection({ onNavigate }: { onNavigate: (tab: string) => v
                   onClick={() => setSelectedDay(selected ? null : day)}
                   className={`relative flex flex-col items-center justify-center gap-0.5 py-2 min-h-[44px] rounded-lg transition-all ${
                     selected
-                      ? "bg-emerald-500/20 ring-1 ring-emerald-500/40"
+                      ? isPoster
+                        ? "bg-[#111111] text-white shadow-[2px_2px_0px_#111111] border border-[#111111]"
+                        : "bg-emerald-500/20 ring-1 ring-emerald-500/40"
                       : today
-                        ? "bg-emerald-500/10 ring-1 ring-emerald-500/25"
-                        : "ring-1 ring-transparent"
-                  } ${!selected && !today && weekend ? "opacity-30" : ""}`}>
+                        ? isPoster
+                          ? "bg-[#f7f5f0] border-2 border-[#111111] font-bold"
+                          : "bg-emerald-500/10 ring-1 ring-emerald-500/25"
+                        : isPoster
+                          ? "hover:bg-[#f7f5f0] border border-transparent"
+                          : "ring-1 ring-transparent"
+                  } ${!selected && !today && weekend ? (isPoster ? "opacity-40" : "opacity-30") : ""}`}>
 
                   {dayOrder && !weekend && (
                     <span className={`text-[7px] font-black leading-none px-1 py-0.5 rounded-md ${
-                      selected ? "bg-emerald-500/20 text-emerald-400" : ""
+                      selected
+                        ? isPoster ? "bg-white text-[#111111]" : "bg-emerald-500/20 text-emerald-400"
+                        : ""
                     }`}
-                      style={!selected ? { background: `${getDoColor(dayOrder)}18`, color: getDoColor(dayOrder) } : {}}>
+                      style={!selected ? {
+                        background: isPoster ? "#f7f5f0" : `${getDoColor(dayOrder)}18`,
+                        color: isPoster ? "#111111" : getDoColor(dayOrder),
+                        border: isPoster ? "1px solid #111111" : "none",
+                      } : {}}>
                       {dayOrder}
                     </span>
                   )}
 
                   <span className={`text-[13px] font-bold leading-none ${
-                    selected ? "text-emerald-400" : today ? "text-zinc-100" : weekend ? "text-zinc-700" : "text-zinc-300"
+                    selected
+                      ? isPoster ? "text-white" : "text-emerald-400"
+                      : today
+                        ? isPoster ? "text-[#111111] font-extrabold" : "text-zinc-100"
+                        : weekend
+                          ? isPoster ? "text-[#888888]" : "text-zinc-700"
+                          : isPoster ? "text-[#111111]" : "text-zinc-300"
                   }`}>
                     {day}
                   </span>
@@ -310,13 +378,13 @@ export function CalendarSection({ onNavigate }: { onNavigate: (tab: string) => v
                     <div className="flex gap-0.5 h-1.5 items-center">
                       {dotTypes.map((type, i) => (
                         <span key={i} className="w-1.5 h-1.5 rounded-full"
-                          style={{ background: selected ? "#34d399" : type === "custom" ? "#22d3ee" : type === "assignment" ? "#f97316" : getEventMeta(type).color }} />
+                          style={{ background: selected ? (isPoster ? "#ffffff" : "#34d399") : type === "custom" ? "#22d3ee" : type === "assignment" ? "#f97316" : getEventMeta(type).color }} />
                       ))}
                     </div>
                   )}
 
                   {today && !selected && (
-                    <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    <span className={`absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full ${isPoster ? "bg-[#111111]" : "bg-emerald-400"}`} />
                   )}
                 </motion.button>
               )
@@ -337,17 +405,25 @@ export function CalendarSection({ onNavigate }: { onNavigate: (tab: string) => v
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
               transition={{ duration: 0.18 }}
-              className="bg-zinc-900/40 ring-1 ring-white/5 rounded-2xl p-5 lg:sticky lg:top-24">
+              className={`rounded-2xl p-5 lg:sticky lg:top-24 transition-all ${
+                isPoster
+                  ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] text-[#111111]"
+                  : "bg-zinc-900/40 ring-1 ring-white/5"
+              }`}>
 
-              <div className="flex items-start justify-between pb-3 border-b border-white/5">
+              <div className={`flex items-start justify-between pb-3 border-b ${isPoster ? "border-[#111111]/15" : "border-white/5"}`}>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-zinc-500">
+                  <p className={`text-xs ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>
                     {new Date(currentYear, currentMonth, selectedDay).toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long"})}
                   </p>
                   <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                     {selectedIsToday && (
-                      <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-lg ring-1 inline-flex items-center gap-1 text-emerald-400 bg-emerald-500/10 ring-emerald-500/20">
-                        <span className="w-1 h-1 rounded-full bg-emerald-400" />Today
+                      <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-lg inline-flex items-center gap-1 ${
+                        isPoster
+                          ? "text-[#111111] bg-[#f7f5f0] border border-[#111111]"
+                          : "ring-1 text-emerald-400 bg-emerald-500/10 ring-emerald-500/20"
+                      }`}>
+                        <span className={`w-1 h-1 rounded-full ${isPoster ? "bg-[#111111]" : "bg-emerald-400"}`} />Today
                       </span>
                     )}
                     {selectedDayOrder && (
@@ -357,12 +433,16 @@ export function CalendarSection({ onNavigate }: { onNavigate: (tab: string) => v
                       </span>
                     )}
                     {selectedIsWeekend && !selectedDayOrder && (
-                      <span className="text-[10px] text-zinc-600">Weekend</span>
+                      <span className={`text-[10px] ${isPoster ? "text-[#777777]" : "text-zinc-600"}`}>Weekend</span>
                     )}
                   </div>
                 </div>
                 <motion.button whileTap={{ scale: 0.9 }} onClick={() => setSelectedDay(null)}
-                  className="w-7 h-7 flex items-center justify-center rounded-lg ml-2 shrink-0 text-zinc-500 bg-white/5 ring-1 ring-white/10 hover:bg-white/10 transition-all">
+                  className={`w-7 h-7 flex items-center justify-center rounded-lg ml-2 shrink-0 transition-all ${
+                    isPoster
+                      ? "text-[#111111] bg-[#f7f5f0] border border-[#111111] hover:bg-[#e5e2da]"
+                      : "text-zinc-500 bg-white/5 ring-1 ring-white/10 hover:bg-white/10"
+                  }`}>
                   <X className="w-3.5 h-3.5" />
                 </motion.button>
               </div>
@@ -371,7 +451,7 @@ export function CalendarSection({ onNavigate }: { onNavigate: (tab: string) => v
 
                 {selectedDayEvents.length > 0 && (
                   <div>
-                    <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-2">Events</p>
+                    <p className={`text-[10px] font-bold uppercase tracking-widest mb-2 ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>Events</p>
                     <div className="space-y-2">
                       {selectedDayEvents.map((event: any) => {
                         const meta = getEventMeta(event.type)
@@ -394,10 +474,10 @@ export function CalendarSection({ onNavigate }: { onNavigate: (tab: string) => v
                               ) : meta.icon}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className={`text-xs font-semibold ${expanded ? "" : "truncate"} text-zinc-100`}>
+                              <p className={`text-xs font-semibold ${expanded ? "" : "truncate"} ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>
                                 {(event.title as string).replace(/ - Holiday$/i,"").trim()}
                               </p>
-                              <p className="text-[10px] capitalize text-zinc-500">{do_ && event.type === "holiday" ? `DO ${do_}` : event.type}</p>
+                              <p className={`text-[10px] capitalize ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>{do_ && event.type === "holiday" ? `DO ${do_}` : event.type}</p>
                             </div>
                           </button>
                         )
@@ -408,7 +488,7 @@ export function CalendarSection({ onNavigate }: { onNavigate: (tab: string) => v
 
                 {selectedDayAssignments.length > 0 && (
                   <div>
-                    <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                    <p className={`text-[10px] font-bold uppercase tracking-widest mb-2 flex items-center gap-1.5 ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>
                       <ClipboardCheck className="w-3 h-3" /> Assignments
                     </p>
                     <div className="space-y-2">
@@ -416,7 +496,11 @@ export function CalendarSection({ onNavigate }: { onNavigate: (tab: string) => v
                         const nextStatus = a.status === "todo" ? "in_progress" : a.status === "in_progress" ? "done" : "todo"
                         return (
                           <div key={a.id}
-                            className="flex items-start gap-3 px-3 py-3 rounded-xl bg-zinc-950/50 ring-1 ring-white/5">
+                            className={`flex items-start gap-3 px-3 py-3 rounded-xl ${
+                              isPoster
+                                ? "bg-[#f7f5f0] border border-[#111111] shadow-[1.5px_1.5px_0px_#111111]"
+                                : "bg-zinc-950/50 ring-1 ring-white/5"
+                            }`}>
                             <div className="w-1 self-stretch rounded-full shrink-0" style={{ background: a.priority === "high" ? "#f87171" : a.priority === "medium" ? "#fbbf24" : "#34d399" }} />
                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ring-1 ${
                               a.priority === "high" ? "bg-rose-500/10 ring-rose-500/20" : a.priority === "medium" ? "bg-amber-400/10 ring-amber-400/20" : "bg-emerald-500/10 ring-emerald-500/20"
@@ -429,14 +513,14 @@ export function CalendarSection({ onNavigate }: { onNavigate: (tab: string) => v
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <p className="text-xs font-semibold text-zinc-200">{a.title}</p>
+                                <p className={`text-xs font-semibold ${isPoster ? "text-[#111111]" : "text-zinc-200"}`}>{a.title}</p>
                                 {a.course && (
                                   <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-lg ring-1 text-emerald-400 bg-emerald-500/10 border-emerald-500/20">
                                     {a.course}
                                   </span>
                                 )}
                               </div>
-                              <p className="text-[10px] text-zinc-500 mt-0.5">
+                              <p className={`text-[10px] mt-0.5 ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>
                                 {a.dueTime ? `Due by ${a.dueTime}` : "All day"}
                               </p>
                               <div className="flex items-center gap-2 mt-2">
@@ -474,15 +558,17 @@ export function CalendarSection({ onNavigate }: { onNavigate: (tab: string) => v
                     <button onClick={() => setShowDayOrderClasses(!showDayOrderClasses)}
                       className="flex items-center w-full text-left mb-2 group">
                       <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                        <BookOpen className="w-[9px] h-[9px] text-zinc-500" />
-                        <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Classes · DO {selectedDayOrder}</span>
+                        <BookOpen className={`w-[9px] h-[9px] ${isPoster ? "text-[#111111]" : "text-zinc-500"}`} />
+                        <span className={`text-[10px] font-bold uppercase tracking-widest ${isPoster ? "text-[#111111]" : "text-zinc-500"}`}>Classes · DO {selectedDayOrder}</span>
                       </div>
-                      <ChevronRight className={`w-3.5 h-3.5 text-zinc-600 transition-transform duration-200 ${showDayOrderClasses ? "rotate-90" : ""}`} />
+                      <ChevronRight className={`w-3.5 h-3.5 transition-transform duration-200 ${showDayOrderClasses ? "rotate-90" : ""} ${isPoster ? "text-[#111111]" : "text-zinc-600"}`} />
                     </button>
                     {showDayOrderClasses && (
                       selectedDayClasses.length === 0 ? (
-                        <div className="px-3 py-4 rounded-xl text-center bg-white/5 border border-dashed border-white/10">
-                          <p className="text-xs text-zinc-600">Timetable not synced for this day order</p>
+                        <div className={`px-3 py-4 rounded-xl text-center border border-dashed ${
+                          isPoster ? "bg-[#f7f5f0] border-[#111111]/30 text-[#555555]" : "bg-white/5 border-white/10 text-zinc-600"
+                        }`}>
+                          <p className="text-xs">Timetable not synced for this day order</p>
                         </div>
                       ) : (
                         <div className="space-y-2">
@@ -490,17 +576,21 @@ export function CalendarSection({ onNavigate }: { onNavigate: (tab: string) => v
                             const tc = getClassTypeColor(cls.type)
                             return (
                               <div key={`${cls.hour}-${cls.code}`}
-                                className="flex items-center gap-3 px-3 py-2 rounded-xl bg-zinc-950/50 ring-1 ring-white/5">
+                                className={`flex items-center gap-3 px-3 py-2 rounded-xl ${
+                                  isPoster
+                                    ? "bg-[#f7f5f0] border border-[#111111] shadow-[1.5px_1.5px_0px_#111111]"
+                                    : "bg-zinc-950/50 ring-1 ring-white/5"
+                                }`}>
                                 <div className="w-1 self-stretch rounded-full shrink-0" style={{ background: tc }} />
                                 <div className="shrink-0 text-right w-10">
                                   <p className="text-[10px] font-black" style={{ color: tc }}>{cls.custom ? cls.startTime : (TIME_SLOTS[cls.hour] || `H${cls.hour}`)}</p>
-                                  <p className="text-[8px] text-zinc-700">Hr {cls.hour}</p>
+                                  <p className={`text-[8px] ${isPoster ? "text-[#555555]" : "text-zinc-700"}`}>Hr {cls.hour}</p>
                                 </div>
-                                <div className="w-px h-8 shrink-0 bg-white/5" />
+                                <div className={`w-px h-8 shrink-0 ${isPoster ? "bg-[#111111]/15" : "bg-white/5"}`} />
                                 <div className="flex-1 min-w-0">
                                   <p className="text-[9px] font-mono mb-0.5 text-emerald-400">{cls.code}</p>
-                                  <p className="text-xs font-semibold truncate text-zinc-100 leading-snug">{cls.name}</p>
-                                  <div className="flex flex-wrap gap-x-2.5 mt-0.5 text-zinc-600 text-[10px]">
+                                  <p className={`text-xs font-semibold truncate leading-snug ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>{cls.name}</p>
+                                  <div className={`flex flex-wrap gap-x-2.5 mt-0.5 text-[10px] ${isPoster ? "text-[#555555]" : "text-zinc-600"}`}>
                                     {cls.room    && <span className="flex items-center gap-0.5"><MapPin className="w-[9px] h-[9px]" />{cls.room}</span>}
                                     {cls.faculty && <span className="flex items-center gap-0.5 truncate max-w-[110px]"><User className="w-[9px] h-[9px] shrink-0" />{cls.faculty}</span>}
                                   </div>
@@ -519,13 +609,15 @@ export function CalendarSection({ onNavigate }: { onNavigate: (tab: string) => v
                 )}
 
                 {!selectedDayOrder && !selectedIsWeekend && selectedDayEvents.length === 0 && selectedCustomClasses.length === 0 && selectedDayAssignments.length === 0 && (
-                  <div className="py-6 text-center rounded-xl bg-white/5 border border-dashed border-white/10">
-                    <CalendarDays className="w-7 h-7 text-zinc-700 mx-auto mb-2" />
-                    <p className="text-xs text-zinc-600">No events or classes scheduled</p>
+                  <div className={`py-6 text-center rounded-xl border border-dashed ${
+                    isPoster ? "bg-[#f7f5f0] border-[#111111]/30" : "bg-white/5 border-white/10"
+                  }`}>
+                    <CalendarDays className={`w-7 h-7 mx-auto mb-2 ${isPoster ? "text-[#555555]" : "text-zinc-700"}`} />
+                    <p className={`text-xs ${isPoster ? "text-[#555555]" : "text-zinc-600"}`}>No events or classes scheduled</p>
                   </div>
                 )}
                 {selectedIsWeekend && selectedDayEvents.length === 0 && (
-                  <p className="text-xs text-center py-2 text-zinc-600">Enjoy your weekend!</p>
+                  <p className={`text-xs text-center py-2 ${isPoster ? "text-[#555555]" : "text-zinc-600"}`}>Enjoy your weekend!</p>
                 )}
           </div>
         </motion.div>
@@ -535,15 +627,23 @@ export function CalendarSection({ onNavigate }: { onNavigate: (tab: string) => v
         {/* Add Assignment */}
         <motion.button initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}
           onClick={() => onNavigate?.("about")} whileTap={{ scale: 0.97 }}
-          className="w-full bg-zinc-900/40 ring-1 ring-white/5 rounded-2xl p-4 flex items-center gap-3 text-left hover:bg-white/[0.02] transition-all mb-4">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-amber-500/10 ring-1 ring-amber-500/20 text-amber-400">
+          className={`w-full rounded-2xl p-4 flex items-center gap-3 text-left transition-all mb-4 ${
+            isPoster
+              ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] text-[#111111] hover:bg-[#f7f5f0]"
+              : "bg-zinc-900/40 ring-1 ring-white/5 hover:bg-white/[0.02]"
+          }`}>
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+            isPoster
+              ? "bg-[#f7f5f0] border border-[#111111] text-[#111111]"
+              : "bg-amber-500/10 ring-1 ring-amber-500/20 text-amber-400"
+          }`}>
             <Plus className="w-4 h-4" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-zinc-100">Add Assignment</p>
-            <p className="text-[11px] text-zinc-500">Track todos, deadlines & progress</p>
+            <p className={`text-sm font-bold ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>Add Assignment</p>
+            <p className={`text-[11px] ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>Track todos, deadlines & progress</p>
           </div>
-          <div className="text-[9px] font-bold uppercase tracking-widest text-amber-400 shrink-0">Profile</div>
+          <div className={`text-[9px] font-bold uppercase tracking-widest shrink-0 ${isPoster ? "text-[#111111]" : "text-amber-400"}`}>Profile</div>
         </motion.button>
 
         {/* Month holidays */}

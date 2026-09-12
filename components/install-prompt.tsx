@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Download, X } from "lucide-react"
+import { useIsPosterTheme } from "@/lib/theme-context"
 
 const STORAGE_KEY = "edutechsrm_install_done_v2"
 
@@ -11,6 +12,7 @@ function getPrompt() {
 }
 
 export function InstallPrompt() {
+  const isPoster = useIsPosterTheme()
   const [show, setShow] = useState(false)
   const [deferredPrompt, setDeferredPrompt] = useState<any>(getPrompt)
 
@@ -79,28 +81,46 @@ export function InstallPrompt() {
           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
           className="overflow-hidden"
         >
-          <div className="relative rounded-xl border border-white/5 px-3 py-2.5 overflow-hidden flex items-center gap-2.5 bg-zinc-900/60">
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-400/30 to-transparent" />
+          <div className={`relative rounded-xl px-3 py-2.5 overflow-hidden flex items-center gap-2.5 transition-all ${
+            isPoster
+              ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] text-[#111111]"
+              : "bg-zinc-900/60 border border-white/5"
+          }`}>
+            {!isPoster && (
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-400/30 to-transparent" />
+            )}
 
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-emerald-500/10 ring-1 ring-emerald-500/20">
-              <Download size={13} className="text-emerald-400" />
+            <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+              isPoster
+                ? "bg-[#f7f5f0] border border-[#111111] text-[#111111]"
+                : "bg-emerald-500/10 ring-1 ring-emerald-500/20 text-emerald-400"
+            }`}>
+              <Download size={13} />
             </div>
 
-            <p className="text-xs text-zinc-400 flex-1 min-w-0 leading-tight">
-              <span className="text-zinc-200 font-semibold">Install the App</span>
+            <p className={`text-xs flex-1 min-w-0 leading-tight ${isPoster ? "text-[#555555]" : "text-zinc-400"}`}>
+              <span className={`font-semibold ${isPoster ? "text-[#111111]" : "text-zinc-200"}`}>Install the App</span>
               <span className="hidden sm:inline"> — your campus, one tap away</span>
             </p>
 
             <button
               onClick={handleInstall}
-              className="px-3 py-1.5 rounded-lg text-[11px] font-bold whitespace-nowrap shrink-0 bg-emerald-500 text-zinc-950 hover:bg-emerald-400 transition-all"
+              className={`px-3 py-1.5 rounded-lg text-[11px] font-bold whitespace-nowrap shrink-0 transition-all ${
+                isPoster
+                  ? "bg-[#111111] text-white border border-[#111111] hover:bg-[#333333]"
+                  : "bg-emerald-500 text-zinc-950 hover:bg-emerald-400"
+              }`}
             >
               Install
             </button>
 
             <button
               onClick={dismiss}
-              className="w-6 h-6 rounded-lg flex items-center justify-center hover:bg-white/5 text-zinc-500 hover:text-zinc-300 transition-colors shrink-0"
+              className={`w-6 h-6 rounded-lg flex items-center justify-center transition-colors shrink-0 ${
+                isPoster
+                  ? "text-[#111111] hover:bg-[#f7f5f0]"
+                  : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"
+              }`}
             >
               <X size={12} />
             </button>
