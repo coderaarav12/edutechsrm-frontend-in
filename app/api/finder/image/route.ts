@@ -10,10 +10,14 @@ export async function GET(request: NextRequest) {
     return new NextResponse("Missing url parameter", { status: 400 })
   }
 
-  // Security check: only allow images from srmist.edu.in
+  // Security check: only allow images from srmist.edu.in or *.srmist.edu.in
   try {
     const parsed = new URL(imageUrl)
-    if (!parsed.hostname.endsWith("srmist.edu.in")) {
+    const isSrmDomain =
+      parsed.hostname === "srmist.edu.in" ||
+      parsed.hostname.endsWith(".srmist.edu.in")
+
+    if (!isSrmDomain || (parsed.protocol !== "https:" && parsed.protocol !== "http:")) {
       return new NextResponse("Invalid image source", { status: 403 })
     }
   } catch {

@@ -1,11 +1,24 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { validateOrigin } from "@/lib/origin-validator"
 
 const PORTAL_BACKEND_URL =
   process.env.STUDENT_PORTAL_BACKEND_URL ||
   process.env.NEXT_PUBLIC_STUDENT_PORTAL_BACKEND_URL ||
   "http://127.0.0.1:8787"
 
+function isAuthorizedRequest(request: NextRequest): boolean {
+  if (validateOrigin(request)) return true
+  const platform = request.headers.get("x-client-platform")
+  const app = request.headers.get("x-client-app")
+  if (platform === "android" && app === "edutechsrm-mobile") return true
+  return false
+}
+
 export async function GET(request: NextRequest) {
+  if (!isAuthorizedRequest(request)) {
+    return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
+  }
+
   const url = new URL(request.url)
   const path = url.pathname.replace(/^\/api\/student-portal/, "/api")
   const targetUrl = new URL(`${PORTAL_BACKEND_URL.replace(/\/$/, "")}${path}`)
@@ -28,12 +41,20 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const url = new URL(request.url)
-  const path = url.pathname.replace(/^\/api\/student-portal/, "/api")
-  const targetUrl = new URL(`${PORTAL_BACKEND_URL.replace(/\/$/, "")}${path}`)
+  if (!isAuthorizedRequest(request)) {
+    return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
+  }
 
   try {
     const body = await request.text()
+    if (body.length > 50_000) {
+      return NextResponse.json({ success: false, error: "Request too large" }, { status: 413 })
+    }
+
+    const url = new URL(request.url)
+    const path = url.pathname.replace(/^\/api\/student-portal/, "/api")
+    const targetUrl = new URL(`${PORTAL_BACKEND_URL.replace(/\/$/, "")}${path}`)
+
     const res = await fetch(targetUrl.toString(), {
       method: "POST",
       headers: {

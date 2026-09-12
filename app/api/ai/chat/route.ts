@@ -42,7 +42,11 @@ export async function POST(req: Request) {
   }
 
   try {
-    const body = await req.json()
+    const rawBody = await req.text()
+    if (rawBody.length > 50_000) {
+      return NextResponse.json({ error: "Request too large" }, { status: 413, headers: API_HEADERS })
+    }
+    const body = JSON.parse(rawBody)
 
     if (!body.messages || !Array.isArray(body.messages) || body.messages.length === 0) {
       return NextResponse.json({ error: "Messages array is required" }, { status: 400, headers: API_HEADERS })
