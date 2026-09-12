@@ -3,16 +3,16 @@
 import { useEffect, useRef } from "react"
 import QRCodeStyling from "qr-code-styling"
 
-export function QrCode({ size = 260 }: { size?: number }) {
+export function QrCode({ size = 260, data = "https://edutechsrm.in" }: { size?: number; data?: string }) {
   const ref = useRef<HTMLDivElement>(null)
   const qrRef = useRef<QRCodeStyling | null>(null)
 
   useEffect(() => {
-    if (!ref.current || qrRef.current) return
+    if (!ref.current) return
     qrRef.current = new QRCodeStyling({
       width: size,
       height: size,
-      data: "https://edutechsrm.in",
+      data,
       image: "/icon-192-v2.png",
       qrOptions: { errorCorrectionLevel: "H" },
       dotsOptions: { color: "#10b981", type: "dots" },
@@ -23,7 +23,7 @@ export function QrCode({ size = 260 }: { size?: number }) {
     })
     ref.current.innerHTML = ""
     qrRef.current.append(ref.current)
-  }, [size])
+  }, [size, data])
 
   return <div ref={ref} />
 }

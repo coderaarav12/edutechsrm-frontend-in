@@ -75,7 +75,7 @@ export default function DownloadPage() {
   }, [])
 
   const handleCopyLink = () => {
-    const url = "https://play.google.com/store/apps/details?id=in.edutechsrm.edutechsrm"
+    const url = "https://play.google.com/store/apps/details?id=in.edutechsrm.app"
     if (navigator.clipboard) {
       navigator.clipboard.writeText(url)
       setCopied(true)
@@ -235,7 +235,7 @@ export default function DownloadPage() {
                 {/* Primary Button Group */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
                   <a
-                    href="https://play.google.com/store/apps/details?id=in.edutechsrm.edutechsrm"
+                    href="https://play.google.com/store/apps/details?id=in.edutechsrm.app"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="dl-btn-primary inline-flex items-center justify-center gap-3 rounded-2xl px-7 py-4 text-sm font-mono font-black uppercase tracking-wider transition-all active:scale-[0.98]"
@@ -517,11 +517,11 @@ export default function DownloadPage() {
                   border: isPoster ? "2px solid #111111" : "2px solid rgba(255,255,255,0.2)",
                 }}
               >
-                <QrCode size={190} />
+                <QrCode size={190} data="https://play.google.com/store/apps/details?id=in.edutechsrm.app" />
               </div>
 
               <span className="font-mono text-[10px] text-zinc-500 mt-3">
-                play.google.com/store/apps/details?id=in.edutechsrm
+                play.google.com/store/apps/details?id=in.edutechsrm.app
               </span>
             </div>
 

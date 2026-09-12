@@ -43,6 +43,37 @@ const nextConfig = {
     ]
   },
 
+  // Route redirects
+  async redirects() {
+    return [
+      {
+        source: "/faculty-finder",
+        destination: "/faculty",
+        permanent: true,
+      },
+      {
+        source: "/facultyfinder",
+        destination: "/faculty",
+        permanent: true,
+      },
+      {
+        source: "/finder",
+        destination: "/faculty",
+        permanent: true,
+      },
+      {
+        source: "/playstore",
+        destination: "https://play.google.com/store/apps/details?id=in.edutechsrm.app",
+        permanent: false,
+      },
+      {
+        source: "/android",
+        destination: "/download",
+        permanent: true,
+      },
+    ]
+  },
+
   // Webpack (used in production builds) - chunk splitting
   webpack: (config) => {
     config.optimization.splitChunks = {
