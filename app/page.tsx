@@ -18,7 +18,14 @@ import { UpdateOverlay } from "@/components/app-shell-ui"
 
 import { useOptionalTheme } from "@/lib/theme-context"
 
-function SessionExpiredModal({ onLogin }: { onLogin: () => void }) {
+import { LogIn, X } from "lucide-react"
+
+interface SessionExpiredModalProps {
+  onLogin: () => void
+  onClose: () => void
+}
+
+function SessionExpiredModal({ onLogin, onClose }: SessionExpiredModalProps) {
   const themeContext = useOptionalTheme()
   const isPoster =
     themeContext?.theme?.mode === "poster" ||
@@ -34,42 +41,74 @@ function SessionExpiredModal({ onLogin }: { onLogin: () => void }) {
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.94, opacity: 0 }}
         transition={{ type: "spring", bounce: 0.22 }}
-        className="w-full max-w-sm rounded-[28px] border-[2.5px] border-[#111111] p-6 text-center bg-white shadow-[8px_8px_0px_#111111]"
+        className="relative w-full max-w-sm rounded-[28px] border-[2.5px] border-[#111111] p-6 text-center bg-[#f7f5f0] shadow-[8px_8px_0px_#111111]"
       >
+        {/* Close Button */}
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute top-4 right-4 h-8 w-8 rounded-full flex items-center justify-center transition-colors cursor-pointer bg-black/5 hover:bg-black/10 text-[#111111]"
+          aria-label="Close"
+        >
+          <X className="h-4 w-4" />
+        </button>
+
         <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center bg-[#fee2e2] border-2 border-[#111111] shadow-[3px_3px_0px_#111111]">
           <span className="text-2xl">⏳</span>
         </div>
         <span className="text-[10px] font-mono font-bold uppercase tracking-[0.18em] text-[#991b1b] bg-[#fee2e2] border border-[#111111] px-2.5 py-1 rounded-md shadow-[1.5px_1.5px_0px_#111111] inline-block">
           Authentication Required
         </span>
-        <h2 className="text-xl font-black mt-3 mb-1.5 text-[#111111]">Session expired</h2>
-        <p className="text-sm mb-1 text-[#444444]">Your session was replaced by a new sign-in on another device.</p>
-        <p className="text-xs mb-5 text-[#666666]">Please sign in again to regain access to your dashboard.</p>
+        <h2 className="text-xl font-black mt-3 mb-1.5 text-[#111111] font-display">Session Expired</h2>
+        <p className="text-sm mb-1 text-zinc-700 font-medium">Your session was replaced by a new sign-in on another device.</p>
+        <p className="text-xs mb-5 text-zinc-500">Please sign in again to regain access to your dashboard.</p>
         <button
+          type="button"
           onClick={onLogin}
-          className="w-full py-3.5 rounded-xl text-sm font-black border-2 border-[#111111] bg-[#111111] text-white shadow-[3px_3px_0px_#111111] hover:translate-x-[1px] hover:translate-y-[1px] transition-all cursor-pointer"
+          className="w-full py-3.5 rounded-2xl font-mono text-xs sm:text-sm font-black uppercase tracking-wider transition-all cursor-pointer bg-[#111111] text-white keep-white hover:bg-zinc-800 border-2 border-[#111111] shadow-[3px_3px_0px_#8b7355] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none flex items-center justify-center gap-2"
+          style={{ color: "#ffffff" }}
         >
-          Go to login
+          <LogIn className="w-4 h-4 text-white keep-white" style={{ color: "#ffffff" }} />
+          <span className="keep-white" style={{ color: "#ffffff" }}>Log In Again</span>
         </button>
       </motion.div>
     )
   }
 
   return (
-    <motion.div onClick={(e) => e.stopPropagation()} initial={{ scale: 0.92, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.94, opacity: 0 }}
+    <motion.div
+      onClick={(e) => e.stopPropagation()}
+      initial={{ scale: 0.92, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      exit={{ scale: 0.94, opacity: 0 }}
       transition={{ type: "spring", bounce: 0.22 }}
-      className="w-full max-w-sm rounded-[26px] border p-6 text-center"
-      style={{ background: "linear-gradient(145deg, rgba(28,12,18,0.95), rgba(20,11,17,0.95))", borderColor: "rgba(248,113,113,0.24)", boxShadow: "0 24px 70px rgba(0,0,0,0.45)" }}>
-      <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center"
-        style={{ background: "linear-gradient(135deg, rgba(248,113,113,0.25), rgba(244,114,182,0.18))", border: "1px solid rgba(248,113,113,0.28)" }}>
+      className="relative w-full max-w-sm rounded-[26px] border border-white/10 p-6 text-center bg-[#0b1017] shadow-[0_24px_70px_rgba(0,0,0,0.7),0_0_30px_rgba(248,113,113,0.15)]"
+    >
+      {/* Close Button */}
+      <button
+        type="button"
+        onClick={onClose}
+        className="absolute top-4 right-4 h-8 w-8 rounded-full flex items-center justify-center transition-colors cursor-pointer bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white"
+        aria-label="Close"
+      >
+        <X className="h-4 w-4" />
+      </button>
+
+      <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center bg-rose-500/15 border border-rose-500/30">
         <span className="text-2xl">⏳</span>
       </div>
-      <p className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: "#fb7185" }}>Authentication Required</p>
-      <h2 className="text-xl font-black mt-1 mb-2" style={{ color: "#f4f4f5" }}>Session expired</h2>
-      <p className="text-sm mb-1" style={{ color: "#d4d4d8" }}>Your session was replaced by a new sign-in on another device.</p>
-      <p className="text-xs mb-5 opacity-80" style={{ color: "#a1a1aa" }}>Please sign in again to regain access to your dashboard.</p>
-      <button onClick={onLogin} className="w-full py-3 rounded-xl text-sm font-extrabold"
-        style={{ background: "linear-gradient(135deg, #34d399, #10b981)", color: "#08120d" }}>Go to login</button>
+      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-rose-400 font-mono">Authentication Required</p>
+      <h2 className="text-xl font-black mt-2 mb-1 text-white font-display">Session Expired</h2>
+      <p className="text-sm mb-1 text-zinc-300">Your session was replaced by a new sign-in on another device.</p>
+      <p className="text-xs mb-5 text-zinc-400">Please sign in again to regain access to your dashboard.</p>
+      <button
+        type="button"
+        onClick={onLogin}
+        className="w-full py-3.5 rounded-2xl font-mono text-xs sm:text-sm font-black uppercase tracking-wider transition-all cursor-pointer bg-gradient-to-r from-emerald-400 to-teal-400 text-zinc-950 hover:brightness-110 shadow-lg shadow-emerald-500/25 active:scale-[0.98] flex items-center justify-center gap-2"
+      >
+        <LogIn className="w-4 h-4 text-zinc-950" />
+        <span>Log In Again</span>
+      </button>
     </motion.div>
   )
 }
@@ -122,10 +161,20 @@ export default function Home() {
       <LandingPage onEnterApp={() => setShowLoginModal(true)} />
       <AnimatePresence>
         {sessionExpired && !showLoginModal && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm"
-            onClick={() => dismissSessionExpired()}>
-            <SessionExpiredModal onLogin={() => { window.location.href = "/login" }} />
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            onClick={() => dismissSessionExpired()}
+          >
+            <SessionExpiredModal
+              onClose={() => dismissSessionExpired()}
+              onLogin={() => {
+                dismissSessionExpired()
+                setShowLoginModal(true)
+              }}
+            />
           </motion.div>
         )}
       </AnimatePresence>
