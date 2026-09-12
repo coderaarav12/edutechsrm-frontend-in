@@ -78,10 +78,24 @@ export default function AdminPortalPage() {
     root.setAttribute("data-admin", "true")
     body.setAttribute("data-admin", "true")
     root.setAttribute("data-theme", "dark")
-    root.setAttribute("data-landing-mode", "dark")
+    root.setAttribute("data-landing-mode", "night")
     body.setAttribute("data-theme", "dark")
-    body.setAttribute("data-landing-mode", "dark")
+    body.setAttribute("data-landing-mode", "night")
     body.style.backgroundColor = "#060910"
+    body.style.color = "#f4f4f5"
+
+    // Clear any poster-mode inline variables from html element
+    const propsToClear = [
+      "--color-zinc-950", "--color-zinc-900", "--color-zinc-800", "--color-zinc-700",
+      "--color-zinc-600", "--color-zinc-500", "--color-zinc-400", "--color-zinc-300",
+      "--color-zinc-200", "--color-zinc-100", "--color-zinc-50",
+      "--text-primary", "--text-secondary", "--text-muted", "--text-subtle", "--text-faint",
+      "--card-bg", "--page-bg", "--input-bg"
+    ]
+    propsToClear.forEach(p => {
+      root.style.removeProperty(p)
+      body.style.removeProperty(p)
+    })
 
     return () => {
       root.removeAttribute("data-admin")
@@ -454,7 +468,7 @@ export default function AdminPortalPage() {
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-black text-white font-display tracking-tight">edutechsrm</span>
+                  <span className="text-sm font-black font-display tracking-tight" style={{ color: "#ffffff" }}>edutechsrm</span>
                   <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
                     CONSOLE v2
                   </span>
@@ -470,8 +484,8 @@ export default function AdminPortalPage() {
               style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
             >
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-zinc-400">Sessions:</span>
-              <span className="font-bold text-white">{analytics.activeSessionCount || 0}</span>
+              <span style={{ color: "#9ca3af" }}>Sessions:</span>
+              <span className="font-bold" style={{ color: "#ffffff" }}>{analytics.activeSessionCount || 0}</span>
             </div>
 
             {/* Refresh button */}
@@ -531,7 +545,7 @@ export default function AdminPortalPage() {
             }}
           >
             <div className="space-y-1">
-              <p className="px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-[0.18em] text-zinc-500">
+              <p className="px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-[0.18em]" style={{ color: "#9ca3af" }}>
                 NAVIGATION
               </p>
               {ADMIN_TABS.map((tab) => {
@@ -551,14 +565,14 @@ export default function AdminPortalPage() {
                       className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all"
                       style={{
                         background: active ? `${tab.color}25` : "rgba(255,255,255,0.04)",
-                        color: active ? tab.color : "#71717a",
+                        color: active ? tab.color : "#9ca3af",
                       }}
                     >
                       <Icon className="w-4 h-4" />
                     </div>
                     <span
                       className="text-xs font-bold flex-1 text-left tracking-tight"
-                      style={{ color: active ? "#ffffff" : "#a1a1aa" }}
+                      style={{ color: active ? "#ffffff" : "#d4d4d8" }}
                     >
                       {tab.label}
                     </span>

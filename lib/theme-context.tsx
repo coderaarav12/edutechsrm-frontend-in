@@ -187,6 +187,15 @@ export function applyThemeGlobally(theme: ThemeState) {
   const body = document.body
   if (!html || !body) return
 
+  // Strictly skip overriding when on Admin console or when data-admin is set
+  if (
+    html.hasAttribute("data-admin") ||
+    body.hasAttribute("data-admin") ||
+    (typeof window !== "undefined" && window.location.pathname.startsWith("/admin"))
+  ) {
+    return
+  }
+
   if (theme.mode === "custom") {
     const cc = theme.customColors
     html.style.setProperty("--page-bg", cc.pageBg)
@@ -197,18 +206,16 @@ export function applyThemeGlobally(theme: ThemeState) {
     html.style.setProperty("--accent-bg", `${cc.accent}1a`)
     html.style.setProperty("--accent-border", `${cc.accent}33`)
 
+    // Ensure native zinc scale is never polluted
+    for (const prop of [
+      "--color-zinc-950", "--color-zinc-900", "--color-zinc-800", "--color-zinc-700",
+      "--color-zinc-600", "--color-zinc-500", "--color-zinc-400", "--color-zinc-300",
+      "--color-zinc-200", "--color-zinc-100", "--color-zinc-50",
+    ]) {
+      html.style.removeProperty(prop)
+    }
+
     if (isLightColor(cc.pageBg)) {
-      html.style.setProperty("--color-zinc-950", "#fafafa")
-      html.style.setProperty("--color-zinc-900", "#f4f4f5")
-      html.style.setProperty("--color-zinc-800", "#e4e4e7")
-      html.style.setProperty("--color-zinc-700", "#d4d4d8")
-      html.style.setProperty("--color-zinc-600", "#a1a1aa")
-      html.style.setProperty("--color-zinc-500", "#71717a")
-      html.style.setProperty("--color-zinc-400", "#52525b")
-      html.style.setProperty("--color-zinc-300", "#3f3f46")
-      html.style.setProperty("--color-zinc-200", "#27272a")
-      html.style.setProperty("--color-zinc-100", "#18181b")
-      html.style.setProperty("--color-zinc-50", "#09090b")
       html.style.setProperty("--card-bg", `${cc.cardBg}cc`)
       html.style.setProperty("--elevated-bg", `${cc.cardBg}fa`)
       html.style.setProperty("--text-secondary", "#18181b")
@@ -271,19 +278,17 @@ export function applyThemeGlobally(theme: ThemeState) {
     html.style.setProperty("--filter-inactive-text", "#52525b")
     html.style.setProperty("--input-bg", "#ffffff")
     html.style.setProperty("--progress-track", "#e5e2da")
-    html.style.setProperty("--color-zinc-950", "#f7f5f0")
-    html.style.setProperty("--color-zinc-900", "#ffffff")
-    html.style.setProperty("--color-zinc-800", "#eae7e0")
-    html.style.setProperty("--color-zinc-700", "#dad5cb")
-    html.style.setProperty("--color-zinc-600", "#71717a")
-    html.style.setProperty("--color-zinc-500", "#52525b")
-    html.style.setProperty("--color-zinc-400", "#3f3f46")
-    html.style.setProperty("--color-zinc-300", "#27272a")
-    html.style.setProperty("--color-zinc-200", "#18181b")
-    html.style.setProperty("--color-zinc-100", "#111111")
-    html.style.setProperty("--color-zinc-50", "#000000")
     html.style.setProperty("--color-background", "#f7f5f0")
     html.style.setProperty("--color-foreground", "#111111")
+
+    // Clean up any previously set zinc scale overrides so Tailwind's native zinc palette stays intact
+    for (const prop of [
+      "--color-zinc-950", "--color-zinc-900", "--color-zinc-800", "--color-zinc-700",
+      "--color-zinc-600", "--color-zinc-500", "--color-zinc-400", "--color-zinc-300",
+      "--color-zinc-200", "--color-zinc-100", "--color-zinc-50",
+    ]) {
+      html.style.removeProperty(prop)
+    }
   } else {
     // Dark mode (or black)
     html.removeAttribute("data-theme")

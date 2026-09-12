@@ -79,15 +79,15 @@ export function StatCard({ label, value, color, subtitle, icon: Icon }: { label:
       }}
     >
       <div className="flex items-center justify-between gap-2 mb-3">
-        <p className="text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-[0.14em] text-zinc-400">{label}</p>
+        <p className="text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-[0.14em]" style={{ color: "#9ca3af" }}>{label}</p>
         {Icon && (
           <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${color}15`, color }}>
             <Icon className="w-3.5 h-3.5" />
           </div>
         )}
       </div>
-      <p className="text-2xl sm:text-3xl font-black font-display tracking-tight text-white" style={{ color }}>{typeof value === "number" ? value.toLocaleString() : value}</p>
-      {subtitle && <p className="text-[11px] text-zinc-400 mt-1 font-sans">{subtitle}</p>}
+      <p className="text-2xl sm:text-3xl font-black font-display tracking-tight" style={{ color }}>{typeof value === "number" ? value.toLocaleString() : value}</p>
+      {subtitle && <p className="text-[11px] mt-1 font-sans" style={{ color: "#9ca3af" }}>{subtitle}</p>}
       <div className="absolute -right-8 -bottom-8 w-24 h-24 rounded-full blur-2xl pointer-events-none opacity-20" style={{ background: color }} />
     </div>
   )
@@ -109,14 +109,17 @@ export function Card({ children, className = "" }: { children: React.ReactNode; 
   )
 }
 
-export function Input({ className = "", ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
+export function Input({ className = "", style, ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
-      className={`w-full rounded-xl px-4 py-2.5 text-sm text-zinc-100 transition-all placeholder:text-zinc-500 outline-none ${className}`}
+      data-admin-input="true"
+      className={`w-full rounded-xl px-4 py-2.5 text-sm transition-all outline-none ${className}`}
       style={{
         background: "rgba(7,11,19,0.95)",
         border: "1px solid rgba(255,255,255,0.12)",
         boxShadow: "inset 0 1px 2px rgba(0,0,0,0.4)",
+        color: "#ffffff",
+        ...style,
       }}
       onFocus={(e) => {
         e.currentTarget.style.borderColor = "rgba(52,211,153,0.5)"
@@ -131,14 +134,17 @@ export function Input({ className = "", ...props }: React.InputHTMLAttributes<HT
   )
 }
 
-export function Textarea({ className = "", ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+export function Textarea({ className = "", style, ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
     <textarea
-      className={`w-full rounded-xl px-4 py-3 text-sm text-zinc-100 transition-all placeholder:text-zinc-500 outline-none resize-none ${className}`}
+      data-admin-input="true"
+      className={`w-full rounded-xl px-4 py-3 text-sm transition-all outline-none resize-none ${className}`}
       style={{
         background: "rgba(7,11,19,0.95)",
         border: "1px solid rgba(255,255,255,0.12)",
         boxShadow: "inset 0 1px 2px rgba(0,0,0,0.4)",
+        color: "#ffffff",
+        ...style,
       }}
       onFocus={(e) => {
         e.currentTarget.style.borderColor = "rgba(52,211,153,0.5)"
@@ -153,14 +159,17 @@ export function Textarea({ className = "", ...props }: React.TextareaHTMLAttribu
   )
 }
 
-export function Select({ className = "", children, ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) {
+export function Select({ className = "", children, style, ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) {
   return (
     <select
-      className={`w-full rounded-xl px-4 py-2.5 text-sm text-zinc-100 transition-all appearance-none outline-none cursor-pointer ${className}`}
+      data-admin-input="true"
+      className={`w-full rounded-xl px-4 py-2.5 text-sm transition-all appearance-none outline-none cursor-pointer ${className}`}
       style={{
         background: "rgba(7,11,19,0.95)",
         border: "1px solid rgba(255,255,255,0.12)",
         boxShadow: "inset 0 1px 2px rgba(0,0,0,0.4)",
+        color: "#ffffff",
+        ...style,
       }}
       onFocus={(e) => {
         e.currentTarget.style.borderColor = "rgba(52,211,153,0.5)"
@@ -183,7 +192,7 @@ export function SectionHeader({ label, title, count, color, icon: Icon }: { labe
           <span className="w-1.5 h-1.5 rounded-full" style={{ background: color }} />
           <h2 className="text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-[0.16em]" style={{ color }}>{label}</h2>
         </div>
-        <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight font-display flex items-center gap-2.5">
+        <h3 className="text-xl sm:text-2xl font-black tracking-tight font-display flex items-center gap-2.5" style={{ color: "#ffffff" }}>
           {title}
           {count !== undefined && (
             <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full" style={{ background: `${color}18`, color }}>{count}</span>
@@ -217,10 +226,10 @@ export function AnalyticsTab({ analytics, maintenance, setMaintenanceMode, maint
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className={`w-2 h-2 rounded-full ${maintenance.enabled ? "bg-amber-400 animate-pulse" : "bg-emerald-400"}`} />
-              <p className="text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-[0.16em] text-zinc-400">System Gateway</p>
+              <p className="text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-[0.16em]" style={{ color: "#9ca3af" }}>System Gateway</p>
             </div>
-            <h3 className="text-lg font-bold text-white font-display">Maintenance Mode</h3>
-            <p className="text-xs text-zinc-400 mt-0.5">When active, student logins and dashboard queries are paused with your broadcast message.</p>
+            <h3 className="text-lg font-bold font-display" style={{ color: "#ffffff" }}>Maintenance Mode</h3>
+            <p className="text-xs mt-0.5 font-sans" style={{ color: "#9ca3af" }}>When active, student logins and dashboard queries are paused with your broadcast message.</p>
           </div>
           <div className="flex items-center gap-3 self-start sm:self-center">
             <span className={`text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${maintenance.enabled ? "bg-amber-500/20 text-amber-300 border border-amber-500/30" : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"}`}>
@@ -253,10 +262,10 @@ export function AnalyticsTab({ analytics, maintenance, setMaintenanceMode, maint
       <Card>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-[0.16em] text-zinc-400 mb-0.5">Realtime Telemetry</p>
-            <h3 className="text-lg font-bold text-white font-display">Recent Login Activity</h3>
+            <p className="text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-[0.16em] mb-0.5" style={{ color: "#9ca3af" }}>Realtime Telemetry</p>
+            <h3 className="text-lg font-bold font-display" style={{ color: "#ffffff" }}>Recent Login Activity</h3>
           </div>
-          <span className="text-[11px] font-mono text-zinc-500">Last 50 entries</span>
+          <span className="text-[11px] font-mono" style={{ color: "#71717a" }}>Last 50 entries</span>
         </div>
         <div className="space-y-2 max-h-72 lg:max-h-[480px] overflow-y-auto pr-1">
           {analytics.logs && analytics.logs.length > 0 ? (
@@ -270,10 +279,10 @@ export function AnalyticsTab({ analytics, maintenance, setMaintenanceMode, maint
                 }}
               >
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-zinc-100 font-mono tracking-tight">{log.username}</p>
+                  <p className="text-sm font-semibold font-mono tracking-tight" style={{ color: "#f4f4f5" }}>{log.username}</p>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[10px] font-mono text-zinc-400">{fmtTime(log.timestamp)}</span>
-                    {log.page && <span className="text-[10px] font-mono text-zinc-500 border-l border-white/10 pl-2">{log.page}</span>}
+                    <span className="text-[10px] font-mono" style={{ color: "#9ca3af" }}>{fmtTime(log.timestamp)}</span>
+                    {log.page && <span className="text-[10px] font-mono border-l border-white/10 pl-2" style={{ color: "#71717a" }}>{log.page}</span>}
                   </div>
                 </div>
                 <span
@@ -285,7 +294,7 @@ export function AnalyticsTab({ analytics, maintenance, setMaintenanceMode, maint
               </div>
             ))
           ) : (
-            <p className="text-sm text-zinc-500 py-8 text-center font-mono">No login activity recorded yet</p>
+            <p className="text-sm py-8 text-center font-mono" style={{ color: "#71717a" }}>No login activity recorded yet</p>
           )}
         </div>
       </Card>
