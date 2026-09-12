@@ -18,13 +18,19 @@ import type { AnnouncementType } from "@/components/announcements"
 
 function AdminLoginBackground() {
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden bg-[#07090f]">
-      <div className="absolute inset-0">
-        <div className="admin-morph absolute -left-36 top-0 h-[520px] w-[520px] border border-emerald-300/25" />
-        <div className="admin-morph admin-morph-alt absolute -right-28 top-0 h-[440px] w-[440px] border border-violet-300/20" />
-        <div className="admin-morph absolute bottom-[-180px] left-[20%] h-[500px] w-[500px] border border-cyan-300/12" />
-      </div>
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(52,211,153,0.12),transparent_35%),radial-gradient(circle_at_80%_10%,rgba(167,139,250,0.10),transparent_30%),radial-gradient(circle_at_50%_90%,rgba(34,211,238,0.08),transparent_35%)]" />
+    <div className="fixed inset-0 -z-10 overflow-hidden bg-[#060910]">
+      {/* Subtle grid pattern */}
+      <div
+        className="absolute inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage: "linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)",
+          backgroundSize: "32px 32px",
+        }}
+      />
+      {/* Ambient glowing orbs */}
+      <div className="absolute -top-40 -left-40 h-[560px] w-[560px] rounded-full blur-[140px] opacity-20 pointer-events-none" style={{ background: "#10b981" }} />
+      <div className="absolute top-1/3 -right-40 h-[500px] w-[500px] rounded-full blur-[140px] opacity-15 pointer-events-none" style={{ background: "#6366f1" }} />
+      <div className="absolute -bottom-40 left-1/4 h-[520px] w-[520px] rounded-full blur-[140px] opacity-15 pointer-events-none" style={{ background: "#06b6d4" }} />
     </div>
   )
 }
@@ -57,6 +63,46 @@ export default function AdminPortalPage() {
   const [disabledPage, setDisabledPage] = useState("")
   const [disabledReason, setDisabledReason] = useState("")
   const [status, setStatus] = useState<{ text: string; error: boolean } | null>(null)
+  const [refreshing, setRefreshing] = useState(false)
+
+  // Strictly isolate Admin Portal from Poster Mode and enforce dark command styling
+  useEffect(() => {
+    if (typeof document === "undefined") return
+    const root = document.documentElement
+    const body = document.body
+
+    const prevTheme = root.getAttribute("data-theme")
+    const prevLandingMode = root.getAttribute("data-landing-mode")
+    const prevBg = body.style.backgroundColor
+
+    root.setAttribute("data-admin", "true")
+    body.setAttribute("data-admin", "true")
+    root.setAttribute("data-theme", "dark")
+    root.setAttribute("data-landing-mode", "dark")
+    body.setAttribute("data-theme", "dark")
+    body.setAttribute("data-landing-mode", "dark")
+    body.style.backgroundColor = "#060910"
+
+    return () => {
+      root.removeAttribute("data-admin")
+      body.removeAttribute("data-admin")
+      if (prevTheme) {
+        root.setAttribute("data-theme", prevTheme)
+        body.setAttribute("data-theme", prevTheme)
+      } else {
+        root.removeAttribute("data-theme")
+        body.removeAttribute("data-theme")
+      }
+      if (prevLandingMode) {
+        root.setAttribute("data-landing-mode", prevLandingMode)
+        body.setAttribute("data-landing-mode", prevLandingMode)
+      } else {
+        root.removeAttribute("data-landing-mode")
+        body.removeAttribute("data-landing-mode")
+      }
+      body.style.backgroundColor = prevBg
+    }
+  }, [])
 
   const showStatus = (text: string, error = false) => {
     setStatus({ text, error })
@@ -83,6 +129,13 @@ export default function AdminPortalPage() {
     document.addEventListener("mousedown", close)
     return () => document.removeEventListener("mousedown", close)
   }, [moreOpen])
+
+  const handleManualRefresh = async () => {
+    setRefreshing(true)
+    await refreshAdminStatus()
+    setRefreshing(false)
+    showStatus("Admin status refreshed")
+  }
 
   const handlePost = async () => {
     const r = await addAnnouncement(announcementType, announcementTitle, announcementBody)
@@ -145,13 +198,6 @@ export default function AdminPortalPage() {
     }
     setPassword("")
   }
-
-  const metrics = useMemo(() => ([
-    { icon: Users, label: "Active sessions", value: analytics.activeSessionCount || 0, color: "#34d399" },
-    { icon: BarChart3, label: "Successful logins", value: analytics.loginSuccessCount || 0, color: "#60a5fa" },
-    { icon: Smartphone, label: "Mobile logins", value: analytics.mobileLoginSuccessCount || 0, color: "#a78bfa" },
-    { icon: Wrench, label: "Failed logins", value: analytics.loginFailureCount || 0, color: "#f87171" },
-  ]), [analytics.activeSessionCount, analytics.loginFailureCount, analytics.loginSuccessCount, analytics.mobileLoginSuccessCount])
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -224,98 +270,150 @@ export default function AdminPortalPage() {
   // ── LOGIN VIEW ──
   if (!isAdminAuthenticated) {
     return (
-      <>
-        <style>{`
-          .admin-morph { border-radius: 46% 54% 62% 38% / 45% 38% 62% 55%; animation: adminMorph 14s ease-in-out infinite alternate; box-shadow: inset 0 0 80px rgba(52,211,153,.06); }
-          .admin-morph-alt { animation-delay: -6s; }
-          @keyframes adminMorph {
-            from { border-radius: 46% 54% 62% 38% / 45% 38% 62% 55%; transform: translate3d(0,0,0) rotate(0deg); }
-            to { border-radius: 62% 38% 44% 56% / 55% 60% 40% 45%; transform: translate3d(24px,-20px,0) rotate(22deg); }
-          }
-          .admin-input { width: 100%; height: 48px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.10); background: linear-gradient(180deg, rgba(8,11,16,0.95), rgba(7,10,14,0.9)); color: #d4d4d8; padding-left: 40px; padding-right: 12px; outline: none; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); transition: border-color 0.2s; font-size: 14px; }
-          .admin-input:focus { border-color: rgba(52,211,153,0.4); box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 0 0 3px rgba(52,211,153,0.08); }
-          .admin-input::placeholder { color: #52525b; }
-          .admin-btn { width: 100%; border-radius: 14px; border: 1px solid rgba(255,255,255,0.16); cursor: pointer; height: 50px; font-weight: 900; font-size: 17px; color: #07120d; background: linear-gradient(135deg, #34d399, #10b981); box-shadow: 0 12px 28px rgba(16,185,129,0.30); transition: all 0.2s; letter-spacing: 0.01em; }
-          .admin-btn:hover { box-shadow: 0 16px 36px rgba(16,185,129,0.40); transform: translateY(-1px); }
-          .admin-btn:active { transform: translateY(0); box-shadow: 0 6px 16px rgba(16,185,129,0.25); }
-          .admin-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-          @media (max-width: 640px) {
-            .admin-morph { height: 260px !important; width: 260px !important; animation-duration: 18s; box-shadow: inset 0 0 40px rgba(52,211,153,.04); }
-            .admin-morph:nth-child(1) { left: -140px !important; top: -30px !important; }
-            .admin-morph:nth-child(2) { right: -140px !important; top: 160px !important; }
-            .admin-morph:nth-child(3) { left: 5vw !important; bottom: -120px !important; }
-          }
-          @media (prefers-reduced-motion: reduce) {
-            .admin-morph { animation: none !important; }
-          }
-        `}</style>
+      <div className="relative min-h-dvh flex items-center justify-center p-4 sm:p-6" style={{ background: "#060910" }}>
         <AdminLoginBackground />
-        <div className="relative flex min-h-dvh items-center justify-center px-4 sm:px-6">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
-            <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-white/[0.035] p-6 backdrop-blur-2xl sm:p-8" style={{ boxShadow: "0 24px 64px rgba(0,0,0,0.50)" }}>
-              <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full blur-3xl" style={{ background: "#34d399", opacity: 0.10 }} />
-              <div className="absolute -bottom-16 -left-16 h-40 w-40 rounded-full blur-3xl" style={{ background: "#06b6d4", opacity: 0.08 }} />
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
+          <div
+            className="relative overflow-hidden rounded-[28px] p-6 sm:p-8 backdrop-blur-2xl"
+            style={{
+              background: "linear-gradient(180deg, rgba(14,20,32,0.92) 0%, rgba(9,13,22,0.95) 100%)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              boxShadow: "0 28px 80px rgba(0,0,0,0.7), 0 0 40px rgba(52,211,153,0.06)",
+            }}
+          >
+            {/* Top Back Link */}
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 text-xs text-zinc-400 mb-6 transition-colors hover:text-white"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" /> Back to main site
+            </Link>
 
-              <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-zinc-400 mb-5 transition-colors hover:text-zinc-300">
-                <ArrowLeft className="h-3.5 w-3.5" /> Back to home
-              </Link>
-
-              <div className="text-center mb-6">
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border bg-zinc-950/50" style={{ borderColor: "rgba(52,211,153,0.267)", color: "#34d399" }}>
-                  <Shield className="h-6 w-6" />
-                </div>
-                <h1 className="font-display text-2xl font-black tracking-tight text-zinc-50 sm:text-[26px]">Admin Sign In</h1>
-                <p className="mt-2 text-sm text-zinc-400">Authorized personnel only.</p>
+            <div className="text-center mb-6">
+              <div
+                className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl shadow-xl"
+                style={{
+                  background: "linear-gradient(135deg, rgba(52,211,153,0.22), rgba(6,182,212,0.18))",
+                  border: "1px solid rgba(52,211,153,0.35)",
+                  color: "#34d399",
+                }}
+              >
+                <Shield className="h-7 w-7" />
               </div>
-
-              <form onSubmit={submitAdminLogin} className="flex flex-col gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-[0.12em] text-zinc-500">Admin Username</label>
-                  <div className="relative">
-                    <Shield className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: "#52525b" }} />
-                    <input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Admin username" autoComplete="username" required className="admin-input" />
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-[0.12em] text-zinc-500">Password</label>
-                  <div className="relative">
-                    <Lock className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: "#52525b" }} />
-                    <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Admin password" autoComplete="current-password" required className="admin-input" style={{ paddingRight: 44 }} />
-                    <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-lg border bg-white/[0.03] text-zinc-500 hover:text-zinc-300 transition-colors" style={{ width: 28, height: 28, borderColor: "rgba(255,255,255,0.1)" }}>
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                {error && (
-                  <div className="flex gap-2 rounded-xl border p-2.5 text-sm" style={{ borderColor: "rgba(248,113,113,0.18)", background: "rgba(248,113,113,0.07)", color: "#f87171" }}>
-                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />{error}
-                  </div>
-                )}
-
-                <button type="submit" disabled={adminLoading} className="admin-btn">
-                  {adminLoading ? (
-                    <span className="inline-flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />Signing in...</span>
-                  ) : (
-                    <span className="inline-flex items-center gap-2"><Lock className="h-4 w-4" />Enter Admin Portal</span>
-                  )}
-                </button>
-              </form>
-
-              <p className="mt-5 text-center text-[11px] leading-relaxed text-zinc-600">
-                Admin access is separate from student login.
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 mb-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-emerald-400">
+                  SECURE ADMIN CONSOLE
+                </span>
+              </div>
+              <h1 className="font-display text-2xl sm:text-3xl font-black tracking-tight text-white mt-1">
+                Admin Sign In
+              </h1>
+              <p className="mt-1 text-xs sm:text-sm text-zinc-400">
+                SRMIST KTR System Core Management
               </p>
             </div>
-          </motion.div>
-        </div>
-      </>
+
+            <form onSubmit={submitAdminLogin} className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-mono font-bold uppercase tracking-[0.14em] text-zinc-400">
+                  Admin Identity
+                </label>
+                <div className="relative">
+                  <Shield className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                  <input
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Admin username"
+                    autoComplete="username"
+                    required
+                    className="w-full h-12 rounded-xl pl-10 pr-4 text-sm text-white placeholder:text-zinc-600 outline-none transition-all"
+                    style={{
+                      background: "rgba(6,9,16,0.9)",
+                      border: "1px solid rgba(255,255,255,0.12)",
+                    }}
+                    onFocus={(e) => { e.currentTarget.style.borderColor = "#34d399"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(52,211,153,0.15)" }}
+                    onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)"; e.currentTarget.style.boxShadow = "none" }}
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-mono font-bold uppercase tracking-[0.14em] text-zinc-400">
+                  Secret Key
+                </label>
+                <div className="relative">
+                  <Lock className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Admin password"
+                    autoComplete="current-password"
+                    required
+                    className="w-full h-12 rounded-xl pl-10 pr-12 text-sm text-white placeholder:text-zinc-600 outline-none transition-all"
+                    style={{
+                      background: "rgba(6,9,16,0.9)",
+                      border: "1px solid rgba(255,255,255,0.12)",
+                    }}
+                    onFocus={(e) => { e.currentTarget.style.borderColor = "#34d399"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(52,211,153,0.15)" }}
+                    onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)"; e.currentTarget.style.boxShadow = "none" }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {error && (
+                <div
+                  className="flex items-center gap-2 rounded-xl p-3 text-xs"
+                  style={{
+                    background: "rgba(248,113,113,0.12)",
+                    border: "1px solid rgba(248,113,113,0.25)",
+                    color: "#fda4af",
+                  }}
+                >
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={adminLoading}
+                className="w-full h-12 mt-2 rounded-xl font-mono text-xs sm:text-sm font-black uppercase tracking-wider transition-all cursor-pointer bg-gradient-to-r from-emerald-400 to-teal-400 text-zinc-950 hover:brightness-110 shadow-lg shadow-emerald-500/25 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {adminLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin text-zinc-950" />
+                    <span>Verifying...</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock className="h-4 w-4 text-zinc-950" />
+                    <span>Authenticate Console</span>
+                  </>
+                )}
+              </button>
+            </form>
+
+            <p className="mt-6 text-center text-[11px] font-mono text-zinc-500 leading-relaxed">
+              Protected access node · Session audited via Cloudflare
+            </p>
+          </div>
+        </motion.div>
+      </div>
     )
   }
 
   // ── DASHBOARD VIEW ──
   return (
-    <div className="min-h-screen" style={{ background: "#07090f" }}>
+    <div className="min-h-screen text-zinc-100 selection:bg-emerald-400 selection:text-black" style={{ background: "#060910" }}>
       <style>{`
         @media (max-width: 1023px) {
           .admin-dash-main { padding-bottom: calc(env(safe-area-inset-bottom) + 80px); }
@@ -323,34 +421,81 @@ export default function AdminPortalPage() {
       `}</style>
 
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-40" style={{
-        background: "linear-gradient(180deg, color-mix(in srgb, #09090b 95%, transparent), color-mix(in srgb, #09090b 72%, transparent))",
-        backdropFilter: "blur(24px) saturate(180%)",
-        WebkitBackdropFilter: "blur(24px) saturate(180%)",
-        borderBottom: "1px solid rgba(255,255,255,0.05)",
-        boxShadow: "0 12px 40px rgba(0,0,0,0.3)",
-      }}>
-        <div className="mx-auto flex h-[52px] w-full items-center px-3 sm:px-6">
-          <div className="flex items-center gap-2 flex-1">
-            <Link href="/" className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
-              <ArrowLeft className="w-3.5 h-3.5" style={{ color: "#52525b" }} />
+      <header
+        className="fixed top-0 left-0 right-0 z-40 h-14 sm:h-16 flex items-center px-4 sm:px-6"
+        style={{
+          background: "rgba(7,11,18,0.92)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+        }}
+      >
+        <div className="mx-auto flex w-full items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              className="w-9 h-9 rounded-xl flex items-center justify-center transition-colors hover:bg-white/[0.08]"
+              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
+              title="Back to home"
+            >
+              <ArrowLeft className="w-4 h-4 text-zinc-400 hover:text-white" />
             </Link>
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, rgba(52,211,153,0.28), rgba(56,189,248,0.22))", border: "1px solid rgba(255,255,255,0.14)" }}>
-                <Shield className="w-3 h-3" style={{ color: "#6ee7b7" }} />
+            <div className="flex items-center gap-2.5">
+              <div
+                className="w-8 h-8 rounded-xl flex items-center justify-center shadow-md"
+                style={{
+                  background: "linear-gradient(135deg, rgba(52,211,153,0.25), rgba(6,182,212,0.2))",
+                  border: "1px solid rgba(52,211,153,0.3)",
+                  color: "#34d399",
+                }}
+              >
+                <Shield className="w-4 h-4" />
               </div>
-              <span className="text-sm font-black text-zinc-100 font-display tracking-tight">Admin</span>
-              <span className="text-[8px] font-bold px-1.5 py-0.5 rounded" style={{ background: "rgba(52,211,153,0.12)", color: "#34d399" }}>LIVE</span>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-black text-white font-display tracking-tight">edutechsrm</span>
+                  <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                    CONSOLE v2
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 flex-1 justify-end">
-            <span className="hidden sm:block text-[10px] text-zinc-600">Active session</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <button onClick={handleLogout}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
-              style={{ background: "rgba(248,113,113,0.1)", color: "#fda4af", border: "1px solid rgba(248,113,113,0.15)" }}>
-              <LogOut className="w-3 h-3" />
+          <div className="flex items-center gap-2.5">
+            {/* Active sessions indicator */}
+            <div
+              className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-mono"
+              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-zinc-400">Sessions:</span>
+              <span className="font-bold text-white">{analytics.activeSessionCount || 0}</span>
+            </div>
+
+            {/* Refresh button */}
+            <button
+              onClick={handleManualRefresh}
+              disabled={refreshing}
+              className="p-2 rounded-xl text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
+              title="Refresh Data"
+            >
+              <Loader2 className={`w-4 h-4 ${refreshing ? "animate-spin text-emerald-400" : ""}`} />
+            </button>
+
+            {/* Sign out */}
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer hover:bg-rose-500/20"
+              style={{
+                background: "rgba(244,63,94,0.12)",
+                color: "#fda4af",
+                border: "1px solid rgba(244,63,94,0.25)",
+              }}
+            >
+              <LogOut className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Sign Out</span>
             </button>
           </div>
@@ -359,66 +504,91 @@ export default function AdminPortalPage() {
 
       {/* Status toast */}
       {status && (
-        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 px-4 py-3 rounded-xl text-sm flex items-center gap-2 shadow-lg"
+        <div
+          className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-3 rounded-2xl text-xs sm:text-sm font-mono flex items-center gap-2.5 shadow-2xl"
           style={{
-            background: status.error ? "rgba(248,113,113,0.12)" : "rgba(52,211,153,0.12)",
-            color: status.error ? "#fda4af" : "#34d399",
-            border: status.error ? "1px solid rgba(248,113,113,0.2)" : "1px solid rgba(52,211,153,0.2)",
-            backdropFilter: "blur(12px)",
-          }}>
+            background: status.error ? "rgba(244,63,94,0.92)" : "rgba(16,185,129,0.92)",
+            color: "#ffffff",
+            backdropFilter: "blur(16px)",
+            border: "1px solid rgba(255,255,255,0.2)",
+          }}
+        >
           {status.error ? <AlertCircle className="w-4 h-4 shrink-0" /> : <Check className="w-4 h-4 shrink-0" />}
-          {status.text}
+          <span>{status.text}</span>
         </div>
       )}
 
-      {/* Main content with sidebar */}
-      <div className="w-full lg:grid lg:grid-cols-[240px_minmax(0,1fr)]">
+      {/* Main layout */}
+      <div className="w-full lg:grid lg:grid-cols-[260px_minmax(0,1fr)] max-w-7xl mx-auto">
         {/* Desktop sidebar */}
-        <aside className="hidden lg:block lg:sticky lg:top-[52px] pt-[72px] lg:pl-6">
-          <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(24,24,27,0.6)", border: "1px solid rgba(255,255,255,0.04)" }}>
-            <div className="p-4 space-y-1">
+        <aside className="hidden lg:block lg:sticky lg:top-[64px] pt-6 pl-4 lg:pl-6 h-[calc(100vh-64px)]">
+          <div
+            className="rounded-2xl p-3 flex flex-col justify-between h-[calc(100vh-100px)] overflow-y-auto"
+            style={{
+              background: "linear-gradient(180deg, rgba(13,19,30,0.85) 0%, rgba(8,12,20,0.9) 100%)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              boxShadow: "0 16px 40px rgba(0,0,0,0.4)",
+            }}
+          >
+            <div className="space-y-1">
+              <p className="px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-[0.18em] text-zinc-500">
+                NAVIGATION
+              </p>
               {ADMIN_TABS.map((tab) => {
                 const Icon = tab.icon
                 const active = activeTab === tab.id
                 return (
-                  <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all cursor-pointer relative"
                     style={{
-                      width: "100%", display: "flex", alignItems: "center", gap: 10,
-                      padding: "9px 12px", borderRadius: 10, cursor: "pointer",
-                      border: "none", background: active ? `${tab.color}0d` : "transparent",
-                      transition: "background 0.15s", position: "relative",
+                      background: active ? `linear-gradient(135deg, ${tab.color}1c, ${tab.color}08)` : "transparent",
+                      border: active ? `1px solid ${tab.color}35` : "1px solid transparent",
                     }}
-                    onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = "rgba(255,255,255,0.03)" }}
-                    onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = "transparent" }}
                   >
-                    {active && (
-                      <div style={{ position: "absolute", left: 0, top: 6, bottom: 6, width: 3, borderRadius: "0 3px 3px 0", background: tab.color }} />
-                    )}
-                    <div style={{
-                      width: 32, height: 32, borderRadius: 8,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      background: active ? `${tab.color}18` : "rgba(255,255,255,0.03)", flexShrink: 0,
-                    }}>
-                      <Icon style={{ width: 15, height: 15, color: active ? tab.color : "#52525b" }} />
+                    <div
+                      className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all"
+                      style={{
+                        background: active ? `${tab.color}25` : "rgba(255,255,255,0.04)",
+                        color: active ? tab.color : "#71717a",
+                      }}
+                    >
+                      <Icon className="w-4 h-4" />
                     </div>
-                    <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
-                      <p style={{ fontSize: 13, fontWeight: active ? 700 : 500, color: active ? "#e4e4e7" : "#a1a1aa", margin: 0, lineHeight: 1.3 }}>
-                        {tab.label}
-                      </p>
-                    </div>
+                    <span
+                      className="text-xs font-bold flex-1 text-left tracking-tight"
+                      style={{ color: active ? "#ffffff" : "#a1a1aa" }}
+                    >
+                      {tab.label}
+                    </span>
                     {active && (
-                      <div style={{ width: 5, height: 5, borderRadius: "50%", background: tab.color, flexShrink: 0 }} />
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: tab.color }} />
                     )}
                   </button>
                 )
               })}
             </div>
+
+            {/* Sidebar telemetry badge */}
+            <div
+              className="p-3 rounded-xl text-center mt-4"
+              style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}
+            >
+              <p className="text-[10px] font-mono uppercase text-zinc-500 tracking-wider">SRMIST KTR · CLOUDFLARE</p>
+              <p className="text-[10px] font-mono text-emerald-400 mt-0.5">TLS 1.3 · ZERO STORED PASSWORDS</p>
+            </div>
           </div>
         </aside>
 
         {/* Main content */}
-        <main className="admin-dash-main relative pt-[68px] px-3 sm:px-6 lg:pr-8 pb-4">
-          <motion.div key={activeTab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
+        <main className="admin-dash-main relative pt-20 sm:pt-24 px-4 sm:px-6 lg:pr-8 pb-12">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.18 }}
+          >
             {renderTabContent()}
           </motion.div>
         </main>

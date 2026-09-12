@@ -143,10 +143,10 @@
   --color-sidebar-border: rgba(255, 255, 255, 0.04);
 }
 
-html[data-theme="poster"]:not([data-landing-mode="night"]):not([data-theme="dark"]),
-html[data-landing-mode="poster"]:not([data-landing-mode="night"]):not([data-theme="dark"]),
-body[data-theme="poster"]:not([data-landing-mode="night"]):not([data-theme="dark"]),
-body[data-landing-mode="poster"]:not([data-landing-mode="night"]):not([data-theme="dark"]) {
+html:not([data-admin])[data-theme="poster"]:not([data-landing-mode="night"]):not([data-theme="dark"]),
+html:not([data-admin])[data-landing-mode="poster"]:not([data-landing-mode="night"]):not([data-theme="dark"]),
+body:not([data-admin])[data-theme="poster"]:not([data-landing-mode="night"]):not([data-theme="dark"]),
+body:not([data-admin])[data-landing-mode="poster"]:not([data-landing-mode="night"]):not([data-theme="dark"]) {
   --page-bg: #f7f5f0;
   --card-bg: #ffffff;
   --card-bg-hover: #fcfbfa;
@@ -204,8 +204,10 @@ body[data-landing-mode="poster"]:not([data-landing-mode="night"]):not([data-them
 }
 
 /* ── Swiss Brutalist / Poster Mode App Styling ── */
-[data-theme="poster"],
-[data-landing-mode="poster"] {
+html:not([data-admin])[data-theme="poster"],
+html:not([data-admin])[data-landing-mode="poster"],
+body:not([data-admin])[data-theme="poster"],
+body:not([data-admin])[data-landing-mode="poster"] {
   /* Surface cards across all app pages */
   .surface-card,
   .tactile-card,
@@ -781,23 +783,23 @@ body[data-landing-mode="poster"]:not([data-landing-mode="night"]):not([data-them
 }
 
 /* ── Poster Theme Global Modal, Popover & Dialog Synchronization ── */
-[data-theme="poster"] [data-slot="dialog-overlay"],
-[data-landing-mode="poster"] [data-slot="dialog-overlay"],
-[data-theme="poster"] [data-slot="alert-dialog-overlay"],
-[data-landing-mode="poster"] [data-slot="alert-dialog-overlay"] {
+html:not([data-admin]) [data-theme="poster"] [data-slot="dialog-overlay"],
+html:not([data-admin]) [data-landing-mode="poster"] [data-slot="dialog-overlay"],
+html:not([data-admin]) [data-theme="poster"] [data-slot="alert-dialog-overlay"],
+html:not([data-admin]) [data-landing-mode="poster"] [data-slot="alert-dialog-overlay"] {
   background: rgba(0, 0, 0, 0.45) !important;
   backdrop-filter: blur(8px) !important;
   -webkit-backdrop-filter: blur(8px) !important;
 }
 
-[data-theme="poster"] [data-slot="dialog-content"],
-[data-landing-mode="poster"] [data-slot="dialog-content"],
-[data-theme="poster"] [data-slot="alert-dialog-content"],
-[data-landing-mode="poster"] [data-slot="alert-dialog-content"],
-[data-theme="poster"] [data-slot="popover-content"],
-[data-landing-mode="poster"] [data-slot="popover-content"],
-[data-theme="poster"] [data-slot="drawer-content"],
-[data-landing-mode="poster"] [data-slot="drawer-content"] {
+html:not([data-admin]) [data-theme="poster"] [data-slot="dialog-content"],
+html:not([data-admin]) [data-landing-mode="poster"] [data-slot="dialog-content"],
+html:not([data-admin]) [data-theme="poster"] [data-slot="alert-dialog-content"],
+html:not([data-admin]) [data-landing-mode="poster"] [data-slot="alert-dialog-content"],
+html:not([data-admin]) [data-theme="poster"] [data-slot="popover-content"],
+html:not([data-admin]) [data-landing-mode="poster"] [data-slot="popover-content"],
+html:not([data-admin]) [data-theme="poster"] [data-slot="drawer-content"],
+html:not([data-admin]) [data-landing-mode="poster"] [data-slot="drawer-content"] {
   background-color: #ffffff !important;
   color: #111111 !important;
   border: 2.5px solid #111111 !important;
@@ -805,9 +807,9 @@ body[data-landing-mode="poster"]:not([data-landing-mode="night"]):not([data-them
   border-radius: 20px !important;
 }
 
-[data-theme="poster"] [data-slot="dialog-content"] input:not([type="checkbox"]):not([type="radio"]),
-[data-landing-mode="poster"] [data-slot="dialog-content"] input:not([type="checkbox"]):not([type="radio"]),
-[data-theme="poster"] [role="dialog"] input:not([type="checkbox"]):not([type="radio"]) {
+html:not([data-admin]) [data-theme="poster"] [data-slot="dialog-content"] input:not([type="checkbox"]):not([type="radio"]),
+html:not([data-admin]) [data-landing-mode="poster"] [data-slot="dialog-content"] input:not([type="checkbox"]):not([type="radio"]),
+html:not([data-admin]) [data-theme="poster"] [role="dialog"] input:not([type="checkbox"]):not([type="radio"]) {
   background-color: #ffffff !important;
   color: #111111 !important;
   border: 2px solid #111111 !important;
