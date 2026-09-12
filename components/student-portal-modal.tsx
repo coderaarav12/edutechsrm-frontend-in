@@ -431,12 +431,12 @@ export function StudentPortalModal() {
               </motion.div>
             )}
 
-            {/* Action Button */}
-            <div className="pt-1">
+            {/* Action Buttons */}
+            <div className="pt-1 flex flex-col gap-2">
               <button
                 type="submit"
                 disabled={isSyncing || captchaLoading || !captcha.trim()}
-                className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                className={`w-full py-2.5 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 ${
                   isPoster
                     ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] hover:bg-[#222222] disabled:opacity-40"
                     : "text-zinc-950 bg-emerald-400 hover:bg-emerald-300 shadow-md shadow-emerald-500/20 disabled:opacity-40"
@@ -453,6 +453,18 @@ export function StudentPortalModal() {
                     {isCaptchaOnlyMode ? "Verify & Resync" : "Connect & Save"}
                   </>
                 )}
+              </button>
+
+              <button
+                type="button"
+                onClick={closePortalLogin}
+                className={`w-full py-2 px-4 rounded-xl text-xs font-bold transition-all text-center ${
+                  isPoster
+                    ? "bg-[#f7f5f0] text-[#111111] border-2 border-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-[#eae6dd]"
+                    : "bg-white/5 text-zinc-400 hover:text-zinc-200 hover:bg-white/10"
+                }`}
+              >
+                Skip for now
               </button>
             </div>
           </form>

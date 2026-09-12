@@ -1032,7 +1032,11 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
 
       {/* ── Desktop: floating AI chat button ── */}
       <button
-        className="hidden lg:flex fixed z-50 items-center"
+        className={`hidden lg:flex fixed z-50 items-center transition-all ${
+          isPoster
+            ? "bg-white border-2 border-[#111111] shadow-[4px_4px_0px_#111111] hover:shadow-[5px_5px_0px_#111111] hover:translate-x-[-1px] hover:translate-y-[-1px]"
+            : "bg-zinc-900 border border-white/10 shadow-[0_16px_48px_rgba(0,0,0,0.6)] hover:border-purple-400/40"
+        }`}
         onClick={() => {
           sessionStorage.setItem("ai_context", "navbar")
           handleTab("ai")
@@ -1041,37 +1045,29 @@ export function Navbar({ activeTab, setActiveTab, minimised, setMinimised }: Nav
           bottom: "calc(env(safe-area-inset-bottom) + 24px)",
           right: 24,
           gap: 12,
-          padding: "14px 24px 14px 20px",
+          padding: "12px 22px 12px 16px",
           borderRadius: 9999,
-          background: "color-mix(in srgb, var(--card-solid, #18181b) 95%, transparent)",
-          border: "1px solid rgba(167,139,250,0.2)",
-          boxShadow: "0 16px 48px rgba(0,0,0,0.5)",
           cursor: "pointer",
           outline: "none",
         }}
       >
-        <div style={{
-          width: 36,
-          height: 36,
-          borderRadius: "50%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "rgba(167,139,250,0.1)",
-          flexShrink: 0,
-        }}>
-          <Bot style={{ width: 18, height: 18, color: "#a78bfa" }} />
+        <div
+          className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-colors ${
+            isPoster
+              ? "bg-[#f7f5f0] border border-[#111111]"
+              : "bg-purple-500/15"
+          }`}
+        >
+          <Bot className={`w-4 h-4 ${isPoster ? "text-[#111111]" : "text-[#a78bfa]"}`} />
         </div>
-        <span style={{
-          fontSize: 14,
-          fontWeight: 700,
-          color: "var(--text-primary)",
-          fontFamily: "'Space Grotesk', sans-serif",
-          whiteSpace: "nowrap",
-        }}>
+        <span
+          className={`text-sm font-bold whitespace-nowrap font-display ${
+            isPoster ? "text-[#111111]" : "text-zinc-100"
+          }`}
+        >
           Hi, how can I help you?
         </span>
-        </button>
+      </button>
 
       <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
       <SignOutModal

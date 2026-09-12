@@ -165,20 +165,40 @@ export function StudentPortalProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  // Auto prompt popup on login if user is authenticated but not yet connected to student portal
+  // Auto prompt popup on login since CAPTCHA is needed every time
   useEffect(() => {
     if (typeof window === "undefined") return
     if (!isAuthenticated) return
 
-    const cached = readCachedPortalData()
-    if (!cached || (!cached.marks?.semesters?.length && !cached.attendance?.length)) {
-      const dismissed = localStorage.getItem(PORTAL_POPUP_DISMISSED_KEY)
-      if (!dismissed) {
-        const timer = setTimeout(() => {
-          setIsLoginModalOpen(true)
-        }, 2200)
-        return () => clearTimeout(timer)
-      }
+    let timer: NodeJS.Timeout | null = null
+
+    const checkAndPrompt = () => {
+      try {
+        const skipped = sessionStorage.getItem("edutechsrm_portal_skipped_session")
+        if (!skipped) {
+          timer = setTimeout(() => {
+            setIsLoginModalOpen(true)
+          }, 1500)
+        }
+      } catch {}
+    }
+
+    checkAndPrompt()
+
+    const handleLoginSuccess = () => {
+      try {
+        sessionStorage.removeItem("edutechsrm_portal_skipped_session")
+      } catch {}
+      if (timer) clearTimeout(timer)
+      timer = setTimeout(() => {
+        setIsLoginModalOpen(true)
+      }, 1500)
+    }
+
+    window.addEventListener("edutechsrm:login-success", handleLoginSuccess)
+    return () => {
+      if (timer) clearTimeout(timer)
+      window.removeEventListener("edutechsrm:login-success", handleLoginSuccess)
     }
   }, [isAuthenticated])
 
@@ -196,7 +216,9 @@ export function StudentPortalProvider({ children }: { children: ReactNode }) {
   const closePortalLogin = useCallback(() => {
     setIsLoginModalOpen(false)
     if (typeof window !== "undefined") {
-      try { localStorage.setItem(PORTAL_POPUP_DISMISSED_KEY, "1") } catch {}
+      try {
+        sessionStorage.setItem("edutechsrm_portal_skipped_session", "1")
+      } catch {}
     }
   }, [])
 
@@ -282,6 +304,12 @@ export function StudentPortalProvider({ children }: { children: ReactNode }) {
           password: pass,
           savedAt: new Date().toISOString(),
         })
+
+        if (typeof window !== "undefined") {
+          try {
+            sessionStorage.setItem("edutechsrm_portal_skipped_session", "1")
+          } catch {}
+        }
 
         setIsLoginModalOpen(false)
         return { success: true }

@@ -8,6 +8,7 @@ import {
   Gauge, Bot,
 } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
+import { useIsPosterTheme } from "@/lib/theme-context"
 import { LoginModal } from "./login-modal"
 import { AIPromoBadge } from "@/components/ai-promo-badge"
 
@@ -70,6 +71,7 @@ const fastSpring = { type: "spring" as const, stiffness: 200, damping: 20 }
 
 // ── Arc dial ───────────────────────────────────────────────────────────────────
 const CGPAArc = memo(function CGPAArc({ value, max = 10 }: { value: number; max?: number }) {
+  const isPoster = useIsPosterTheme()
   const cx = 80, cy = 80, r = 62
   const startAngle = 200, sweepAngle = 320
   const pct = Math.min(value / max, 1)
@@ -83,8 +85,7 @@ const CGPAArc = memo(function CGPAArc({ value, max = 10 }: { value: number; max?
     const large = sweep > 180 ? 1 : 0
     return `M ${s.x} ${s.y} A ${r} ${r} 0 ${large} 1 ${e.x} ${e.y}`
   }
-  const color = cgpaColor(value)
-  const grad = cgpaGradient(value)
+  const color = isPoster ? "#111111" : cgpaColor(value)
   const filledSweep = Math.max(pct * sweepAngle, 0.5)
 
   return (
@@ -92,17 +93,17 @@ const CGPAArc = memo(function CGPAArc({ value, max = 10 }: { value: number; max?
       <svg viewBox="0 0 160 160" className="w-full h-full">
         <defs>
           <linearGradient id="cgpa-grad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor={value >= 9 ? "#22d3ee" : value >= 7 ? "#34d399" : value >= 6 ? "#fcd34d" : "#f87171"} />
-            <stop offset="100%" stopColor={value >= 9 ? "#34d399" : value >= 7 ? "#4ade80" : value >= 6 ? "#fbbf24" : "#fb7185"} />
+            <stop offset="0%" stopColor={isPoster ? "#111111" : value >= 9 ? "#22d3ee" : value >= 7 ? "#34d399" : value >= 6 ? "#fcd34d" : "#f87171"} />
+            <stop offset="100%" stopColor={isPoster ? "#333333" : value >= 9 ? "#34d399" : value >= 7 ? "#4ade80" : value >= 6 ? "#fbbf24" : "#fb7185"} />
           </linearGradient>
         </defs>
         <path
           d={arcPath(startAngle, sweepAngle)}
-          fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="7" strokeLinecap="round"
+          fill="none" stroke={isPoster ? "rgba(17,17,17,0.12)" : "rgba(255,255,255,0.04)"} strokeWidth="8" strokeLinecap="round"
         />
         <motion.path
           d={arcPath(startAngle, filledSweep)}
-          fill="none" stroke="url(#cgpa-grad)" strokeWidth="7" strokeLinecap="round"
+          fill="none" stroke={isPoster ? "#111111" : "url(#cgpa-grad)"} strokeWidth="8" strokeLinecap="round"
           initial={{ pathLength: 0 }}
           animate={{ pathLength: 1 }}
           transition={{ duration: 1.2, ease: [0.25, 0.46, 0.45, 0.94] }}
@@ -115,13 +116,13 @@ const CGPAArc = memo(function CGPAArc({ value, max = 10 }: { value: number; max?
         >
           {value > 0 ? value.toFixed(2) : "—"}
         </motion.text>
-        <text x={cx} y={cy + 17} textAnchor="middle" fill="#a1a1aa" fontSize="8" fontWeight="700" letterSpacing="3">
+        <text x={cx} y={cy + 17} textAnchor="middle" fill={isPoster ? "#555555" : "#a1a1aa"} fontSize="8" fontWeight="800" letterSpacing="3">
           CGPA
         </text>
         <motion.text
           x={cx} y={cy + 31} textAnchor="middle"
-          fill={color} fontSize="7.5" fontWeight="600" opacity={0.7}
-          initial={{ opacity: 0 }} animate={{ opacity: 0.7 }} transition={{ delay: 0.6 }}
+          fill={color} fontSize="8" fontWeight="700" opacity={isPoster ? 0.9 : 0.7}
+          initial={{ opacity: 0 }} animate={{ opacity: isPoster ? 0.9 : 0.7 }} transition={{ delay: 0.6 }}
         >
           {value > 0 ? cgpaLabel(value) : ""}
         </motion.text>
@@ -132,6 +133,7 @@ const CGPAArc = memo(function CGPAArc({ value, max = 10 }: { value: number; max?
 
 // ── Grade Slider ──────────────────────────────────────────────────────────────
 const GradeSlider = memo(function GradeSlider({ value, onChange }: { value: string; onChange: (g: string) => void }) {
+  const isPoster = useIsPosterTheme()
   const currentIdx = ALL_GRADE_OPTIONS.indexOf(value || "—")
 
   return (
@@ -146,14 +148,24 @@ const GradeSlider = memo(function GradeSlider({ value, onChange }: { value: stri
             whileTap={{ scale: 0.9 }}
             layout
             transition={fastSpring}
-            className="flex-1 min-w-[26px] py-[5px] rounded-lg text-[10px] font-extrabold leading-none transition-colors duration-150"
-            style={{
-              background: sel ? (m ? m.bg : "rgba(255,255,255,0.08)") : "rgba(255,255,255,0.02)",
-              color: sel ? (m ? m.color : "#a1a1aa") : `${m ? m.color : "rgba(255,255,255,0.15)"}`,
-              border: sel
-                ? `1.5px solid ${m ? m.border : "rgba(255,255,255,0.2)"}`
-                : "1.5px solid transparent",
-            }}
+            className={`flex-1 min-w-[26px] py-[6px] rounded-lg text-[11px] font-black leading-none transition-all duration-150 ${
+              isPoster
+                ? sel
+                  ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111]"
+                  : "bg-[#f7f5f0] text-[#111111] border border-[#111111]/30 hover:border-[#111111] hover:bg-[#eae6dd]"
+                : "transition-colors"
+            }`}
+            style={
+              isPoster
+                ? undefined
+                : {
+                    background: sel ? (m ? m.bg : "rgba(255,255,255,0.08)") : "rgba(255,255,255,0.02)",
+                    color: sel ? (m ? m.color : "#a1a1aa") : `${m ? m.color : "rgba(255,255,255,0.15)"}`,
+                    border: sel
+                      ? `1.5px solid ${m ? m.border : "rgba(255,255,255,0.2)"}`
+                      : "1.5px solid transparent",
+                  }
+            }
           >
             {g}
           </motion.button>
@@ -165,22 +177,29 @@ const GradeSlider = memo(function GradeSlider({ value, onChange }: { value: stri
 
 // ── Stat Tile ──────────────────────────────────────────────────────────────────
 function StatTile({ label, value, color }: { label: string; value: string | number; color: string }) {
+  const isPoster = useIsPosterTheme()
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-xl py-3 text-center bg-zinc-900/50 ring-1 ring-white/[0.04]"
+      className={`rounded-xl py-3 text-center transition-all ${
+        isPoster
+          ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111]"
+          : "bg-zinc-900/50 ring-1 ring-white/[0.04]"
+      }`}
     >
       <motion.p
-        className="font-bold text-lg sm:text-2xl tracking-tight tabular-nums"
-        style={{ color }}
+        className="font-black text-lg sm:text-2xl tracking-tight tabular-nums"
+        style={{ color: isPoster ? "#111111" : color }}
         initial={{ scale: 0.5, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: "spring", stiffness: 150, damping: 12 }}
       >
         {value}
       </motion.p>
-      <p className="text-zinc-600 text-[9px] font-bold uppercase tracking-widest mt-1">
+      <p className={`text-[9px] font-bold uppercase tracking-widest mt-1 ${
+        isPoster ? "text-[#555555]" : "text-zinc-600"
+      }`}>
         {label}
       </p>
     </motion.div>
@@ -195,6 +214,7 @@ function SubjectCard({
   code: string; name: string; credits: number; grade: string; pct?: number;
   isOpen: boolean; onToggle: () => void; delay?: number;
 }) {
+  const isPoster = useIsPosterTheme()
   const meta = GRADE_META[grade] || { color: "#71717a", bg: "rgba(255,255,255,0.03)", border: "rgba(255,255,255,0.06)" }
 
   return (
@@ -202,40 +222,58 @@ function SubjectCard({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: delay * 0.04, ...spring }}
-      className="group bg-zinc-900/40 ring-1 ring-white/[0.04] rounded-xl overflow-hidden hover:ring-white/[0.08] transition-all duration-300"
+      className={`group rounded-xl overflow-hidden transition-all duration-300 ${
+        isPoster
+          ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] hover:translate-x-[1px] hover:translate-y-[1px]"
+          : "bg-zinc-900/40 ring-1 ring-white/[0.04] hover:ring-white/[0.08]"
+      }`}
     >
       <button onClick={onToggle} className="w-full p-3.5 sm:p-4 text-left flex items-center gap-3">
         <div
-          className="w-[3px] h-10 rounded-full shrink-0 transition-all duration-300"
+          className={`w-[4px] h-10 rounded-full shrink-0 transition-all duration-300 ${isPoster ? "border border-[#111111]" : ""}`}
           style={{ background: meta.color }}
         />
         <div className="flex-1 min-w-0">
-          <span className="text-zinc-600 text-[8px] uppercase font-bold tracking-[0.12em] block mb-[2px]">
+          <span className={`text-[9px] uppercase font-black tracking-[0.12em] block mb-[2px] ${
+            isPoster ? "text-[#555555]" : "text-zinc-600"
+          }`}>
             {code}
           </span>
-          <h4 className="font-semibold text-zinc-200 text-sm tracking-tight truncate leading-snug">
+          <h4 className={`font-bold text-sm tracking-tight truncate leading-snug ${
+            isPoster ? "text-[#111111]" : "text-zinc-200"
+          }`}>
             {name}
           </h4>
         </div>
         <div className="shrink-0 flex items-center gap-2">
           <div className="text-right">
             <span
-              className="inline-block text-[11px] font-black px-2.5 py-[3px] rounded-md leading-none transition-all"
-              style={{
-                color: meta.color,
-                background: meta.bg,
-                border: `1px solid ${meta.border}`,
-              }}
+              className={`inline-block text-[11px] font-black px-2.5 py-[3px] rounded-md leading-none transition-all ${
+                isPoster ? "bg-[#111111] text-white border border-[#111111] shadow-[1.5px_1.5px_0px_#111111]" : ""
+              }`}
+              style={
+                isPoster
+                  ? undefined
+                  : {
+                      color: meta.color,
+                      background: meta.bg,
+                      border: `1px solid ${meta.border}`,
+                    }
+              }
             >
               {grade}
             </span>
-            <p className="text-zinc-600 text-[7px] font-bold mt-1.5 tracking-wide">
+            <p className={`text-[8px] font-bold mt-1.5 tracking-wide ${
+              isPoster ? "text-[#555555]" : "text-zinc-600"
+            }`}>
               {credits}cr · {GRADE_POINTS[grade] ?? 0}pt
             </p>
           </div>
           <ChevronDown
             size={13}
-            className={`text-zinc-700 shrink-0 transition-all duration-300 ${isOpen ? "rotate-180" : ""}`}
+            className={`shrink-0 transition-all duration-300 ${
+              isPoster ? "text-[#111111]" : "text-zinc-700"
+            } ${isOpen ? "rotate-180" : ""}`}
           />
         </div>
       </button>
@@ -247,21 +285,25 @@ function SubjectCard({
             transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="overflow-hidden"
           >
-            <div className="border-t border-white/[0.04] mx-3.5 sm:mx-4" />
+            <div className={`border-t mx-3.5 sm:mx-4 ${isPoster ? "border-[#111111]/15" : "border-white/[0.04]"}`} />
             <div className="px-3.5 sm:px-4 pb-3.5 sm:pb-4 pt-2.5">
               <div className="flex items-center gap-3">
-                <div className="flex-1 h-1.5 bg-zinc-950 rounded-full overflow-hidden ring-1 ring-white/[0.03]">
+                <div className={`flex-1 h-2 rounded-full overflow-hidden ${
+                  isPoster ? "bg-[#e8e5dc] border border-[#111111]/30" : "bg-zinc-950 ring-1 ring-white/[0.03]"
+                }`}>
                   <motion.div
                     className="h-full rounded-full"
                     style={{
-                      background: `linear-gradient(90deg, ${meta.color}88, ${meta.color})`,
+                      background: isPoster ? "#111111" : `linear-gradient(90deg, ${meta.color}88, ${meta.color})`,
                     }}
                     initial={{ width: 0 }}
                     animate={{ width: `${pct}%` }}
                     transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
                   />
                 </div>
-                <span className="text-zinc-500 text-[10px] font-bold tabular-nums">{pct}%</span>
+                <span className={`text-[10px] font-bold tabular-nums ${
+                  isPoster ? "text-[#111111]" : "text-zinc-500"
+                }`}>{pct}%</span>
               </div>
             </div>
           </motion.div>
@@ -273,6 +315,7 @@ function SubjectCard({
 
 // ── Internal CGPA Tab ──────────────────────────────────────────────────────────
 function InternalCGPA({ marks, courses }: { marks: any[]; courses: any[] }) {
+  const isPoster = useIsPosterTheme()
   const [expandedCode, setExpandedCode] = useState<string | null>(null)
 
   const creditMap = useMemo(() => {
@@ -339,10 +382,16 @@ function InternalCGPA({ marks, courses }: { marks: any[]; courses: any[] }) {
       <div className="space-y-4 sm:space-y-5">
 
         {/* CGPA Hero */}
-        <motion.div layout="position" className="bg-zinc-900/60 ring-1 ring-white/[0.04] rounded-2xl p-5 sm:p-7 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
+        <motion.div layout="position" className={`rounded-2xl p-5 sm:p-7 relative overflow-hidden transition-all ${
+          isPoster
+            ? "bg-white border-2 border-[#111111] shadow-[4px_4px_0px_#111111]"
+            : "bg-zinc-900/60 ring-1 ring-white/[0.04]"
+        }`}>
+          {!isPoster && <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />}
           <div className="relative z-10">
-            <p className="text-zinc-600 text-[9px] font-bold uppercase tracking-[0.15em] mb-5">
+            <p className={`text-[10px] font-black uppercase tracking-[0.15em] mb-5 ${
+              isPoster ? "text-[#555555]" : "text-zinc-600"
+            }`}>
               Internal Marks CGPA
             </p>
 
@@ -354,9 +403,15 @@ function InternalCGPA({ marks, courses }: { marks: any[]; courses: any[] }) {
               <StatTile label="Avg %" value={subjects.length > 0 ? `${avgPct}%` : "—"} color="#34d399" />
             </div>
 
-            <div className="mt-3 flex items-center gap-2 rounded-xl px-3 py-2.5 bg-zinc-900/50 ring-1 ring-white/[0.03]">
-              <Info size={11} className="text-zinc-600 shrink-0" />
-              <p className="text-[8px] text-zinc-600 leading-relaxed">
+            <div className={`mt-3 flex items-center gap-2 rounded-xl px-3 py-2.5 transition-all ${
+              isPoster
+                ? "bg-[#f7f5f0] border border-[#111111]/30"
+                : "bg-zinc-900/50 ring-1 ring-white/[0.03]"
+            }`}>
+              <Info size={11} className={`shrink-0 ${isPoster ? "text-[#111111]" : "text-zinc-600"}`} />
+              <p className={`text-[9px] font-bold leading-relaxed ${
+                isPoster ? "text-[#555555]" : "text-zinc-600"
+              }`}>
                 Estimated from internal marks · Credits synced from courses
               </p>
             </div>
@@ -376,11 +431,15 @@ function InternalCGPA({ marks, courses }: { marks: any[]; courses: any[] }) {
           ))}
           {subjects.length === 0 && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
-              <div className="w-12 h-12 mx-auto mb-4 rounded-2xl bg-zinc-900/60 ring-1 ring-white/[0.04] flex items-center justify-center">
-                <BookOpen size={22} className="text-zinc-600" />
+              <div className={`w-12 h-12 mx-auto mb-4 rounded-2xl flex items-center justify-center transition-all ${
+                isPoster
+                  ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] text-[#111111]"
+                  : "bg-zinc-900/60 ring-1 ring-white/[0.04] text-zinc-600"
+              }`}>
+                <BookOpen size={22} className={isPoster ? "text-[#111111]" : "text-zinc-600"} />
               </div>
-              <p className="text-sm font-semibold text-zinc-400">No marks data yet</p>
-              <p className="text-xs text-zinc-600 mt-1">Sync from SRM to see your grades</p>
+              <p className={`text-sm font-bold ${isPoster ? "text-[#111111]" : "text-zinc-400"}`}>No marks data yet</p>
+              <p className={`text-xs mt-1 font-medium ${isPoster ? "text-[#555555]" : "text-zinc-600"}`}>Sync from SRM to see your grades</p>
             </motion.div>
           )}
         </div>
@@ -391,6 +450,7 @@ function InternalCGPA({ marks, courses }: { marks: any[]; courses: any[] }) {
 
 // ── Final Exam Predictor Tab ──────────────────────────────────────────────────
 function FinalPredictor({ courses }: { courses: any[] }) {
+  const isPoster = useIsPosterTheme()
   const [subjects, setSubjects] = useState<PredSubject[]>([])
   const [synced, setSynced] = useState(false)
 
@@ -451,21 +511,37 @@ function FinalPredictor({ courses }: { courses: any[] }) {
       <div className="space-y-4 sm:space-y-5">
 
         {/* CGPA Hero */}
-        <motion.div layout="position" className="bg-zinc-900/60 ring-1 ring-white/[0.04] rounded-2xl p-5 sm:p-7 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
+        <motion.div layout="position" className={`rounded-2xl p-5 sm:p-7 relative overflow-hidden transition-all ${
+          isPoster
+            ? "bg-white border-2 border-[#111111] shadow-[4px_4px_0px_#111111]"
+            : "bg-zinc-900/60 ring-1 ring-white/[0.04]"
+        }`}>
+          {!isPoster && <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />}
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-5">
-              <p className="text-zinc-600 text-[9px] font-bold uppercase tracking-[0.15em]">
+              <p className={`text-[10px] font-black uppercase tracking-[0.15em] ${
+                isPoster ? "text-[#555555]" : "text-zinc-600"
+              }`}>
                 Final Exam Predictor
               </p>
-              <div className="flex gap-1.5">
+              <div className="flex gap-2">
                 <motion.button whileTap={{ scale: 0.88 }} onClick={resetGrades}
-                  className="w-7 h-7 rounded-lg flex items-center justify-center bg-zinc-900/50 ring-1 ring-white/[0.06] text-zinc-600 hover:text-zinc-300 hover:bg-zinc-800 transition-all"
+                  className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${
+                    isPoster
+                      ? "bg-[#f7f5f0] border-2 border-[#111111] shadow-[2px_2px_0px_#111111] text-[#111111] hover:bg-[#e8e5dc]"
+                      : "bg-zinc-900/50 ring-1 ring-white/[0.06] text-zinc-600 hover:text-zinc-300 hover:bg-zinc-800"
+                  }`}
+                  title="Reset grades"
                 >
                   <RotateCcw size={11} />
                 </motion.button>
                 <motion.button whileTap={{ scale: 0.88 }} onClick={syncFromCourses}
-                  className="w-7 h-7 rounded-lg flex items-center justify-center bg-emerald-500/10 ring-1 ring-emerald-500/15 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300 transition-all"
+                  className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${
+                    isPoster
+                      ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-[#2c2c2c]"
+                      : "bg-emerald-500/10 ring-1 ring-emerald-500/15 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300"
+                  }`}
+                  title="Sync courses"
                 >
                   <RefreshCw size={11} />
                 </motion.button>
@@ -487,11 +563,19 @@ function FinalPredictor({ courses }: { courses: any[] }) {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.08, ...spring }}
-          className="bg-zinc-900/40 ring-1 ring-white/[0.04] rounded-xl p-4 sm:p-5"
+          className={`rounded-xl p-4 sm:p-5 transition-all ${
+            isPoster
+              ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111]"
+              : "bg-zinc-900/40 ring-1 ring-white/[0.04]"
+          }`}
         >
           <div className="flex items-center gap-2 mb-3">
-            <Target size={12} className="text-zinc-500" />
-            <p className="text-[11px] font-bold text-zinc-200 tracking-tight">What‑if all ungraded get…</p>
+            <Target size={13} className={isPoster ? "text-[#111111]" : "text-zinc-500"} />
+            <p className={`text-[11px] font-black tracking-tight ${
+              isPoster ? "text-[#111111]" : "text-zinc-200"
+            }`}>
+              What‑if all ungraded get…
+            </p>
           </div>
           <div className="grid grid-cols-7 gap-1.5">
             {whatIf.map(({ grade, cgpa: c }, i) => {
@@ -502,11 +586,19 @@ function FinalPredictor({ courses }: { courses: any[] }) {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.02 * i, ...fastSpring }}
-                  className="text-[9px] font-bold uppercase tracking-widest py-2.5 rounded-lg text-center leading-tight"
-                  style={{ background: m.bg, color: m.color, border: `1px solid ${m.border}` }}
+                  className={`text-[9px] font-bold uppercase tracking-wider py-2 rounded-lg text-center leading-tight transition-all ${
+                    isPoster
+                      ? "bg-[#f7f5f0] border-2 border-[#111111] shadow-[2px_2px_0px_#111111] text-[#111111]"
+                      : ""
+                  }`}
+                  style={isPoster ? undefined : { background: m.bg, color: m.color, border: `1px solid ${m.border}` }}
                 >
-                  <p>{grade}</p>
-                  <p className="text-zinc-500 font-bold mt-1 text-[10px] tracking-tight">{c.toFixed(2)}</p>
+                  <p className={isPoster ? "font-black text-[#111111]" : ""}>{grade}</p>
+                  <p className={`font-black mt-1 text-[11px] tracking-tight ${
+                    isPoster ? "text-[#111111]" : "text-zinc-500"
+                  }`}>
+                    {c.toFixed(2)}
+                  </p>
                 </motion.div>
               )
             })}
@@ -523,32 +615,57 @@ function FinalPredictor({ courses }: { courses: any[] }) {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.03 * i + 0.12, ...spring }}
-                className="bg-zinc-900/40 ring-1 ring-white/[0.04] rounded-xl p-3.5 sm:p-4 hover:ring-white/[0.08] transition-all duration-300"
+                className={`rounded-xl p-3.5 sm:p-4 transition-all duration-300 ${
+                  isPoster
+                    ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111]"
+                    : "bg-zinc-900/40 ring-1 ring-white/[0.04] hover:ring-white/[0.08]"
+                }`}
               >
                 <div className="flex items-center gap-3 mb-3">
                   <div
-                    className="w-[3px] h-10 rounded-full shrink-0"
-                    style={{ background: meta ? meta.color : "rgba(255,255,255,0.08)" }}
+                    className={`w-[4px] h-10 rounded-full shrink-0 ${isPoster ? "border border-[#111111]" : ""}`}
+                    style={{
+                      background: meta
+                        ? meta.color
+                        : isPoster
+                        ? "#cfcac2"
+                        : "rgba(255,255,255,0.08)",
+                    }}
                   />
                   <div className="flex-1 min-w-0">
-                    <span className="text-zinc-600 text-[8px] uppercase font-bold tracking-[0.12em] block mb-[2px]">
+                    <span className={`text-[9px] uppercase font-black tracking-[0.12em] block mb-[2px] ${
+                      isPoster ? "text-[#555555]" : "text-zinc-600"
+                    }`}>
                       {s.code}
                     </span>
-                    <h4 className="font-semibold text-zinc-200 text-sm tracking-tight truncate leading-snug">
+                    <h4 className={`font-bold text-sm tracking-tight truncate leading-snug ${
+                      isPoster ? "text-[#111111]" : "text-zinc-200"
+                    }`}>
                       {s.name}
                     </h4>
-                    <p className="text-zinc-600 text-[9px] mt-1 tracking-wide">
+                    <p className={`text-[9px] font-bold mt-1 tracking-wide ${
+                      isPoster ? "text-[#555555]" : "text-zinc-600"
+                    }`}>
                       {s.credits} credits{meta && (
-                        <span style={{ color: meta.color }}> · {GRADE_POINTS[s.grade]} pts</span>
+                        <span style={{ color: isPoster ? "#111111" : meta.color }}> · {GRADE_POINTS[s.grade]} pts</span>
                       )}
                     </p>
                   </div>
                   <div className="shrink-0 text-center">
                     <span
-                      className="inline-block text-[11px] font-black px-2.5 py-[3px] rounded-md leading-none transition-all"
-                      style={meta
-                        ? { color: meta.color, background: meta.bg, border: `1px solid ${meta.border}` }
-                        : { color: "#27272a", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }
+                      className={`inline-block text-[11px] font-black px-2.5 py-[3px] rounded-md leading-none transition-all ${
+                        isPoster
+                          ? s.grade !== "—"
+                            ? "bg-[#111111] text-white border border-[#111111] shadow-[1.5px_1.5px_0px_#111111]"
+                            : "bg-[#f7f5f0] text-[#111111] border border-[#111111]/30 font-bold"
+                          : ""
+                      }`}
+                      style={
+                        isPoster
+                          ? undefined
+                          : (meta
+                            ? { color: meta.color, background: meta.bg, border: `1px solid ${meta.border}` }
+                            : { color: "#27272a", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" })
                       }
                     >
                       {s.grade}
@@ -562,11 +679,15 @@ function FinalPredictor({ courses }: { courses: any[] }) {
 
           {subjects.length === 0 && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
-              <div className="w-12 h-12 mx-auto mb-4 rounded-2xl bg-zinc-900/60 ring-1 ring-white/[0.04] flex items-center justify-center">
-                <Zap size={22} className="text-zinc-600" />
+              <div className={`w-12 h-12 mx-auto mb-4 rounded-2xl flex items-center justify-center transition-all ${
+                isPoster
+                  ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] text-[#111111]"
+                  : "bg-zinc-900/60 ring-1 ring-white/[0.04] text-zinc-600"
+              }`}>
+                <Zap size={22} className={isPoster ? "text-[#111111]" : "text-zinc-600"} />
               </div>
-              <p className="text-sm font-semibold text-zinc-400">No courses synced</p>
-              <p className="text-xs text-zinc-600 mt-1">Sync from SRM to start predicting</p>
+              <p className={`text-sm font-bold ${isPoster ? "text-[#111111]" : "text-zinc-400"}`}>No courses synced</p>
+              <p className={`text-xs mt-1 font-medium ${isPoster ? "text-[#555555]" : "text-zinc-600"}`}>Sync from SRM to start predicting</p>
             </motion.div>
           )}
         </div>
@@ -579,6 +700,7 @@ interface PredSubject { id: string; name: string; code: string; credits: number;
 
 // ── Main GradeX Page ──────────────────────────────────────────────────────────
 export function GradeXSection() {
+  const isPoster = useIsPosterTheme()
   const { isAuthenticated, courses, marks, isLoading, refreshData } = useAuth() as any
   const [isLoginOpen, setIsLoginOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<"internal" | "predictor">("internal")
@@ -587,15 +709,27 @@ export function GradeXSection() {
     return (
       <div className="min-h-full pt-[3.75rem] pb-20 px-3 sm:px-4 lg:px-8 lg:pb-8 w-full flex items-center justify-center">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
-          <div className="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 ring-1 ring-emerald-500/15">
-            <Gauge size={34} className="text-emerald-400" />
+          <div className={`w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center transition-all ${
+            isPoster
+              ? "bg-white border-2 border-[#111111] shadow-[4px_4px_0px_#111111]"
+              : "bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 ring-1 ring-emerald-500/15"
+          }`}>
+            <Gauge size={34} className={isPoster ? "text-[#111111]" : "text-emerald-400"} />
           </div>
-          <h2 className="text-3xl font-bold text-zinc-100 tracking-tight">GradeX</h2>
-          <p className="text-sm text-zinc-500 mt-2 mb-8 max-w-xs mx-auto leading-relaxed">
+          <h2 className={`text-3xl font-black tracking-tight ${
+            isPoster ? "text-[#111111]" : "text-zinc-100"
+          }`}>GradeX</h2>
+          <p className={`text-sm mt-2 mb-8 max-w-xs mx-auto leading-relaxed font-medium ${
+            isPoster ? "text-[#555555]" : "text-zinc-500"
+          }`}>
             Predict your final CGPA before results drop.
           </p>
           <motion.button whileTap={{ scale: 0.96 }} onClick={() => setIsLoginOpen(true)}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-500 to-emerald-400 text-zinc-950"
+            className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl font-black text-sm transition-all ${
+              isPoster
+                ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] hover:bg-[#222222]"
+                : "bg-gradient-to-r from-emerald-500 to-emerald-400 text-zinc-950"
+            }`}
           >
             <LogIn size={16} />
             Connect to SRM Academia
@@ -614,17 +748,27 @@ export function GradeXSection() {
         className="flex justify-between items-start mb-6 sm:mb-7"
       >
         <div>
-          <p className="text-zinc-600 font-bold text-[9px] uppercase tracking-[0.15em] mb-1">Prediction Lab</p>
-          <h1 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight flex items-center gap-2">
-            <Sparkles size={16} className="text-emerald-400" />
+          <p className={`font-black text-[9px] uppercase tracking-[0.15em] mb-1 ${
+            isPoster ? "text-[#555555]" : "text-zinc-600"
+          }`}>Prediction Lab</p>
+          <h1 className={`text-2xl sm:text-3xl font-black tracking-tight flex items-center gap-2 ${
+            isPoster ? "text-[#111111]" : "text-zinc-100"
+          }`}>
+            <Sparkles size={16} className={isPoster ? "text-[#111111]" : "text-emerald-400"} />
             GradeX
           </h1>
-          <p className="text-[10px] text-zinc-600 mt-0.5 tracking-wide">CGPA Calculator &amp; Predictor</p>
+          <p className={`text-[10px] mt-0.5 tracking-wide font-medium ${
+            isPoster ? "text-[#555555]" : "text-zinc-600"
+          }`}>CGPA Calculator &amp; Predictor</p>
         </div>
         <div className="flex items-center gap-2">
           <AIPromoBadge page="gradex" />
           <motion.button whileTap={{ scale: 0.9 }} onClick={refreshData} disabled={isLoading}
-            className="flex items-center justify-center w-8 h-8 rounded-lg text-zinc-600 bg-zinc-900/60 ring-1 ring-white/[0.04] hover:text-zinc-300 hover:bg-zinc-800 transition-all disabled:opacity-30"
+            className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all disabled:opacity-30 ${
+              isPoster
+                ? "bg-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] text-[#111111] hover:bg-[#f7f5f0]"
+                : "text-zinc-600 bg-zinc-900/60 ring-1 ring-white/[0.04] hover:text-zinc-300 hover:bg-zinc-800"
+            }`}
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
           </motion.button>
@@ -636,7 +780,11 @@ export function GradeXSection() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.03 }}
-        className="flex bg-zinc-900/80 rounded-xl p-[3px] ring-1 ring-white/[0.04] mb-6"
+        className={`flex rounded-xl p-[4px] mb-6 transition-all ${
+          isPoster
+            ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111]"
+            : "bg-zinc-900/80 rounded-xl p-[3px] ring-1 ring-white/[0.04]"
+        }`}
       >
         {[
           { id: "internal" as const, label: "Internal CGPA", icon: Award },
@@ -649,18 +797,26 @@ export function GradeXSection() {
               key={tab.id}
               whileTap={{ scale: 0.97 }}
               onClick={() => setActiveTab(tab.id)}
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all relative"
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-black transition-all relative"
             >
               {isActive && (
                 <motion.div
                   layoutId="gradex-tab-bg"
-                  className="absolute inset-0 rounded-lg"
-                  style={{ background: "rgba(52,211,153,0.12)", border: "1px solid rgba(52,211,153,0.2)" }}
+                  className={`absolute inset-0 rounded-lg ${isPoster ? "bg-[#111111]" : ""}`}
+                  style={isPoster ? undefined : { background: "rgba(52,211,153,0.12)", border: "1px solid rgba(52,211,153,0.2)" }}
                   transition={spring}
                 />
               )}
-              <Icon size={12} className={`relative z-10 ${isActive ? "text-emerald-400" : "text-zinc-600"}`} />
-              <span className={`relative z-10 ${isActive ? "text-emerald-300" : "text-zinc-500"}`}>
+              <Icon size={13} className={`relative z-10 transition-colors ${
+                isPoster
+                  ? isActive ? "text-white" : "text-[#555555]"
+                  : isActive ? "text-emerald-400" : "text-zinc-600"
+              }`} />
+              <span className={`relative z-10 transition-colors ${
+                isPoster
+                  ? isActive ? "text-white" : "text-[#555555]"
+                  : isActive ? "text-emerald-300" : "text-zinc-500"
+              }`}>
                 {tab.label}
               </span>
             </motion.button>

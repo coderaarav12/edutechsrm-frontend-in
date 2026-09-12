@@ -4,6 +4,7 @@ import { useMemo, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { LogIn, MapPin, User, RefreshCw, BookMarked, Moon } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
+import { useIsPosterTheme } from "@/lib/theme-context"
 import { LoginModal } from "./login-modal"
 import { AIPromoBadge } from "@/components/ai-promo-badge"
 
@@ -33,6 +34,7 @@ function getTypeStyle(type: string) {
 }
 
 export function PlannerSection() {
+  const isPoster = useIsPosterTheme()
   const { isAuthenticated, timetable, isLoading, refreshData } = useAuth() as any
   const [isLoginOpen, setIsLoginOpen] = useState(false)
   const [selectedDO, setSelectedDO] = useState(1)
@@ -80,21 +82,29 @@ export function PlannerSection() {
     <div className="min-h-full pt-[3.75rem] pb-20 px-3 sm:px-4 lg:px-8 lg:pb-8 w-full">
       <div className="flex justify-between items-start mb-8">
         <div>
-          <p className="text-zinc-500 font-bold text-[10px] uppercase tracking-widest mb-1">All Day Orders</p>
-          <h1 className="text-3xl font-bold text-zinc-100 tracking-tight font-display">Day Order Planner</h1>
-          <p className="text-xs mt-1 text-zinc-500">{totalClasses} classes across 5 day orders</p>
+          <p className={`font-bold text-[10px] uppercase tracking-widest mb-1 ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>All Day Orders</p>
+          <h1 className={`text-3xl font-bold tracking-tight font-display ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>Day Order Planner</h1>
+          <p className={`text-xs mt-1 ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>{totalClasses} classes across 5 day orders</p>
         </div>
         <div className="flex items-center gap-2">
           <AIPromoBadge page="planner" />
           <motion.button whileTap={{ scale: 0.9 }} onClick={refreshData} disabled={isLoading}
-            className="flex items-center justify-center w-8 h-8 rounded-lg text-zinc-500 bg-zinc-900/60 ring-1 ring-white/5 hover:text-zinc-300 transition-all disabled:opacity-40">
+            className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all disabled:opacity-40 ${
+              isPoster
+                ? "bg-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] text-[#111111] hover:bg-[#f7f5f0]"
+                : "text-zinc-500 bg-zinc-900/60 ring-1 ring-white/5 hover:text-zinc-300"
+            }`}>
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
           </motion.button>
         </div>
       </div>
 
       {/* Day Order Tabs */}
-      <div className="flex bg-zinc-900 rounded-xl p-1 border border-white/5 shadow-inner mb-8">
+      <div className={`flex rounded-xl p-1 mb-8 transition-all ${
+        isPoster
+          ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111]"
+          : "bg-zinc-900 border border-white/5 shadow-inner"
+      }`}>
         {dayOrders.map((do_, i) => {
           const isActive = selectedDO === do_
           const classCount = (dayOrderTimetable[do_] || []).length
@@ -103,12 +113,28 @@ export function PlannerSection() {
               key={do_}
               whileTap={{ scale: 0.95 }}
               onClick={() => setSelectedDO(do_)}
-              className={`flex-1 min-w-[60px] flex flex-col items-center justify-center py-3 px-2 rounded-lg transition-all ${isActive ? "bg-zinc-800 text-zinc-100 shadow-md border border-white/5" : "text-zinc-500 hover:text-zinc-300"}`}
+              className={`flex-1 min-w-[60px] flex flex-col items-center justify-center py-3 px-2 rounded-lg transition-all ${
+                isActive
+                  ? isPoster
+                    ? "bg-[#111111] text-white shadow-sm border border-[#111111]"
+                    : "bg-zinc-800 text-zinc-100 shadow-md border border-white/5"
+                  : isPoster
+                    ? "text-[#555555] hover:text-[#111111]"
+                    : "text-zinc-500 hover:text-zinc-300"
+              }`}
             >
-              <span className={`text-[10px] font-black uppercase tracking-wider ${isActive ? "text-zinc-100" : "text-zinc-500"}`}>
+              <span className={`text-[10px] font-black uppercase tracking-wider ${
+                isActive
+                  ? isPoster ? "text-white" : "text-zinc-100"
+                  : isPoster ? "text-[#111111]" : "text-zinc-500"
+              }`}>
                 DO {do_}
               </span>
-              <span className={`text-[9px] mt-0.5 ${isActive ? "text-zinc-400" : "text-zinc-700"}`}>
+              <span className={`text-[9px] mt-0.5 ${
+                isActive
+                  ? isPoster ? "text-zinc-300" : "text-zinc-400"
+                  : isPoster ? "text-[#666666]" : "text-zinc-700"
+              }`}>
                 {classCount} class{classCount !== 1 ? "es" : ""}
               </span>
             </motion.button>
@@ -125,18 +151,20 @@ export function PlannerSection() {
           transition={{ duration: 0.15 }}
         >
           <div className="flex items-center gap-2 mb-6">
-            <h2 className="text-lg font-bold text-zinc-100">Day Order {selectedDO}</h2>
+            <h2 className={`text-lg font-bold ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>Day Order {selectedDO}</h2>
             {classes.length > 0 && (
-              <span className="text-xs text-zinc-500">
+              <span className={`text-xs ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>
                 {classes.length} class{classes.length > 1 ? "es" : ""}
               </span>
             )}
           </div>
 
           {classes.length === 0 ? (
-            <div className="bg-zinc-900/60 ring-1 ring-white/5 rounded-3xl p-8 overflow-hidden relative text-center py-12">
-              <Moon className="w-10 h-10 mx-auto mb-3 text-zinc-600" />
-              <p className="text-sm font-semibold text-zinc-500">No classes</p>
+            <div className={`rounded-3xl p-8 overflow-hidden relative text-center py-12 ${
+              isPoster ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111]" : "bg-zinc-900/60 ring-1 ring-white/5"
+            }`}>
+              <Moon className={`w-10 h-10 mx-auto mb-3 ${isPoster ? "text-[#555555]" : "text-zinc-600"}`} />
+              <p className={`text-sm font-semibold ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>No classes</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -149,39 +177,49 @@ export function PlannerSection() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: ci * 0.05 }}
-                    className="group bg-zinc-900/40 ring-1 ring-white/5 rounded-2xl p-6 hover:ring-zinc-700 hover:bg-zinc-900/60 transition-all relative overflow-hidden"
+                    className={`group rounded-2xl p-6 transition-all relative overflow-hidden ${
+                      isPoster
+                        ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] text-[#111111]"
+                        : "bg-zinc-900/40 ring-1 ring-white/5 hover:ring-zinc-700 hover:bg-zinc-900/60"
+                    }`}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/0 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    {!isPoster && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/0 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    )}
                     <div className="flex gap-3 relative z-10">
-                      <div className="w-1 self-stretch rounded-full shrink-0" style={{ background: ts.color, boxShadow: `0 0 6px ${ts.color}80` }} />
+                      <div className="w-1 self-stretch rounded-full shrink-0" style={{ background: ts.color, boxShadow: isPoster ? "none" : `0 0 6px ${ts.color}80` }} />
                       <div className="shrink-0 flex flex-col items-end justify-center w-12 gap-0.5">
-                        <span className="text-xs font-black tabular-nums text-zinc-400">
+                        <span className={`text-xs font-black tabular-nums ${isPoster ? "text-[#111111]" : "text-zinc-400"}`}>
                           {timeSlot?.time?.split(" - ")[0] || c.time?.split(" - ")[0]}
                         </span>
-                        <span className="text-[10px] tabular-nums text-zinc-600">
+                        <span className={`text-[10px] tabular-nums ${isPoster ? "text-[#555555]" : "text-zinc-600"}`}>
                           {timeSlot?.time?.split(" - ")[1] || c.time?.split(" - ")[1]}
                         </span>
-                        <span className="text-[9px] text-zinc-700">Hr {c.hour}</span>
+                        <span className={`text-[9px] ${isPoster ? "text-[#777777]" : "text-zinc-700"}`}>Hr {c.hour}</span>
                       </div>
-                      <div className="w-px self-stretch shrink-0 bg-white/5" />
+                      <div className={`w-px self-stretch shrink-0 ${isPoster ? "bg-[#111111]/15" : "bg-white/5"}`} />
                       <div className="flex-1 min-w-0 py-0.5">
                         <div className="flex items-start justify-between gap-2 mb-1">
-                          <span className="text-[10px] font-mono text-emerald-400">{c.code}</span>
+                          <span className={`text-[10px] font-mono ${isPoster ? "text-[#111111] font-bold" : "text-emerald-400"}`}>{c.code}</span>
                           {c.room && (
-                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0" style={{ background: `${activeColor}15`, color: activeColor, border: `1px solid ${activeColor}25` }}>
+                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
+                              isPoster
+                                ? "bg-[#f7f5f0] text-[#111111] border border-[#111111]"
+                                : ""
+                            }`} style={!isPoster ? { background: `${activeColor}15`, color: activeColor, border: `1px solid ${activeColor}25` } : undefined}>
                               {c.room}
                             </span>
                           )}
                         </div>
-                        <p className="text-sm font-semibold leading-snug text-zinc-100 mb-1.5">{c.name}</p>
-                        <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-zinc-500 text-[10px]">
+                        <p className={`text-sm font-semibold leading-snug mb-1.5 ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>{c.name}</p>
+                        <div className={`flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>
                           {c.faculty && (
                             <span className="flex items-center gap-0.5 truncate max-w-[130px]">
-                              <User className="w-[10px] h-[10px] shrink-0" />{c.faculty}
+                              <User className={`w-[10px] h-[10px] shrink-0 ${isPoster ? "text-[#111111]" : ""}`} />{c.faculty}
                             </span>
                           )}
                           {c.slot && (
-                            <span className="text-zinc-700">Slot {c.slot}</span>
+                            <span className={isPoster ? "text-[#777777]" : "text-zinc-700"}>Slot {c.slot}</span>
                           )}
                         </div>
                       </div>

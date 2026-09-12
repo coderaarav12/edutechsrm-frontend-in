@@ -17,6 +17,8 @@ import {
   ExternalLink,
   Flame,
 } from "lucide-react"
+import { useIsPosterTheme } from "@/lib/theme-context"
+import { AIPromoBadge } from "@/components/ai-promo-badge"
 import {
   BUILDINGS,
   CATEGORY_META,
@@ -79,7 +81,8 @@ export function CampusMapSection({
   }, [])
 
   // Theme detection
-  const [isPoster, setIsPoster] = useState(false)
+  const isPosterTheme = useIsPosterTheme()
+  const [isPosterLocal, setIsPosterLocal] = useState(false)
   useEffect(() => {
     const check = () => {
       if (typeof document !== "undefined") {
@@ -88,7 +91,7 @@ export function CampusMapSection({
           document.documentElement.getAttribute("data-theme") ||
           localStorage.getItem("edutechsrm-landing-mode") ||
           localStorage.getItem("edutechsrm_landing_mode")
-        setIsPoster(m === "poster")
+        setIsPosterLocal(m === "poster")
       }
     }
     check()
@@ -101,6 +104,7 @@ export function CampusMapSection({
       window.removeEventListener("edutechsrm_theme_event", check)
     }
   }, [])
+  const isPoster = isPosterTheme || isPosterLocal
 
   // Geolocation
   const requestLocation = useCallback(() => {
@@ -288,68 +292,117 @@ export function CampusMapSection({
         }
       `}</style>
 
-      <div className="mx-auto max-w-7xl px-4 pt-24 pb-20 sm:px-6 lg:px-8">
+      <div className={standalone ? "mx-auto max-w-7xl px-4 pt-24 pb-20 sm:px-6 lg:px-8" : "min-h-full pt-[3.75rem] pb-20 px-3 sm:px-4 lg:px-8 lg:pb-8 w-full max-w-7xl mx-auto"}>
         
-        {/* ── 1. Tactical Command Masthead ── */}
-        <div className="mb-8">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="inline-flex items-center gap-2 rounded-full border px-3.5 py-1 text-xs font-mono font-bold uppercase tracking-wider"
-              style={{
-                borderColor: isPoster ? "#111111" : "rgba(52,211,153,0.3)",
-                background: isPoster ? "#ffffff" : "rgba(52,211,153,0.1)",
-                color: isPoster ? "#111111" : "#34d399",
-                boxShadow: isPoster ? "2px 2px 0px #111111" : "none",
-              }}
-            >
-              <Compass className="h-3.5 w-3.5 animate-spin" style={{ animationDuration: "12s" }} />
-              <span>003 // CAMPUS RADAR & CARTOGRAPHY • 250 ACRES</span>
+        {/* ── 1. Header ── */}
+        {!standalone ? (
+          /* Inside App Header - Standardized to match Courses, Attendance, Marks, GradeX */
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex justify-between items-start mb-6 sm:mb-8"
+          >
+            <div>
+              <h2 className={`font-bold text-[10px] uppercase tracking-widest mb-1 ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>
+                Campus Radar
+              </h2>
+              <h1 className={`text-2xl sm:text-3xl font-bold tracking-tight font-display flex items-center gap-2 ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>
+                <Compass className={`w-6 h-6 shrink-0 ${isPoster ? "text-[#111111]" : "text-emerald-400"}`} />
+                Campus Explore
+              </h1>
+              <p className={`text-xs mt-1 ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>
+                SRMIST KTR · Find any room, cabin, or stall · 250 Acres
+              </p>
             </div>
-
             <div className="flex items-center gap-2">
+              <AIPromoBadge page="explore" />
               <button
                 onClick={handleShare}
-                className="radar-btn-secondary inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-mono font-bold transition-all"
-                style={{
-                  background: isPoster ? "#ffffff" : "rgba(255,255,255,0.05)",
-                  border: isPoster ? "1.5px solid #111111" : "1px solid rgba(255,255,255,0.1)",
-                  color: isPoster ? "#111111" : "#d4d4d8",
-                }}
+                className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all ${
+                  isPoster
+                    ? "bg-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] text-[#111111] hover:bg-[#f7f5f0]"
+                    : "text-zinc-500 bg-zinc-900/60 ring-1 ring-white/5 hover:text-zinc-300 hover:bg-zinc-800"
+                }`}
+                title={copied ? "Link Copied!" : "Share Radar"}
               >
-                {copied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Share2 className="h-3.5 w-3.5" />}
-                <span>{copied ? "Link Copied!" : "Share Radar"}</span>
+                {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Share2 className="h-4 w-4" />}
               </button>
-
               <button
                 onClick={requestLocation}
                 disabled={posLoading}
-                className="radar-btn-secondary inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-mono font-bold transition-all"
-                style={{
-                  background: isPoster ? "#ffffff" : "rgba(255,255,255,0.05)",
-                  border: isPoster ? "1.5px solid #111111" : "1px solid rgba(255,255,255,0.1)",
-                  color: isPoster ? "#111111" : userPos ? "#34d399" : "#d4d4d8",
-                }}
+                className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all ${
+                  isPoster
+                    ? "bg-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] text-[#111111] hover:bg-[#f7f5f0]"
+                    : "text-zinc-500 bg-zinc-900/60 ring-1 ring-white/5 hover:text-zinc-300 hover:bg-zinc-800"
+                }`}
+                title={userPos ? "GPS Active" : "Detect Location"}
               >
-                <Locate className={`h-3.5 w-3.5 ${posLoading ? "animate-pulse" : ""}`} />
-                <span>{userPos ? "GPS Active" : "Detect Location"}</span>
+                <Locate className={`h-4 w-4 ${posLoading ? "animate-pulse" : userPos ? (isPoster ? "text-emerald-600" : "text-emerald-400") : ""}`} />
               </button>
             </div>
+          </motion.div>
+        ) : (
+          /* Public Standalone Landing Page Masthead */
+          <div className="mb-8">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="inline-flex items-center gap-2 rounded-full border px-3.5 py-1 text-xs font-mono font-bold uppercase tracking-wider"
+                style={{
+                  borderColor: isPoster ? "#111111" : "rgba(52,211,153,0.3)",
+                  background: isPoster ? "#ffffff" : "rgba(52,211,153,0.1)",
+                  color: isPoster ? "#111111" : "#34d399",
+                  boxShadow: isPoster ? "2px 2px 0px #111111" : "none",
+                }}
+              >
+                <Compass className="h-3.5 w-3.5 animate-spin" style={{ animationDuration: "12s" }} />
+                <span>003 // CAMPUS RADAR & CARTOGRAPHY • 250 ACRES</span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleShare}
+                  className="radar-btn-secondary inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-mono font-bold transition-all"
+                  style={{
+                    background: isPoster ? "#ffffff" : "rgba(255,255,255,0.05)",
+                    border: isPoster ? "1.5px solid #111111" : "1px solid rgba(255,255,255,0.1)",
+                    color: isPoster ? "#111111" : "#d4d4d8",
+                  }}
+                >
+                  {copied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Share2 className="h-3.5 w-3.5" />}
+                  <span>{copied ? "Link Copied!" : "Share Radar"}</span>
+                </button>
+
+                <button
+                  onClick={requestLocation}
+                  disabled={posLoading}
+                  className="radar-btn-secondary inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-mono font-bold transition-all"
+                  style={{
+                    background: isPoster ? "#ffffff" : "rgba(255,255,255,0.05)",
+                    border: isPoster ? "1.5px solid #111111" : "1px solid rgba(255,255,255,0.1)",
+                    color: isPoster ? "#111111" : userPos ? "#34d399" : "#d4d4d8",
+                  }}
+                >
+                  <Locate className={`h-3.5 w-3.5 ${posLoading ? "animate-pulse" : ""}`} />
+                  <span>{userPos ? "GPS Active" : "Detect Location"}</span>
+                </button>
+              </div>
+            </div>
+
+            <h1 className="font-display mt-5 text-3xl font-black tracking-tight sm:text-5xl lg:text-6xl leading-[1.05]"
+              style={{ color: isPoster ? "#111111" : "#ffffff" }}
+            >
+              SRMIST KTR Campus Radar. <br className="hidden sm:inline" />
+              <span className="font-serif italic font-normal" style={{ color: isPoster ? "#059669" : "#34d399" }}>
+                Find any room before the professor does.
+              </span>
+            </h1>
+
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed sm:text-base font-sans"
+              style={{ color: isPoster ? "#444444" : "#a1a1aa" }}
+            >
+              Real-time walking estimates, floor directories, faculty cabins, food courts, and transit walkways across SRM Institute of Science and Technology, Kattankulathur. Zero login required.
+            </p>
           </div>
-
-          <h1 className="font-display mt-5 text-3xl font-black tracking-tight sm:text-5xl lg:text-6xl leading-[1.05]"
-            style={{ color: isPoster ? "#111111" : "#ffffff" }}
-          >
-            SRMIST KTR Campus Radar. <br className="hidden sm:inline" />
-            <span className="font-serif italic font-normal" style={{ color: isPoster ? "#059669" : "#34d399" }}>
-              Find any room before the professor does.
-            </span>
-          </h1>
-
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed sm:text-base font-sans"
-            style={{ color: isPoster ? "#444444" : "#a1a1aa" }}
-          >
-            Real-time walking estimates, floor directories, faculty cabins, food courts, and transit walkways across SRM Institute of Science and Technology, Kattankulathur. Zero login required.
-          </p>
-        </div>
+        )}
 
         {/* ── 2. Unified Search with Live Dropdown & Category Switcher Bar ── */}
         <div className="mb-6 space-y-3">

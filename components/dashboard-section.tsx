@@ -843,19 +843,27 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
         </div>
 
         <div ref={dockRef} className="flex justify-center relative">
-          <div className="flex flex-nowrap items-center gap-1 sm:gap-1.5 px-4 py-2.5 rounded-3xl bg-zinc-900/60 ring-1 ring-white/5 overflow-x-auto w-full scrollbar-thin justify-start sm:justify-center">
+          <div className={`flex flex-nowrap items-center gap-1 sm:gap-1.5 px-4 py-2.5 rounded-3xl overflow-x-auto w-full scrollbar-thin justify-start sm:justify-center transition-all ${
+            isPoster
+              ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111]"
+              : "bg-zinc-900/60 ring-1 ring-white/5"
+          }`}>
             {(isDesktop ? NAV_ITEMS : NAV_ITEMS.filter((item) => dockApps.includes(item.id))).map((item) => (
               <DockItem key={item.id} item={item} info={dockInfo[item.id]} onNavigate={onNavigate} />
             ))}
             {!isDesktop && <button id="dock-customize-trigger" onClick={() => setShowDockCustomize(true)}
               className="shrink-0 w-8 h-8 rounded-xl flex items-center justify-center hover:bg-white/[0.04] active:scale-95 transition-all"
               style={{ WebkitTapHighlightColor: "transparent" }}>
-              <Pencil className="w-3.5 h-3.5 text-zinc-500" />
+              <Pencil className={`w-3.5 h-3.5 ${isPoster ? "text-[#111111]" : "text-zinc-500"}`} />
             </button>}
           </div>
           {showDockCustomize && (
-              <div id="dock-customize-popover" className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 z-50 w-72 p-4 rounded-2xl bg-zinc-900 ring-1 ring-white/10 shadow-2xl">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Dock Apps</p>
+              <div id="dock-customize-popover" className={`absolute bottom-full mb-3 left-1/2 -translate-x-1/2 z-50 w-72 p-4 rounded-2xl ${
+                isPoster
+                  ? "bg-white border-2 border-[#111111] shadow-[4px_4px_0px_#111111] text-[#111111]"
+                  : "bg-zinc-900 ring-1 ring-white/10 shadow-2xl"
+              }`}>
+                <p className={`text-[10px] font-bold uppercase tracking-widest mb-3 ${isPoster ? "text-[#555555]" : "text-zinc-500"}`}>Dock Apps</p>
                 <div className="grid grid-cols-2 gap-1.5">
                   {ALL_DOCK_APP_IDS.map((id) => {
                     const navItem = NAV_ITEMS.find((n) => n.id === id)!
@@ -864,13 +872,25 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
                       <button key={id} onClick={() => {
                         setDockApps((prev) => enabled ? prev.filter((p) => p !== id) : [...prev, id])
                       }}
-                        className={`flex items-center gap-2 px-2.5 py-2 rounded-xl transition-all ${enabled ? "bg-white/[0.04]" : "hover:bg-white/[0.02]"}`}
+                        className={`flex items-center gap-2 px-2.5 py-2 rounded-xl transition-all ${
+                          enabled
+                            ? isPoster ? "bg-[#f7f5f0] border border-[#111111]" : "bg-white/[0.04]"
+                            : isPoster ? "hover:bg-[#faf9f5]" : "hover:bg-white/[0.02]"
+                        }`}
                         style={{ WebkitTapHighlightColor: "transparent" }}>
-                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 relative ${enabled ? "bg-zinc-800/60 ring-1 ring-white/10" : "bg-zinc-800/30 ring-1 ring-white/5"}`}>
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 relative ${
+                          isPoster
+                            ? (enabled ? "bg-white border border-[#111111]" : "bg-zinc-100 border border-zinc-300")
+                            : (enabled ? "bg-zinc-800/60 ring-1 ring-white/10" : "bg-zinc-800/30 ring-1 ring-white/5")
+                        }`}>
                           <navItem.icon className="w-4 h-4" style={{ color: enabled ? navItem.color : "#52525b" }} />
-                          {enabled && <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-500 flex items-center justify-center ring-2 ring-zinc-900"><CheckCircle2 className="w-1.5 h-1.5 text-zinc-950" /></div>}
+                          {enabled && <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-500 flex items-center justify-center ring-2 ${isPoster ? "ring-white" : "ring-zinc-900"}`}><CheckCircle2 className="w-1.5 h-1.5 text-zinc-950" /></div>}
                         </div>
-                        <span className={`text-[10px] font-semibold ${enabled ? "text-zinc-300" : "text-zinc-600"}`}>{navItem.label}</span>
+                        <span className={`text-[10px] font-semibold ${
+                          enabled
+                            ? isPoster ? "text-[#111111] font-bold" : "text-zinc-300"
+                            : isPoster ? "text-[#777777]" : "text-zinc-600"
+                        }`}>{navItem.label}</span>
                       </button>
                     )
                   })}
@@ -882,14 +902,18 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
         <div ref={alertRef}>
           {topAlert ? (
             topAlert.assignment ? (
-              <div className="w-full bg-zinc-900/60 ring-1 ring-white/5 rounded-3xl p-6 flex items-center gap-4"
-                style={{ background: topAlert.bg }}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ring-1 ring-white/5 bg-zinc-800/50">
-                  <topAlert.icon className="w-4 h-4" style={{ color: topAlert.color }} />
+              <div className={`w-full rounded-3xl p-6 flex items-center gap-4 ${
+                isPoster ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111]" : "bg-zinc-900/60 ring-1 ring-white/5"
+              }`}
+                style={!isPoster ? { background: topAlert.bg } : undefined}>
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                  isPoster ? "bg-[#f7f5f0] border border-[#111111]" : "ring-1 ring-white/5 bg-zinc-800/50"
+                }`}>
+                  <topAlert.icon className="w-4 h-4" style={{ color: isPoster ? "#111111" : topAlert.color }} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold leading-snug" style={{ color: topAlert.color }}>{topAlert.title}</p>
-                  <p className="text-[11px] mt-0.5 text-zinc-400">{topAlert.detail}</p>
+                  <p className="text-sm font-bold leading-snug" style={{ color: isPoster ? "#111111" : topAlert.color }}>{topAlert.title}</p>
+                  <p className={`text-[11px] mt-0.5 ${isPoster ? "text-[#555555]" : "text-zinc-400"}`}>{topAlert.detail}</p>
                   <div className="flex items-center gap-2 mt-3">
                     <button onClick={(e) => { e.stopPropagation(); updateAssignment(topAlert.assignment.id, { status: "in_progress" }) }}
                       className="text-[9px] font-bold uppercase tracking-widest px-2.5 py-1.5 rounded-lg ring-1 text-cyan-400 bg-cyan-500/10 border-cyan-500/20 hover:opacity-80 transition-all">
@@ -905,86 +929,125 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
             ) : (
               <button
                 onClick={() => onNavigate(topAlert.tab)}
-                className="w-full bg-zinc-900/60 ring-1 ring-white/5 rounded-3xl p-6 flex items-center gap-4 text-left transition-all active:scale-[0.99] hover:bg-white/[0.02]"
-                style={{ background: topAlert.bg }}
+                className={`w-full rounded-3xl p-6 flex items-center gap-4 text-left transition-all active:scale-[0.99] ${
+                  isPoster ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] hover:bg-[#faf9f5]" : "bg-zinc-900/60 ring-1 ring-white/5 hover:bg-white/[0.02]"
+                }`}
+                style={!isPoster ? { background: topAlert.bg } : undefined}
               >
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ring-1 ring-white/5 bg-zinc-800/50">
-                  <topAlert.icon className="w-4 h-4" style={{ color: topAlert.color }} />
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                  isPoster ? "bg-[#f7f5f0] border border-[#111111]" : "ring-1 ring-white/5 bg-zinc-800/50"
+                }`}>
+                  <topAlert.icon className="w-4 h-4" style={{ color: isPoster ? "#111111" : topAlert.color }} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold leading-snug" style={{ color: topAlert.color }}>{topAlert.title}</p>
-                  <p className="text-[11px] mt-0.5 text-zinc-400">{topAlert.detail}</p>
+                  <p className="text-sm font-bold leading-snug" style={{ color: isPoster ? "#111111" : topAlert.color }}>{topAlert.title}</p>
+                  <p className={`text-[11px] mt-0.5 ${isPoster ? "text-[#555555]" : "text-zinc-400"}`}>{topAlert.detail}</p>
                 </div>
               </button>
             )
           ) : (
-            <div className="bg-zinc-900/60 ring-1 ring-white/5 rounded-3xl p-6 flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ring-1 ring-white/5 bg-zinc-800/50">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <div className={`rounded-3xl p-6 flex items-center gap-4 ${
+              isPoster ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111]" : "bg-zinc-900/60 ring-1 ring-white/5"
+            }`}>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                isPoster ? "bg-[#f7f5f0] border border-[#111111]" : "ring-1 ring-white/5 bg-zinc-800/50"
+              }`}>
+                <CheckCircle2 className={`w-4 h-4 ${isPoster ? "text-[#111111]" : "text-emerald-400"}`} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold leading-snug text-emerald-400">All clear</p>
-                <p className="text-[11px] mt-0.5 text-zinc-400">No alerts right now.</p>
-          </div>
-        </div>
+                <p className={`text-sm font-bold leading-snug ${isPoster ? "text-[#111111]" : "text-emerald-400"}`}>All clear</p>
+                <p className={`text-[11px] mt-0.5 ${isPoster ? "text-[#555555]" : "text-zinc-400"}`}>No alerts right now.</p>
+              </div>
+            </div>
           )}
         </div>
 
         <div ref={profileRef}>
-          <div className="bg-zinc-900/60 ring-1 ring-white/5 rounded-3xl p-6 flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl shrink-0 overflow-hidden ring-1 ring-white/5 bg-zinc-800/50 flex items-center justify-center">
-              <ProfileAvatar name={user?.name} token={token} fallback={<User className="w-4 h-4 text-pink-400" />} />
+          <div className={`rounded-3xl p-6 flex items-center gap-4 ${
+            isPoster ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111]" : "bg-zinc-900/60 ring-1 ring-white/5"
+          }`}>
+            <div className={`w-10 h-10 rounded-xl shrink-0 overflow-hidden flex items-center justify-center ${
+              isPoster ? "bg-[#f7f5f0] border border-[#111111]" : "ring-1 ring-white/5 bg-zinc-800/50"
+            }`}>
+              <ProfileAvatar name={user?.name} token={token} fallback={<User className={`w-4 h-4 ${isPoster ? "text-[#111111]" : "text-pink-400"}`} />} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold leading-snug text-zinc-100">{user?.name || "Student"}</p>
-              <p className="text-[11px] mt-0.5 text-zinc-400">
+              <p className={`text-sm font-bold leading-snug ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>{user?.name || "Student"}</p>
+              <p className={`text-[11px] mt-0.5 ${isPoster ? "text-[#555555]" : "text-zinc-400"}`}>
                 {user?.program || ""}{user?.semester ? ` \u00b7 Sem ${user.semester}` : ""}
               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={() => onNavigate("about")}
-                className="text-[10px] font-semibold px-3 py-1.5 rounded-lg ring-1 ring-white/10 text-zinc-400 hover:bg-white/5 transition-colors"
+                className={`text-[10px] font-semibold px-3 py-1.5 rounded-lg transition-colors ${
+                  isPoster
+                    ? "bg-[#f7f5f0] border border-[#111111] text-[#111111] hover:bg-[#e8e5dc]"
+                    : "ring-1 ring-white/10 text-zinc-400 hover:bg-white/5"
+                }`}
               >
                 Profile
               </button>
               <button
                 onClick={() => onNavigate("feedback")}
-                className="text-[10px] font-semibold px-3 py-1.5 rounded-lg ring-1 ring-amber-500/20 text-amber-400 hover:bg-white/5 transition-colors"
+                className={`text-[10px] font-semibold px-3 py-1.5 rounded-lg transition-colors ${
+                  isPoster
+                    ? "bg-[#f7f5f0] border border-[#111111] text-[#111111] hover:bg-[#e8e5dc]"
+                    : "ring-1 ring-amber-500/20 text-amber-400 hover:bg-white/5"
+                }`}
               >
                 Feedback
               </button>
-
             </div>
           </div>
         </div>
 
         <button onClick={handleSupportClick}
-          className="w-full bg-zinc-900/60 ring-1 ring-white/5 rounded-3xl p-6 flex items-center gap-4 text-left transition-all active:scale-[0.99] hover:bg-white/[0.02]"
+          className={`w-full rounded-3xl p-6 flex items-center gap-4 text-left transition-all active:scale-[0.99] ${
+            isPoster
+              ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] hover:bg-[#faf9f5]"
+              : "bg-zinc-900/60 ring-1 ring-white/5 hover:bg-white/[0.02]"
+          }`}
         >
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(167,139,250,0.1)", border: "1px solid rgba(167,139,250,0.2)" }}>
-            <Heart className="w-4 h-4" style={{ color: "#a78bfa" }} />
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+            isPoster
+              ? "bg-[#f7f5f0] border border-[#111111]"
+              : ""
+          }`} style={!isPoster ? { background: "rgba(167,139,250,0.1)", border: "1px solid rgba(167,139,250,0.2)" } : undefined}>
+            <Heart className="w-4 h-4" style={{ color: isPoster ? "#111111" : "#a78bfa" }} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold leading-snug" style={{ color: "#a78bfa" }}>Support edutechsrm</p>
-            <p className="text-[11px] mt-0.5 text-zinc-400">Help cover domain & Cloudflare costs</p>
+            <p className="text-sm font-bold leading-snug" style={{ color: isPoster ? "#111111" : "#a78bfa" }}>Support edutechsrm</p>
+            <p className={`text-[11px] mt-0.5 ${isPoster ? "text-[#555555]" : "text-zinc-400"}`}>Help cover domain & Cloudflare costs</p>
           </div>
         </button>
 
         <div ref={bottomRef}>
-          <div className="bg-zinc-900/60 ring-1 ring-white/5 rounded-3xl p-6">
+          <div className={`rounded-3xl p-6 ${
+            isPoster
+              ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111]"
+              : "bg-zinc-900/60 ring-1 ring-white/5"
+          }`}>
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ring-1 ring-white/5 bg-zinc-800/50">
-                <Sparkles className="w-4 h-4 text-amber-400" />
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                isPoster
+                  ? "bg-[#f7f5f0] border border-[#111111]"
+                  : "ring-1 ring-white/5 bg-zinc-800/50"
+              }`}>
+                <Sparkles className={`w-4 h-4 ${isPoster ? "text-[#111111]" : "text-amber-400"}`} />
               </div>
               <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
                 <div>
-                  <p className="text-sm font-bold leading-snug text-amber-400">Updates & release notes</p>
-                  <p className="text-[11px] mt-0.5 text-zinc-400">Latest changes</p>
+                  <p className={`text-sm font-bold leading-snug ${isPoster ? "text-[#111111]" : "text-amber-400"}`}>Updates & release notes</p>
+                  <p className={`text-[11px] mt-0.5 ${isPoster ? "text-[#555555]" : "text-zinc-400"}`}>Latest changes</p>
                 </div>
                 <button
                   onClick={() => onNavigate("updates")}
-                  className="text-[10px] font-semibold px-3 py-1.5 rounded-lg ring-1 ring-white/10 text-zinc-400 hover:bg-white/5 transition-colors shrink-0"
+                  className={`text-[10px] font-semibold px-3 py-1.5 rounded-lg transition-colors shrink-0 ${
+                    isPoster
+                      ? "bg-[#f7f5f0] border border-[#111111] text-[#111111] hover:bg-[#e8e5dc]"
+                      : "ring-1 ring-white/10 text-zinc-400 hover:bg-white/5"
+                  }`}
                 >
                   Know more
                 </button>

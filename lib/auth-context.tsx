@@ -451,6 +451,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }))
       // Download profile photo
       fetch("/api/srm/photo?force=1", { headers: { "x-access-token": token } }).catch(() => {})
+
+      if (typeof window !== "undefined") {
+        try {
+          sessionStorage.removeItem("edutechsrm_portal_skipped_session")
+          window.dispatchEvent(new CustomEvent("edutechsrm:login-success"))
+        } catch {}
+      }
     } catch (error) {
       console.error("[edutechsrm] Login error:", error)
       if (isSessionExpiredError(error)) {
