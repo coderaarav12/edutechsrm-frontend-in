@@ -39,14 +39,26 @@ interface FloatingAppActionProps {
   onLogin?: () => void
   mode?: "night" | "poster" | string
   onModeChange?: (mode: "night" | "poster", coords?: { x: number; y: number }) => void
+  onOpenJump?: () => void
 }
 
-export function FloatingAppAction({ onLogin, mode = "night", onModeChange }: FloatingAppActionProps = {}) {
+export function FloatingAppAction({ onLogin, mode = "night", onModeChange, onOpenJump }: FloatingAppActionProps = {}) {
   const isPoster = mode === "poster" || mode === "blueprint"
   const [device, setDevice] = useState<"android" | "ios" | "desktop">("desktop")
   const [canInstallPwa, setCanInstallPwa] = useState(false)
   const [showIosTip, setShowIosTip] = useState(false)
+  const [showJumpTop, setShowJumpTop] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const handleScroll = () => {
+      setShowJumpTop(window.scrollY > 280)
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    handleScroll()
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -114,14 +126,55 @@ export function FloatingAppAction({ onLogin, mode = "night", onModeChange }: Flo
   }
 
   return (
-    <div
-      ref={containerRef}
-      className="fixed z-40 flex flex-col items-end"
-      style={{
-        bottom: "max(env(safe-area-inset-bottom, 16px), 16px)",
-        right: "max(env(safe-area-inset-right, 16px), 16px)",
-      }}
-    >
+    <>
+      {/* Bottom-Left Fixed Jump to Top Button (Laptop / Desktop overlay) - only visible when scrolled */}
+      <AnimatePresence>
+        {showJumpTop && (
+          <motion.div
+            initial={{ opacity: 0, y: 16, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 16, scale: 0.9 }}
+            transition={{ duration: 0.22, ease: "easeOut" }}
+            className="hidden md:flex fixed z-50 items-center"
+            style={{
+              bottom: "max(env(safe-area-inset-bottom, 20px), 20px)",
+              left: "max(env(safe-area-inset-left, 20px), 20px)",
+            }}
+          >
+            <motion.button
+              onClick={() => {
+                const html = document.documentElement
+                const prev = html.style.scrollBehavior
+                html.style.scrollBehavior = "auto"
+                window.scrollTo({ top: 0, behavior: "instant" })
+                html.style.scrollBehavior = prev
+              }}
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              aria-label="Jump to Top"
+              className="group relative flex min-h-[44px] items-center gap-2 rounded-full px-4 py-2.5 shadow-2xl backdrop-blur-xl transition select-none cursor-pointer"
+              style={{
+                background: isPoster ? "#ffffff" : "#0d1514",
+                border: isPoster ? "2px solid #111111" : "1px solid rgba(255,255,255,0.18)",
+                boxShadow: isPoster ? "4px 4px 0px #111111" : "0 8px 28px rgba(0,0,0,0.65)",
+                color: isPoster ? "#111111" : "#ffffff",
+              }}
+            >
+              <span className="text-sm font-bold text-emerald-400 group-hover:-translate-y-0.5 transition-transform">↑</span>
+              <span className="font-mono text-xs font-bold tracking-tight">Jump to Top</span>
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div
+        ref={containerRef}
+        className="fixed z-50 flex flex-col items-end"
+        style={{
+          bottom: "max(env(safe-area-inset-bottom, 12px), 12px)",
+          right: "max(env(safe-area-inset-right, 12px), 12px)",
+        }}
+      >
       {/* iOS PWA Install Instruction Balloon */}
       <AnimatePresence>
         {showIosTip && (
@@ -156,8 +209,30 @@ export function FloatingAppAction({ onLogin, mode = "night", onModeChange }: Flo
         )}
       </AnimatePresence>
 
-      {/* Floating Action Cluster: Mode Switcher + Direct Download Action */}
-      <div className="flex items-center gap-2">
+      {/* Floating Action Cluster: Unified single-row dock on mobile & desktop */}
+      <div className="flex items-center gap-1.5 sm:gap-2">
+        {/* Mobile Quick-Jump Trigger (Integrated into same row, compact & matching) */}
+        {onOpenJump && (
+          <motion.button
+            onClick={onOpenJump}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.94 }}
+            aria-label="Jump to station"
+            className="group relative flex h-9 md:hidden items-center gap-1 rounded-full px-2.5 shadow-lg backdrop-blur-xl transition select-none touch-manipulation cursor-pointer"
+            style={{
+              background: isPoster ? "#ffffff" : "#0d1514",
+              border: isPoster ? "2px solid #111111" : "1px solid rgba(255,255,255,0.18)",
+              boxShadow: isPoster ? "3px 3px 0px #111111" : "0 8px 24px rgba(0,0,0,0.55)",
+              color: isPoster ? "#111111" : "#ffffff",
+              WebkitTapHighlightColor: "transparent",
+            }}
+          >
+            <span className="text-emerald-400 font-bold text-xs">⚡</span>
+            <span className="font-mono text-[11px] font-bold tracking-tight">Jump to</span>
+          </motion.button>
+        )}
+
+        {/* Mode Switcher Button */}
         {onModeChange && (
           <motion.button
             onClick={(e) => {
@@ -170,7 +245,7 @@ export function FloatingAppAction({ onLogin, mode = "night", onModeChange }: Flo
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             aria-label={isPoster ? "Switch to Dark Mode" : "Switch to Poster Mode"}
-            className="group relative flex min-h-[44px] items-center gap-1.5 rounded-full px-3.5 shadow-xl backdrop-blur-xl transition select-none touch-manipulation cursor-pointer"
+            className="group relative flex h-9 md:h-11 items-center gap-1 sm:gap-1.5 rounded-full px-2.5 sm:px-3.5 shadow-lg backdrop-blur-xl transition select-none touch-manipulation cursor-pointer"
             style={{
               background: isPoster ? "#ffffff" : "#0d1514",
               border: isPoster ? "2px solid #111111" : "1px solid rgba(255,255,255,0.15)",
@@ -180,13 +255,13 @@ export function FloatingAppAction({ onLogin, mode = "night", onModeChange }: Flo
             }}
           >
             <span className="text-xs">{isPoster ? "☾" : "⌖"}</span>
-            <span className="font-mono text-xs font-bold tracking-tight">
+            <span className="font-mono text-[11px] sm:text-xs font-bold tracking-tight">
               {isPoster ? "Dark" : "Poster"}
             </span>
           </motion.button>
         )}
 
-        {/* Direct Action Button (Optimized for all phone screen sizes) */}
+        {/* Direct Action Button (Compact on mobile, expanded on desktop) */}
         <motion.button
           onClick={handleClick}
           whileHover={{ scale: 1.03 }}
@@ -200,33 +275,26 @@ export function FloatingAppAction({ onLogin, mode = "night", onModeChange }: Flo
                   ? "Install Web App"
                   : "Download edutechsrm App"
           }
-          className="group relative flex min-h-[44px] items-center gap-2.5 rounded-full px-4 py-2.5 backdrop-blur-xl transition active:scale-95 touch-manipulation select-none cursor-pointer"
+          className="group relative flex h-9 md:h-11 items-center gap-1.5 sm:gap-2 rounded-full px-3 sm:px-4 backdrop-blur-xl transition active:scale-95 touch-manipulation select-none cursor-pointer"
           style={{
             background: isPoster ? "#ffffff" : "#0d1514",
             border: isPoster ? "2px solid #111111" : "1px solid rgba(255,255,255,0.15)",
-            boxShadow: isPoster ? "4px 4px 0px #111111" : "0 8px 24px rgba(0,0,0,0.55)",
+            boxShadow: isPoster ? "3px 3px 0px #111111" : "0 8px 24px rgba(0,0,0,0.55)",
             color: isPoster ? "#111111" : "#ffffff",
             WebkitTapHighlightColor: "transparent",
           }}
         >
           {/* Green Mesh Download Sign */}
-          <span className="relative flex h-5 w-5 items-center justify-center">
-            <GreenMeshDownloadIcon className="h-5 w-5 transition-transform duration-200 group-hover:translate-y-0.5" />
+          <span className="relative flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center">
+            <GreenMeshDownloadIcon className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-200 group-hover:translate-y-0.5" />
           </span>
 
           {/* Dynamic platform text */}
-          <span className="font-display flex items-center gap-1.5 text-xs font-black tracking-tight" style={{ color: isPoster ? "#111111" : "#ffffff" }}>
-            <span style={{ color: isPoster ? "#111111" : "#ffffff" }}>
-              {device === "android"
-                ? "Install App"
-                : device === "ios"
-                  ? "Install PWA App"
-                  : canInstallPwa
-                    ? "Install App"
-                    : "Install App"}
-            </span>
+          <span className="font-display flex items-center gap-1 sm:gap-1.5 text-xs font-black tracking-tight" style={{ color: isPoster ? "#111111" : "#ffffff" }}>
+            <span>Install</span>
+            <span className="hidden sm:inline">App</span>
             <span
-              className="rounded-md px-1.5 py-0.5 text-[9px] font-black uppercase"
+              className="hidden sm:inline-block rounded-md px-1.5 py-0.5 text-[9px] font-black uppercase"
               style={{
                 border: isPoster ? "1px solid #111111" : "1px solid rgba(255,255,255,0.10)",
                 background: isPoster ? "#111111" : "rgba(255,255,255,0.06)",
@@ -239,5 +307,6 @@ export function FloatingAppAction({ onLogin, mode = "night", onModeChange }: Flo
         </motion.button>
       </div>
     </div>
+    </>
   )
 }

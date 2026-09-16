@@ -6,7 +6,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 import {
   AlertTriangle, ArrowRight, ArrowUpRight, BarChart3, BookOpen, Bot, CalendarDays, Calculator,
   CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, Clock, Coffee, FileCode, FileText, GraduationCap, IdCard, Lock, MapPin,
-  MessageSquareText, Navigation, RefreshCw, Shield, Sparkles, SlidersHorizontal, TrendingUp, Wifi, Zap,
+  MessageSquareText, Navigation, RefreshCw, Shield, Sparkles, SlidersHorizontal, TrendingUp, Wifi, X, Zap,
 } from "lucide-react"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
@@ -510,11 +510,14 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
       })
 
       // ── Act 0: Hero Student Chaos Disperses (0.00 -> 0.14) ──
-      tl.to(".hero-chip-attendance", { x: -140, y: -45, rotation: -12, opacity: 0, ease: "none", duration: 0.12 }, 0)
+      tl.to(".hero-transit-rail", { x: 220, autoAlpha: 0, ease: "power2.in", duration: 0.10 }, 0)
+        .to(".hero-chip-attendance", { x: -140, y: -45, rotation: -12, opacity: 0, ease: "none", duration: 0.12 }, 0)
         .to(".hero-chip-timetable", { y: -70, rotation: -8, opacity: 0, ease: "none", duration: 0.12 }, 0.01)
         .to(".hero-chip-caution", { x: 140, y: -45, rotation: 14, opacity: 0, ease: "none", duration: 0.12 }, 0)
         .to(".hero-chip-campus", { x: -120, y: -30, rotation: 10, opacity: 0, ease: "none", duration: 0.12 }, 0.01)
+        .to(".hero-chip-tplift", { x: -140, y: 25, rotation: -10, opacity: 0, ease: "none", duration: 0.12 }, 0.01)
         .to(".hero-chip-bunk", { x: 140, y: -10, rotation: 12, opacity: 0, ease: "none", duration: 0.12 }, 0.02)
+        .to(".hero-chip-assignment", { x: 140, y: -35, rotation: 10, opacity: 0, ease: "none", duration: 0.12 }, 0.01)
         .to(".hero-chip-mobile", { opacity: 0, y: -20, ease: "none", duration: 0.10 }, 0)
         .to(".hero-chip-laptop", { opacity: 0, ease: "none", duration: 0.12 }, 0.01)
         .to(".hero-headline-wrap", { y: -40, opacity: 0, scale: 0.95, ease: "none", duration: 0.13 }, 0.02)
@@ -655,7 +658,37 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
     return () => ctx.revert()
   }, [reduce])
 
+  const [showMobileJump, setShowMobileJump] = useState(false)
   const goLogin = () => { window.location.href = isAuthenticated ? "/app" : "/login" }
+  const navTransitStations = useMemo(() => [
+    { num: "01", label: "Homepage", sub: "Hero intro & student reality", target: "top" },
+    { num: "02", label: "Features", sub: "5-moment cinematic student reel", target: "story" },
+    { num: "03", label: "Map & Faculty", sub: "3D/2D Building Explorer & Faculty Radar", target: "campus" },
+    { num: "04", label: "Tools", sub: "10 dedicated academic utilities", target: "features" },
+    { num: "05", label: "FAQ", sub: "Who built this & quick answers", target: "faq" },
+    { num: "06", label: "Login", sub: "Sign in to your student portal", action: goLogin },
+  ], [goLogin])
+
+  const handleStationJump = (item: { num: string; label: string; target?: string; action?: () => void }) => {
+    if (item.action) {
+      item.action()
+    } else if (item.target === "top") {
+      const html = document.documentElement
+      const prev = html.style.scrollBehavior
+      html.style.scrollBehavior = "auto"
+      window.scrollTo({ top: 0, behavior: "instant" })
+      html.style.scrollBehavior = prev
+    } else if (item.target) {
+      const el = document.getElementById(item.target)
+      if (el) {
+        const html = document.documentElement
+        const prev = html.style.scrollBehavior
+        html.style.scrollBehavior = "auto"
+        el.scrollIntoView({ behavior: "instant", block: "start" })
+        html.style.scrollBehavior = prev
+      }
+    }
+  }
   const tags = useMemo(() => ["Campus Explore", "SRM Timetable App", "Attendance Calculator", "Bunk Calculator", "OD / ML Mode", "Internal Marks", "GradeX CGPA", "Day Order Today", "PYQs + Notes", "edutechsrm AI", "Faculty Finder"], [])
 
   return (
@@ -1381,10 +1414,6 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
                       <span className="h-1.5 w-1.5 rounded-full bg-rose-400 animate-pulse" />
                       Scene 01 // Student Reality
                     </div>
-                    <div className="hero-trust-badge inline-flex items-center gap-2 rounded-full px-3 py-0.5 sm:px-3.5 sm:py-1 text-[10px] font-mono uppercase tracking-wider font-bold transition-all">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      <span>trusted by 450+ SRMites</span>
-                    </div>
                     <span className="hidden lg:inline-block font-mono text-[10px] uppercase tracking-widest text-zinc-500">
                       SYS_ID: SRM_KTR_2026 // [ACADEMIA SYNC: ACTIVE]
                     </span>
@@ -1431,37 +1460,37 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
                 {/* Floating tactile student reality fragments & micro marks framing the screen */}
                 <div className="pointer-events-none absolute inset-0 overflow-hidden z-20">
                   {/* Fragment 1 (Top Left): Attendance Debarment Warning Gauge (Dynamic/Rotating outward on scroll - No tape) */}
-                  <div className="hero-chip-attendance absolute top-[3%] left-[2%] sm:left-[3%] flex flex-col gap-1 sm:gap-1.5 rounded-xl sm:rounded-2xl tactile-chip p-2 sm:p-3.5 rotate-[-6deg] sm:rotate-[-7.5deg] max-w-[155px] xs:max-w-[185px] sm:max-w-[230px] select-none">
-                    <div className="flex items-center justify-between gap-1.5 sm:gap-2">
-                      <span className="font-mono text-[8.5px] sm:text-[10px] font-bold text-rose-300 uppercase tracking-wider flex items-center gap-1">
+                  <div className="hero-chip-attendance absolute top-[2.5%] left-[2%] sm:left-[3%] flex flex-col gap-1 sm:gap-1.5 rounded-xl sm:rounded-2xl tactile-chip p-2 sm:p-3.5 rotate-[-5deg] sm:rotate-[-7.5deg] max-w-[145px] xs:max-w-[175px] sm:max-w-[230px] select-none shadow-lg">
+                    <div className="flex items-center justify-between gap-1 sm:gap-2">
+                      <span className="font-mono text-[8px] sm:text-[10px] font-bold text-rose-300 uppercase tracking-wider flex items-center gap-1">
                         <span className="h-1.5 w-1.5 rounded-full bg-rose-400 animate-ping" />
                         Debar Risk
                       </span>
-                      <span className="font-mono text-[8px] sm:text-[9px] text-zinc-400">DO 4</span>
+                      <span className="font-mono text-[7.5px] sm:text-[9px] text-zinc-400">DO 4</span>
                     </div>
                     <div className="flex items-baseline justify-between gap-1 sm:gap-2">
-                      <span className="font-mono text-xs sm:text-base font-black text-rose-200">74.2%</span>
-                      <span className="font-mono text-[8.5px] sm:text-[10px] text-rose-300/90 font-medium">1 slot left</span>
+                      <span className="font-mono text-[11px] sm:text-base font-black text-rose-200">74.2%</span>
+                      <span className="font-mono text-[8px] sm:text-[10px] text-rose-300/90 font-medium">1 slot left</span>
                     </div>
                     <div className="h-1 sm:h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
                       <div className="h-full w-[74.2%] bg-gradient-to-r from-rose-500 to-amber-400 rounded-full" />
                     </div>
-                    <span className="font-mono text-[7.5px] sm:text-[9px] text-rose-400/80">safe skips remaining: 0</span>
+                    <span className="font-mono text-[7px] sm:text-[9px] text-rose-400/80">safe skips remaining: 0</span>
                   </div>
 
-                  {/* Fragment 2 (Top Center-Left, Staggered Down): Mini Timetable Schedule Slot (Dynamic/Rotating outward on scroll - No tape) */}
-                  <div className="hero-chip-timetable absolute top-[14%] left-[17%] xl:left-[19%] hidden lg:flex items-center gap-3 rounded-2xl tactile-chip px-4 py-2.5 rotate-[4.5deg] select-none">
-                    <span className="rounded-lg bg-emerald-400/15 border border-emerald-400/30 px-2 py-1 font-mono text-[11px] font-bold text-emerald-300">
+                  {/* Fragment 2 (Top Right on mobile / Top Center-Left on desktop): Mini Timetable Schedule Slot (Dynamic/Rotating outward on scroll - No tape) */}
+                  <div className="hero-chip-timetable absolute top-[2.5%] right-[2%] lg:top-[13%] lg:left-[16%] lg:right-auto xl:left-[18%] flex items-center gap-2 sm:gap-3 rounded-xl sm:rounded-2xl tactile-chip px-2.5 py-1.5 sm:px-4 sm:py-2.5 rotate-[4deg] sm:rotate-[4.5deg] select-none max-w-[150px] xs:max-w-[185px] sm:max-w-none shadow-lg">
+                    <span className="rounded-md sm:rounded-lg bg-emerald-400/15 border border-emerald-400/30 px-1.5 py-0.5 sm:px-2 sm:py-1 font-mono text-[9px] sm:text-[11px] font-bold text-emerald-300 whitespace-nowrap">
                       Slot B · 08:00 AM
                     </span>
-                    <div>
-                      <div className="font-mono text-xs font-bold text-white">Full Stack Web Dev</div>
-                      <div className="font-mono text-[10px] text-zinc-400">TP402 Tech Park · Margin: +1</div>
+                    <div className="min-w-0">
+                      <div className="font-mono text-[10px] sm:text-xs font-bold text-white truncate">Full Stack Web Dev</div>
+                      <div className="font-mono text-[8px] sm:text-[10px] text-zinc-400 truncate">TP402 Tech Park · Margin: +1</div>
                     </div>
                   </div>
 
-                  {/* Laptop Fragment A (Top Center): SRM OD Approval Form (Static & taped - just dissolves on scroll) */}
-                  <div className="hero-chip-laptop absolute top-[2.5%] left-[45%] xl:left-[47%] hidden lg:flex flex-col gap-1 rounded-2xl tactile-chip p-3 rotate-[-4.5deg] max-w-[220px] select-none border-amber-500/30">
+                  {/* Laptop Fragment A (Top Center): SRM OD Approval Form (Restored) */}
+                  <div className="hero-chip-laptop absolute top-[2.5%] left-[44%] xl:left-[46%] hidden md:flex flex-col gap-1 rounded-2xl tactile-chip p-3 rotate-[-4.5deg] max-w-[220px] select-none border-amber-500/30">
                     {/* Washi tape anchoring it to poster */}
                     <div className="tactile-washi-tape absolute -top-2.5 left-8 w-12 h-3.5 rounded-xs rotate-[3deg] pointer-events-none" />
                     <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-1">
@@ -1482,25 +1511,30 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
                     </div>
                   </div>
 
-                  {/* Fragment 3 (Top Right): DO 4 or 5 Caution Chip (Dynamic/Rotating outward on scroll - No tape) */}
-                  <div className="hero-chip-caution absolute top-[4%] right-[11%] xl:right-[13%] flex items-center gap-1.5 sm:gap-2.5 rounded-xl sm:rounded-2xl tactile-chip px-2.5 py-1.5 sm:px-4 sm:py-2.5 rotate-[8.5deg] max-w-[145px] xs:max-w-[180px] sm:max-w-none select-none">
-                    <span className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-amber-400 animate-pulse shrink-0" />
-                    <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-1.5">
-                      <span className="font-mono text-[8.5px] sm:text-xs text-amber-200 font-bold leading-tight">DO 4 or 5?</span>
-                      <span className="font-hand text-[10px] sm:text-sm text-amber-300 underline decoration-amber-400/40">circular?</span>
+                  {/* Laptop Fragment E (Bottom-Left on mobile / Bottom Mid-Left on desktop): Tech Park Elevator Queue (Dynamic - No tape) */}
+                  <div className="hero-chip-tplift absolute bottom-[18%] left-[2%] md:bottom-[13%] md:left-[15%] xl:left-[17%] flex items-center gap-2 sm:gap-3 rounded-xl sm:rounded-2xl tactile-chip px-2.5 py-1.5 sm:px-3.5 sm:py-2.5 rotate-[-4.5deg] sm:rotate-[-6deg] max-w-[150px] xs:max-w-[185px] sm:max-w-[230px] select-none border-sky-400/30 shadow-lg">
+                    <div className="h-6 w-6 sm:h-7 sm:w-7 rounded-lg sm:rounded-xl bg-sky-500/15 border border-sky-400/30 flex items-center justify-center shrink-0">
+                      <Coffee className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-sky-300" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono text-[8.5px] sm:text-[9.5px] font-bold text-sky-200 truncate">TP Lift: ~48</span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse shrink-0" />
+                      </div>
+                      <div className="font-hand text-[11px] sm:text-xs text-sky-300 leading-tight truncate">
+                        stairs = 3m 20s · skip wait
+                      </div>
                     </div>
                   </div>
 
-                  {/* Laptop Fragment B (Upper-Right): Handwritten 28-Page Assignment Sheet (Static & taped - just dissolves on scroll) */}
-                  <div className="hero-chip-laptop absolute top-[16%] right-[2.5%] xl:right-[3.5%] hidden lg:flex flex-col gap-1.5 rounded-2xl tactile-chip tactile-postit p-3.5 rotate-[-6.5deg] max-w-[225px] select-none">
-                    {/* Washi tape anchoring it to poster */}
-                    <div className="tactile-washi-tape absolute -top-2.5 left-4 w-12 h-3.5 rounded-xs rotate-[-8deg] pointer-events-none" />
+                  {/* Middle Tactile Fragment 1 (Upper-Right): Handwritten 28-Page Assignment Sheet (Dynamic - No tape) */}
+                  <div className="hero-chip-assignment absolute top-[10%] left-[62%] xl:left-[65%] hidden md:flex flex-col gap-1.5 rounded-2xl tactile-chip tactile-postit p-3.5 rotate-[-4deg] max-w-[215px] select-none shadow-xl">
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-mono text-[9px] font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
                         <BookOpen className="h-3 w-3" />
                         ASSIGNMENT 02
                       </span>
-                      <span className="tactile-stamp-red font-mono text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-tight rotate-[4deg]">
+                      <span className="tactile-stamp-red font-mono text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-tight rotate-[3deg]">
                         DUE 8:00 AM
                       </span>
                     </div>
@@ -1513,10 +1547,10 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
                     </div>
                   </div>
 
-                  {/* Laptop Fragment C (Mid-Right): Lab Observation Manual (Static & taped - just dissolves on scroll) */}
-                  <div className="hero-chip-laptop absolute top-[43%] right-[2%] xl:right-[3%] hidden lg:flex flex-col gap-1.5 rounded-2xl tactile-chip p-3.5 rotate-[6.5deg] max-w-[230px] select-none border-rose-500/30">
+                  {/* Static Fragment 1 (Middle-Right): Lab Observation Manual (Static & taped) */}
+                  <div className="hero-chip-laptop absolute top-[33%] left-[57%] xl:left-[60%] hidden lg:flex flex-col gap-1.5 rounded-2xl tactile-chip p-3.5 rotate-[4deg] max-w-[215px] select-none border-rose-500/30 shadow-xl">
                     {/* Washi tape anchoring it to poster */}
-                    <div className="tactile-washi-tape absolute -top-2.5 right-6 w-14 h-3.5 rounded-xs rotate-[-5deg] pointer-events-none" />
+                    <div className="tactile-washi-tape absolute -top-2.5 right-6 w-12 h-3.5 rounded-xs rotate-[-5deg] pointer-events-none" />
                     <div className="flex items-center justify-between border-b border-white/10 pb-1">
                       <span className="font-mono text-[9px] font-bold text-rose-300 uppercase tracking-wider flex items-center gap-1">
                         <FileText className="h-3 w-3 text-rose-400" />
@@ -1535,11 +1569,11 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
                     </div>
                   </div>
 
-                  {/* Laptop Fragment D (Lower Mid-Right): SGPA Target 9.20 (Static & taped - just dissolves on scroll) */}
-                  <div className="hero-chip-laptop absolute bottom-[27%] right-[15%] xl:right-[18%] hidden lg:flex flex-col gap-1.5 rounded-2xl tactile-chip p-3.5 rotate-[-5.5deg] max-w-[220px] select-none border-emerald-400/30">
+                  {/* Static Fragment 2 (Lower Mid-Right): SGPA Target Note (Static & taped) */}
+                  <div className="hero-chip-laptop absolute top-[53%] left-[63%] xl:left-[66%] hidden lg:flex flex-col gap-1.5 rounded-2xl tactile-chip p-3.5 rotate-[-3.5deg] max-w-[210px] select-none border-emerald-400/30 shadow-xl">
                     {/* Washi tape anchoring it to poster */}
-                    <div className="tactile-washi-tape absolute -top-2.5 left-10 w-12 h-3.5 rounded-xs rotate-[-3deg] pointer-events-none" />
-                    <div className="flex items-center justify-between gap-1.5">
+                    <div className="tactile-washi-tape absolute -top-2.5 left-8 w-11 h-3.5 rounded-xs rotate-[3deg] pointer-events-none" />
+                    <div className="flex items-center justify-between gap-1.5 border-b border-white/10 pb-1">
                       <span className="font-mono text-[9px] font-bold text-emerald-300 uppercase tracking-wider flex items-center gap-1">
                         <TrendingUp className="h-3 w-3 text-emerald-400" />
                         Target 9.20 SGPA
@@ -1548,72 +1582,118 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
                         DEAN&apos;S LIST
                       </span>
                     </div>
-                    <div className="flex flex-col gap-1 font-mono text-[9px] text-zinc-300 pt-0.5">
+                    <div className="flex flex-col gap-1 font-mono text-[8.5px] text-zinc-300 pt-0.5">
                       <div className="flex items-center justify-between">
                         <span className="text-zinc-400">DAA (Slot C)</span>
-                        <span className="font-bold text-emerald-300">Need 22/25 in CA2</span>
+                        <span className="font-bold text-emerald-300">Need 22/25 CA2</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-zinc-400">OS (Slot E)</span>
                         <span className="font-bold text-emerald-400">Safe for O grade</span>
                       </div>
                     </div>
-                    <div className="font-hand text-[11px] text-emerald-300/90 -rotate-1 pt-0.5">
-                      &quot;3 internal marks = 0.2 GPA bump&quot;
-                    </div>
                   </div>
 
-                  {/* Laptop Fragment E (Bottom Mid-Left): Tech Park Elevator Queue (Static & taped - just dissolves on scroll) */}
-                  <div className="hero-chip-laptop absolute bottom-[12%] left-[17%] xl:left-[19%] hidden lg:flex items-center gap-3 rounded-2xl tactile-chip px-3.5 py-2.5 rotate-[-6deg] max-w-[230px] select-none border-sky-400/30">
-                    {/* Washi tape anchoring it to poster */}
-                    <div className="tactile-washi-tape absolute -top-2 right-6 w-10 h-3 rounded-xs rotate-[4deg] pointer-events-none" />
-                    <div className="h-7 w-7 rounded-xl bg-sky-500/15 border border-sky-400/30 flex items-center justify-center shrink-0">
-                      <Coffee className="h-3.5 w-3.5 text-sky-300" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-mono text-[9.5px] font-bold text-sky-200">TP Lift Queue: ~48</span>
-                        <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse" />
-                      </div>
-                      <div className="font-hand text-xs text-sky-300 leading-tight">
-                        stairs = 3m 20s · skip the wait
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Fragment 4 (Bottom Left): Campus Locator (Dynamic/Rotating outward on scroll - No tape) */}
-                  <div className="hero-chip-campus absolute bottom-[18%] sm:bottom-[16%] lg:bottom-[4%] left-[2%] sm:left-[3%] flex items-center gap-2 sm:gap-3 rounded-xl sm:rounded-2xl tactile-chip px-2.5 py-1.5 sm:px-4 sm:py-3 rotate-[5deg] max-w-[160px] xs:max-w-[200px] sm:max-w-none select-none">
-                    <span className="h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-sky-400 shrink-0" />
-                    <div className="min-w-0">
-                      <div className="font-mono text-[8.5px] sm:text-xs font-bold text-sky-200 truncate">TP402 Tech Park</div>
-                      <div className="font-hand text-[10px] sm:text-sm text-sky-300 leading-tight truncate">elevator line: 40 ↗ stairs</div>
-                    </div>
-                  </div>
-
-                  {/* Fragment 6 (Bottom Right): Bunk Equation (Dynamic/Rotating outward on scroll - No tape) */}
-                  <div className="hero-chip-bunk absolute bottom-[18%] sm:bottom-[20%] lg:bottom-[14%] right-[2%] sm:right-[3%] flex flex-col gap-0.5 sm:gap-1 rounded-xl sm:rounded-2xl tactile-chip p-2 sm:p-3.5 rotate-[6.5deg] max-w-[145px] xs:max-w-[185px] sm:max-w-none select-none">
-                    <div className="flex items-center justify-between gap-1.5 sm:gap-3 text-[8px] sm:text-[10px] font-mono text-emerald-400 font-bold">
+                  {/* Middle Tactile Fragment 2 (Bottom-Right on mobile / Lower-Right on desktop): Bunk Calculation Chip (Dynamic - No tape) */}
+                  <div className="hero-chip-bunk absolute bottom-[18%] right-[2%] md:bottom-[16%] md:left-[49%] md:right-auto xl:left-[53%] flex flex-col gap-0.5 sm:gap-1 rounded-xl sm:rounded-2xl tactile-chip p-2 sm:p-3 rotate-[4deg] sm:rotate-[4.5deg] max-w-[145px] xs:max-w-[170px] sm:max-w-[185px] select-none shadow-xl border-emerald-400/30">
+                    <div className="flex items-center justify-between gap-1.5 text-[8px] sm:text-[9px] font-mono text-emerald-400 font-bold">
                       <span>BUNK MATH</span>
                       <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
                     </div>
-                    <div className="font-hand text-xs sm:text-lg text-emerald-200 leading-tight">
+                    <div className="font-hand text-sm sm:text-base text-emerald-200 leading-tight">
                       safe skips = 2 slots
                     </div>
-                    <div className="text-[7.5px] sm:text-[9px] font-mono text-emerald-400/70 truncate">next class: Slot B TP402</div>
+                    <div className="text-[7.5px] sm:text-[8px] font-mono text-emerald-400/80 truncate">next: Slot B TP402</div>
+                  </div>
+
+                  {/* ── Desktop Right-Side Transit Map Navigation Rail (Spread like a map) ── */}
+                  <div className="hero-transit-rail absolute right-5 xl:right-10 top-[9%] bottom-[12%] xl:top-[9%] xl:bottom-[13%] hidden md:flex flex-col justify-between items-end z-30 select-none pointer-events-auto">
+                    {/* Continuous vertical transit line / wire */}
+                    <div
+                      className={`absolute right-[4px] top-1 bottom-1 w-[1.5px] pointer-events-none ${
+                        isPoster
+                          ? "bg-gradient-to-b from-[#111111]/40 via-[#111111]/20 to-transparent"
+                          : "bg-gradient-to-b from-emerald-400/80 via-white/20 to-transparent"
+                      }`}
+                    />
+
+                    {/* Top terminal beacon */}
+                    <div className="absolute -top-2.5 right-[1px] w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_10px_#34d399] animate-pulse pointer-events-none" />
+
+                    {navTransitStations.map((item) => (
+                      <div
+                        key={item.num}
+                        className="relative flex items-center justify-end gap-2.5 xl:gap-3 group"
+                      >
+                        {/* Refined Sleek Station Node Pill (Landing page font-mono aesthetic) */}
+                        <button
+                          onClick={() => handleStationJump(item)}
+                          className={`group/btn flex items-center gap-2.5 px-3.5 py-1.5 rounded-full text-left transition-all duration-200 cursor-pointer backdrop-blur-md select-none ${
+                            isPoster
+                              ? "bg-white text-[#111111] border-2 border-[#111111] shadow-[2px_2px_0px_#111111] hover:shadow-[3px_3px_0px_#111111] hover:-translate-x-0.5 hover:-translate-y-0.5"
+                              : "bg-[#060b13]/85 text-zinc-300 border border-white/10 shadow-[0_4px_16px_rgba(0,0,0,0.5)] hover:border-emerald-400/50 hover:bg-[#0a111e] hover:text-white hover:-translate-x-1"
+                          }`}
+                        >
+                          <span
+                            className={`font-mono text-[11px] font-bold transition-colors ${
+                              isPoster ? "text-emerald-700" : "text-emerald-400"
+                            }`}
+                          >
+                            {item.num}.
+                          </span>
+                          <span
+                            className={`font-mono text-xs font-medium tracking-tight transition-colors ${
+                              isPoster ? "text-[#111111]" : "text-zinc-200 group-hover/btn:text-white"
+                            }`}
+                          >
+                            {item.label}
+                          </span>
+                          <span
+                            className={`font-mono text-[11px] transition-transform duration-200 group-hover/btn:translate-x-1 ${
+                              isPoster
+                                ? "text-[#111111]/60 group-hover/btn:text-[#111111]"
+                                : "text-zinc-500 group-hover/btn:text-emerald-400"
+                            }`}
+                          >
+                            →
+                          </span>
+                        </button>
+
+                        {/* Horizontal Connector Wire */}
+                        <div
+                          className={`w-4 xl:w-6 h-[1.5px] transition-colors duration-200 ${
+                            isPoster
+                              ? "bg-[#111111]/30 group-hover:bg-[#111111]"
+                              : "bg-white/20 group-hover:bg-emerald-400/80"
+                          }`}
+                        />
+
+                        {/* Map Station Dot Ring */}
+                        <div className="relative flex items-center justify-center">
+                          <div
+                            className={`w-2.5 h-2.5 rounded-full border transition-all duration-200 z-10 ${
+                              isPoster
+                                ? "border-[#111111] bg-white group-hover:bg-[#111111]"
+                                : "border-white/40 bg-[#06080d] group-hover:border-emerald-400 group-hover:bg-emerald-400 group-hover:shadow-[0_0_10px_#34d399]"
+                            }`}
+                          />
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
                 {/* Center Bottom Scroll Indicator */}
-                <div className="hero-scroll-hint flex items-center justify-center border-t border-white/[0.08] pt-3 pb-1 w-full text-center">
+                <div className="hero-scroll-hint flex items-center justify-center border-t border-white/[0.08] pt-2.5 pb-16 sm:pt-3 sm:pb-1 w-full text-center">
                   <button
                     onClick={() => {
                       document.getElementById("story")?.scrollIntoView({ behavior: "smooth" })
                     }}
-                    className="group inline-flex items-center gap-2.5 text-[11px] font-mono tracking-[0.14em] uppercase text-zinc-400 hover:text-white transition-colors cursor-pointer select-none"
+                    className="group inline-flex items-center gap-2 sm:gap-2.5 text-[10px] sm:text-[11px] font-mono tracking-[0.12em] sm:tracking-[0.14em] uppercase text-zinc-400 hover:text-white transition-colors cursor-pointer select-none"
                     aria-label="Scroll to bring order to chaos"
                   >
                     <span>Scroll to bring order to chaos</span>
-                    <span className="hero-scroll-arrow inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-400/10 border border-emerald-400/30 text-emerald-400 font-bold animate-bounce text-xs transition-transform group-hover:translate-y-0.5">
+                    <span className="hero-scroll-arrow inline-flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-emerald-400/10 border border-emerald-400/30 text-emerald-400 font-bold animate-bounce text-[10px] sm:text-xs transition-transform group-hover:translate-y-0.5">
                       ↓
                     </span>
                   </button>
@@ -2698,7 +2778,132 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
             setShowModeModal(false)
           }}
         />
-        <FloatingAppAction onLogin={onEnterApp ?? goLogin} mode={mode} onModeChange={handleModeChange} />
+
+        {/* ── Mobile Navigation Jump Panel Bottom Sheet (md:hidden) ── */}
+        <AnimatePresence>
+          {showMobileJump && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowMobileJump(false)}
+                className="fixed inset-0 bg-black/80 backdrop-blur-md z-[70] md:hidden"
+                aria-hidden="true"
+              />
+
+              {/* Sleek Bottom Sheet Drawer */}
+              <motion.div
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                exit={{ y: "100%" }}
+                transition={{ type: "spring", damping: 30, stiffness: 340 }}
+                className={`fixed bottom-0 left-0 right-0 z-[75] md:hidden rounded-t-[28px] overflow-hidden ${
+                  isPoster
+                    ? "bg-[#faf9f5] border-t-4 border-[#111111] text-[#111111] shadow-[0_-16px_48px_rgba(0,0,0,0.3)]"
+                    : "bg-[#080d16]/95 border-t border-white/15 text-white shadow-[0_-20px_60px_rgba(0,0,0,0.9)] backdrop-blur-2xl"
+                }`}
+                style={{
+                  paddingBottom: "max(env(safe-area-inset-bottom, 20px), 20px)",
+                }}
+              >
+                {/* Drag pill handle */}
+                <div className="w-9 h-1 bg-white/20 rounded-full mx-auto mt-2.5 mb-1" />
+
+                {/* Sheet Header */}
+                <div className="flex items-center justify-between px-5 py-2.5 border-b border-white/10">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse" />
+                    <span
+                      className={`font-mono text-xs font-black uppercase tracking-[0.16em] ${
+                        isPoster ? "text-[#111111]" : "text-white"
+                      }`}
+                    >
+                      TRANSIT RADAR{" "}
+                      <span className={isPoster ? "text-emerald-700" : "text-emerald-400"}>
+                        // QUICK JUMP
+                      </span>
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => setShowMobileJump(false)}
+                    className={`p-1.5 rounded-full transition cursor-pointer ${
+                      isPoster
+                        ? "bg-[#111111]/10 text-[#111111] hover:bg-[#111111]/20"
+                        : "bg-white/10 text-zinc-300 hover:text-white hover:bg-white/20"
+                    }`}
+                    aria-label="Close jump panel"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                {/* Station List */}
+                <div className="px-5 py-3">
+                  <div className="flex flex-col gap-1.5">
+                    {navTransitStations.map((item) => (
+                      <button
+                        key={item.num}
+                        onClick={() => {
+                          setShowMobileJump(false)
+                          handleStationJump(item)
+                        }}
+                        className={`group relative flex items-center gap-3 py-2.5 px-3 rounded-xl text-left transition-all active:scale-[0.98] cursor-pointer border ${
+                          isPoster
+                            ? "bg-white border-[#111111]/10 hover:border-[#111111] hover:bg-[#111111]/5 text-[#111111]"
+                            : "bg-white/[0.03] border-white/[0.08] hover:border-emerald-400/40 hover:bg-white/[0.07] text-white"
+                        }`}
+                      >
+                        {/* Station Number Badge */}
+                        <span
+                          className={`font-mono text-xs font-black px-2 py-0.5 rounded-md shrink-0 transition-colors ${
+                            isPoster
+                              ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                              : "bg-emerald-400/15 text-emerald-300 border border-emerald-400/30 group-hover:bg-emerald-400/25"
+                          }`}
+                        >
+                          {item.num}
+                        </span>
+
+                        {/* Station Label */}
+                        <span
+                          className={`font-mono text-xs sm:text-sm font-bold tracking-tight flex-1 truncate transition-colors ${
+                            isPoster ? "text-[#111111]" : "text-zinc-200 group-hover:text-white"
+                          }`}
+                        >
+                          {item.label}
+                        </span>
+
+                        {/* Jump Arrow */}
+                        <span
+                          className={`font-mono text-xs transition-transform duration-200 group-hover:translate-x-1 shrink-0 ${
+                            isPoster
+                              ? "text-[#111111]/40 group-hover:text-[#111111]"
+                              : "text-zinc-500 group-hover:text-emerald-400"
+                          }`}
+                        >
+                          →
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+
+        {/* Floating action cluster (Cleanly hidden when station jump panel is open) */}
+        {!showMobileJump && (
+          <FloatingAppAction
+            onLogin={onEnterApp ?? goLogin}
+            mode={mode}
+            onModeChange={handleModeChange}
+            onOpenJump={() => setShowMobileJump(true)}
+          />
+        )}
       </div>
     </>
   )

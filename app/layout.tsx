@@ -8,7 +8,6 @@ import { PwaInstallCapture } from "@/components/pwa-install-capture"
 import { ServiceWorkerRegister } from "@/components/service-worker-register"
 import { CustomCursor } from "@/components/custom-cursor"
 import { ThemeCurtainWipe } from "@/components/theme-curtain-wipe"
-import Script from "next/script"
 
 const inter = Inter({ subsets: ["latin"] })
 const jetbrainsMono = JetBrains_Mono({
@@ -349,9 +348,9 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
         {/* Google Consent Mode v2 defaults — denied until user consents */}
-        <Script
+        <script
           id="google-consent-defaults"
-          strategy="beforeInteractive"
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
