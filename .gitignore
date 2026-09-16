@@ -13,6 +13,7 @@
 /build
 
 # debug
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -27,29 +28,17 @@ yarn-error.log*
 next-env.d.ts
 dry-run-build/
 
+# scratch and deprecated folders
+/scratch/
+/styles/
+
 # generated
 public/profile-photo.jpg
 
-# one-off scraping / data generation scripts (not needed in repo)
-scripts/scrape-branches.js
-scripts/fetch-mealmap.mjs
-scripts/generate-finder-data.mjs
-scripts/generate-qr.mjs
-scripts/step1-studyplus.png
-scripts/step2-branches.png
-scripts/scrape-*.js
-scripts/debug-*.js
-scripts/explore-*.js
-scripts/analyze-*.js
-scripts/capture-*.js
-scripts/intercept-*.js
-scripts/extract-*.js
-scripts/find-*.js
-scripts/list-*.js
-scripts/check-*.js
-scripts/test-*.js
-scripts/fast-*.js
-scripts/add-*.js
+# local-only scraping scripts, dumps & utilities (kept locally, not in repo)
+scripts/*
+!scripts/build-version.js
+!scripts/fix-worker-paths.js
 
 # capacitor / Android app (moved to separate android-app folder)
 /android/
