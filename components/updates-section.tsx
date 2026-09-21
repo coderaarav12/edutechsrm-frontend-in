@@ -19,7 +19,7 @@ const toneStyles = {
   info: { color: "#a78bfa", bg: "rgba(167,139,250,0.08)", border: "rgba(167,139,250,0.2)", icon: Info },
 }
 
-type TabType = "dashboard" | "timetable" | "attendance" | "courses" | "marks" | "calendar" | "gradex" | "about" | "planner" | "notes" | "updates"
+import type { TabType } from "@/lib/app-types"
 
 interface UpdatesSectionProps {
   onNavigate?: (tab: TabType) => void

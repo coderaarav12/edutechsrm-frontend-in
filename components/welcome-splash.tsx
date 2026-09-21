@@ -30,8 +30,6 @@ export function WelcomeSplash({
     }
   }, [onComplete])
 
-  if (phase === "done") return null
-
   const bg = isPoster ? "#f7f5f0" : "#06080d"
   const titleColor = isPoster ? "#111111" : "#ffffff"
   const subColor = isPoster ? "rgba(17, 17, 17, 0.6)" : "rgba(244, 244, 245, 0.55)"
@@ -78,44 +76,29 @@ export function WelcomeSplash({
               className="text-[10px] sm:text-xs font-mono tracking-[0.3em] uppercase mb-4"
               style={{ color: subColor }}
             >
-              SYS_INIT // edutechsrm
+              Academic Intelligence
             </div>
 
-            {/* Subtitle */}
-            <div
-              className="text-sm sm:text-base font-medium tracking-wide mb-1.5"
-              style={{ color: subColor }}
-            >
-              Welcome to
-            </div>
-
-            {/* Bold brand title */}
+            {/* Brand Title */}
             <h1
-              className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight"
+              className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight mb-3 select-none"
               style={{
                 color: titleColor,
-                fontFamily: "var(--font-display), var(--font-sans), sans-serif",
-                letterSpacing: "-0.03em",
+                fontFamily:
+                  'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
               }}
             >
-              edutechsrm
+              Edutech<span style={{ color: isPoster ? "#10b981" : "#34d399" }}>SRM</span>
             </h1>
 
-            {/* Precision accent divider line */}
+            {/* Accent Rule / Underline */}
             <motion.div
               initial={{ scaleX: 0 }}
-              animate={{
-                scaleX: phase === "exiting" ? 0 : 1,
-              }}
-              transition={{
-                duration: 0.5,
-                delay: 0.15,
-                ease: [0.22, 1, 0.36, 1],
-              }}
-              className="h-[2px] w-20 rounded-full my-4"
+              animate={{ scaleX: 1 }}
+              transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              className="h-[2px] w-12 sm:w-16 mb-4 rounded-full"
               style={{
                 backgroundColor: accentColor,
-                boxShadow: isPoster ? "none" : "0 0 16px rgba(52, 211, 153, 0.6)",
                 transformOrigin: "center",
               }}
             />

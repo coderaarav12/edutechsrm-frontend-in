@@ -106,7 +106,10 @@ export async function POST(request: NextRequest) {
   // ── HMAC signature verification ──────────────────────────────────────────
   const clientSig = request.headers.get("x-client-signature")
   if (clientSig) {
-    const timestampStr = String(rawBody?.timestamp ?? "")
+    const timestampStr =
+      request.headers.get("x-client-ts") ||
+      request.headers.get("x-req-timestamp") ||
+      String(rawBody?.timestamp ?? "")
     // Sign over the raw body string so the Android client and server agree exactly
     const sigValid = await verifyHmacSignature(rawBodyText, timestampStr, clientSig)
     if (!sigValid) {

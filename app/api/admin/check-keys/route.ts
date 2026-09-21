@@ -6,6 +6,10 @@ export async function GET(request: NextRequest) {
   const token = request.headers.get("x-admin-token")
   if (!token) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
 
+  if (!AI_BACKEND_URL) {
+    return NextResponse.json({ success: false, error: "AI backend URL not configured" }, { status: 503 })
+  }
+
   try {
     const response = await fetch(`${AI_BACKEND_URL.replace(/\/$/, "")}/api/check-keys`, {
       headers: { Accept: "application/json" },

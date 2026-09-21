@@ -55,7 +55,7 @@ export function SupportModal({ isOpen, onClose }: SupportModalProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount, currency: "INR" }),
       })
-      const orderData = await orderRes.json()
+      const orderData: any = await orderRes.json()
       if (!orderRes.ok || !orderData.order_id) {
         const errMsg = typeof orderData.error === "string" ? orderData.error : orderData.error?.description || orderData.error?.message || "Failed to create order"
         throw new Error(errMsg)
@@ -87,7 +87,7 @@ export function SupportModal({ isOpen, onClose }: SupportModalProps) {
               amount,
             }),
           })
-          const verifyData = await verifyRes.json()
+          const verifyData: any = await verifyRes.json()
           if (verifyData.success) {
             setStatus("success")
             setStatusMsg("Thank you for supporting edutechsrm!")

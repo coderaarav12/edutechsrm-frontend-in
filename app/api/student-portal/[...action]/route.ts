@@ -1,18 +1,16 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { validateOrigin } from "@/lib/origin-validator"
+import {
+  decryptRequestPayload,
+  applySecurityHeaders,
+  sanitizeErrorMessage,
+  stripInternalSecrets,
+} from "@/lib/security"
 
 const PORTAL_BACKEND_URL =
   process.env.STUDENT_PORTAL_BACKEND_URL ||
   process.env.NEXT_PUBLIC_STUDENT_PORTAL_BACKEND_URL ||
   "http://127.0.0.1:8787"
-
-function isAuthorizedRequest(request: NextRequest): boolean {
-  if (validateOrigin(request)) return true
-  const platform = request.headers.get("x-client-platform")
-  const app = request.headers.get("x-client-app")
-  if (platform === "android" && app === "edutechsrm-mobile") return true
-  return false
-}
 
 function copyBackendCookie(response: NextResponse, backendResponse: Response) {
   const setCookie = backendResponse.headers.get("set-cookie")
@@ -32,8 +30,8 @@ function portalHeaders(request: NextRequest, contentType = false): HeadersInit {
 }
 
 export async function GET(request: NextRequest) {
-  if (!isAuthorizedRequest(request)) {
-    return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
+  if (!validateOrigin(request)) {
+    return applySecurityHeaders(NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 }))
   }
 
   const url = new URL(request.url)
@@ -47,27 +45,57 @@ export async function GET(request: NextRequest) {
       headers: portalHeaders(request),
       cache: "no-store",
     })
-    const data = await res.json().catch(() => ({}))
-    const response = NextResponse.json(data, { status: res.status })
+    const rawData = await res.json().catch(() => ({}))
+    const sanitizedData = stripInternalSecrets(rawData)
+    const response = applySecurityHeaders(NextResponse.json(sanitizedData, { status: res.status }))
     copyBackendCookie(response, res)
     return response
   } catch (err: any) {
-    return NextResponse.json(
-      { success: false, error: err?.message || "Student Portal backend unreachable" },
-      { status: 502 }
+    return applySecurityHeaders(
+      NextResponse.json(
+        { success: false, error: sanitizeErrorMessage(err?.message, "Student Portal backend unreachable") },
+        { status: 502 }
+      )
     )
   }
 }
 
 export async function POST(request: NextRequest) {
-  if (!isAuthorizedRequest(request)) {
-    return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
+  if (!validateOrigin(request)) {
+    return applySecurityHeaders(NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 }))
   }
 
   try {
-    const body = await request.text()
-    if (body.length > 50_000) {
-      return NextResponse.json({ success: false, error: "Request too large" }, { status: 413 })
+    const rawText = await request.text()
+    if (rawText.length > 50_000) {
+      return applySecurityHeaders(NextResponse.json({ success: false, error: "Request too large" }, { status: 413 }))
+    }
+
+    let outgoingBody = rawText
+
+    // In-memory decryption if payload is an encrypted blob
+    try {
+      let parsed: any = null
+      try {
+        parsed = JSON.parse(rawText)
+      } catch {
+        // Not a JSON string; pass through as text
+      }
+
+      if (parsed && typeof parsed === "object") {
+        const decrypted = decryptRequestPayload(parsed)
+        outgoingBody = typeof decrypted === "string" ? decrypted : JSON.stringify(decrypted)
+      }
+    } catch (decryptErr: any) {
+      return applySecurityHeaders(
+        NextResponse.json(
+          {
+            success: false,
+            error: sanitizeErrorMessage(decryptErr?.message, "Invalid or expired payload"),
+          },
+          { status: 400 }
+        )
+      )
     }
 
     const url = new URL(request.url)
@@ -77,17 +105,20 @@ export async function POST(request: NextRequest) {
     const res = await fetch(targetUrl.toString(), {
       method: "POST",
       headers: portalHeaders(request, true),
-      body,
+      body: outgoingBody,
       cache: "no-store",
     })
-    const data = await res.json().catch(() => ({}))
-    const response = NextResponse.json(data, { status: res.status })
+    const rawData = await res.json().catch(() => ({}))
+    const sanitizedData = stripInternalSecrets(rawData)
+    const response = applySecurityHeaders(NextResponse.json(sanitizedData, { status: res.status }))
     copyBackendCookie(response, res)
     return response
   } catch (err: any) {
-    return NextResponse.json(
-      { success: false, error: err?.message || "Student Portal backend unreachable" },
-      { status: 502 }
+    return applySecurityHeaders(
+      NextResponse.json(
+        { success: false, error: sanitizeErrorMessage(err?.message, "Student Portal backend unreachable") },
+        { status: 502 }
+      )
     )
   }
 }

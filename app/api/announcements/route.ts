@@ -13,7 +13,7 @@ export async function GET() {
       headers: { Accept: "application/json" },
     })
 
-    const data = await response.json()
+    const data: any = await response.json()
     if (Array.isArray(data?.announcements)) {
       data.announcements = data.announcements.filter((item: any) => (
         item && typeof item.date === "string" && item.date >= V2_ANNOUNCEMENT_CUTOFF

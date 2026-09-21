@@ -44,7 +44,7 @@ export function getPayloadKey(): Buffer {
     process.env.PAYLOAD_ENCRYPTION_KEY ||
     process.env.ENCRYPTION_KEY ||
     process.env.APP_SECRET ||
-    DEFAULT_PAYLOAD_SECRET
+    Buffer.from(_resolveAndroidPassphrase()).toString("utf8")
 
   if (secret.length === 64 && /^[0-9a-fA-F]+$/.test(secret)) {
     return Buffer.from(secret, "hex")
@@ -316,27 +316,10 @@ export function stripInternalSecrets(data: any): any {
  */
 async function _deriveAndroidAesKey(): Promise<CryptoKey> {
   const passphrase = _resolveAndroidPassphrase()
-  const keyMaterial = await globalThis.crypto.subtle.importKey(
-    "raw",
-    passphrase as BufferSource,
-    { name: "PBKDF2" },
-    false,
-    ["deriveBits"],
-  )
-  // SHA-256 of the passphrase bytes → 32-byte key (mirrors Android SHA256)
-  const rawKeyBits = await globalThis.crypto.subtle.deriveBits(
-    {
-      name: "PBKDF2",
-      salt: new Uint8Array(0),
-      iterations: 1,
-      hash: "SHA-256",
-    },
-    keyMaterial,
-    256,
-  )
+  const keyHash = await globalThis.crypto.subtle.digest("SHA-256", passphrase as BufferSource)
   return globalThis.crypto.subtle.importKey(
     "raw",
-    rawKeyBits,
+    keyHash,
     { name: "AES-CBC" },
     false,
     ["decrypt"],
@@ -345,13 +328,14 @@ async function _deriveAndroidAesKey(): Promise<CryptoKey> {
 
 /**
  * HMAC-SHA256 signing key derived once per signature operation.
- * Uses the same passphrase as AES so both halves stay in sync with Android.
+ * Uses the SHA-256 hash of the master passphrase (32 bytes) to mirror Android.
  */
 async function _deriveHmacKey(): Promise<CryptoKey> {
   const passphrase = _resolveAndroidPassphrase()
+  const keyHash = await globalThis.crypto.subtle.digest("SHA-256", passphrase as BufferSource)
   return globalThis.crypto.subtle.importKey(
     "raw",
-    passphrase as BufferSource,
+    keyHash,
     { name: "HMAC", hash: "SHA-256" },
     false,
     ["sign", "verify"],
@@ -362,7 +346,7 @@ async function _deriveHmacKey(): Promise<CryptoKey> {
  * Decrypts an AES-256-CBC blob sent by the Android client.
  *
  * @param envelope  The encrypted envelope with `encryptedBlob` (Base64),
- *                  `iv` (Base64), `timestamp` (ms epoch), and `clientVersion`.
+ *                  `iv` (Hex or Base64), `timestamp` (ms epoch), and `clientVersion`.
  * @returns         The decrypted, JSON-parsed payload, or `null` on failure.
  */
 export async function decryptPayload<T>(envelope: {
@@ -372,13 +356,20 @@ export async function decryptPayload<T>(envelope: {
   clientVersion: string
 }): Promise<T | null> {
   try {
-    const iv = Uint8Array.from(atob(envelope.iv), (c) => c.charCodeAt(0)).subarray(0, 16)
+    let iv: Uint8Array
+    if (envelope.iv.length === 32 && /^[0-9a-fA-F]+$/.test(envelope.iv)) {
+      const match = envelope.iv.match(/.{1,2}/g) || []
+      iv = new Uint8Array(match.map((byte) => parseInt(byte, 16)))
+    } else {
+      iv = Uint8Array.from(atob(envelope.iv), (c) => c.charCodeAt(0)).subarray(0, 16)
+    }
+
     const ciphertext = Uint8Array.from(atob(envelope.encryptedBlob), (c) => c.charCodeAt(0))
     const key = await _deriveAndroidAesKey()
     const plainBuf = await globalThis.crypto.subtle.decrypt(
-      { name: "AES-CBC", iv },
+      { name: "AES-CBC", iv: iv as BufferSource },
       key,
-      ciphertext,
+      ciphertext as BufferSource,
     )
     const plainText = new TextDecoder().decode(plainBuf)
     try {
@@ -412,14 +403,14 @@ export function verifyTimestamp(timestamp: number, windowMs = 5 * 60 * 1000): bo
 }
 
 /**
- * Generates an HMAC-SHA256 signature over `payload + "." + timestamp`.
+ * Generates an HMAC-SHA256 signature over `${timestamp}:${payload}`.
  * Mirrors the Android client signing scheme.
  *
  * @returns Hex-encoded HMAC-SHA256 signature string.
  */
 export async function generateHmacSignature(payload: string, timestamp: string): Promise<string> {
   const key = await _deriveHmacKey()
-  const message = new TextEncoder().encode(`${payload}.${timestamp}`)
+  const message = new TextEncoder().encode(`${timestamp}:${payload || ""}`)
   const sigBuf = await globalThis.crypto.subtle.sign("HMAC", key, message)
   return Array.from(new Uint8Array(sigBuf))
     .map((b) => b.toString(16).padStart(2, "0"))
@@ -428,9 +419,10 @@ export async function generateHmacSignature(payload: string, timestamp: string):
 
 /**
  * Verifies an HMAC-SHA256 signature in constant time.
+ * Supports both `${timestamp}:${payload}` (Android standard) and `${payload}.${timestamp}` fallback.
  *
  * @param payload    The original payload string.
- * @param timestamp  The timestamp string appended during signing.
+ * @param timestamp  The timestamp string.
  * @param signature  Hex-encoded signature to verify.
  * @returns          `true` if the signature is valid.
  */
@@ -441,13 +433,24 @@ export async function verifyHmacSignature(
 ): Promise<boolean> {
   try {
     const key = await _deriveHmacKey()
-    const message = new TextEncoder().encode(`${payload}.${timestamp}`)
-    // Convert hex signature → Uint8Array
     const sigBytes = new Uint8Array(
       signature.match(/.{1,2}/g)?.map((byte) => parseInt(byte, 16)) ?? [],
     )
     if (sigBytes.length === 0) return false
-    return globalThis.crypto.subtle.verify("HMAC", key, sigBytes, message)
+
+    // Primary: ${timestamp}:${payload} (Android client standard)
+    const primaryMsg = new TextEncoder().encode(`${timestamp}:${payload || ""}`)
+    const primaryValid = await globalThis.crypto.subtle.verify("HMAC", key, sigBytes, primaryMsg)
+    if (primaryValid) return true
+
+    // Fallback 1: ${payload}.${timestamp}
+    const fallbackMsg1 = new TextEncoder().encode(`${payload || ""}.${timestamp}`)
+    const fallbackValid1 = await globalThis.crypto.subtle.verify("HMAC", key, sigBytes, fallbackMsg1)
+    if (fallbackValid1) return true
+
+    // Fallback 2: without timestamp
+    const fallbackMsg2 = new TextEncoder().encode(payload || "")
+    return await globalThis.crypto.subtle.verify("HMAC", key, sigBytes, fallbackMsg2)
   } catch {
     return false
   }

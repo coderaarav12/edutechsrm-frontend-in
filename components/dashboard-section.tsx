@@ -41,7 +41,7 @@ import { SupportModal } from "./support-modal"
 import { useSupport } from "@/lib/use-support"
 import { DEFAULT_ANNOUNCEMENTS } from "@/components/announcements"
 
-type TabType = "dashboard" | "timetable" | "attendance" | "courses" | "marks" | "calendar" | "gradex" | "about" | "notes" | "feedback" | "updates" | "settings" | "ai" | "finder" | "calculator" | "map"
+import type { TabType } from "@/lib/app-types"
 
 interface DashboardSectionProps {
   onNavigate: (tab: TabType) => void
@@ -407,8 +407,8 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
       if (a.date !== b.date) return a.date.localeCompare(b.date)
       return a.startMin - b.startMin
     })[0] ?? null
-  const todayEvents = calendar.filter((event) => event.date === todayStr)
-  const todayHoliday = todayEvents.find((event) => event.type === "holiday")
+  const todayEvents = (calendar || []).filter((event: any) => event.date === todayStr)
+  const todayHoliday = todayEvents.find((event: any) => event.type === "holiday")
   const isWeekend = now.getDay() === 0 || now.getDay() === 6
 
   const todayDueAssignments = (assignments || []).filter((a: any) => a.status !== "done" && a.dueDate === todayStr)
@@ -419,9 +419,9 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
   const pendingAssignmentCount = (assignments || []).filter((a: any) => a.status !== "done").length
 
   const todayDayOrder = dateToDoMap[todayStr]
-  const nextCalendarEvent = calendar
-    .filter((event) => event.date >= todayStr)
-    .sort((a, b) => a.date.localeCompare(b.date))[0] ?? null
+  const nextCalendarEvent = (calendar || [])
+    .filter((event: any) => event.date >= todayStr)
+    .sort((a: any, b: any) => a.date.localeCompare(b.date))[0] ?? null
   const nextEvent = (() => {
     if (!nextCalendarEvent && !upcomingAssignment) return null
     if (!nextCalendarEvent) return { title: upcomingAssignment.title, date: upcomingAssignment.dueDate, type: "assignment", id: upcomingAssignment.id }

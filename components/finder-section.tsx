@@ -343,7 +343,7 @@ export function FinderSection({
       const res = await fetch(`/api/finder?${params}`, { headers })
       if (!res.ok) throw Error(await res.text().catch(() => "Failed to load"))
       
-      const data = await res.json()
+      const data: any = await res.json()
       setFaculty(data.faculty || [])
       setTotalPages(data.totalPages || 1)
       setTotalCount(data.total || 0)

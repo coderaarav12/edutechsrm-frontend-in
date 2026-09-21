@@ -2657,9 +2657,9 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
             <div
               className="gs-reveal relative mx-auto max-w-[1000px] overflow-hidden rounded-3xl border p-8 text-center sm:rounded-[36px] sm:p-14 backdrop-blur-2xl shadow-[0_28px_80px_rgba(0,0,0,0.6)] surface-card-elevated"
               style={{
-                background: mode === "paper"
+                background: (mode as string) === "paper"
                   ? "radial-gradient(90% 120% at 50% 0%, rgba(15,118,110,.08), transparent 60%), #ffffff"
-                  : mode === "blueprint"
+                  : (mode as string) === "blueprint"
                     ? "radial-gradient(90% 120% at 50% 0%, rgba(56,189,248,.16), transparent 60%), #0a1c30"
                     : "radial-gradient(90% 120% at 50% 0%, rgba(52,211,153,.12), transparent 60%), radial-gradient(70% 100% at 50% 110%, rgba(167,139,250,.10), transparent 60%), #0b1019",
               }}
