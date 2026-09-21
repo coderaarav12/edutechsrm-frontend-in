@@ -48,6 +48,7 @@ export default function LoginPage() {
   const [showPortalPassword, setShowPortalPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [skipPortal, setSkipPortal] = useState(false)
   const [mode, setMode] = useState<"night" | "poster">("poster")
 
   const derivedNetId = netIdFromEmail(email || "")
@@ -128,7 +129,7 @@ export default function LoginPage() {
 
   const finishLogin = async (token: string, normalizedEmail: string) => {
     const isDemoAuth = isDemoCredentials(email, password)
-    const wantsPortalSync = !isDemoAuth && Boolean(portalPassword.trim() || portalCaptcha.trim())
+    const wantsPortalSync = !isDemoAuth && !skipPortal && Boolean(portalPassword.trim() || portalCaptcha.trim())
     if (wantsPortalSync) {
       setPortalError("")
       if (!portalPassword.trim()) {
@@ -671,7 +672,7 @@ export default function LoginPage() {
                           </span>
                         </div>
                       </div>
-                    ) : (
+                    ) : !skipPortal ? (
                       <>
                         <div className="flex flex-col gap-1.5">
                           <div className="flex items-center justify-between">
@@ -761,6 +762,21 @@ export default function LoginPage() {
                           </div>
                         )}
                       </>
+                    ) : null}
+
+                    {/* Skip Student Portal Checkbox Option */}
+                    {!isDemo && (
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none py-1 group">
+                        <input
+                          type="checkbox"
+                          checked={skipPortal}
+                          onChange={(e) => setSkipPortal(e.target.checked)}
+                          className="w-4 h-4 rounded border-white/20 bg-white/5 text-emerald-500 focus:ring-emerald-500/20 cursor-pointer accent-emerald-500"
+                        />
+                        <span className="text-xs text-zinc-400 group-hover:text-zinc-300 font-medium transition-colors">
+                          Skip Student Portal login
+                        </span>
+                      </label>
                     )}
 
                     {showTurnstile && (
