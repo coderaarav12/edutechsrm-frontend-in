@@ -437,37 +437,6 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
         </motion.div>
       )}
 
-      {/* ── Portal Mode Active Indicator ── */}
-      {attendanceSource === "portal" && !isSessionExpired && (
-        <motion.div
-          initial={{ opacity: 0, y: -4 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={`mb-6 p-3 sm:p-4 rounded-2xl flex items-center justify-between gap-3 text-xs ${
-            isPoster
-              ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] text-[#111111]"
-              : "bg-cyan-500/10 border border-cyan-500/25 text-cyan-300"
-          }`}
-        >
-          <div className="flex items-center gap-2.5">
-            <span className={`w-2.5 h-2.5 rounded-full ${isPoster ? "bg-[#111111]" : "bg-cyan-400 animate-pulse"}`} />
-            <span className={isPoster ? "font-bold text-[#111111] tracking-tight" : "text-cyan-300"}>
-              Student Portal Scraper Mode Active — Live data from sp.srmist.edu.in
-            </span>
-          </div>
-          {(!portalData?.attendance || portalData.attendance.length === 0) && (
-            <button
-              onClick={handlePortalResync}
-              className={`px-3 py-1 rounded-lg font-bold transition-all shrink-0 ${
-                isPoster
-                  ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] keep-white hover:bg-zinc-800"
-                  : "bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-200 border border-cyan-500/30"
-              }`}
-            >
-              Sync Portal
-            </button>
-          )}
-        </motion.div>
-      )}
 
       {/* ── Mode Switcher ── */}
       <motion.div
