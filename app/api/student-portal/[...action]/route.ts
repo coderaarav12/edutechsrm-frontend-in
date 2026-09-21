@@ -14,6 +14,23 @@ function isAuthorizedRequest(request: NextRequest): boolean {
   return false
 }
 
+function copyBackendCookie(response: NextResponse, backendResponse: Response) {
+  const setCookie = backendResponse.headers.get("set-cookie")
+  if (setCookie) {
+    response.headers.set("set-cookie", setCookie)
+  }
+}
+
+function portalHeaders(request: NextRequest, contentType = false): HeadersInit {
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+  }
+  const cookie = request.headers.get("cookie")
+  if (cookie) headers.Cookie = cookie
+  if (contentType) headers["Content-Type"] = "application/json"
+  return headers
+}
+
 export async function GET(request: NextRequest) {
   if (!isAuthorizedRequest(request)) {
     return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
@@ -27,11 +44,13 @@ export async function GET(request: NextRequest) {
   try {
     const res = await fetch(targetUrl.toString(), {
       method: "GET",
-      headers: { Accept: "application/json" },
+      headers: portalHeaders(request),
       cache: "no-store",
     })
     const data = await res.json().catch(() => ({}))
-    return NextResponse.json(data, { status: res.status })
+    const response = NextResponse.json(data, { status: res.status })
+    copyBackendCookie(response, res)
+    return response
   } catch (err: any) {
     return NextResponse.json(
       { success: false, error: err?.message || "Student Portal backend unreachable" },
@@ -57,15 +76,14 @@ export async function POST(request: NextRequest) {
 
     const res = await fetch(targetUrl.toString(), {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
+      headers: portalHeaders(request, true),
       body,
       cache: "no-store",
     })
     const data = await res.json().catch(() => ({}))
-    return NextResponse.json(data, { status: res.status })
+    const response = NextResponse.json(data, { status: res.status })
+    copyBackendCookie(response, res)
+    return response
   } catch (err: any) {
     return NextResponse.json(
       { success: false, error: err?.message || "Student Portal backend unreachable" },

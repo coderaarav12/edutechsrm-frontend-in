@@ -129,6 +129,18 @@ function clearPersistedSnapshot() {
   try { localStorage.removeItem("edutechsrm_photo_cache_v1") } catch {}
 }
 
+function clearStudentPortalSnapshot() {
+  if (typeof window === "undefined") return
+  try {
+    localStorage.removeItem("edutechsrm_student_portal_session_id")
+    localStorage.removeItem("edutechsrm_student_portal_cache_v2")
+    localStorage.removeItem("edutechsrm_student_portal_creds_v2")
+    localStorage.removeItem("edutechsrm_portal_popup_dismissed_v2")
+    sessionStorage.removeItem("edutechsrm_portal_skipped_session")
+    window.dispatchEvent(new CustomEvent("edutechsrm:portal-logout"))
+  } catch {}
+}
+
 function buildDataStatusFromSnapshot(snapshot: PersistedAuthSnapshot): DataStatus {
   const hasUser = Boolean(snapshot.user)
   return {
@@ -476,7 +488,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     const token = localStorage.getItem("srm_token")
+    const portalSessionId = localStorage.getItem("edutechsrm_student_portal_session_id")
     try {
+      if (portalSessionId) {
+        await fetch("/api/student-portal/logout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ sessionId: portalSessionId }),
+        }).catch(() => {})
+      }
       if (token) {
         await fetch("/api/logout", {
           method: "POST",
@@ -493,6 +514,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("srm_section")
     localStorage.removeItem("srm_batch")
     clearPersistedSnapshot()
+    clearStudentPortalSnapshot()
     setState(createSignedOutState(null, false))
 
     if (typeof window !== "undefined") {

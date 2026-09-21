@@ -43,3 +43,7 @@ scripts/*
 # capacitor / Android app (moved to separate android-app folder)
 /android/
 /capacitor.config.ts
+
+# generated AI agent files
+AGENTS.md
+CLAUDE.md

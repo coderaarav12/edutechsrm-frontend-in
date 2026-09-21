@@ -76,6 +76,14 @@ function getStoredPassword(): string {
   return ""
 }
 
+function getStoredPortalSessionId(): string {
+  if (typeof window === "undefined") return ""
+  try {
+    return localStorage.getItem("edutechsrm_student_portal_session_id") || ""
+  } catch {}
+  return ""
+}
+
 export function StudentPortalModal() {
   const { isLoginModalOpen, closePortalLogin, fetchCaptcha, loginPortal, isSyncing, isSessionExpired } =
     useStudentPortal()
@@ -99,6 +107,7 @@ export function StudentPortalModal() {
     setError("")
     setSuccess("")
     setCaptcha("")
+    setSessionId(getStoredPortalSessionId())
 
     const detected = detectNetId(user)
     if (detected) {
@@ -176,7 +185,13 @@ export function StudentPortalModal() {
         closePortalLogin()
       }, 800)
     } else {
-      setError(res.error || "Authentication failed.")
+      const message =
+        res.errorCode === "INVALID_CAPTCHA"
+          ? "The CAPTCHA was incorrect. A new CAPTCHA has been loaded."
+          : res.errorCode === "INVALID_CREDENTIALS"
+          ? "NetID or password is incorrect. Please check your Student Portal credentials."
+          : res.error || "Authentication failed."
+      setError(message)
       if (res.captchaImage) {
         const img = res.captchaImage.startsWith("data:")
           ? res.captchaImage
@@ -351,7 +366,7 @@ export function StudentPortalModal() {
               </div>
 
               {/* Captcha Image Container */}
-              <div className={`h-16 rounded-2xl flex items-center justify-center p-1.5 overflow-hidden mb-2.5 ${
+              <div className={`h-14 w-fit min-w-[132px] max-w-full mx-auto rounded-2xl flex items-center justify-center px-2 py-1.5 overflow-hidden mb-2.5 ${
                 isPoster
                   ? "bg-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111]"
                   : "bg-zinc-900 border border-white/10 shadow-inner"
@@ -365,7 +380,7 @@ export function StudentPortalModal() {
                   <img
                     src={captchaImage}
                     alt="Portal CAPTCHA"
-                    className="max-h-full object-contain rounded p-1"
+                    className="max-h-full max-w-[150px] object-contain rounded"
                   />
                 ) : (
                   <button
@@ -389,7 +404,7 @@ export function StudentPortalModal() {
                 autoCapitalize="none"
                 autoCorrect="off"
                 spellCheck={false}
-                className={`w-full rounded-xl px-3 py-2.5 text-base font-mono text-center tracking-[0.2em] font-semibold outline-none transition-all placeholder:tracking-normal placeholder:font-normal placeholder:text-xs ${
+                className={`block w-[11rem] max-w-full mx-auto rounded-xl px-3 py-2.5 text-base font-mono text-center tracking-[0.2em] font-semibold outline-none transition-all placeholder:tracking-normal placeholder:font-normal placeholder:text-xs ${
                   isPoster
                     ? "bg-white border-2 border-[#111111] text-[#111111] shadow-[2px_2px_0px_#111111] placeholder:text-[#888888] focus:ring-1 focus:ring-[#111111]"
                     : "bg-zinc-900/90 border border-white/15 text-zinc-100 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 placeholder:text-zinc-600"

@@ -21,9 +21,14 @@ import { AIPromoBadge } from "@/components/ai-promo-badge"
 
 export function MarksSection() {
   const { isAuthenticated, marks, courses, isLoading, refreshData, user } = useAuth()
-  const { portalData, isPortalConnected, isSessionExpired, openGradesModal, openPortalLogin, isSyncing } = useStudentPortal()
+  const { portalData, isPortalConnected, isSessionExpired, openGradesModal, openPortalLogin, syncPortalData, isSyncing } = useStudentPortal()
   const [isLoginOpen, setIsLoginOpen] = useState(false)
   const [expandedCard, setExpandedCard] = useState<string | null>(null)
+
+  const handlePortalResync = async () => {
+    const ok = await syncPortalData({ forceRefresh: true })
+    if (!ok && !isPortalConnected) openPortalLogin()
+  }
 
   // Map internal marks from Academia and Student Portal scraper directly into subjects
   const mergedMarks = useMemo(() => {
@@ -135,15 +140,23 @@ export function MarksSection() {
 
       // Case B: Portal internal marks exist
       if (portalEntries.length > 0) {
-        const tests = portalEntries.map((p: any) => {
+        const tests = portalEntries.flatMap((p: any) => {
+          if (Array.isArray(p.components) && p.components.length > 0) {
+            return p.components.map((component: any) => ({
+              test: component.title || p.name || "Internal Component",
+              scored: typeof component.markObtained === "number" ? component.markObtained : 0,
+              max: typeof component.maxMark === "number" && component.maxMark > 0 ? component.maxMark : 0,
+            }))
+          }
+
           const scoredNum = typeof p.markObtained === "number" ? p.markObtained : parseFloat(String(p.rawMarkText || "0"))
           const validNum = !isNaN(scoredNum) ? scoredNum : 0
           const maxNum = typeof p.maxMark === "number" && p.maxMark > 0 ? p.maxMark : 50
-          return {
+          return [{
             test: p.name || "Internal Test",
             scored: validNum,
             max: maxNum,
-          }
+          }]
         })
         const total = tests.reduce((s: number, t: any) => s + t.scored, 0)
         const maxTotal = tests.reduce((s: number, t: any) => s + t.max, 0)
@@ -286,7 +299,7 @@ export function MarksSection() {
           <AIPromoBadge page="marks" />
           <motion.button
             whileTap={{ scale: 0.95 }}
-            onClick={openPortalLogin}
+            onClick={handlePortalResync}
             disabled={isLoading || isSyncing}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/25 transition-all shadow-sm disabled:opacity-50"
           >
@@ -532,6 +545,25 @@ export function MarksSection() {
                   <span>{mark.type || "Course"}</span>
                   {hasMarks && <span>{mark.tests.length} tests recorded</span>}
                 </div>
+
+                {hasMarks && mark.tests.length > 0 && (
+                  <div className="mt-3 space-y-1.5">
+                    {mark.tests.slice(0, 4).map((test: any, testIndex: number) => (
+                      <div
+                        key={`${cardKey}-test-${testIndex}`}
+                        className="flex items-center justify-between gap-3 rounded-lg bg-zinc-950/45 px-2.5 py-1.5 text-[11px] ring-1 ring-white/5"
+                      >
+                        <span className="truncate text-zinc-400">{test.test || `Test ${testIndex + 1}`}</span>
+                        <span className="shrink-0 font-mono text-zinc-200">
+                          {test.scored} / {test.max || "N/A"}
+                        </span>
+                      </div>
+                    ))}
+                    {mark.tests.length > 4 && (
+                      <div className="text-[10px] text-zinc-600">+{mark.tests.length - 4} more components</div>
+                    )}
+                  </div>
+                )}
               </div>
             </motion.div>
           )

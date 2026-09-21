@@ -40,7 +40,7 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
     dateToDoMap = {},
     courses = [],
   } = useAuth() as any
-  const { portalData, syncPortalData, openPortalLogin, isSessionExpired, isSyncing } = useStudentPortal()
+  const { portalData, isPortalConnected, syncPortalData, openPortalLogin, isSessionExpired, isSyncing } = useStudentPortal()
   const { odMlEntries } = useCustomPlanner()
   const [isLoginOpen, setIsLoginOpen] = useState(false)
   const [attendanceSource, setAttendanceSource] = useState<"backend" | "portal">("backend")
@@ -88,6 +88,11 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
 
   const refreshAttendance = async () => {
     await Promise.allSettled([refreshData(), syncPortalData()])
+  }
+
+  const handlePortalResync = async () => {
+    const ok = await syncPortalData({ forceRefresh: true })
+    if (!ok && !isPortalConnected) openPortalLogin()
   }
 
   const toDate = (value: string) => new Date(`${value}T00:00:00`)
@@ -374,7 +379,7 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
           {attendanceSource === "portal" && (
             <motion.button
               whileTap={{ scale: 0.95 }}
-              onClick={openPortalLogin}
+              onClick={handlePortalResync}
               disabled={isLoading || isSyncing}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all disabled:opacity-50 ${
                 isPoster
@@ -451,7 +456,7 @@ export function AttendanceSection({ onNavigate }: AttendanceSectionProps) {
           </div>
           {(!portalData?.attendance || portalData.attendance.length === 0) && (
             <button
-              onClick={openPortalLogin}
+              onClick={handlePortalResync}
               className={`px-3 py-1 rounded-lg font-bold transition-all shrink-0 ${
                 isPoster
                   ? "bg-[#111111] text-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111] keep-white hover:bg-zinc-800"

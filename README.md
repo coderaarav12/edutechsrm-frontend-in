@@ -97,6 +97,15 @@ edutechsrm is a student-built web app that connects to your SRM Academia account
 - Low marks alerts (below 50%)
 - Announcement bell for developer updates, bug fixes, and info notices
 
+### Student Portal Sync
+- Main login can also connect SRM Student Portal alongside Academia.
+- Student Portal NetID is derived from the Academia email prefix: `ag0892@srmist.edu.in` becomes `ag0892`.
+- The login route asks only for Student Portal password and CAPTCHA; portal errors are shown separately from Academia errors.
+- Browser storage keeps the app `sessionId` plus cached portal data for fast reloads. SRM portal cookies stay in the scraper backend.
+- Normal app sync now reuses the stored portal session and refreshes attendance, semester grades, CGPA, and internal marks without reopening the portal popup.
+- If the scraper returns `SESSION_EXPIRED`, the cached portal session is cleared and the Student Portal login popup appears again.
+- Internal marks render component-level entries when the scraper can open SRM's "view details" response for a subject.
+
 ### Profile
 - Student info: name, register number, department, class, batch, semester
 - Live profile photo — fetched from SRM Academia portal, shows everywhere (navbar, sidebar, dashboard, profile)
@@ -136,8 +145,10 @@ edutechsrm is a student-built web app that connects to your SRM Academia account
 
 ## Security
 
-- Your password is never stored. Credentials go directly to SRM Academia's servers for authentication.
-- Only a session token is kept temporarily — the same way any normal login works.
+- Your Academia password is never stored. Credentials go directly to SRM Academia's servers for authentication.
+- If Student Portal quick sync is enabled, the portal password can be saved in this browser's local storage so future relogins ask only for CAPTCHA; logout clears it.
+- Session tokens and local cached academic data are kept temporarily — the same way any normal login/cache works.
+- Student Portal SRM cookies are never written to the browser; only the app session id is stored client-side.
 - No database. No third-party analytics. No ads.
 - All data is fetched live from SRM Academia on every sync.
 - Origin validation on all admin API routes.
@@ -180,6 +191,7 @@ edutechsrm is a student-built web app that connects to your SRM Academia account
 │   ├── timetable-section.tsx   # Day / list / grid views with assignments
 │   ├── attendance-section.tsx  # Attendance with OD/ML planner
 │   ├── marks-section.tsx       # Internal marks with progress bars
+│   ├── student-portal-modal.tsx # Student Portal CAPTCHA relogin/resync flow
 │   ├── courses-section.tsx     # Course list searchable/filterable
 │   ├── calendar-section.tsx    # Academic calendar + assignments
 │   ├── gradex-section.tsx      # CGPA calculator + predictor
@@ -201,6 +213,7 @@ edutechsrm is a student-built web app that connects to your SRM Academia account
 │   └── seo-structured-data.tsx # JSON-LD structured data
 ├── lib/
 │   ├── auth-context.tsx        # Auth state + data sync
+│   ├── student-portal-context.tsx # Portal session cache + resync state
 │   ├── admin-control.ts        # Admin API hooks
 │   ├── use-support.ts          # Razorpay support hook
 │   └── custom-planner.ts       # Custom class scheduling

@@ -43,11 +43,17 @@ export interface InternalMarkRow {
   maxMark: number | null
   rawMarkText: string
   subjectId?: string
+  components?: {
+    title: string
+    markObtained: number
+    maxMark: number
+  }[]
 }
 
 export interface UnifiedSubjectRecord {
   code: string
   name: string
+  category?: string
   attendance?: {
     attended: number
     total: number
@@ -57,6 +63,11 @@ export interface UnifiedSubjectRecord {
     markObtained: number | null
     maxMark: number | null
     rawText: string
+    components?: {
+      title: string
+      markObtained: number
+      maxMark: number
+    }[]
   }
 }
 
@@ -88,8 +99,8 @@ interface StudentPortalContextType {
   closePortalLogin: () => void
   openGradesModal: () => void
   closeGradesModal: () => void
-  fetchCaptcha: (sessionId?: string) => Promise<{ success: boolean; sessionId?: string; captchaImage?: string; error?: string }>
-  loginPortal: (netId: string, pass: string, captcha: string, sessionId: string) => Promise<{ success: boolean; error?: string; requiresCaptcha?: boolean; captchaImage?: string; sessionId?: string }>
+  fetchCaptcha: (sessionId?: string) => Promise<{ success: boolean; sessionId?: string; captchaImage?: string; error?: string; errorCode?: string }>
+  loginPortal: (netId: string, pass: string, captcha: string, sessionId: string) => Promise<{ success: boolean; error?: string; errorCode?: string; requiresCaptcha?: boolean; captchaImage?: string; sessionId?: string }>
   syncPortalData: (options?: { forceRefresh?: boolean }) => Promise<boolean>
   disconnectPortal: () => void
 }
@@ -98,6 +109,7 @@ const StudentPortalContext = createContext<StudentPortalContextType | null>(null
 
 const CACHE_KEY = "edutechsrm_student_portal_cache_v2"
 const CREDS_KEY = "edutechsrm_student_portal_creds_v2"
+const SESSION_KEY = "edutechsrm_student_portal_session_id"
 const PORTAL_POPUP_DISMISSED_KEY = "edutechsrm_portal_popup_dismissed_v2"
 
 function readCachedPortalData(): StudentPortalData | null {
@@ -136,11 +148,40 @@ function writeStoredCredentials(creds: StoredCredentials) {
   } catch {}
 }
 
+function readStoredSessionId(): string {
+  if (typeof window === "undefined") return ""
+  try {
+    return localStorage.getItem(SESSION_KEY) || ""
+  } catch {
+    return ""
+  }
+}
+
+function writeStoredSessionId(sessionId: string) {
+  if (typeof window === "undefined" || !sessionId) return
+  try {
+    localStorage.setItem(SESSION_KEY, sessionId)
+  } catch {}
+}
+
+function clearStoredSessionId() {
+  if (typeof window === "undefined") return
+  try {
+    localStorage.removeItem(SESSION_KEY)
+  } catch {}
+}
+
+async function readJson(response: Response | null): Promise<any> {
+  if (!response) return {}
+  return response.json().catch(() => ({}))
+}
+
 function clearPortalStorage() {
   if (typeof window === "undefined") return
   try {
     localStorage.removeItem(CACHE_KEY)
     localStorage.removeItem(CREDS_KEY)
+    localStorage.removeItem(SESSION_KEY)
     localStorage.removeItem(PORTAL_POPUP_DISMISSED_KEY)
   } catch {}
 }
@@ -153,9 +194,14 @@ export function StudentPortalProvider({ children }: { children: ReactNode }) {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
   const [isGradesModalOpen, setIsGradesModalOpen] = useState(false)
 
+  const [storedSessionId, setStoredSessionId] = useState(() => readStoredSessionId())
+
   const isPortalConnected = useMemo(() => {
-    return Boolean(portalData && (portalData.marks?.semesters?.length || portalData.attendance?.length))
-  }, [portalData])
+    return Boolean(
+      storedSessionId ||
+      (portalData && (portalData.marks?.semesters?.length || portalData.attendance?.length))
+    )
+  }, [portalData, storedSessionId])
 
   // Load cache on mount
   useEffect(() => {
@@ -165,40 +211,31 @@ export function StudentPortalProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  // Auto prompt popup on login since CAPTCHA is needed every time
+  // On reload or app login, silently reuse the saved portal session. Do not open
+  // the login modal unless the scraper explicitly reports SESSION_EXPIRED.
   useEffect(() => {
     if (typeof window === "undefined") return
     if (!isAuthenticated) return
 
-    let timer: NodeJS.Timeout | null = null
-
-    const checkAndPrompt = () => {
-      try {
-        const skipped = sessionStorage.getItem("edutechsrm_portal_skipped_session")
-        if (!skipped) {
-          timer = setTimeout(() => {
-            setIsLoginModalOpen(true)
-          }, 1500)
-        }
-      } catch {}
+    const sessionId = readStoredSessionId()
+    setStoredSessionId(sessionId)
+    if (sessionId) {
+      void syncPortalData({ forceRefresh: false })
     }
-
-    checkAndPrompt()
 
     const handleLoginSuccess = () => {
-      try {
-        sessionStorage.removeItem("edutechsrm_portal_skipped_session")
-      } catch {}
-      if (timer) clearTimeout(timer)
-      timer = setTimeout(() => {
-        setIsLoginModalOpen(true)
-      }, 1500)
+      const currentSessionId = readStoredSessionId()
+      setStoredSessionId(currentSessionId)
+      if (currentSessionId) void syncPortalData({ forceRefresh: false })
     }
 
+    const handlePortalLogout = () => disconnectPortal()
+
     window.addEventListener("edutechsrm:login-success", handleLoginSuccess)
+    window.addEventListener("edutechsrm:portal-logout", handlePortalLogout)
     return () => {
-      if (timer) clearTimeout(timer)
       window.removeEventListener("edutechsrm:login-success", handleLoginSuccess)
+      window.removeEventListener("edutechsrm:portal-logout", handlePortalLogout)
     }
   }, [isAuthenticated])
 
@@ -234,10 +271,14 @@ export function StudentPortalProvider({ children }: { children: ReactNode }) {
     try {
       const url = new URL("/api/student-portal/captcha", window.location.origin)
       if (sessionId) url.searchParams.set("sessionId", sessionId)
-      const res = await fetch(url.toString(), { cache: "no-store" })
-      const data = await res.json().catch(() => ({}))
+      const res = await fetch(url.toString(), { cache: "no-store", credentials: "include" })
+      const data = await readJson(res)
       if (!res.ok || !data.success) {
-        return { success: false, error: data?.error || "Failed to fetch captcha from portal scraper" }
+        return { success: false, error: data?.error || "Failed to fetch captcha from portal scraper", errorCode: data?.errorCode }
+      }
+      if (data.sessionId) {
+        writeStoredSessionId(data.sessionId)
+        setStoredSessionId(data.sessionId)
       }
       return {
         success: true,
@@ -256,6 +297,7 @@ export function StudentPortalProvider({ children }: { children: ReactNode }) {
         const res = await fetch("/api/student-portal/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({
             netId: netId.trim().toLowerCase(),
             password: pass,
@@ -264,11 +306,12 @@ export function StudentPortalProvider({ children }: { children: ReactNode }) {
           }),
         })
 
-        const data = await res.json().catch(() => ({}))
+        const data = await readJson(res)
         if (!res.ok || !data.success) {
           return {
             success: false,
             error: data?.error || "Student portal authentication failed",
+            errorCode: data?.errorCode,
             requiresCaptcha: data?.requiresCaptcha,
             captchaImage: data?.captchaImage || data?.captchaDataUrl,
             sessionId: data?.sessionId || sessionId,
@@ -289,10 +332,12 @@ export function StudentPortalProvider({ children }: { children: ReactNode }) {
 
         setPortalData(newPortalData)
         setIsSessionExpired(false)
+        writeCachedPortalData(newPortalData)
         const cleanNetId = netId.trim().toLowerCase()
         if (typeof window !== "undefined") {
           if (finalSessionId) {
-            localStorage.setItem("edutechsrm_student_portal_session_id", finalSessionId)
+            writeStoredSessionId(finalSessionId)
+            setStoredSessionId(finalSessionId)
           }
           if (cleanNetId && !/^ra\d/i.test(cleanNetId)) {
             localStorage.setItem("edutechsrm_netid", cleanNetId)
@@ -322,6 +367,27 @@ export function StudentPortalProvider({ children }: { children: ReactNode }) {
     []
   )
 
+  const markPortalSessionExpired = useCallback((stale?: Partial<StudentPortalData>) => {
+    clearStoredSessionId()
+    setStoredSessionId("")
+    setIsSessionExpired(true)
+    if (stale && portalData) {
+      const merged: StudentPortalData = {
+        ...portalData,
+        attendance: (stale.attendance as PortalAttendanceRow[]) || portalData.attendance,
+        attendanceOutput: stale.attendanceOutput || portalData.attendanceOutput,
+        marks: (stale.marks as MarksReport) || portalData.marks,
+        marksOutput: stale.marksOutput || portalData.marksOutput,
+        internalMarks: (stale.internalMarks as InternalMarkRow[]) || portalData.internalMarks,
+        internalMarksOutput: stale.internalMarksOutput || portalData.internalMarksOutput,
+        unifiedSubjects: (stale.unifiedSubjects as UnifiedSubjectRecord[]) || portalData.unifiedSubjects,
+      }
+      setPortalData(merged)
+      writeCachedPortalData(merged)
+    }
+    setIsLoginModalOpen(true)
+  }, [portalData])
+
   const syncPortalData = useCallback(
     async (options?: { forceRefresh?: boolean }) => {
       const cached = readCachedPortalData()
@@ -329,46 +395,45 @@ export function StudentPortalProvider({ children }: { children: ReactNode }) {
         setPortalData(cached)
       }
 
-      const storedSessionId = typeof window !== "undefined"
-        ? localStorage.getItem("edutechsrm_student_portal_session_id") || ""
-        : ""
+      const activeSessionId = readStoredSessionId()
+      setStoredSessionId(activeSessionId)
 
-      if (!storedSessionId) {
-        // No active session token found - session is stale/expired
-        if (cached) {
-          setIsSessionExpired(true)
+      if (!activeSessionId) {
+        if (options?.forceRefresh) {
+          setIsLoginModalOpen(true)
         }
         return false
       }
 
       setIsSyncing(true)
       try {
-        const query = `?sessionId=${encodeURIComponent(storedSessionId)}`
-        const attRes = await fetch(`/api/student-portal/attendance${query}`, { cache: "no-store" }).catch(() => null)
-        const marksRes = await fetch(`/api/student-portal/marks${query}`, { cache: "no-store" }).catch(() => null)
-        const intRes = await fetch(`/api/student-portal/internal-marks${query}`, { cache: "no-store" }).catch(() => null)
+        const query = `?sessionId=${encodeURIComponent(activeSessionId)}`
+        const requestInit: RequestInit = { cache: "no-store", credentials: "include" }
+        const attRes = await fetch(`/api/student-portal/attendance${query}`, requestInit).catch(() => null)
+        const attData = await readJson(attRes)
 
-        if (
-          attRes?.status === 401 ||
-          marksRes?.status === 401 ||
-          intRes?.status === 401 ||
-          attRes?.status === 404 ||
-          marksRes?.status === 404
-        ) {
-          setIsSessionExpired(true)
+        if (attRes?.status === 401 || attData?.sessionExpired || attData?.errorCode === "SESSION_EXPIRED") {
+          markPortalSessionExpired(attData)
           return false
         }
 
-        if (attRes?.ok && marksRes?.ok) {
-          const attData = await attRes.json().catch(() => ({}))
-          const marksData = await marksRes.json().catch(() => ({}))
-          const intData = intRes?.ok ? await intRes.json().catch(() => ({})) : { internalMarks: [] }
+        const marksRes = await fetch(`/api/student-portal/marks${query}`, requestInit).catch(() => null)
+        const marksData = await readJson(marksRes)
 
-          if (attData?.sessionExpired || marksData?.sessionExpired || !attData?.success) {
-            setIsSessionExpired(true)
-            return false
-          }
+        if (marksRes?.status === 401 || marksData?.sessionExpired || marksData?.errorCode === "SESSION_EXPIRED") {
+          markPortalSessionExpired({ ...attData, ...marksData })
+          return false
+        }
 
+        const intRes = await fetch(`/api/student-portal/internal-marks${query}`, requestInit).catch(() => null)
+        const intData = intRes?.ok ? await readJson(intRes) : {}
+
+        if (intRes?.status === 401 || intData?.sessionExpired || intData?.errorCode === "SESSION_EXPIRED") {
+          markPortalSessionExpired({ ...attData, ...marksData, ...intData })
+          return false
+        }
+
+        if (attRes?.ok && marksRes?.ok && attData?.success && marksData?.success) {
           const updated: StudentPortalData = {
             attendance: attData.attendance || cached?.attendance || [],
             attendanceOutput: attData.attendanceOutput,
@@ -393,11 +458,21 @@ export function StudentPortalProvider({ children }: { children: ReactNode }) {
         setIsSyncing(false)
       }
     },
-    []
+    [markPortalSessionExpired]
   )
 
-  const disconnectPortal = useCallback(() => {
+  const disconnectPortal = useCallback(async () => {
+    const sessionId = readStoredSessionId()
+    if (sessionId) {
+      fetch("/api/student-portal/logout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ sessionId }),
+      }).catch(() => {})
+    }
     clearPortalStorage()
+    setStoredSessionId("")
     setPortalData(null)
     setIsSessionExpired(false)
   }, [])
