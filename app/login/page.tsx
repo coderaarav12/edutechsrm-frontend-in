@@ -40,6 +40,7 @@ export default function LoginPage() {
   const [turnstileToken, setTurnstileToken] = useState("")
   const [turnstileKey, setTurnstileKey] = useState(0)
   const [showPassword, setShowPassword] = useState(false)
+  const [showPortalPassword, setShowPortalPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [mode, setMode] = useState<"night" | "poster">("poster")
@@ -640,77 +641,93 @@ export default function LoginPage() {
                       </div>
                     )}
 
-                    <div className="login-portal-card rounded-2xl border border-cyan-500/20 bg-cyan-500/[0.06] p-3.5">
-                      <div className="mb-3 flex items-start justify-between gap-3">
-                        <div className="flex items-center gap-2">
-                          <div className="login-portal-icon flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-cyan-500/25 bg-cyan-500/10 text-cyan-300">
-                            <GraduationCap className="h-4 w-4" />
-                          </div>
-                          <div>
-                            <p className="login-portal-title text-[11px] font-mono font-bold uppercase tracking-wider text-cyan-300">Student Portal Sync</p>
-                            <p className="login-portal-netid text-[11px] text-zinc-500">
-                              NetID: <span className="login-portal-netid-val font-mono text-zinc-300">{derivedNetId || "ab1234"}</span>
-                            </p>
-                          </div>
-                        </div>
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="login-field-label text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-400">
+                          Student Portal Password
+                        </label>
+                        <span className="text-[11px] text-zinc-500 font-mono">
+                          NetID: <span className="text-zinc-300 font-bold">{derivedNetId || "ab1234"}</span>
+                        </span>
+                      </div>
+                      <div className="relative">
+                        <Lock className="login-input-icon pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                        <input
+                          type={showPortalPassword ? "text" : "password"}
+                          value={portalPassword}
+                          onChange={(e) => setPortalPassword(e.target.value)}
+                          placeholder="••••••••••••"
+                          autoComplete="current-password"
+                          required
+                          className="login-input"
+                          style={{ paddingRight: 44 }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPortalPassword((v) => !v)}
+                          className="login-password-toggle absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-lg border border-white/10 bg-white/[0.05] text-zinc-400 hover:text-white transition-colors"
+                          style={{ width: 32, height: 32 }}
+                          title={showPortalPassword ? "Hide password" : "Show password"}
+                        >
+                          {showPortalPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="login-field-label text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-400">
+                          Student Portal Captcha
+                        </label>
                         <button
                           type="button"
                           onClick={() => loadPortalCaptcha(portalSessionId)}
                           disabled={portalLoading}
-                          className="login-portal-refresh flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.05] text-zinc-400 transition-colors hover:text-cyan-300 disabled:opacity-50"
+                          className="login-forgot-link inline-flex items-center gap-1 text-[11px] text-zinc-400 hover:text-emerald-400 transition-colors disabled:opacity-50"
                           title="Refresh Student Portal CAPTCHA"
                         >
-                          <RefreshCw className={`h-3.5 w-3.5 ${portalLoading ? "animate-spin" : ""}`} />
+                          <RefreshCw className={`h-3 w-3 ${portalLoading ? "animate-spin" : ""}`} />
+                          <span>{portalLoading ? "Refreshing..." : "Refresh"}</span>
                         </button>
                       </div>
-
-                      <div className="flex flex-col gap-2.5">
-                        <div className="relative">
-                          <Lock className="login-input-icon pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
-                          <input
-                            type="password"
-                            value={portalPassword}
-                            onChange={(e) => setPortalPassword(e.target.value)}
-                            placeholder="Student Portal password"
-                            autoComplete="current-password"
-                            className="login-input"
-                          />
+                      <div className="flex items-center gap-2.5">
+                        <div
+                          className="login-captcha-box flex h-[50px] w-[134px] shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/15 bg-white px-1.5 cursor-pointer"
+                          onClick={() => loadPortalCaptcha(portalSessionId)}
+                          title="Click to refresh CAPTCHA"
+                        >
+                          {portalCaptchaImage ? (
+                            <img src={portalCaptchaImage} alt="Student Portal CAPTCHA" className="h-[42px] max-w-[124px] object-contain" />
+                          ) : (
+                            <span className="px-1 text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                              {portalLoading ? "Loading..." : "Refresh"}
+                            </span>
+                          )}
                         </div>
+                        <input
+                          value={portalCaptcha}
+                          onChange={(e) => setPortalCaptcha(e.target.value)}
+                          placeholder="Enter captcha"
+                          autoCapitalize="none"
+                          autoCorrect="off"
+                          autoComplete="off"
+                          spellCheck={false}
+                          required
+                          className="login-input login-captcha-input flex-1 min-w-0"
+                          style={{ paddingLeft: 14 }}
+                        />
+                      </div>
+                    </div>
 
-                        <div className="flex items-center gap-2.5">
-                          <div className="login-captcha-box flex h-[50px] w-[134px] shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/15 bg-white px-1.5">
-                            {portalCaptchaImage ? (
-                              <img src={portalCaptchaImage} alt="Student Portal CAPTCHA" className="h-[42px] max-w-[124px] object-contain" />
-                            ) : (
-                              <span className="px-1 text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-                                {portalLoading ? "Loading..." : "Refresh"}
-                              </span>
-                            )}
-                          </div>
-                          <input
-                            value={portalCaptcha}
-                            onChange={(e) => setPortalCaptcha(e.target.value)}
-                            placeholder="Captcha"
-                            autoCapitalize="none"
-                            autoCorrect="off"
-                            autoComplete="off"
-                            spellCheck={false}
-                            className="login-input login-captcha-input flex-1 min-w-0"
-                            style={{ paddingLeft: 14 }}
-                          />
+                    {portalError && (
+                      <div className="login-portal-error flex items-start gap-2.5 rounded-xl border border-amber-500/25 bg-amber-500/10 p-3 text-xs leading-relaxed text-amber-300">
+                        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+                        <div>
+                          <span className="font-mono font-bold uppercase tracking-wider text-[11px] text-amber-400 block mb-0.5">Student Portal Sync Error</span>
+                          <span>{portalError}</span>
                         </div>
                       </div>
-
-                      {portalError && (
-                        <div className="login-portal-error mt-3 flex items-start gap-2.5 rounded-xl border border-amber-500/25 bg-amber-500/10 p-3 text-xs leading-relaxed text-amber-300">
-                          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
-                          <div>
-                            <span className="font-mono font-bold uppercase tracking-wider text-[11px] text-amber-400 block mb-0.5">Student Portal Sync Error</span>
-                            <span>{portalError}</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                    )}
 
                     {showTurnstile && (
                       <TurnstileWidget key={turnstileKey} onSuccess={(token) => setTurnstileToken(token)} />
