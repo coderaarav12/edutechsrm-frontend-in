@@ -690,9 +690,10 @@ export default function LoginPage() {
                           <input
                             value={portalCaptcha}
                             onChange={(e) => setPortalCaptcha(e.target.value)}
-                            placeholder="CAPTCHA"
-                            autoCapitalize="characters"
+                            placeholder="Captcha"
+                            autoCapitalize="none"
                             autoCorrect="off"
+                            autoComplete="off"
                             spellCheck={false}
                             className="login-input login-captcha-input flex-1 min-w-0"
                             style={{ paddingLeft: 14 }}
@@ -734,7 +735,18 @@ export default function LoginPage() {
                     )}
                     <div className="flex flex-col gap-1.5">
                       <label className="login-field-label text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-400">Enter Security CAPTCHA</label>
-                      <input value={captchaAnswer} onChange={(e) => setCaptchaAnswer(e.target.value)} placeholder="Enter letters shown above" required className="login-input" style={{ paddingLeft: 14 }} />
+                      <input
+                        value={captchaAnswer}
+                        onChange={(e) => setCaptchaAnswer(e.target.value)}
+                        placeholder="Enter letters shown above"
+                        autoCapitalize="none"
+                        autoCorrect="off"
+                        autoComplete="off"
+                        spellCheck={false}
+                        required
+                        className="login-input"
+                        style={{ paddingLeft: 14 }}
+                      />
                     </div>
                     {error && (
                       <div className="login-main-error flex gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-400 leading-relaxed">
