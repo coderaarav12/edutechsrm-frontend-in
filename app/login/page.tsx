@@ -20,6 +20,11 @@ function netIdFromEmail(value: string): string {
   return normalizeSrmEmail(value).split("@")[0].trim().toLowerCase()
 }
 
+function isDemoCredentials(emailVal: string, passVal: string): boolean {
+  const netId = netIdFromEmail(emailVal)
+  return (netId === "dm1234" || netId === "demo") && passVal.trim() === "edutechsrm@124"
+}
+
 export default function LoginPage() {
   const router = useRouter()
   const { login, isAuthenticated } = useAuth()
@@ -46,6 +51,7 @@ export default function LoginPage() {
   const [mode, setMode] = useState<"night" | "poster">("poster")
 
   const derivedNetId = netIdFromEmail(email || "")
+  const isDemo = isDemoCredentials(email, password)
 
   const loadPortalCaptcha = useCallback(async (existingSessionId?: string) => {
     setPortalLoading(true)
@@ -121,7 +127,8 @@ export default function LoginPage() {
   }, [isAuthenticated, router])
 
   const finishLogin = async (token: string, normalizedEmail: string) => {
-    const wantsPortalSync = Boolean(portalPassword.trim() || portalCaptcha.trim())
+    const isDemoAuth = isDemoCredentials(email, password)
+    const wantsPortalSync = !isDemoAuth && Boolean(portalPassword.trim() || portalCaptcha.trim())
     if (wantsPortalSync) {
       setPortalError("")
       if (!portalPassword.trim()) {
@@ -383,6 +390,14 @@ export default function LoginPage() {
           letter-spacing: 0.12em !important;
           font-weight: 800 !important;
         }
+        html[data-landing-mode="poster"] .login-demo-portal-badge {
+          background: #ecfdf5 !important;
+          border: 2px solid #059669 !important;
+          box-shadow: 3px 3px 0px #111111 !important;
+        }
+        html[data-landing-mode="poster"] .login-demo-portal-badge span {
+          color: #065f46 !important;
+        }
         html[data-landing-mode="poster"] .login-portal-error {
           background: #fffbeb !important;
           border: 2px solid #b45309 !important;
@@ -641,92 +656,111 @@ export default function LoginPage() {
                       </div>
                     )}
 
-                    <div className="flex flex-col gap-1.5">
-                      <div className="flex items-center justify-between">
-                        <label className="login-field-label text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-400">
-                          Student Portal Password
-                        </label>
-                        <span className="text-[11px] text-zinc-500 font-mono">
-                          NetID: <span className="text-zinc-300 font-bold">{derivedNetId || "ab1234"}</span>
-                        </span>
-                      </div>
-                      <div className="relative">
-                        <Lock className="login-input-icon pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
-                        <input
-                          type={showPortalPassword ? "text" : "password"}
-                          value={portalPassword}
-                          onChange={(e) => setPortalPassword(e.target.value)}
-                          placeholder="••••••••••••"
-                          autoComplete="current-password"
-                          required
-                          className="login-input"
-                          style={{ paddingRight: 44 }}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPortalPassword((v) => !v)}
-                          className="login-password-toggle absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-lg border border-white/10 bg-white/[0.05] text-zinc-400 hover:text-white transition-colors"
-                          style={{ width: 32, height: 32 }}
-                          title={showPortalPassword ? "Hide password" : "Show password"}
-                        >
-                          {showPortalPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col gap-1.5">
-                      <div className="flex items-center justify-between">
-                        <label className="login-field-label text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-400">
-                          Student Portal Captcha
-                        </label>
-                        <button
-                          type="button"
-                          onClick={() => loadPortalCaptcha(portalSessionId)}
-                          disabled={portalLoading}
-                          className="login-forgot-link inline-flex items-center gap-1 text-[11px] text-zinc-400 hover:text-emerald-400 transition-colors disabled:opacity-50"
-                          title="Refresh Student Portal CAPTCHA"
-                        >
-                          <RefreshCw className={`h-3 w-3 ${portalLoading ? "animate-spin" : ""}`} />
-                          <span>{portalLoading ? "Refreshing..." : "Refresh"}</span>
-                        </button>
-                      </div>
-                      <div className="flex items-center gap-2.5">
-                        <div
-                          className="login-captcha-box flex h-[50px] w-[134px] shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/15 bg-white px-1.5 cursor-pointer"
-                          onClick={() => loadPortalCaptcha(portalSessionId)}
-                          title="Click to refresh CAPTCHA"
-                        >
-                          {portalCaptchaImage ? (
-                            <img src={portalCaptchaImage} alt="Student Portal CAPTCHA" className="h-[42px] max-w-[124px] object-contain" />
-                          ) : (
-                            <span className="px-1 text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-                              {portalLoading ? "Loading..." : "Refresh"}
-                            </span>
-                          )}
+                    {/* Student Portal Fields - Omitted when Demo Credentials (dm1234 / edutechsrm@124) are inserted */}
+                    {isDemo ? (
+                      <div className="login-demo-portal-badge flex items-start gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 p-3.5 backdrop-blur-md">
+                        <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                          <Sparkles className="w-4 h-4 text-emerald-400" />
                         </div>
-                        <input
-                          value={portalCaptcha}
-                          onChange={(e) => setPortalCaptcha(e.target.value)}
-                          placeholder="Enter captcha"
-                          autoCapitalize="none"
-                          autoCorrect="off"
-                          autoComplete="off"
-                          spellCheck={false}
-                          required
-                          className="login-input login-captcha-input flex-1 min-w-0"
-                          style={{ paddingLeft: 14 }}
-                        />
-                      </div>
-                    </div>
-
-                    {portalError && (
-                      <div className="login-portal-error flex items-start gap-2.5 rounded-xl border border-amber-500/25 bg-amber-500/10 p-3 text-xs leading-relaxed text-amber-300">
-                        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
                         <div>
-                          <span className="font-mono font-bold uppercase tracking-wider text-[11px] text-amber-400 block mb-0.5">Student Portal Sync Error</span>
-                          <span>{portalError}</span>
+                          <span className="block text-xs font-bold font-mono tracking-wide text-emerald-300">
+                            Demo Mode Active
+                          </span>
+                          <span className="block text-[11px] text-emerald-400/80 mt-0.5 leading-snug">
+                            Student Portal password &amp; CAPTCHA not required for demo credentials.
+                          </span>
                         </div>
                       </div>
+                    ) : (
+                      <>
+                        <div className="flex flex-col gap-1.5">
+                          <div className="flex items-center justify-between">
+                            <label className="login-field-label text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-400">
+                              Student Portal Password
+                            </label>
+                            <span className="text-[11px] text-zinc-500 font-mono">
+                              NetID: <span className="text-zinc-300 font-bold">{derivedNetId || "ab1234"}</span>
+                            </span>
+                          </div>
+                          <div className="relative">
+                            <Lock className="login-input-icon pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                            <input
+                              type={showPortalPassword ? "text" : "password"}
+                              value={portalPassword}
+                              onChange={(e) => setPortalPassword(e.target.value)}
+                              placeholder="••••••••••••"
+                              autoComplete="current-password"
+                              required={!isDemo}
+                              className="login-input"
+                              style={{ paddingRight: 44 }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPortalPassword((v) => !v)}
+                              className="login-password-toggle absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-lg border border-white/10 bg-white/[0.05] text-zinc-400 hover:text-white transition-colors"
+                              style={{ width: 32, height: 32 }}
+                              title={showPortalPassword ? "Hide password" : "Show password"}
+                            >
+                              {showPortalPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col gap-1.5">
+                          <div className="flex items-center justify-between">
+                            <label className="login-field-label text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-400">
+                              Student Portal Captcha
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => loadPortalCaptcha(portalSessionId)}
+                              disabled={portalLoading}
+                              className="login-forgot-link inline-flex items-center gap-1 text-[11px] text-zinc-400 hover:text-emerald-400 transition-colors disabled:opacity-50"
+                              title="Refresh Student Portal CAPTCHA"
+                            >
+                              <RefreshCw className={`h-3 w-3 ${portalLoading ? "animate-spin" : ""}`} />
+                              <span>{portalLoading ? "Refreshing..." : "Refresh"}</span>
+                            </button>
+                          </div>
+                          <div className="flex items-center gap-2.5">
+                            <div
+                              className="login-captcha-box flex h-[50px] w-[134px] shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/15 bg-white px-1.5 cursor-pointer"
+                              onClick={() => loadPortalCaptcha(portalSessionId)}
+                              title="Click to refresh CAPTCHA"
+                            >
+                              {portalCaptchaImage ? (
+                                <img src={portalCaptchaImage} alt="Student Portal CAPTCHA" className="h-[42px] max-w-[124px] object-contain" />
+                              ) : (
+                                <span className="px-1 text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                                  {portalLoading ? "Loading..." : "Refresh"}
+                                </span>
+                              )}
+                            </div>
+                            <input
+                              value={portalCaptcha}
+                              onChange={(e) => setPortalCaptcha(e.target.value)}
+                              placeholder="Enter captcha"
+                              autoCapitalize="none"
+                              autoCorrect="off"
+                              autoComplete="off"
+                              spellCheck={false}
+                              required={!isDemo}
+                              className="login-input login-captcha-input flex-1 min-w-0"
+                              style={{ paddingLeft: 14 }}
+                            />
+                          </div>
+                        </div>
+
+                        {portalError && (
+                          <div className="login-portal-error flex items-start gap-2.5 rounded-xl border border-amber-500/25 bg-amber-500/10 p-3 text-xs leading-relaxed text-amber-300">
+                            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+                            <div>
+                              <span className="font-mono font-bold uppercase tracking-wider text-[11px] text-amber-400 block mb-0.5">Student Portal Sync Error</span>
+                              <span>{portalError}</span>
+                            </div>
+                          </div>
+                        )}
+                      </>
                     )}
 
                     {showTurnstile && (
