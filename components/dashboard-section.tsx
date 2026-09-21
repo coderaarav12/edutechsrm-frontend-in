@@ -29,6 +29,8 @@ import {
   TrendingUp,
   ChevronRight,
   User,
+  Mail,
+  Phone,
 } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 import { useStudentPortal } from "@/lib/student-portal-context"
@@ -998,6 +1000,59 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
               >
                 Feedback
               </button>
+            </div>
+          </div>
+
+          {/* Advisors section under profile card */}
+          <div className={`mt-3.5 grid grid-cols-1 sm:grid-cols-2 gap-2.5`}>
+            <div className={`p-3 rounded-2xl ${isPoster ? "bg-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111]" : "bg-zinc-900/40 ring-1 ring-white/5"}`}>
+              <p className={`text-[9px] font-bold uppercase tracking-widest ${isPoster ? "text-emerald-700 font-mono" : "text-emerald-400 font-mono"}`}>
+                Faculty Advisor
+              </p>
+              <p className={`text-xs font-bold mt-0.5 ${isPoster ? "text-[#111111]" : "text-zinc-200"}`}>
+                {(user as any)?.faculty_advisor_name || (user as any)?.["Faculty Advisor"] || (user as any)?.advisor || "Dr. P. Sridevi Ponmalar"}
+              </p>
+              <div className="flex items-center gap-2 mt-2">
+                <a
+                  href={`mailto:${(user as any)?.faculty_advisor_email || (user as any)?.["Faculty Advisor Email"] || "sridevip@srmist.edu.in"}`}
+                  className={`inline-flex items-center gap-1 text-[11px] font-medium transition-colors ${isPoster ? "text-[#111111] hover:underline" : "text-zinc-400 hover:text-white"}`}
+                >
+                  <Mail className="w-3 h-3 text-blue-500" />
+                  <span className="truncate max-w-[130px]">{(user as any)?.faculty_advisor_email || (user as any)?.["Faculty Advisor Email"] || "sridevip@srmist.edu.in"}</span>
+                </a>
+                <a
+                  href={`tel:${(user as any)?.faculty_advisor_phone || (user as any)?.["Faculty Advisor Mobile"] || "9710488283"}`}
+                  className={`inline-flex items-center gap-1 text-[11px] font-bold transition-colors ${isPoster ? "text-[#111111] hover:underline" : "text-emerald-400 hover:text-emerald-300"}`}
+                >
+                  <Phone className="w-3 h-3 text-emerald-500" />
+                  <span>{(user as any)?.faculty_advisor_phone || (user as any)?.["Faculty Advisor Mobile"] || "9710488283"}</span>
+                </a>
+              </div>
+            </div>
+
+            <div className={`p-3 rounded-2xl ${isPoster ? "bg-white border-2 border-[#111111] shadow-[2px_2px_0px_#111111]" : "bg-zinc-900/40 ring-1 ring-white/5"}`}>
+              <p className={`text-[9px] font-bold uppercase tracking-widest ${isPoster ? "text-violet-700 font-mono" : "text-violet-400 font-mono"}`}>
+                Academic Advisor
+              </p>
+              <p className={`text-xs font-bold mt-0.5 ${isPoster ? "text-[#111111]" : "text-zinc-200"}`}>
+                {(user as any)?.academic_advisor_name || (user as any)?.["Academic Advisor"] || "Dr. Sudha Rajesh"}
+              </p>
+              <div className="flex items-center gap-2 mt-2">
+                <a
+                  href={`mailto:${(user as any)?.academic_advisor_email || (user as any)?.["Academic Advisor Email"] || "sudhar3@srmist.edu.in"}`}
+                  className={`inline-flex items-center gap-1 text-[11px] font-medium transition-colors ${isPoster ? "text-[#111111] hover:underline" : "text-zinc-400 hover:text-white"}`}
+                >
+                  <Mail className="w-3 h-3 text-blue-500" />
+                  <span className="truncate max-w-[130px]">{(user as any)?.academic_advisor_email || (user as any)?.["Academic Advisor Email"] || "sudhar3@srmist.edu.in"}</span>
+                </a>
+                <a
+                  href={`tel:${(user as any)?.academic_advisor_phone || (user as any)?.["Academic Advisor Mobile"] || "9445959163"}`}
+                  className={`inline-flex items-center gap-1 text-[11px] font-bold transition-colors ${isPoster ? "text-[#111111] hover:underline" : "text-emerald-400 hover:text-emerald-300"}`}
+                >
+                  <Phone className="w-3 h-3 text-emerald-500" />
+                  <span>{(user as any)?.academic_advisor_phone || (user as any)?.["Academic Advisor Mobile"] || "9445959163"}</span>
+                </a>
+              </div>
             </div>
           </div>
         </div>

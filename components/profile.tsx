@@ -7,6 +7,7 @@ import {
   LogIn, ExternalLink, Building, Layers,
   ChevronDown, Plus, Trash2, BookMarked, Clock3,
   ClipboardCheck, ClipboardList, CheckCircle2, Heart,
+  Mail, Phone, UserCheck,
 } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 import { useStudentPortal } from "@/lib/student-portal-context"
@@ -646,6 +647,101 @@ export function AboutSection() {
              </div>
            </motion.div>
          ))}
+       </motion.div>
+
+       {/* ── Advisors Section (Faculty Advisor & Academic Advisor) ── */}
+       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }}
+         className="mb-8 space-y-3">
+         <p className={`text-[10px] font-mono font-bold uppercase tracking-widest ${isPoster ? "text-[#111111]" : "text-zinc-500"}`}>
+           Academic & Faculty Advisors
+         </p>
+         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+           {/* Faculty Advisor */}
+           <div className={`rounded-2xl p-4 transition-all ${
+             isPoster
+               ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] text-[#111111]"
+               : "bg-zinc-900/30 ring-1 ring-white/[0.04] text-zinc-200"
+           }`}>
+             <div className="flex items-center gap-2 mb-2">
+               <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${isPoster ? "bg-[#111111] text-white" : "bg-emerald-500/10 text-emerald-400"}`}>
+                 <UserCheck className="w-3.5 h-3.5" />
+               </div>
+               <span className={`text-[9px] font-bold uppercase tracking-widest ${isPoster ? "text-emerald-700 font-mono" : "text-emerald-400 font-mono"}`}>
+                 Faculty Advisor
+               </span>
+             </div>
+             <p className={`text-sm font-bold ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>
+               {(user as any)?.faculty_advisor_name || (user as any)?.["Faculty Advisor"] || (user as any)?.advisor || "Dr. P. Sridevi Ponmalar"}
+             </p>
+             <div className="flex flex-wrap gap-2 mt-3">
+               <a
+                 href={`mailto:${(user as any)?.faculty_advisor_email || (user as any)?.["Faculty Advisor Email"] || "sridevip@srmist.edu.in"}`}
+                 className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                   isPoster
+                     ? "bg-[#f7f5f0] border border-[#111111] text-[#111111] hover:bg-zinc-100"
+                     : "bg-white/5 hover:bg-white/10 text-zinc-300 ring-1 ring-white/10"
+                 }`}
+               >
+                 <Mail className="w-3 h-3 text-blue-500" />
+                 <span>{(user as any)?.faculty_advisor_email || (user as any)?.["Faculty Advisor Email"] || "sridevip@srmist.edu.in"}</span>
+               </a>
+               <a
+                 href={`tel:${(user as any)?.faculty_advisor_phone || (user as any)?.["Faculty Advisor Mobile"] || "9710488283"}`}
+                 className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-colors ${
+                   isPoster
+                     ? "bg-[#f7f5f0] border border-[#111111] text-[#111111] hover:bg-zinc-100"
+                     : "bg-white/5 hover:bg-white/10 text-emerald-400 ring-1 ring-white/10"
+                 }`}
+               >
+                 <Phone className="w-3 h-3 text-emerald-500" />
+                 <span>{(user as any)?.faculty_advisor_phone || (user as any)?.["Faculty Advisor Mobile"] || "9710488283"}</span>
+               </a>
+             </div>
+           </div>
+
+           {/* Academic Advisor */}
+           <div className={`rounded-2xl p-4 transition-all ${
+             isPoster
+               ? "bg-white border-2 border-[#111111] shadow-[3px_3px_0px_#111111] text-[#111111]"
+               : "bg-zinc-900/30 ring-1 ring-white/[0.04] text-zinc-200"
+           }`}>
+             <div className="flex items-center gap-2 mb-2">
+               <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${isPoster ? "bg-[#111111] text-white" : "bg-violet-500/10 text-violet-400"}`}>
+                 <GraduationCap className="w-3.5 h-3.5" />
+               </div>
+               <span className={`text-[9px] font-bold uppercase tracking-widest ${isPoster ? "text-violet-700 font-mono" : "text-violet-400 font-mono"}`}>
+                 Academic Advisor
+               </span>
+             </div>
+             <p className={`text-sm font-bold ${isPoster ? "text-[#111111]" : "text-zinc-100"}`}>
+               {(user as any)?.academic_advisor_name || (user as any)?.["Academic Advisor"] || "Dr. Sudha Rajesh"}
+             </p>
+             <div className="flex flex-wrap gap-2 mt-3">
+               <a
+                 href={`mailto:${(user as any)?.academic_advisor_email || (user as any)?.["Academic Advisor Email"] || "sudhar3@srmist.edu.in"}`}
+                 className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                   isPoster
+                     ? "bg-[#f7f5f0] border border-[#111111] text-[#111111] hover:bg-zinc-100"
+                     : "bg-white/5 hover:bg-white/10 text-zinc-300 ring-1 ring-white/10"
+                 }`}
+               >
+                 <Mail className="w-3 h-3 text-blue-500" />
+                 <span>{(user as any)?.academic_advisor_email || (user as any)?.["Academic Advisor Email"] || "sudhar3@srmist.edu.in"}</span>
+               </a>
+               <a
+                 href={`tel:${(user as any)?.academic_advisor_phone || (user as any)?.["Academic Advisor Mobile"] || "9445959163"}`}
+                 className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-colors ${
+                   isPoster
+                     ? "bg-[#f7f5f0] border border-[#111111] text-[#111111] hover:bg-zinc-100"
+                     : "bg-white/5 hover:bg-white/10 text-emerald-400 ring-1 ring-white/10"
+                 }`}
+               >
+                 <Phone className="w-3 h-3 text-emerald-500" />
+                 <span>{(user as any)?.academic_advisor_phone || (user as any)?.["Academic Advisor Mobile"] || "9445959163"}</span>
+               </a>
+             </div>
+           </div>
+         </div>
        </motion.div>
 
       {/* ── Stats row ── */}
