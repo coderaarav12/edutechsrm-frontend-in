@@ -324,6 +324,23 @@ const CAMPUS_HUBS: CampusHub[] = [
     lat: 12.822000,
     lng: 80.038500,
   },
+  {
+    id: 172,
+    key: "nri",
+    name: "NRI Hostel (NRI Premium)",
+    icon: "🏢",
+    badge: "AC Premium",
+    floors: "Multi-Storey",
+    category: "accommodation",
+    coords: "12.8240°N · 80.0419°E",
+    distance: "230m from Main Gate",
+    desc: "Premium air-conditioned hostel accommodation for international and NRI students, located beside Camber Racing and near SRM Hotel.",
+    tip: "Walking access to University Building and Central Library.",
+    x: 340,
+    y: 220,
+    lat: 12.823998,
+    lng: 80.041896,
+  },
 ]
 
 interface LiveFaculty {

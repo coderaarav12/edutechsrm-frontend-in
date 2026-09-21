@@ -39,6 +39,7 @@ const FILTERS: { id: CategoryFilter; label: string }[] = [
 const KEY_CAMPUS_HOTSPOTS = [
   { id: 1, name: "UB Block", icon: "🏛️", lat: 12.8233083, lng: 80.0424496 },
   { id: 2, name: "Tech Park", icon: "💻", lat: 12.824648, lng: 80.04533 },
+  { id: 172, name: "NRI Hostel", icon: "🏢", lat: 12.823998, lng: 80.041896 },
   { id: 43, name: "Java Green", icon: "🍜", lat: 12.823636, lng: 80.044062 },
   { id: 14, name: "Library", icon: "📚", lat: 12.823285, lng: 80.042586 },
   { id: 13, name: "Auditorium", icon: "🎭", lat: 12.824652, lng: 80.046601 },
@@ -862,12 +863,28 @@ export function CampusMapSection({
                                   </div>
                                 </div>
 
-                                <div className="flex items-center gap-2 shrink-0">
+                                <div className="flex items-center gap-1.5 shrink-0">
                                   {dist !== null && (
-                                    <span className="font-mono text-[10px] font-bold" style={{ color: isPoster ? "#0b7a54" : "#34d399" }}>
+                                    <span className="font-mono text-[10px] font-bold mr-1" style={{ color: isPoster ? "#0b7a54" : "#34d399" }}>
                                       {formatDistance(dist)}
                                     </span>
                                   )}
+                                  <a
+                                    href={getDirectionsUrl(b.lat, b.lng)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="font-mono text-[10px] uppercase font-bold flex items-center gap-1 px-2 py-0.5 rounded transition-all hover:opacity-90"
+                                    style={{
+                                      background: isPoster ? "#059669" : "rgba(16,185,129,0.2)",
+                                      color: isPoster ? "#ffffff" : "#34d399",
+                                      border: isPoster ? "1px solid #047857" : "1px solid rgba(52,211,153,0.3)",
+                                    }}
+                                    title={`Get walking directions to ${b.name}`}
+                                  >
+                                    <Navigation className="h-2.5 w-2.5" />
+                                    <span>Directions</span>
+                                  </a>
                                   <span className="font-mono text-[10px] uppercase font-bold flex items-center gap-0.5 px-2 py-0.5 rounded"
                                     style={{
                                       background: isPoster ? "#111111" : "rgba(52,211,153,0.15)",

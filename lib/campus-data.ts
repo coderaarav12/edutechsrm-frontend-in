@@ -244,6 +244,8 @@ export const BUILDINGS: Building[] = [
   { id: 169, icon: "🏫", name: "SRM Valliammai Engineering College", shortDesc: "Autonomous engineering college", longDesc: "Autonomous engineering college beside NH-45, adjacent to the main campus.", category: "academic", lat: 12.825720, lng: 80.042819 },
   { id: 170, icon: "🧪", name: "SRM Chemical Block", shortDesc: "Chemical engineering block", longDesc: "Chemical engineering block on Intra College Road.", category: "academic", lat: 12.824081, lng: 80.043000 },
   { id: 171, icon: "🔬", name: "C.V. Raman Research Park", shortDesc: "Central research park", longDesc: "Multi-storey central research park near the Tech Park.", category: "academic", lat: 12.824500, lng: 80.044000 },
+  { id: 172, icon: "🏢", name: "NRI Hostel (NRI Premium)", shortDesc: "Premium AC international hostel", longDesc: "Premium air-conditioned hostel accommodation for international and NRI students located beside Camber Racing and near SRM Hotel, with direct access to the University Building and Central Library. Features attached washrooms, dedicated dining mess, and high-speed Wi-Fi.", category: "accommodation", lat: 12.823998, lng: 80.041896 },
+  { id: 173, icon: "🏎️", name: "Camber Racing Workshop", shortDesc: "Formula Student combustion team", longDesc: "Official Formula Student combustion team workshop of SRMIST, situated on Intra College Road adjacent to the NRI Hostel.", category: "academic", lat: 12.82425, lng: 80.04285 },
 ]
 
 export function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
