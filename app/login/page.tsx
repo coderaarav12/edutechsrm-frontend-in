@@ -171,13 +171,13 @@ export default function LoginPage() {
     setError("")
     setPortalError("")
     if (!email || !password) {
-      setError("Please enter both email and password")
+      setError("Please enter your SRM NetID and Academia password.")
       return
     }
 
     const normalizedEmail = normalizeSrmEmail(email)
     if (!normalizedEmail.endsWith("@srmist.edu.in")) {
-      setError("Please use your SRM email address (@srmist.edu.in)")
+      setError("Please use your SRM email address (@srmist.edu.in) or NetID.")
       return
     }
     setIsLoading(true)
@@ -201,10 +201,20 @@ export default function LoginPage() {
       } else {
         setTurnstileToken("")
         setTurnstileKey((k) => k + 1)
-        setError(result.error || "Login failed. Please check your credentials.")
+        const rawErr = String(result.error || "").trim()
+        const lower = rawErr.toLowerCase()
+        if (lower.includes("busy") || lower.includes("rate limit") || lower.includes("429")) {
+          setError("SRM Academia server is busy. Please wait 20-30 seconds and try again.")
+        } else if (lower.includes("unavailable") || lower.includes("maintenance") || lower.includes("502") || lower.includes("503")) {
+          setError("SRM Academia server is temporarily unavailable. Please try again in a moment.")
+        } else if (!rawErr || lower.includes("credential") || lower.includes("auth") || lower.includes("password") || lower.includes("invalid") || lower.includes("user") || lower.includes("failed")) {
+          setError("Invalid SRM Academia credentials. Your NetID or Academia password is incorrect.")
+        } else {
+          setError(rawErr)
+        }
       }
     } catch {
-      setError("Network error. Please try again.")
+      setError("Unable to connect to SRM Academia. Please check your internet connection.")
     } finally {
       setIsLoading(false)
     }
@@ -212,7 +222,7 @@ export default function LoginPage() {
 
   const submitCaptcha = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!captchaAnswer) return setError("Please enter the CAPTCHA")
+    if (!captchaAnswer) return setError("Please enter the Academia security CAPTCHA.")
     setError("")
     setPortalError("")
     setIsLoading(true)
@@ -222,11 +232,11 @@ export default function LoginPage() {
       if (result.success && result.token) {
         await finishLogin(result.token, normalizedEmail)
       } else {
-        setError(result.error || "CAPTCHA verification failed. Please try again.")
+        setError(result.error || "Academia security CAPTCHA verification failed. Please try again.")
         setCaptchaAnswer("")
       }
     } catch {
-      setError("Network error. Please try again.")
+      setError("Unable to connect to SRM Academia. Please check your internet connection.")
     } finally {
       setIsLoading(false)
     }
@@ -620,6 +630,16 @@ export default function LoginPage() {
                       </div>
                     </div>
 
+                    {error && (
+                      <div className="login-main-error flex items-start gap-2.5 rounded-xl border border-red-500/25 bg-red-500/10 p-3 text-xs text-red-400 leading-relaxed">
+                        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
+                        <div>
+                          <span className="font-mono font-bold uppercase tracking-wider text-[11px] text-red-400 block mb-0.5">Academia Authentication Error</span>
+                          <span>{error}</span>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="login-portal-card rounded-2xl border border-cyan-500/20 bg-cyan-500/[0.06] p-3.5">
                       <div className="mb-3 flex items-start justify-between gap-3">
                         <div className="flex items-center gap-2">
@@ -681,17 +701,15 @@ export default function LoginPage() {
                       </div>
 
                       {portalError && (
-                        <div className="login-portal-error mt-3 flex gap-2 rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-xs leading-relaxed text-amber-300">
-                          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />{portalError}
+                        <div className="login-portal-error mt-3 flex items-start gap-2.5 rounded-xl border border-amber-500/25 bg-amber-500/10 p-3 text-xs leading-relaxed text-amber-300">
+                          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+                          <div>
+                            <span className="font-mono font-bold uppercase tracking-wider text-[11px] text-amber-400 block mb-0.5">Student Portal Sync Error</span>
+                            <span>{portalError}</span>
+                          </div>
                         </div>
                       )}
                     </div>
-
-                    {error && (
-                      <div className="login-main-error flex gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-400 leading-relaxed">
-                        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />{error}
-                      </div>
-                    )}
 
                     {showTurnstile && (
                       <TurnstileWidget key={turnstileKey} onSuccess={(token) => setTurnstileToken(token)} />
