@@ -4,8 +4,8 @@ import type React from "react"
 import { useCallback, useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { motion } from "framer-motion"
-import { Eye, EyeOff, Loader2, Lock, Mail, AlertCircle, ArrowLeft, Rocket, Moon, Sparkles, GraduationCap, RefreshCw } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
+import { Eye, EyeOff, Loader2, Lock, Mail, AlertCircle, ArrowLeft, Rocket, Moon, Sparkles, GraduationCap, RefreshCw, Check } from "lucide-react"
 import { loginToSRM } from "@/lib/srm-api"
 import { useAuth } from "@/lib/auth-context"
 import { useStudentPortal } from "@/lib/student-portal-context"
@@ -672,111 +672,143 @@ export default function LoginPage() {
                           </span>
                         </div>
                       </div>
-                    ) : !skipPortal ? (
-                      <>
-                        <div className="flex flex-col gap-1.5">
-                          <div className="flex items-center justify-between">
-                            <label className="login-field-label text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-400">
-                              Student Portal Password
-                            </label>
-                            <span className="text-[11px] text-zinc-500 font-mono">
-                              NetID: <span className="text-zinc-300 font-bold">{derivedNetId || "ab1234"}</span>
-                            </span>
-                          </div>
-                          <div className="relative">
-                            <Lock className="login-input-icon pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
-                            <input
-                              type={showPortalPassword ? "text" : "password"}
-                              value={portalPassword}
-                              onChange={(e) => setPortalPassword(e.target.value)}
-                              placeholder="••••••••••••"
-                              autoComplete="current-password"
-                              required={!isDemo}
-                              className="login-input"
-                              style={{ paddingRight: 44 }}
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setShowPortalPassword((v) => !v)}
-                              className="login-password-toggle absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-lg border border-white/10 bg-white/[0.05] text-zinc-400 hover:text-white transition-colors"
-                              style={{ width: 32, height: 32 }}
-                              title={showPortalPassword ? "Hide password" : "Show password"}
-                            >
-                              {showPortalPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-col gap-1.5">
-                          <div className="flex items-center justify-between">
-                            <label className="login-field-label text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-400">
-                              Student Portal Captcha
-                            </label>
-                            <button
-                              type="button"
-                              onClick={() => loadPortalCaptcha(portalSessionId)}
-                              disabled={portalLoading}
-                              className="login-forgot-link inline-flex items-center gap-1 text-[11px] text-zinc-400 hover:text-emerald-400 transition-colors disabled:opacity-50"
-                              title="Refresh Student Portal CAPTCHA"
-                            >
-                              <RefreshCw className={`h-3 w-3 ${portalLoading ? "animate-spin" : ""}`} />
-                              <span>{portalLoading ? "Refreshing..." : "Refresh"}</span>
-                            </button>
-                          </div>
-                          <div className="flex items-center gap-2.5">
-                            <div
-                              className="login-captcha-box flex h-[50px] w-[134px] shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/15 bg-white px-1.5 cursor-pointer"
-                              onClick={() => loadPortalCaptcha(portalSessionId)}
-                              title="Click to refresh CAPTCHA"
-                            >
-                              {portalCaptchaImage ? (
-                                <img src={portalCaptchaImage} alt="Student Portal CAPTCHA" className="h-[42px] max-w-[124px] object-contain" />
-                              ) : (
-                                <span className="px-1 text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-                                  {portalLoading ? "Loading..." : "Refresh"}
+                    ) : (
+                      <AnimatePresence initial={false}>
+                        {!skipPortal && (
+                          <motion.div
+                            key="portal-fields-wrapper"
+                            initial={{ opacity: 0, height: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, height: "auto", scale: 1 }}
+                            exit={{ opacity: 0, height: 0, scale: 0.98 }}
+                            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                            className="overflow-hidden flex flex-col gap-4"
+                          >
+                            <div className="flex flex-col gap-1.5">
+                              <div className="flex items-center justify-between">
+                                <label className="login-field-label text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-400">
+                                  Student Portal Password
+                                </label>
+                                <span className="text-[11px] text-zinc-500 font-mono">
+                                  NetID: <span className="text-zinc-300 font-bold">{derivedNetId || "ab1234"}</span>
                                 </span>
-                              )}
+                              </div>
+                              <div className="relative">
+                                <Lock className="login-input-icon pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                                <input
+                                  type={showPortalPassword ? "text" : "password"}
+                                  value={portalPassword}
+                                  onChange={(e) => setPortalPassword(e.target.value)}
+                                  placeholder="••••••••••••"
+                                  autoComplete="current-password"
+                                  required={!isDemo && !skipPortal}
+                                  className="login-input"
+                                  style={{ paddingRight: 44 }}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setShowPortalPassword((v) => !v)}
+                                  className="login-password-toggle absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-lg border border-white/10 bg-white/[0.05] text-zinc-400 hover:text-white transition-colors"
+                                  style={{ width: 32, height: 32 }}
+                                  title={showPortalPassword ? "Hide password" : "Show password"}
+                                >
+                                  {showPortalPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                </button>
+                              </div>
                             </div>
-                            <input
-                              value={portalCaptcha}
-                              onChange={(e) => setPortalCaptcha(e.target.value)}
-                              placeholder="Enter captcha"
-                              autoCapitalize="none"
-                              autoCorrect="off"
-                              autoComplete="off"
-                              spellCheck={false}
-                              required={!isDemo}
-                              className="login-input login-captcha-input flex-1 min-w-0"
-                              style={{ paddingLeft: 14 }}
-                            />
-                          </div>
-                        </div>
 
-                        {portalError && (
-                          <div className="login-portal-error flex items-start gap-2.5 rounded-xl border border-amber-500/25 bg-amber-500/10 p-3 text-xs leading-relaxed text-amber-300">
-                            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
-                            <div>
-                              <span className="font-mono font-bold uppercase tracking-wider text-[11px] text-amber-400 block mb-0.5">Student Portal Sync Error</span>
-                              <span>{portalError}</span>
+                            <div className="flex flex-col gap-1.5">
+                              <div className="flex items-center justify-between">
+                                <label className="login-field-label text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-400">
+                                  Student Portal Captcha
+                                </label>
+                                <button
+                                  type="button"
+                                  onClick={() => loadPortalCaptcha(portalSessionId)}
+                                  disabled={portalLoading}
+                                  className="login-forgot-link inline-flex items-center gap-1 text-[11px] text-zinc-400 hover:text-emerald-400 transition-colors disabled:opacity-50"
+                                  title="Refresh Student Portal CAPTCHA"
+                                >
+                                  <RefreshCw className={`h-3 w-3 ${portalLoading ? "animate-spin" : ""}`} />
+                                  <span>{portalLoading ? "Refreshing..." : "Refresh"}</span>
+                                </button>
+                              </div>
+                              <div className="flex items-center gap-2.5">
+                                <div
+                                  className="login-captcha-box flex h-[50px] w-[134px] shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/15 bg-white px-1.5 cursor-pointer"
+                                  onClick={() => loadPortalCaptcha(portalSessionId)}
+                                  title="Click to refresh CAPTCHA"
+                                >
+                                  {portalCaptchaImage ? (
+                                    <img src={portalCaptchaImage} alt="Student Portal CAPTCHA" className="h-[42px] max-w-[124px] object-contain" />
+                                  ) : (
+                                    <span className="px-1 text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                                      {portalLoading ? "Loading..." : "Refresh"}
+                                    </span>
+                                  )}
+                                </div>
+                                <input
+                                  value={portalCaptcha}
+                                  onChange={(e) => setPortalCaptcha(e.target.value)}
+                                  placeholder="Enter captcha"
+                                  autoCapitalize="none"
+                                  autoCorrect="off"
+                                  autoComplete="off"
+                                  spellCheck={false}
+                                  required={!isDemo && !skipPortal}
+                                  className="login-input login-captcha-input flex-1 min-w-0"
+                                  style={{ paddingLeft: 14 }}
+                                />
+                              </div>
                             </div>
-                          </div>
+
+                            {portalError && (
+                              <div className="login-portal-error flex items-start gap-2.5 rounded-xl border border-amber-500/25 bg-amber-500/10 p-3 text-xs leading-relaxed text-amber-300">
+                                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+                                <div>
+                                  <span className="font-mono font-bold uppercase tracking-wider text-[11px] text-amber-400 block mb-0.5">Student Portal Sync Error</span>
+                                  <span>{portalError}</span>
+                                </div>
+                              </div>
+                            )}
+                          </motion.div>
                         )}
-                      </>
-                    ) : null}
+                      </AnimatePresence>
+                    )}
 
-                    {/* Skip Student Portal Checkbox Option */}
+                    {/* Skip Student Portal Custom Tickbox Option */}
                     {!isDemo && (
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none py-1 group">
-                        <input
-                          type="checkbox"
-                          checked={skipPortal}
-                          onChange={(e) => setSkipPortal(e.target.checked)}
-                          className="w-4 h-4 rounded border-white/20 bg-white/5 text-emerald-500 focus:ring-emerald-500/20 cursor-pointer accent-emerald-500"
-                        />
-                        <span className="text-xs text-zinc-400 group-hover:text-zinc-300 font-medium transition-colors">
+                      <button
+                        type="button"
+                        onClick={() => setSkipPortal((v) => !v)}
+                        className="group flex items-center gap-3 py-1.5 select-none text-left transition-all duration-200 focus:outline-none"
+                      >
+                        <motion.div
+                          whileTap={{ scale: 0.88 }}
+                          className={`relative flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-all duration-200 ${
+                            skipPortal
+                              ? "bg-emerald-500 border-emerald-500 text-black shadow-[0_0_12px_rgba(16,185,129,0.35)]"
+                              : "border-white/20 bg-white/[0.04] group-hover:border-white/35 group-hover:bg-white/[0.08]"
+                          }`}
+                        >
+                          <AnimatePresence>
+                            {skipPortal && (
+                              <motion.div
+                                initial={{ scale: 0, rotate: -20, opacity: 0 }}
+                                animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                                exit={{ scale: 0, opacity: 0 }}
+                                transition={{ type: "spring", stiffness: 500, damping: 28 }}
+                              >
+                                <Check className="h-3.5 w-3.5 stroke-[3] text-zinc-950" />
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </motion.div>
+                        <span className={`text-xs font-medium transition-colors duration-200 ${
+                          skipPortal ? "text-zinc-200 font-semibold" : "text-zinc-400 group-hover:text-zinc-300"
+                        }`}>
                           Skip Student Portal login
                         </span>
-                      </label>
+                      </button>
                     )}
 
                     {showTurnstile && (
