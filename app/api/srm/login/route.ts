@@ -1,5 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { validateOrigin } from "@/lib/origin-validator"
+import {
+  decryptRequestPayload,
+  applySecurityHeaders,
+  sanitizeErrorMessage,
+  stripInternalSecrets,
+  verifyTimestamp,
+  verifyHmacSignature,
+  hardendResponseHeaders,
+} from "@/lib/security"
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_SRM_BACKEND_URL || process.env.SRM_BACKEND_URL || process.env.BACKEND_URL
 const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET_KEY || "1x0000000000000000000000000000000AA"
@@ -41,64 +50,123 @@ function isValidSRMEmail(email: string): boolean {
   return srmRegex.test(email)
 }
 
-function publicLoginError(status = 500) {
-  return NextResponse.json(
-    {
-      success: false,
-      error: "Login is temporarily unavailable. Please try again in a moment.",
-    },
-    { status },
+function publicLoginError(status = 500, customMsg?: string) {
+  return applySecurityHeaders(
+    NextResponse.json(
+      {
+        success: false,
+        error: customMsg || "Login is temporarily unavailable. Please try again in a moment.",
+      },
+      { status },
+    )
   )
 }
 
 export async function POST(request: NextRequest) {
+  // Strict origin validation
   if (!validateOrigin(request)) {
-    return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
+    return applySecurityHeaders(NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 }))
+  }
+
+  // ── Ultra-security: hardened response headers on ALL paths ──────────────
+  // applySecurityHeaders already sets core headers; hardendResponseHeaders()
+  // adds the strict CSP + Permissions-Policy layer required for Android/web.
+  function withHardenedHeaders<T extends { headers: Headers }>(res: T): T {
+    applySecurityHeaders(res)
+    for (const [k, v] of Object.entries(hardendResponseHeaders())) {
+      res.headers.set(k, v)
+    }
+    return res
+  }
+
+  // ── Replay attack prevention ─────────────────────────────────────────────
+  // If the client sends a `timestamp` field in the body, validate it before
+  // doing anything else. We peek at the raw JSON without consuming the stream.
+  let rawBodyText: string
+  try {
+    rawBodyText = await request.text()
+  } catch {
+    return withHardenedHeaders(NextResponse.json({ success: false, error: "Invalid request body" }, { status: 400 }))
+  }
+
+  let rawBody: any
+  try {
+    rawBody = JSON.parse(rawBodyText)
+  } catch {
+    return withHardenedHeaders(NextResponse.json({ success: false, error: "Invalid request body" }, { status: 400 }))
+  }
+
+  // Timestamp check: only enforce when the field is present (encrypted clients always send it)
+  if (rawBody && typeof rawBody.timestamp === "number") {
+    if (!verifyTimestamp(rawBody.timestamp)) {
+      return withHardenedHeaders(NextResponse.json({ success: false, error: "Request expired" }, { status: 400 }))
+    }
+  }
+
+  // ── HMAC signature verification ──────────────────────────────────────────
+  const clientSig = request.headers.get("x-client-signature")
+  if (clientSig) {
+    const timestampStr = String(rawBody?.timestamp ?? "")
+    // Sign over the raw body string so the Android client and server agree exactly
+    const sigValid = await verifyHmacSignature(rawBodyText, timestampStr, clientSig)
+    if (!sigValid) {
+      return withHardenedHeaders(NextResponse.json({ success: false, error: "Invalid signature" }, { status: 401 }))
+    }
   }
 
   const ip = getClientIP(request)
 
   try {
     if (!BACKEND_URL) {
-      return publicLoginError(503)
+      return withHardenedHeaders(publicLoginError(503))
     }
 
+    // Decrypt request payload if encrypted blob ({ encryptedBlob, iv, timestamp }), or pass through standard JSON
     let body: { email?: string; password?: string; captchaAnswer?: string; cdigest?: string; turnstileToken?: string }
     try {
-      body = await request.json()
-    } catch {
-      return NextResponse.json({ success: false, error: "Invalid request body" }, { status: 400 })
+      body = decryptRequestPayload(rawBody)
+    } catch (err: any) {
+      return withHardenedHeaders(
+        NextResponse.json(
+          { success: false, error: sanitizeErrorMessage(err?.message, "Invalid or expired request payload") },
+          { status: 400 }
+        )
+      )
     }
 
-    const { email, password, captchaAnswer, cdigest, turnstileToken } = body
+    const { email, password, captchaAnswer, cdigest, turnstileToken } = body || {}
 
     if (!email || !password) {
-      return NextResponse.json({ success: false, error: "Email and password are required" }, { status: 400 })
+      return applySecurityHeaders(NextResponse.json({ success: false, error: "Email and password are required" }, { status: 400 }))
     }
 
     const rawEmail = email.trim().toLowerCase()
     const username = rawEmail.includes("@") ? rawEmail : `${rawEmail}@srmist.edu.in`
 
     if (!isValidSRMEmail(username)) {
-      return NextResponse.json({
-        success: false,
-        error: "Please enter a valid SRM email ID (e.g. ab1234@srmist.edu.in)",
-        hint: "Use the format: first 2 letters of your name + your 4+ digit registration number @srmist.edu.in",
-      }, { status: 400 })
+      return applySecurityHeaders(
+        NextResponse.json({
+          success: false,
+          error: "Please enter a valid SRM email ID (e.g. ab1234@srmist.edu.in)",
+          hint: "Use the format: first 2 letters of your name + your 4+ digit registration number @srmist.edu.in",
+        }, { status: 400 })
+      )
     }
 
     pruneExpired()
     const failedCount = FAILED_ATTEMPTS.get(ip)?.count || 0
     if (failedCount >= MAX_FAILED) {
       if (!turnstileToken) {
-        return NextResponse.json(
-          { success: false, requiresTurnstile: true, error: "Complete the bot check below to continue." },
-          { status: 403 },
+        return applySecurityHeaders(
+          NextResponse.json(
+            { success: false, requiresTurnstile: true, error: "Complete the bot check below to continue." },
+            { status: 403 },
+          )
         )
       }
       const result = await verifyTurnstileToken(turnstileToken)
       if (result === false) {
-        return NextResponse.json({ success: false, error: "Bot verification failed. Please try again." }, { status: 403 })
+        return applySecurityHeaders(NextResponse.json({ success: false, error: "Bot verification failed. Please try again." }, { status: 403 }))
       }
       if (result === "error") {
         console.warn("[login] Turnstile verify endpoint unreachable — allowing login to proceed")
@@ -121,9 +189,11 @@ export async function POST(request: NextRequest) {
     } catch (fetchError: any) {
       clearTimeout(timeoutId)
       if (fetchError.name === "AbortError") {
-        return NextResponse.json(
-          { success: false, error: "Request timed out. SRM portal may be slow, please try again." },
-          { status: 504 },
+        return applySecurityHeaders(
+          NextResponse.json(
+            { success: false, error: "Request timed out. SRM portal may be slow, please try again." },
+            { status: 504 },
+          )
         )
       }
       return publicLoginError(503)
@@ -135,35 +205,41 @@ export async function POST(request: NextRequest) {
     try {
       responseText = await loginResponse.text()
     } catch {
-      return NextResponse.json({ success: false, error: "Failed to read server response" }, { status: 500 })
+      return applySecurityHeaders(NextResponse.json({ success: false, error: "Failed to read server response" }, { status: 500 }))
     }
 
-    let data: any
+    let rawData: any
     try {
-      data = JSON.parse(responseText)
+      rawData = JSON.parse(responseText)
     } catch {
       return publicLoginError(500)
     }
 
+    const data = stripInternalSecrets(rawData)
+
     if (!loginResponse.ok) {
       if (data.requiresCaptcha) {
-        return NextResponse.json({
-          success: false,
-          requiresCaptcha: true,
-          captchaImage: data.captchaImage,
-          cdigest: data.cdigest,
-          error: data.detail || data.error || "SRM Academia requires CAPTCHA verification.",
-        }, { status: 409 })
+        return applySecurityHeaders(
+          NextResponse.json({
+            success: false,
+            requiresCaptcha: true,
+            captchaImage: data.captchaImage,
+            cdigest: data.cdigest,
+            error: sanitizeErrorMessage(data.detail || data.error || "SRM Academia requires CAPTCHA verification."),
+          }, { status: 409 })
+        )
       }
 
       if (loginResponse.status === 429) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: data.detail || data.error || "Server is busy. Please wait 20-30 seconds and try again.",
-            backendStatus: 429,
-          },
-          { status: 429 },
+        return applySecurityHeaders(
+          NextResponse.json(
+            {
+              success: false,
+              error: sanitizeErrorMessage(data.detail || data.error || "Server is busy. Please wait 20-30 seconds and try again."),
+              backendStatus: 429,
+            },
+            { status: 429 },
+          )
         )
       }
 
@@ -173,13 +249,15 @@ export async function POST(request: NextRequest) {
 
       FAILED_ATTEMPTS.set(ip, { count: failedCount + 1, time: Date.now() })
 
-      return NextResponse.json(
-        {
-          success: false,
-          error: data.detail || data.error || data.message || "Authentication failed",
-          backendStatus: loginResponse.status,
-        },
-        { status: loginResponse.status },
+      return applySecurityHeaders(
+        NextResponse.json(
+          {
+            success: false,
+            error: sanitizeErrorMessage(data.detail || data.error || data.message, "Authentication failed"),
+            backendStatus: loginResponse.status,
+          },
+          { status: loginResponse.status },
+        )
       )
     }
 
@@ -187,29 +265,35 @@ export async function POST(request: NextRequest) {
 
     if (!isAuthenticated) {
       FAILED_ATTEMPTS.set(ip, { count: failedCount + 1, time: Date.now() })
-      return NextResponse.json(
-        { success: false, error: data.detail || data.message || "Authentication failed" },
-        { status: 401 },
+      return applySecurityHeaders(
+        NextResponse.json(
+          { success: false, error: sanitizeErrorMessage(data.detail || data.message, "Authentication failed") },
+          { status: 401 },
+        )
       )
     }
 
     const token = data.token || data.accessToken || data.access_token || data.lookup?.digest
 
-    if (!token || (typeof token === 'string' && token.trim() === '')) {
-      return NextResponse.json(
-        { success: false, error: "Login did not complete successfully. Please try again." },
-        { status: 401 },
+    if (!token || (typeof token === "string" && token.trim() === "")) {
+      return applySecurityHeaders(
+        NextResponse.json(
+          { success: false, error: "Login did not complete successfully. Please try again." },
+          { status: 401 },
+        )
       )
     }
 
     FAILED_ATTEMPTS.delete(ip)
 
-    const response = NextResponse.json({
-      success: true,
-      token,
-      message: "Connected to SRM Academia",
-      isAuthenticated: true,
-    })
+    const response = applySecurityHeaders(
+      NextResponse.json({
+        success: true,
+        token,
+        message: "Connected to SRM Academia",
+        isAuthenticated: true,
+      })
+    )
 
     response.cookies.set({
       name: "srm-token",
@@ -222,7 +306,7 @@ export async function POST(request: NextRequest) {
     })
 
     return response
-  } catch (error) {
+  } catch {
     return publicLoginError(500)
   }
 }
