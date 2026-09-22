@@ -170,6 +170,11 @@ export default function LoginPage() {
       localStorage.setItem("__srmites_count", String((Number(localStorage.getItem("__srmites_count")) || 120) + 1))
       localStorage.setItem("edutechsrm_netid", netIdFromEmail(normalizedEmail))
       localStorage.setItem("edutechsrm_srm_email", normalizedEmail)
+      if (skipPortal) {
+        localStorage.setItem("edutechsrm_skip_portal", "true")
+      } else {
+        localStorage.removeItem("edutechsrm_skip_portal")
+      }
     } catch {}
     await login(token)
     router.replace("/")
