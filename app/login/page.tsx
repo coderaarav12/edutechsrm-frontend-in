@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { Eye, EyeOff, Loader2, Lock, Mail, AlertCircle, ArrowLeft, Rocket, Moon, Sparkles, GraduationCap, RefreshCw, Check } from "lucide-react"
+import { Eye, EyeOff, Loader2, Lock, Mail, AlertCircle, ArrowLeft, Rocket, Moon, Sparkles, GraduationCap, RefreshCw, Check, HelpCircle } from "lucide-react"
 import { loginToSRM } from "@/lib/srm-api"
 import { useAuth } from "@/lib/auth-context"
 import { useStudentPortal } from "@/lib/student-portal-context"
@@ -49,6 +49,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [skipPortal, setSkipPortal] = useState(false)
+  const [showSkipInfo, setShowSkipInfo] = useState(false)
   const [mode, setMode] = useState<"night" | "poster">("poster")
 
   const derivedNetId = netIdFromEmail(email || "")
@@ -782,38 +783,79 @@ export default function LoginPage() {
 
                     {/* Skip Student Portal Custom Tickbox Option */}
                     {!isDemo && (
-                      <button
-                        type="button"
-                        onClick={() => setSkipPortal((v) => !v)}
-                        className="group flex items-center gap-3 py-1.5 select-none text-left transition-all duration-200 focus:outline-none"
-                      >
-                        <motion.div
-                          whileTap={{ scale: 0.88 }}
-                          className={`relative flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-all duration-200 ${
-                            skipPortal
-                              ? "bg-emerald-500 border-emerald-500 text-black shadow-[0_0_12px_rgba(16,185,129,0.35)]"
-                              : "border-white/20 bg-white/[0.04] group-hover:border-white/35 group-hover:bg-white/[0.08]"
-                          }`}
+                      <div className="flex items-center justify-between py-1.5 select-none relative">
+                        <button
+                          type="button"
+                          onClick={() => setSkipPortal((v) => !v)}
+                          className="group flex items-center gap-3 text-left transition-all duration-200 focus:outline-none cursor-pointer"
                         >
+                          <motion.div
+                            whileTap={{ scale: 0.88 }}
+                            className={`relative flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-all duration-200 ${
+                              skipPortal
+                                ? "bg-emerald-500 border-emerald-500 text-black shadow-[0_0_12px_rgba(16,185,129,0.35)]"
+                                : "border-white/20 bg-white/[0.04] group-hover:border-white/35 group-hover:bg-white/[0.08]"
+                            }`}
+                          >
+                            <AnimatePresence>
+                              {skipPortal && (
+                                <motion.div
+                                  initial={{ scale: 0, rotate: -20, opacity: 0 }}
+                                  animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                                  exit={{ scale: 0, opacity: 0 }}
+                                  transition={{ type: "spring", stiffness: 500, damping: 28 }}
+                                >
+                                  <Check className="h-3.5 w-3.5 stroke-[3] text-zinc-950" />
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </motion.div>
+                          <span className={`text-xs font-medium transition-colors duration-200 ${
+                            skipPortal ? "text-zinc-200 font-semibold" : "text-zinc-400 group-hover:text-zinc-300"
+                          }`}>
+                            Skip Student Portal login
+                          </span>
+                        </button>
+
+                        {/* Info Tooltip / Question Mark */}
+                        <div className="relative inline-flex items-center">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setShowSkipInfo((v) => !v)
+                            }}
+                            onMouseEnter={() => setShowSkipInfo(true)}
+                            onMouseLeave={() => setShowSkipInfo(false)}
+                            aria-label="Student Portal information"
+                            className="p-1 text-zinc-500 hover:text-zinc-300 transition-colors focus:outline-none rounded-full hover:bg-white/5 cursor-pointer"
+                          >
+                            <HelpCircle className="w-4 h-4 text-zinc-400 hover:text-zinc-200 transition-colors" />
+                          </button>
                           <AnimatePresence>
-                            {skipPortal && (
+                            {showSkipInfo && (
                               <motion.div
-                                initial={{ scale: 0, rotate: -20, opacity: 0 }}
-                                animate={{ scale: 1, rotate: 0, opacity: 1 }}
-                                exit={{ scale: 0, opacity: 0 }}
-                                transition={{ type: "spring", stiffness: 500, damping: 28 }}
+                                initial={{ opacity: 0, y: 6, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 4, scale: 0.95 }}
+                                transition={{ duration: 0.15 }}
+                                className="absolute right-0 bottom-full mb-2 z-50 w-64 p-3 rounded-xl bg-zinc-900/95 border border-white/10 shadow-2xl shadow-black/80 text-xs leading-relaxed text-zinc-300 backdrop-blur-md"
                               >
-                                <Check className="h-3.5 w-3.5 stroke-[3] text-zinc-950" />
+                                <div className="flex items-start gap-2">
+                                  <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                                  <div>
+                                    <p className="font-semibold text-zinc-200 mb-0.5">Portal Sync Disabled</p>
+                                    <p className="text-[11px] text-zinc-400 leading-normal">
+                                      Attendance and marks will not be able to sync without student portal credentials.
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="absolute -bottom-1.5 right-2 w-3 h-3 bg-zinc-900 border-r border-b border-white/10 rotate-45" />
                               </motion.div>
                             )}
                           </AnimatePresence>
-                        </motion.div>
-                        <span className={`text-xs font-medium transition-colors duration-200 ${
-                          skipPortal ? "text-zinc-200 font-semibold" : "text-zinc-400 group-hover:text-zinc-300"
-                        }`}>
-                          Skip Student Portal login
-                        </span>
-                      </button>
+                        </div>
+                      </div>
                     )}
 
                     {showTurnstile && (

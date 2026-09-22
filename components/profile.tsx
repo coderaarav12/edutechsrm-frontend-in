@@ -275,43 +275,95 @@ export function AboutSection() {
   const attendancePendingCount = codes.length - attendanceWithData.length
 
   const mergedMarks = useMemo(() => {
-    const marksGrouped = new Map<string, any[]>()
-    effectiveMarks.forEach((m: any) => {
-      const list = marksGrouped.get(m.code) || []
+    // 1. Primary Academia marks map
+    const marksByCode = new Map<string, any[]>()
+    ;(marks as any[] || []).forEach((m: any) => {
+      if (!m?.code) return
+      const list = marksByCode.get(m.code) || []
       list.push(m)
-      marksGrouped.set(m.code, list)
+      marksByCode.set(m.code, list)
     })
-    return codes.map(code => {
-      const courseEntries = (courses as any[]).filter((c: any) => c.code === code)
+
+    // 2. Student Portal Scraper internal marks map
+    const portalInternalByCode = new Map<string, any[]>()
+    if (Array.isArray(portalData?.internalMarks)) {
+      portalData.internalMarks.forEach((item: any) => {
+        if (!item?.code) return
+        const list = portalInternalByCode.get(item.code) || []
+        list.push(item)
+        portalInternalByCode.set(item.code, list)
+      })
+    }
+
+    // 3. Combined unique course codes
+    const allCodes = [
+      ...new Set([
+        ...(courses as any[] || []).map((c: any) => c.code),
+        ...Array.from(marksByCode.keys()),
+        ...Array.from(portalInternalByCode.keys()),
+        ...(portalData?.attendance || []).map((a: any) => a.code),
+        ...(portalData?.unifiedSubjects || []).map((u: any) => u.code),
+      ]),
+    ].filter(Boolean)
+
+    return allCodes.map((code) => {
+      const courseEntries = (courses as any[] || []).filter((c: any) => c.code === code)
       const names = [...new Set(courseEntries.map((c: any) => c.name?.trim()).filter(Boolean))]
-      const mEntries = marksGrouped.get(code) || []
-      const name = names[0] || mEntries[0]?.name || code
-      if (mEntries.length > 0) {
-        const total = mEntries.reduce((s: number, m: any) => {
-          if (m.total !== undefined) return s + Number(m.total || 0)
-          if (m.marks !== undefined) {
-            const parsed = parseFloat(String(m.marks || "0"))
-            return s + (!isNaN(parsed) ? parsed : 0)
+      const marksEntries = marksByCode.get(code) || []
+      const portalEntries = portalInternalByCode.get(code) || []
+      const unified = (portalData?.unifiedSubjects || []).find((u: any) => u.code === code)
+      const name =
+        names[0] ||
+        unified?.name ||
+        portalEntries[0]?.name ||
+        marksEntries[0]?.name ||
+        code
+
+      // Case A: Primary Academia marks exist
+      if (marksEntries.length > 0) {
+        const total = marksEntries.reduce((s: number, m: any) => {
+          const t = parseFloat(m.total)
+          if (!isNaN(t) && t > 0) return s + t
+          if (Array.isArray(m.tests) && m.tests.length > 0) {
+            return s + m.tests.reduce((acc: number, item: any) => acc + (parseFloat(item.scored || item.marks || 0) || 0), 0)
           }
           return s
         }, 0)
-        const maxTotal = mEntries.reduce((s: number, m: any) => {
-          if (m.maxTotal !== undefined) return s + Number(m.maxTotal || 0)
-          if (m.marks !== undefined) return s + 50
+        const maxTotal = marksEntries.reduce((s: number, m: any) => {
+          const mt = parseFloat(m.maxTotal)
+          if (!isNaN(mt) && mt > 0) return s + mt
+          if (Array.isArray(m.tests) && m.tests.length > 0) {
+            return s + m.tests.reduce((acc: number, item: any) => acc + (parseFloat(item.max || item.maxMarks || 0) || 0), 0)
+          }
           return s
         }, 0)
-        return { code, name, total, maxTotal, tests: mEntries.flatMap((m: any) => m.tests || []),
-          test1: mEntries.reduce((s: number, m: any) => s + (m.test1 || 0), 0) || null,
-          test1_max: mEntries.reduce((s: number, m: any) => s + (m.test1_max || 0), 0),
-          test2: mEntries.reduce((s: number, m: any) => s + (m.test2 || 0), 0) || null,
-          test2_max: mEntries.reduce((s: number, m: any) => s + (m.test2_max || 0), 0),
-          test3: mEntries.reduce((s: number, m: any) => s + (m.test3 || 0), 0) || null,
-          test3_max: mEntries.reduce((s: number, m: any) => s + (m.test3_max || 0), 0),
-          grade: undefined }
+        if (maxTotal > 0 || total > 0) {
+          return { code, name, total, maxTotal }
+        }
       }
-      return { code, name, total: 0, maxTotal: 0, tests: [], test1: null, test1_max: 0, test2: null, test2_max: 0, test3: null, test3_max: 0, grade: undefined }
+
+      // Case B: Portal internal marks exist
+      if (portalEntries.length > 0) {
+        const tests = portalEntries.flatMap((p: any) => {
+          if (Array.isArray(p.components) && p.components.length > 0) {
+            return p.components.map((c: any) => ({
+              scored: typeof c.markObtained === "number" ? c.markObtained : parseFloat(String(c.markObtained || "0")) || 0,
+              max: typeof c.maxMark === "number" && c.maxMark > 0 ? c.maxMark : parseFloat(String(c.maxMark || "0")) || 0,
+            }))
+          }
+          const scoredNum = typeof p.markObtained === "number" ? p.markObtained : parseFloat(String(p.rawMarkText || p.markObtained || "0"))
+          const validNum = !isNaN(scoredNum) ? scoredNum : 0
+          const maxNum = typeof p.maxMark === "number" && p.maxMark > 0 ? p.maxMark : 50
+          return [{ scored: validNum, max: maxNum }]
+        })
+        const total = tests.reduce((s: number, t: any) => s + t.scored, 0)
+        const maxTotal = tests.reduce((s: number, t: any) => s + t.max, 0)
+        return { code, name, total, maxTotal }
+      }
+
+      return { code, name, total: 0, maxTotal: 0 }
     })
-  }, [codes, courses, effectiveMarks])
+  }, [courses, marks, portalData?.internalMarks, portalData?.attendance, portalData?.unifiedSubjects])
   const totalScored = mergedMarks.reduce((s, m) => s + (m.total || 0), 0)
   const totalMax    = mergedMarks.reduce((s, m) => s + (m.maxTotal || 0), 0)
   const marksPercent = totalMax > 0 ? Math.round((totalScored / totalMax) * 100) : 0
@@ -767,7 +819,12 @@ export function AboutSection() {
           {totalMax > 0 ? (
             <>
               <p className={`text-xl font-bold font-display mt-1 ${marksPercent >= 60 ? (isPoster ? "text-emerald-700" : "text-emerald-400") : "text-amber-500"}`}>{marksPercent}%</p>
-              <p className={`text-[10px] mt-0.5 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>{totalScored.toFixed(1)} / {totalMax}</p>
+              <p className={`text-[10px] mt-0.5 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>{Number(totalScored.toFixed(1))} / {totalMax}</p>
+            </>
+          ) : portalData?.marks?.cgpa ? (
+            <>
+              <p className={`text-xl font-bold font-display mt-1 ${isPoster ? "text-emerald-700" : "text-emerald-400"}`}>{portalData.marks.cgpa} <span className="text-xs font-normal">CGPA</span></p>
+              <p className={`text-[10px] mt-0.5 ${isPoster ? "text-zinc-600 font-mono" : "text-zinc-500"}`}>{portalData.marks.semesters?.length ? `${portalData.marks.semesters.length} Semesters` : "Overall Grade"}</p>
             </>
           ) : (
             <>
