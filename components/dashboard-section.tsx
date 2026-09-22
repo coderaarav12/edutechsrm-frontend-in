@@ -211,7 +211,6 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
 
   const containerRef = useRef<HTMLDivElement>(null)
   const splashRef = useRef<HTMLDivElement>(null)
-  const avatarRef = useRef<HTMLDivElement>(null)
   const greetingLineRef = useRef<HTMLDivElement>(null)
   const nameLineRef = useRef<HTMLDivElement>(null)
   const shimmerRef = useRef<HTMLDivElement>(null)
@@ -228,17 +227,11 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
       const tl = gsap.timeline()
 
       if (greetingLineRef.current && nameLineRef.current && shimmerRef.current && splashRef.current) {
-        if (avatarRef.current) {
-          tl.from(avatarRef.current, { scale: 0.75, opacity: 0, duration: 0.45, ease: "back.out(1.7)" })
-        }
-        tl.from(greetingLineRef.current, { y: 24, opacity: 0, duration: 0.45, ease: "power3.out" }, avatarRef.current ? "-=0.2" : undefined)
+        tl.from(greetingLineRef.current, { y: 24, opacity: 0, duration: 0.45, ease: "power3.out" })
         tl.from(nameLineRef.current, { y: 20, opacity: 0, duration: 0.35, ease: "power3.out" }, "-=0.1")
         tl.from(shimmerRef.current, { y: 20, opacity: 0, duration: 0.4, ease: "power3.out" }, "+=0.2")
         tl.to({}, { duration: 0.6 })
-        if (avatarRef.current) {
-          tl.to(avatarRef.current, { scale: 0.8, opacity: 0, duration: 0.3, ease: "power2.in" }, "+=0")
-        }
-        tl.to(greetingLineRef.current, { y: -10, opacity: 0, duration: 0.3, ease: "power2.in" }, avatarRef.current ? "-=0.2" : "+=0")
+        tl.to(greetingLineRef.current, { y: -10, opacity: 0, duration: 0.3, ease: "power2.in" }, "+=0")
         tl.to(nameLineRef.current, { y: -10, opacity: 0, duration: 0.3, ease: "power2.in" }, "-=0.2")
         tl.to(shimmerRef.current, { y: -10, opacity: 0, duration: 0.25, ease: "power2.in" }, "-=0.2")
         tl.to(splashRef.current, { opacity: 0, duration: 0.45, ease: "power2.inOut", onComplete: () => setShowSplash(false) }, "-=0.1")
@@ -588,31 +581,6 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
           ref={splashRef}
         >
           <div className="flex flex-col items-center justify-center gap-3 text-center max-w-2xl w-full px-4">
-            {/* Student Profile Photo */}
-            <div
-              ref={avatarRef}
-              className="flex justify-center mb-1"
-              style={{ willChange: "transform, opacity" }}
-            >
-              <div className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden p-1 ${
-                isPoster
-                  ? "bg-white border-[2.5px] border-[#111111] shadow-[4px_4px_0px_#111111]"
-                  : "bg-zinc-900 border-2 border-emerald-500/40 shadow-[0_0_24px_rgba(16,185,129,0.25)]"
-              }`}>
-                <div className="w-full h-full rounded-full overflow-hidden bg-black/20">
-                  <ProfileAvatar
-                    name={fullName}
-                    token={token}
-                    fallback={
-                      <div className="w-full h-full flex items-center justify-center font-display font-black text-2xl text-emerald-400">
-                        {fullName.charAt(0) || "U"}
-                      </div>
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-
             {/* Professional Art Kicker Badge */}
             <div
               ref={greetingLineRef}
@@ -685,18 +653,7 @@ export function DashboardSection({ onNavigate }: DashboardSectionProps) {
 
         <div className={`border-b pb-4 ${isPoster ? "border-[#111111]/15" : "border-white/[0.04]"}`}>
           {/* Professional greeting banner & full student name */}
-          <div className="mt-1 mb-4 flex items-center justify-center md:justify-start gap-3 flex-wrap">
-            <div className={`w-10 h-10 rounded-full overflow-hidden shrink-0 ${
-              isPoster
-                ? "border-2 border-[#111111] shadow-[2px_2px_0px_#111111] bg-white"
-                : "border border-emerald-500/30 bg-zinc-900 shadow-sm"
-            }`}>
-              <ProfileAvatar
-                name={fullName}
-                token={token}
-                fallback={<div className="w-full h-full flex items-center justify-center font-bold text-xs">{fullName.charAt(0)}</div>}
-              />
-            </div>
+          <div className="mt-1 mb-4 flex items-center justify-center md:justify-start gap-2.5 flex-wrap">
             <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold tracking-wider uppercase border ${
               isPoster
                 ? "bg-white border-2 border-[#111111] text-[#111111] shadow-[2px_2px_0px_#111111]"
