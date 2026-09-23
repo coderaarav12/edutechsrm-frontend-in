@@ -865,4 +865,49 @@ body[data-admin],
   color: #71717a !important;
 }
 
+/* ── Custom Cursor Styles ─────────────────────────────────────────────────── */
+body,
+body * {
+  cursor: url("/cursors/light/arrow.png") 2 2, url("/cursors/light/arrow.cur") 2 2, auto !important;
+}
+
+a,
+button,
+[role="button"],
+[tabindex]:not([tabindex="-1"]),
+.cursor-pointer,
+[onclick],
+summary,
+label[for] {
+  cursor: url("/cursors/light/hand.png") 6 1, url("/cursors/light/hand.cur") 6 1, pointer !important;
+}
+
+input,
+textarea,
+select,
+[contenteditable="true"],
+.cursor-text {
+  cursor: url("/cursors/light/ibeam.png") 16 16, url("/cursors/light/ibeam.cur") 16 16, text !important;
+}
+
+[data-draggable],
+.cursor-move,
+.cursor-grab {
+  cursor: url("/cursors/light/sizeall.png") 13 13, url("/cursors/light/sizeall.cur") 13 13, move !important;
+}
+
+.cursor-e-resize {
+  cursor: e-resize !important;
+}
+
+.cursor-w-resize {
+  cursor: w-resize !important;
+}
+
+:disabled,
+[disabled],
+.cursor-not-allowed {
+  cursor: not-allowed !important;
+}
+
 
